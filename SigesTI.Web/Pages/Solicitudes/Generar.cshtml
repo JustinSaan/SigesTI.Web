@@ -6,152 +6,154 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-<div class="container mt-4">
-    <div class="card shadow border-0">
-        <div class="card-header bg-primary text-white py-3">
-            <h4 class="mb-0"><i class="bi bi-file-earmark-text"></i> Formato de Requerimientos de Soporte Técnico</h4>
+<div class="container mt-4 mb-5">
+    <div class="card shadow-lg border-0 custom-card">
+        <div class="card-header bg-gradient-primary-modern text-white py-3 shadow-sm">
+            <h4 class="mb-0 fw-bold"><i class="bi bi-file-earmark-text"></i> Formato de Requerimientos de Soporte Técnico</h4>
         </div>
-        <div class="card-body p-4">
+        <div class="card-body p-4 bg-light-modern">
             <form method="post" id="formSolicitud">
 
-                <h5 class="text-primary border-bottom pb-2 mb-3 fw-bold">Control de Tiempos y Estado</h5>
-                <div class="row g-3 mb-4 Flyout-fechas p-3 rounded border bg-white shadow-sm">
+                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-clock-history"></i> Control de Tiempos y Estado</h5>
+                <div class="row g-3 mb-4 Flyout-fechas p-3 rounded border bg-white shadow-sm section-hover">
                     <div class="col-md-4">
                         <label class="form-label fw-bold text-dark">Fecha de Ingreso:</label>
-                        <input type="date" asp-for="NuevaSolicitud.FechaIngreso" class="form-control" required />
+                        <input type="date" asp-for="NuevaSolicitud.FechaIngreso" class="form-control custom-input" required />
                         <span asp-validation-for="NuevaSolicitud.FechaIngreso" class="text-danger"></span>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold text-dark">Fecha de Entrega:</label>
-                        <input type="date" asp-for="NuevaSolicitud.FechaEntrega" class="form-control" required />
+                        <input type="date" asp-for="NuevaSolicitud.FechaEntrega" class="form-control custom-input" required />
                         <span asp-validation-for="NuevaSolicitud.FechaEntrega" class="text-danger"></span>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold text-dark">Estatus de la Solicitud:</label>
-                        <select asp-for="NuevaSolicitud.Estatus" asp-items="Model.EstatusOptions" id="estatusCombo" class="form-select fw-bold">
+                        <select asp-for="NuevaSolicitud.Estatus" asp-items="Model.EstatusOptions" id="estatusCombo" class="form-select custom-input select-estatus-bold">
                         </select>
                         <span asp-validation-for="NuevaSolicitud.Estatus" class="text-danger"></span>
                     </div>
                 </div>
 
-                <h5 class="text-secondary border-bottom pb-2 mb-3 fw-bold">Datos del Solicitante</h5>
-                <div class="row g-3 mb-4">
+                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-person-badge"></i> Datos del Solicitante</h5>
+                <div class="row g-3 mb-4 p-3 rounded border bg-white shadow-sm section-hover">
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Área:</label>
-                        <select asp-for="AreaAuxiliar" asp-items="Model.AreasOptions" id="ddlArea" class="form-select" required>
+                        <select asp-for="AreaAuxiliar" asp-items="Model.AreasOptions" id="ddlArea" class="form-select custom-input" required>
                             <option value="">-- Seleccione Área --</option>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Nombre del Solicitante:</label>
-                        <select asp-for="NuevaSolicitud.IdPersonal" id="ddlPersonal" class="form-select" required>
+                        <select asp-for="NuevaSolicitud.IdPersonal" id="ddlPersonal" class="form-select custom-input" required>
                             <option value="">-- Seleccione Personal --</option>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Puesto:</label>
-                        <input type="text" asp-for="NuevaSolicitud.PuestoSolicitante" id="txtPuesto" class="form-control" readonly />
+                        <input type="text" asp-for="NuevaSolicitud.PuestoSolicitante" id="txtPuesto" class="form-control custom-input input-readonly" readonly />
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Correo Electrónico:</label>
-                        <input type="email" asp-for="NuevaSolicitud.CorreoSolicitante" id="txtCorreo" class="form-control" readonly />
+                        <input type="email" asp-for="NuevaSolicitud.CorreoSolicitante" id="txtCorreo" class="form-control custom-input input-readonly" readonly />
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Responsable del Área (Jefe):</label>
-                        <input type="text" asp-for="NuevaSolicitud.ResponsableArea" id="txtResponsable" class="form-control" readonly />
+                        <input type="text" asp-for="NuevaSolicitud.ResponsableArea" id="txtResponsable" class="form-control custom-input input-readonly" readonly />
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Unidades de red compartidas:</label>
-                        <input type="text" asp-for="NuevaSolicitud.UnidadesRed" class="form-control" placeholder="Ruta de carpetas de red" />
+                        <input type="text" asp-for="NuevaSolicitud.UnidadesRed" class="form-control custom-input" placeholder="Ruta de carpetas de red" />
                     </div>
-                    <div class="col-md-4 mt-4">
-                        <label class="form-label fw-bold d-block">¿Tiene impresora configurada?</label>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input chk-impresora-grupo" type="checkbox" name="ImpresoraConfiguradaAux" id="config_si" value="Si">
-                            <label class="form-check-label" for="config_si">Sí</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input chk-impresora-grupo" type="checkbox" name="ImpresoraConfiguradaAux" id="config_no" value="No" checked>
-                            <label class="form-check-label" for="config_no">No</label>
-                        </div>
-                    </div>
-                </div>
-
-                <h5 class="text-secondary border-bottom pb-2 mb-3 fw-bold">Sistemas Requeridos</h5>
-                <div class="row mb-4">
-                    <div class="col-12 mb-2">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" asp-for="NuevaSolicitud.ReqSistemas" id="chkReqSistemas">
-                            <label class="form-check-label fw-bold" for="chkReqSistemas">¿Requiere Acceso/Soporte a Sistemas?</label>
-                        </div>
-                    </div>
-
-                    <div class="col-12 ps-4 d-none" id="seccionSistemas">
-                        <div class="row g-2">
-                            @foreach (var sistema in new[] { "Encuentro.NET", "ADMIN", "BDD", "SITA", "COA", "DNLP", "VUCEM", "ADCO" })
-                            {
-                                <div class="col-md-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="SistemasSeleccionados" value="@sistema" id="chk_@sistema">
-                                        <label class="form-check-label" for="chk_@sistema">@sistema</label>
-                                    </div>
-                                </div>
-                            }
-                            <div class="col-md-6 d-flex align-items-center mt-2">
-                                <div class="form-check me-2">
-                                    <input class="form-check-input" type="checkbox" name="SistemasSeleccionados" value="Otros" id="chkOtros">
-                                    <label class="form-check-label fw-bold" for="chkOtros">Otros:</label>
-                                </div>
-                                <input type="text" asp-for="NuevaSolicitud.OtrosSistemas" id="txtOtrosSistemas" class="form-control form-control-sm d-none" placeholder="Especifique el sistema" />
+                    <div class="col-md-4 mt-4 d-flex flex-column justify-content-center">
+                        <label class="form-label fw-bold d-block mb-2">¿Tiene impresora configurada?</label>
+                        <div>
+                            <div class="form-check form-check-inline custom-checkbox-wrapper">
+                                <input class="form-check-input chk-impresora-grupo custom-cb" type="checkbox" name="ImpresoraConfiguradaAux" id="config_si" value="Si">
+                                <label class="form-check-label fw-semibold" for="config_si">Sí</label>
+                            </div>
+                            <div class="form-check form-check-inline custom-checkbox-wrapper">
+                                <input class="form-check-input chk-impresora-grupo custom-cb" type="checkbox" name="ImpresoraConfiguradaAux" id="config_no" value="No" checked>
+                                <label class="form-check-label fw-semibold" for="config_no">No</label>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <h5 class="text-secondary border-bottom pb-2 mb-3 fw-bold">Otras Configuraciones</h5>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="chkHabilitarRed">
-                            <label class="form-check-label fw-bold" for="chkHabilitarRed">Habilitar unidad de red</label>
-                        </div>
-                        <div id="divContenedorRed" class="d-none">
-                            <input type="text" asp-for="NuevaSolicitud.SistemasDetalle" id="txtDetalleRed" class="form-control" placeholder="Escribe los detalles de la unidad de red..." />
+                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-cpu"></i> Sistemas Requeridos</h5>
+                <div class="row mb-4 p-3 rounded border bg-white shadow-sm section-hover">
+                    <div class="col-12 mb-2">
+                        <div class="form-check form-switch custom-switch-wrapper">
+                            <input class="form-check-input custom-switch-input" type="checkbox" asp-for="NuevaSolicitud.ReqSistemas" id="chkReqSistemas">
+                            <label class="form-check-label fw-bold text-dark" for="chkReqSistemas">¿Requiere Acceso/Soporte a Sistemas?</label>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="chkConfigurarImpresora">
-                            <label class="form-check-label fw-bold" for="chkConfigurarImpresora">Configurar impresora</label>
-                        </div>
-                        <div id="divContenedorImpresora" class="d-none">
-                            <input type="text" asp-for="NuevaSolicitud.Impresora" id="txtDetalleImpresora" class="form-control" placeholder="Escribe el modelo o detalles de la impresora..." />
+
+                    <div class="col-12 ps-4 d-none toggle-animation" id="seccionSistemas">
+                        <div class="row g-2 p-2 rounded bg-light">
+                            @foreach (var sistema in new[] { "Encuentro.NET", "ADMIN", "BDD", "SITA", "COA", "DNLP", "VUCEM", "ADCO" })
+                            {
+                                <div class="col-md-3">
+                                    <div class="form-check custom-checkbox-wrapper py-1">
+                                        <input class="form-check-input custom-cb" type="checkbox" name="SistemasSeleccionados" value="@sistema" id="chk_@sistema">
+                                        <label class="form-check-label fw-semibold" for="chk_@sistema">@sistema</label>
+                                    </div>
+                                </div>
+                            }
+                            <div class="col-md-6 d-flex align-items-center mt-2">
+                                <div class="form-check me-2 custom-checkbox-wrapper">
+                                    <input class="form-check-input custom-cb" type="checkbox" name="SistemasSeleccionados" value="Otros" id="chkOtros">
+                                    <label class="form-check-label fw-bold" for="chkOtros">Otros:</label>
+                                </div>
+                                <input type="text" asp-for="NuevaSolicitud.OtrosSistemas" id="txtOtrosSistemas" class="form-control form-control-sm custom-input d-none scale-in" placeholder="Especifique el sistema" />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <h5 class="text-secondary border-bottom pb-2 mb-3 fw-bold">Detalles del Servicio</h5>
-                <div class="row g-3 mb-4">
+                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-gear-widg-select"></i> Otras Configuraciones</h5>
+                <div class="row g-3 mb-4 p-3 rounded border bg-white shadow-sm section-hover">
+                    <div class="col-md-6">
+                        <div class="form-check mb-2 custom-checkbox-wrapper">
+                            <input class="form-check-input custom-cb" type="checkbox" id="chkHabilitarRed">
+                            <label class="form-check-label fw-bold" for="chkHabilitarRed">Habilitar unidad de red</label>
+                        </div>
+                        <div id="divContenedorRed" class="d-none scale-in">
+                            <input type="text" asp-for="NuevaSolicitud.SistemasDetalle" id="txtDetalleRed" class="form-control custom-input" placeholder="Escribe los detalles de la unidad de red..." />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mb-2 custom-checkbox-wrapper">
+                            <input class="form-check-input custom-cb" type="checkbox" id="chkConfigurarImpresora">
+                            <label class="form-check-label fw-bold" for="chkConfigurarImpresora">Configurar impresora</label>
+                        </div>
+                        <div id="divContenedorImpresora" class="d-none scale-in">
+                            <input type="text" asp-for="NuevaSolicitud.Impresora" id="txtDetalleImpresora" class="form-control custom-input" placeholder="Escribe el modelo o detalles de la impresora..." />
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-tools"></i> Detalles del Servicio</h5>
+                <div class="row g-3 mb-4 p-3 rounded border bg-white shadow-sm section-hover">
                     <div class="col-12">
                         <label class="form-label fw-bold">Descripción del Problema o Requerimiento:</label>
-                        <textarea asp-for="NuevaSolicitud.DescripcionProblema" class="form-control" rows="3" placeholder="Escriba aquí la relatoría..."></textarea>
+                        <textarea asp-for="NuevaSolicitud.DescripcionProblema" class="form-control custom-input" rows="3" placeholder="Escriba aquí la relatoría detallada de la solicitud..."></textarea>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Ejecutivo de Soporte Asignado:</label>
-                        <select asp-for="NuevaSolicitud.EjecutivoAsignado" asp-items="Model.SoporteOptions" class="form-select">
+                        <select asp-for="NuevaSolicitud.EjecutivoAsignado" asp-items="Model.SoporteOptions" class="form-select custom-input">
                             <option value="">-- Seleccione Técnico --</option>
                         </select>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Autorización (Administración):</label>
-                        <select asp-for="NuevaSolicitud.AutorizaAdmin" asp-items="Model.AdminOptions" class="form-select">
-                            <option value="">-- Seleccione Administrator --</option>
+                        <select asp-for="NuevaSolicitud.AutorizaAdmin" asp-items="Model.AdminOptions" class="form-select custom-input">
+                            <option value="">-- Seleccione Administrador --</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="d-flex justify-content-end border-top pt-3">
-                    <button type="submit" class="btn btn-success btn-lg px-5 shadow-sm">
+                    <button type="submit" class="btn btn-modern-success btn-lg px-5 shadow">
                         <i class="bi bi-save"></i> Guardar Solicitud
                     </button>
                 </div>
@@ -168,23 +170,25 @@
     <script>
         $(document).ready(function () {
 
-        // =========================================================
-        // COEXISTENCIA: FUNCIÓN DINÁMICA DE COLOR VIVO EN EL ESTATUS
-        // =========================================================
-        function aplicarColorEstatus() {
+        // ========================================================
+        // INTERACTIVIDAD: ACTUALIZACIÓN DINÁMICA DE COLOR DE ESTATUS
+        // ========================================================
+        function actualizarColorEstatus() {
         var valor = $("#estatusCombo").val();
         if (valor === "Pendiente") {
-        $("#estatusCombo").css({ "color": "#d11a2a", "background-color": "#fff5f5", "border-color": "#f5c2c7" });
+        // Rojo vivo de alta visibilidad con fondo suave
+        $("#estatusCombo").css({ "color": "#e01b2f", "background-color": "#fff2f3", "border-color": "#ffb6bc" });
         } else if (valor === "Resuelto") {
-        $("#estatusCombo").css({ "color": "#1ea844", "background-color": "#f4fbf7", "border-color": "#badbcc" });
+        // Verde vivo brillante con fondo suave
+        $("#estatusCombo").css({ "color": "#129e3b", "background-color": "#f1faf3", "border-color": "#a1e4b4" });
         } else {
         $("#estatusCombo").css({ "color": "#212529", "background-color": "#fff", "border-color": "#ced4da" });
         }
         }
 
-        // Ejecuta al cargar la página y ante cada cambio manual
-        aplicarColorEstatus();
-        $("#estatusCombo").change(aplicarColorEstatus);
+        // Ejecutar al iniciar la pantalla y al cambiar selección
+        actualizarColorEstatus();
+        $("#estatusCombo").change(actualizarColorEstatus);
 
 
         // ==========================================
@@ -217,7 +221,7 @@
         title: '¡Solicitud Guardada con Éxito!',
         text: 'El folio y tiempos se registraron correctamente.',
         confirmButtonText: 'Aceptar',
-        confirmButtonColor: '#198754',
+        confirmButtonColor: '#129e3b',
         allowOutsideClick: false
         }).then((result) => {
         if (result.isConfirmed) {
@@ -231,7 +235,7 @@
         icon: 'error',
         title: 'Error al procesar el formulario',
         text: xhr.responseText || 'Verifica que las llaves foráneas de Personal correspondan con IDs válidos.',
-        confirmButtonColor: '#dc3545'
+        confirmButtonColor: '#e01b2f'
         });
         }
         });

@@ -1,18 +1,183 @@
-﻿/* Color vivo Rojo Intenso para opción Pendiente */
-#estatusCombo option[value="Pendiente"] {
-    color: #d11a2a !important;
-    background-color: #ffffff !important;
-    font-weight: bold !important;
+﻿/* ==========================================================================
+   1. FONDO GLOBAL Y TARJETA PRINCIPAL (AZUL OSCURO PROFUNDO)
+   ========================================================================== */
+/* Fondo total detrás de la solicitud (elimina cualquier rastro blanco de la plantilla) */
+body, .card-body.p-4.bg-light-modern {
+    background-color: #0f172a !important; /* Azul marino medianoche muy oscuro */
+    color: #f1f5f9 !important; /* Texto general en tono claro para contraste */
 }
 
-/* Color vivo Verde Esmeralda para opción Resuelto */
-#estatusCombo option[value="Resuelto"] {
-    color: #1ea844 !important;
-    background-color: #ffffff !important;
-    font-weight: bold !important;
+/* Tarjeta contenedora principal */
+.custom-card {
+    border-radius: 14px !important;
+    overflow: hidden;
+    background-color: #1e293b !important; /* Azul oscuro pizarra */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid #334155 !important;
 }
 
-/* Letras de títulos de sección limpias y firmes */
-.text-secondary, .text-primary {
+/* Encabezado del Formulario - DEGRADADO SUAVE Y AMIGABLE */
+.bg-gradient-primary-modern {
+    background: linear-gradient(135deg, #1e3a8a 0%, #334155 100%) !important; /* Degradado oscuro amigable de azul a pizarra */
+    border-bottom: 2px solid #38bdf8 !important; /* Línea delgada azul cielo */
+}
+
+/* ==========================================================================
+   2. SECCIONES Y BLOQUES INTERNOS (AZUL MEDIO ACERO)
+   ========================================================================== */
+/* Unificación de todos los renglones, bloques y contenedor de fechas */
+.Flyout-fechas, .row.g-3.mb-4, .row.mb-4.p-3 {
+    background-color: #334155 !important; /* Azul acero que resalta del fondo oscuro */
+    border: 1px solid #475569 !important;
+    border-radius: 10px !important;
+    padding: 1.2rem !important;
+    color: #f8fafc !important;
+}
+
+/* Contenedor dinámico interno de los checkboxes de sistemas */
+.col-12.ps-4.toggle-animation .row.g-2.p-2.rounded.bg-light,
+div[id*="Sistemas"] .bg-light,
+.row:has(#chkReqSistemas) .bg-light {
+    background-color: #1e293b !important; /* Azul marino profundo para integrarse al diseño */
+    border: 1px solid #475569 !important;
+    border-radius: 8px !important;
+    padding: 0.8rem !important;
+}
+
+/* ==========================================================================
+   CORRECCIÓN: RESALTE PROPORCIONAL SOLO PARA LAS ETIQUETAS DE SISTEMAS
+   ========================================================================== */
+/* Le damos un espacio ordenado a las etiquetas de los sistemas dentro del bloque oculto */
+.toggle-animation .form-check-label,
+div[id*="Sistemas"] .form-check-label {
+    padding: 4px 10px 4px 6px !important;
+    margin-left: 6px !important; /* Separa el texto del cuadro del checkbox */
+    border-radius: 6px !important;
+    border: 1px solid transparent !important;
+    transition: all 0.2s ease-in-out !important;
+    display: inline-block !important;
+}
+
+/* Estado Activo: Cuando el checkbox está seleccionado, se ilumina el cuadrado redondeado del texto */
+.toggle-animation .form-check-input:checked + .form-check-label,
+div[id*="Sistemas"] .form-check-input:checked + .form-check-label {
+    background-color: #2563eb !important; /* Azul rey medio muy estético */
+    border: 1px solid #38bdf8 !important; /* Borde resaltado azul cielo */
+    color: #ffffff !important; /* Texto blanco nítido */
     font-weight: 600 !important;
+}
+
+/* Etiquetas y textos fijos encima de los cuadros de texto generales */
+label, .form-label, .control-label {
+    color: #cbd5e1 !important; /* Azul grisáceo claro muy amigable a la vista */
+    font-weight: 500;
+}
+
+/* Títulos principales de cada sección */
+.text-custom-gradient {
+    color: #38bdf8 !important; /* Azul cielo brillante para destacar en la oscuridad */
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    margin-top: 1.5rem;
+    margin-bottom: 0.6rem;
+}
+
+/* ==========================================================================
+   3. CUADROS DE TEXTO (ÚNICO LUGAR CON FONDO BLANCO PARA LEGIBILIDAD)
+   ========================================================================== */
+/* Inputs, Textareas y Selects Dropdown */
+.custom-input, .form-control, .form-select {
+    background-color: #ffffff !important; /* Fondo blanco limpio para la lectura */
+    color: #0f172a !important; /* Letras oscuras para contraste total */
+    border: 2px solid #94a3b8 !important;
+    border-radius: 8px !important;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+    /* Enfoque al dar clic en una caja de texto (Resalta en azul brillante) */
+    .custom-input:focus,
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.25) !important;
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+    }
+
+/* Campos de sólo lectura o calculados automáticos (Readonly) */
+.input-readonly {
+    background-color: #e2e8f0 !important; /* Blanco hueso / Gris claro amigable */
+    color: #334155 !important;
+    border: 2px dashed #94a3b8 !important;
+}
+
+/* ==========================================================================
+   4. CONTROLES DINÁMICOS e INTERACTIVOS
+   ========================================================================== */
+/* Efecto hover sobre los bloques para que responda al usuario */
+.Flyout-fechas:hover, .row.g-3.mb-4:hover, .row.mb-4.p-3:hover {
+    border-color: #38bdf8 !important; /* Ilumina el borde en azul cielo */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Casillas de verificación y switches checked generales */
+.custom-cb:checked, .form-check-input:checked {
+    background-color: #38bdf8 !important; /* Azul cielo cuando se activa */
+    border-color: #38bdf8 !important;
+}
+
+/* ==========================================================================
+   5. DETALLES DE ALTA VISIBILIDAD (ESTATUS Y BOTÓN)
+   ========================================================================== */
+.select-estatus-bold {
+    font-weight: 700 !important;
+}
+
+/* Colores dentro de las opciones del combo de Estatus */
+#estatusCombo option[value="Pendiente"] {
+    color: #ff4d4d !important; /* Rojo brillante legible en fondo blanco */
+    font-weight: bold !important;
+}
+
+#estatusCombo option[value="Resuelto"] {
+    color: #00cc44 !important; /* Verde vivo legible en fondo blanco */
+    font-weight: bold !important;
+}
+
+/* Botón Guardar */
+.btn-modern-success {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important; /* Azul fuerte a azul profundo */
+    color: #ffffff !important;
+    border: 1px solid #3b82f6 !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    padding: 0.65rem 2.2rem;
+    box-shadow: 0 4px 14px rgba(29, 78, 216, 0.4) !important;
+    transition: all 0.25s ease !important;
+}
+
+    .btn-modern-success:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 20px rgba(29, 78, 216, 0.6) !important;
+    }
+
+/* Micro-animación de aparición para los sistemas desplegables */
+.scale-in {
+    animation: amigableScale 0.25s ease-out forwards;
+}
+
+@keyframes amigableScale {
+    0% {
+        opacity: 0;
+        transform: translateY(3px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
