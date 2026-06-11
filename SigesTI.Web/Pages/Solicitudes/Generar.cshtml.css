@@ -1,0 +1,18 @@
+﻿/* Color vivo Rojo Intenso para opción Pendiente */
+#estatusCombo option[value="Pendiente"] {
+    color: #d11a2a !important;
+    background-color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* Color vivo Verde Esmeralda para opción Resuelto */
+#estatusCombo option[value="Resuelto"] {
+    color: #1ea844 !important;
+    background-color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* Letras de títulos de sección limpias y firmes */
+.text-secondary, .text-primary {
+    font-weight: 600 !important;
+}

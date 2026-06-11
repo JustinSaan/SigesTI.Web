@@ -35,46 +35,51 @@ namespace SigesTI.Web.Migrations
 
                     b.Property<string>("Area")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Correo")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EsResponsable")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Puesto")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Personales");
+                    b.ToTable("Personal", (string)null);
                 });
 
             modelBuilder.Entity("SigesTI.Web.Models.Solicitud", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("IdSolicitud")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdSolicitud"));
 
                     b.Property<string>("AutorizaAdmin")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DescripcionImpresora")
+                    b.Property<string>("CorreoSolicitante")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DescripcionUnidadesRed")
+                    b.Property<string>("DescripcionProblema")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EjecutivoAsignado")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Estatus")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("FechaEntrega")
                         .HasColumnType("datetime2");
@@ -82,40 +87,42 @@ namespace SigesTI.Web.Migrations
                     b.Property<DateTime>("FechaIngreso")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("ImpresoraConfigurada")
-                        .HasColumnType("bit");
+                    b.Property<int>("IdPersonal")
+                        .HasColumnType("int");
 
-                    b.Property<bool>("Otros")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("OtrosDetalle")
+                    b.Property<string>("Impresora")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PersonalId")
-                        .HasColumnType("int");
+                    b.Property<string>("OtrosSistemas")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PuestoSolicitante")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("ReqSistemas")
                         .HasColumnType("bit");
 
                     b.Property<string>("ResponsableArea")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("UnidadesRed")
-                        .HasColumnType("bit");
+                    b.Property<string>("SistemasDetalle")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.Property<string>("UnidadesRed")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("PersonalId");
+                    b.HasKey("IdSolicitud");
 
-                    b.ToTable("Solicitudes");
+                    b.HasIndex("IdPersonal");
+
+                    b.ToTable("Solicitudes", (string)null);
                 });
 
             modelBuilder.Entity("SigesTI.Web.Models.Solicitud", b =>
                 {
                     b.HasOne("SigesTI.Web.Models.Personal", "Personal")
                         .WithMany()
-                        .HasForeignKey("PersonalId")
+                        .HasForeignKey("IdPersonal")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

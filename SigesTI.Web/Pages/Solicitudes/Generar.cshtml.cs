@@ -4,73 +4,111 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SigesTI.Web.Data;
 using SigesTI.Web.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SigesTI.Web.Pages.Solicitudes
 {
-    public class GenerarModel(ApplicationDbContext context) : PageModel
+    public class GenerarModel : PageModel
     {
-        private readonly ApplicationDbContext _context = context;
+        private readonly ApplicationDbContext _context;
 
-        // Estas son las dos listas exactas que tu archivo HTML (Create.cshtml) necesita leer
-        public SelectList AreasOptions { get; set; } = default!;
-        public SelectList SoporteOptions { get; set; } = default!;
+        public GenerarModel(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
         [BindProperty]
         public Solicitud NuevaSolicitud { get; set; } = new Solicitud();
 
-        public async Task<IActionResult> OnGetAsync()
+        [BindProperty]
+        public string AreaAuxiliar { get; set; } = null!;
+
+        [BindProperty]
+        public string[] SistemasSeleccionados { get; set; } = Array.Empty<string>();
+
+        [BindProperty]
+        public string ImpresoraConfiguradaAux { get; set; } = "No";
+
+        public List<SelectListItem> AreasOptions { get; set; } = new();
+        public List<SelectListItem> SoporteOptions { get; set; } = new();
+        public List<SelectListItem> AdminOptions { get; set; } = new();
+        public List<SelectListItem> EstatusOptions { get; set; } = new();
+
+        public void OnGet()
         {
-            // 1. Cargamos las áreas únicas desde la tabla Personal para el primer menú desplegable
-            var areas = await _context.Personal
-                                      .Select(p => p.Area)
-                                      .Distinct()
-                                      .ToListAsync();
+            AreasOptions = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "Ventas", Text = "Ventas" },
+                new SelectListItem { Value = "Administración", Text = "Administración" },
+                new SelectListItem { Value = "Soporte Técnico", Text = "Soporte Técnico" },
+                new SelectListItem { Value = "Consultoría", Text = "Consultoría" },
+                new SelectListItem { Value = "Cobranza", Text = "Cobranza" }
+            };
 
-            AreasOptions = new SelectList(areas);
+            SoporteOptions = _context.Personal
+                .Where(p => p.Area == "Soporte Técnico" || p.Area == "Soporte")
+                .Select(p => new SelectListItem
+                {
+                    Value = p.Nombre,
+                    Text = p.Nombre
+                }).ToList();
 
-            // 2. Cargamos una lista estática (o desde base de datos si la tuvieras) para los ejecutivos de soporte
-            var ejecutivos = new List<string> { "Justin Sánchez", "Soporte TI 2", "Soporte TI 3" };
-            SoporteOptions = new SelectList(ejecutivos);
+            AdminOptions = _context.Personal
+                .Where(p => p.Area == "Administración")
+                .Select(p => new SelectListItem
+                {
+                    Value = p.Nombre,
+                    Text = p.Nombre
+                }).ToList();
 
-            return Page();
+            EstatusOptions = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "Pendiente", Text = "Pendiente" },
+                new SelectListItem { Value = "Resuelto", Text = "Resuelto" }
+            };
         }
 
-        // EL CONTROLADOR JQUERY: Cuando el usuario cambia de área en la vista,
-        // este método busca los empleados asignados a ella y regresa su Id, Nombre y Correo en JSON.
-        public async Task<JsonResult> OnGetBuscarPersonalPorAreaAsync(string area)
+        // CORRECCIÓN: Retorna un estado para que AJAX en el Frontend maneje la animación de SweetAlert2
+        public IActionResult OnPost()
         {
-            var empleados = await _context.Personal
-                                          .Where(p => p.Area == area)
-                                          .Select(p => new { p.Id, p.Nombre, p.Correo })
-                                          .ToListAsync();
-
-            return new JsonResult(empleados);
-        }
-
-        public async Task<IActionResult> OnPostAsync()
-        {
-            // Eliminamos la validación automática del objeto virtual "Personal" para que no interfiera al guardar
-            ModelState.Remove("NuevaSolicitud.Personal");
+            // Forzar remoción de campos auxiliares en la validación que causan falsos errores en el ModelState
+            ModelState.Remove("AreaAuxiliar");
+            ModelState.Remove("ImpresoraConfiguradaAux");
 
             if (!ModelState.IsValid)
             {
-                // Si el formulario falla (por ejemplo, si faltan campos obligatorios),
-                // volvemos a llenar las listas para que los menús desplegables no se queden vacíos en la recarga
-                var areas = await _context.Personal.Select(p => p.Area).Distinct().ToListAsync();
-                AreasOptions = new SelectList(areas);
-
-                var ejecutivos = new List<string> { "Justin Sánchez", "Soporte TI 2", "Soporte TI 3" };
-                SoporteOptions = new SelectList(ejecutivos);
-
-                return Page();
+                // Si hay un error real de datos nulos en el modelo, mandamos un aviso controlado al cliente
+                return new BadRequestObjectResult("Por favor, rellene todos los campos requeridos.");
             }
 
-            // Guardamos el requerimiento en la tabla de Solicitudes de SQL Server
-            _context.Solicitudes.Add(NuevaSolicitud);
-            await _context.SaveChangesAsync();
+            if (SistemasSeleccionados != null && SistemasSeleccionados.Length > 0)
+            {
+                NuevaSolicitud.SistemasDetalle = string.Join(", ", SistemasSeleccionados);
+            }
 
-            // Redireccionamos a la bitácora general de solicitudes que tienes en la misma carpeta
-            return RedirectToPage("./Index");
+            _context.Solicitudes.Add(NuevaSolicitud);
+            _context.SaveChanges();
+
+            // Enviamos señal en limpio diciendo que la base de datos procesó el registro exitosamente
+            return new JsonResult(new { success = true });
+        }
+
+        public JsonResult OnGetFiltrarPersonal(string area)
+        {
+            var listaPersonal = _context.Personal
+                .Where(p => p.Area == area)
+                .Select(p => new
+                {
+                    id = p.Id,
+                    nombre = p.Nombre,
+                    correo = p.Correo,
+                    puesto = p.Puesto,
+                    esResponsable = p.EsResponsable
+                }).ToList();
+
+            return new JsonResult(listaPersonal);
         }
     }
 }

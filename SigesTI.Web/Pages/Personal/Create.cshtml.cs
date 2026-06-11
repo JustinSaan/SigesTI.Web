@@ -13,9 +13,9 @@ namespace SigesTI.Web.Pages
             _context = context;
         }
 
-        // Le ponemos la ruta completa al modelo para que no choque con tu carpeta
+        // CORRECCIÓN: Inicializamos la propiedad con un objeto vacío para silenciar la advertencia de nulos
         [BindProperty]
-        public SigesTI.Web.Models.Personal Personal { get; set; }
+        public SigesTI.Web.Models.Personal Personal { get; set; } = new SigesTI.Web.Models.Personal();
 
         public void OnGet()
         {
