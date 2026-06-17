@@ -45,6 +45,12 @@
                     <span asp-validation-for="Personal.Correo" class="text-danger small"></span>
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Acceso a Unidades de Red</label>
+                    <input asp-for="Personal.UnidadesRed" class="form-control" placeholder="Compartida, Ventas.." />
+                    <span asp-validation-for="Personal.UnidadesRed" class="text-danger small"></span>
+                </div>
+
                 <div class="mb-3 form-check">
                     <input asp-for="Personal.Activo" type="checkbox" class="form-check-input" checked />
                     <label class="form-check-label">Personal Activo</label>

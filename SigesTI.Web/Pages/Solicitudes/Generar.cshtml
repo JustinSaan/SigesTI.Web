@@ -62,7 +62,10 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Unidades de red compartidas:</label>
-                        <input type="text" asp-for="NuevaSolicitud.UnidadesRed" class="form-control custom-input" placeholder="Ruta de carpetas de red" />
+                        <input type="text"
+                               id="txtUnidadesRed"
+                               class="form-control custom-input input-readonly"
+                               readonly />
                     </div>
                     <div class="col-md-4 mt-4 d-flex flex-column justify-content-center">
                         <label class="form-label fw-bold d-block mb-2">¿Tiene impresora configurada?</label>
@@ -118,7 +121,11 @@
                             <label class="form-check-label fw-bold" for="chkHabilitarRed">Habilitar unidad de red</label>
                         </div>
                         <div id="divContenedorRed" class="d-none scale-in">
-                            <input type="text" asp-for="NuevaSolicitud.SistemasDetalle" id="txtDetalleRed" class="form-control custom-input" placeholder="Escribe los detalles de la unidad de red..." />
+                            <input type="text"
+                                   asp-for="NuevaSolicitud.NuevaUnidadRed"
+                                   id="txtDetalleRed"
+                                   class="form-control custom-input"
+                                   placeholder="Escribe la nueva unidad de red..." />
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -127,7 +134,11 @@
                             <label class="form-check-label fw-bold" for="chkConfigurarImpresora">Configurar impresora</label>
                         </div>
                         <div id="divContenedorImpresora" class="d-none scale-in">
-                            <input type="text" asp-for="NuevaSolicitud.Impresora" id="txtDetalleImpresora" class="form-control custom-input" placeholder="Escribe el modelo o detalles de la impresora..." />
+                            <input type="text"
+                                   asp-for="NuevaSolicitud.DetalleImpresora"
+                                   id="txtDetalleImpresora"
+                                   class="form-control custom-input"
+                                   placeholder="Escribe el modelo o detalles de la impresora..." />
                         </div>
                     </div>
                 </div>
@@ -258,7 +269,13 @@
         if (item.esResponsable === true) {
         jefeDelArea = item.nombre;
         }
-        $ddlPersonal.append('<option value="' + item.id + '" data-correo="' + item.correo + '" data-puesto="' + item.puesto + '">' + item.nombre + '</option>');
+
+        $ddlPersonal.append(
+        '<option value="' + item.id +
+        '" data-correo="' + item.correo +
+        '" data-puesto="' + item.puesto +
+        '" data-unidades="' + (item.unidadesRed || '') +
+        '">' + item.nombre + '</option>');
         });
 
         if(jefeDelArea !== "") {
@@ -275,9 +292,11 @@
         if ($(this).val()) {
         $("#txtCorreo").val($opcionSeleccionada.data('correo'));
         $("#txtPuesto").val($opcionSeleccionada.data('puesto'));
+        $("#txtUnidadesRed").val($opcionSeleccionada.data('unidades'));
         } else {
         $("#txtCorreo").val('');
         $("#txtPuesto").val('');
+        $("#txtUnidadesRed").val('');
         }
         });
 

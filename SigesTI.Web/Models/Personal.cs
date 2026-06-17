@@ -24,5 +24,7 @@ namespace SigesTI.Web.Models
         public string Puesto { get; set; } = string.Empty;
 
         public bool EsResponsable { get; set; } = false;
+
+        public string? UnidadesRed { get; set; }
     }
 }

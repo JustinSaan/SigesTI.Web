@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using SigesTI.Web.Data;
+using QuestPDF.Infrastructure;
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
