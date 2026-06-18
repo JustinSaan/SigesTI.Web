@@ -34,7 +34,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Puesto o Cargo</label>
+                    <label class="form-label fw-bold">Puesto</label>
                     <input asp-for="Personal.Puesto" class="form-control" placeholder="Ej. Gerente, Auxiliar, Coordinador" />
                     <span asp-validation-for="Personal.Puesto" class="text-danger small"></span>
                 </div>
@@ -59,10 +59,10 @@
                 <div class="mb-3 p-3 bg-light border rounded form-check">
                     <input asp-for="Personal.EsResponsable" type="checkbox" class="form-check-input" id="chkJefe" />
                     <label class="form-check-label fw-bold text-primary" for="chkJefe">
-                        ¿Es el Responsable / Jefe de esta Área?
+                        ¿Es el Responsable de esta Área?
                     </label>
                     <div class="form-text text-muted">
-                        Si marcas esta opción, su nombre aparecerá automáticamente como el responsable encargado de autorizar las solicitudes de soporte de su área.
+                        Si marcas esta opción, su nombre aparecerá automáticamente como el responsable encargado de su área.
                     </div>
                 </div>
 

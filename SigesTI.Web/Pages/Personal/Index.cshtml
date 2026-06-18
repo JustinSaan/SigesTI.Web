@@ -4,53 +4,78 @@
     ViewData["Title"] = "Lista de Personal";
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Lista de Personal</h2>
-        <a asp-page="./Create" class="btn btn-primary">Registrar Nuevo</a>
+<div class="container mt-4 mb-5">
+    <div class="header-modulo d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="titulo-modulo m-0">Catálogo de Personal</h2>
+            <small class="text-muted-custom">Administración y control de usuarios del sistema</small>
+        </div>
+        <a asp-page="./Create" class="btn btn-registrar-custom">
+            <i class="bi bi-person-plus-fill me-2"></i> Registrar Personal
+        </a>
     </div>
 
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>Nombre Completo</th>
-                <th>Área</th>
-                <th>Puesto</th>
-                <th>Correo Electrónico</th>
-                <th>Unidades de red</th>
-                <th>Estado</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.ListaPersonal.Count == 0)
-            {
-                <tr>
-                    <td colspan="4" class="text-center text-muted">No hay personal registrado todavía.</td>
-                </tr>
-            }
-            else
-            {
-                @foreach (var persona in Model.ListaPersonal)
-                {
+    <div class="panel-personal card-principal">
+        <div class="table-responsive">
+            <table class="table tabla-sigesti m-0">
+                <thead>
                     <tr>
-                        <td>@persona.Nombre</td>
-                        <td>@persona.Area</td>
-                        <td>@persona.Puesto</td>
-                        <td>@persona.Correo</td>
-                        <td>@persona.UnidadesRed</td>
-                        <td>
-                            @if (persona.Activo)
-                            {
-                                <span class="badge bg-success">Activo</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger">Inactivo</span>
-                            }
-                        </td>
+                        <th>Nombre Completo</th>
+                        <th>Área</th>
+                        <th>Puesto</th>
+                        <th>Correo Electrónico</th>
+                        <th>Unidades de Red</th>
+                        <th class="text-center">Estado</th>
                     </tr>
-                }
-            }
-        </tbody>
-    </table>
+                </thead>
+                <tbody>
+                    @if (Model.ListaPersonal.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted-custom">
+                                <i class="bi bi-people text-muted d-block mb-2 fs-3"></i>
+                                No hay personal registrado todavía en la base de datos.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var persona in Model.ListaPersonal)
+                        {
+                            <tr>
+                                <td class="fw-semibold text-bright font-accent">@persona.Nombre</td>
+                                <td>
+                                    <span class="badge-area @persona.Area.ToLower().Replace(" ", "-")">
+                                        @persona.Area
+                                    </span>
+                                </td>
+                                <td>@persona.Puesto</td>
+                                <td class="text-lowercase text-muted-custom">@persona.Correo</td>
+                                <td>
+                                    @if (string.IsNullOrEmpty(persona.UnidadesRed))
+                                    {
+                                        <span class="text-muted-dim fs-7">Ninguna</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-unidades"><i class="bi bi-folder-symlink me-1"></i> @persona.UnidadesRed</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (persona.Activo)
+                                    {
+                                        <span class="badge-estatus activo">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-estatus inactivo">Inactivo</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
