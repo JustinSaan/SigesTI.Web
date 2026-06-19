@@ -7,12 +7,15 @@
 <div class="container mt-4 mb-5">
     <div class="header-modulo d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="titulo-modulo m-0">Catálogo de Personal</h2>
-            <small class="text-muted-custom">Administración y control de usuarios del sistema</small>
+            <h2 class="titulo-modulo m-0">Administración de Personal</h2>
+            <small class="text-muted-custom">Gestión y control de usuarios del sistema</small>
         </div>
-        <a asp-page="./Create" class="btn btn-registrar-custom">
-            <i class="bi bi-person-plus-fill me-2"></i> Registrar Personal
-        </a>
+        <button type="button"
+                class="btn-registrar-custom"
+                onclick="abrirModalRegistrar()">
+            <i class="bi bi-person-plus-fill"></i>
+            <span>Registrar Personal</span>
+        </button>
     </div>
 
     <div class="panel-personal card-principal">
@@ -20,19 +23,20 @@
             <table class="table tabla-sigesti m-0">
                 <thead>
                     <tr>
-                        <th>Nombre Completo</th>
-                        <th>Área</th>
-                        <th>Puesto</th>
-                        <th>Correo Electrónico</th>
-                        <th>Unidades de Red</th>
+                        <th class="text-center">Nombre Completo</th>
+                        <th class="text-center">Área</th>
+                        <th class="text-center">Puesto</th>
+                        <th class="text-center">Correo Electrónico</th>
+                        <th class="text-center">Unidades de Red</th>
                         <th class="text-center">Estado</th>
+                        <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (Model.ListaPersonal.Count == 0)
                     {
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted-custom">
+                            <td colspan="7" class="text-center py-5 text-muted-custom">
                                 <i class="bi bi-people text-muted d-block mb-2 fs-3"></i>
                                 No hay personal registrado todavía en la base de datos.
                             </td>
@@ -71,6 +75,19 @@
                                         <span class="badge-estatus inactivo">Inactivo</span>
                                     }
                                 </td>
+                                <td class="text-center">
+                                    <button type="button"
+                                            class="btn btn-editar"
+                                            onclick="editarEmpleado(@persona.Id)">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-eliminar"
+                                            onclick="eliminarEmpleado(@persona.Id, `@persona.Nombre`)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </td>
                             </tr>
                         }
                     }
@@ -79,3 +96,404 @@
         </div>
     </div>
 </div>
+
+@Html.AntiForgeryToken()
+
+<div class="modal-body">
+
+    <input type="hidden" id="editId" />
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label>Nombre Completo</label>
+            <input id="editNombre" class="form-control" />
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label>Área</label>
+            <select id="editArea" class="form-select">
+                <option value="Ventas">Ventas</option>
+                <option value="Administración">Administración</option>
+                <option value="Soporte Técnico">Soporte Técnico</option>
+                <option value="Consultoría">Consultoría</option>
+                <option value="Cobranza">Cobranza</option>
+            </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label>Puesto</label>
+            <input id="editPuesto" class="form-control" />
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label>Correo</label>
+            <input id="editCorreo" class="form-control" />
+        </div>
+
+        <div class="col-md-12 mb-3">
+            <label>Unidades de Red</label>
+            <input id="editUnidadesRed" class="form-control" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <div class="check-panel h-100">
+                <div class="form-check">
+                    <input id="editActivo"
+                           class="form-check-input"
+                           type="checkbox">
+                    <label class="form-check-label">
+                        Personal Activo
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="check-panel responsable h-100">
+                <div class="form-check">
+                    <input id="editResponsable"
+                           class="form-check-input"
+                           type="checkbox">
+                    <label class="form-check-label fw-bold">
+                        Responsable del Área
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="modalRegistrar" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content modal-dark">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-person-plus-fill me-2"></i>
+                    Registrar Nuevo Personal
+                </h5>
+
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            @* Modal de registro *@
+            <div class="modal-body">
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Nombre Completo</label>
+                        <input id="regNombre" class="form-control" placeholder="Ej. Juan Pérez" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Área</label>
+                        <select id="regArea" class="form-select">
+                            <option value="">-- Selecciona un Área --</option>
+                            <option value="Ventas">Ventas</option>
+                            <option value="Administración">Administración</option>
+                            <option value="Soporte Técnico">Soporte Técnico</option>
+                            <option value="Consultoría">Consultoría</option>
+                            <option value="Cobranza">Cobranza</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Puesto</label>
+                        <input id="regPuesto" class="form-control" placeholder="Ej. Gerente, Auxiliar, Coordinador" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Correo</label>
+                        <input id="regCorreo" type="email" class="form-control" placeholder="ejemplo@sigesti.com" />
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label>Unidades de Red</label>
+                        <input id="regUnidadesRed" class="form-control" placeholder="Compartida, Ventas..." />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="check-panel h-100">
+                            <div class="form-check">
+                                <input id="regActivo"
+                                       type="checkbox"
+                                       class="form-check-input"
+                                       checked />
+                                <label class="form-check-label">Personal Activo</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <div class="check-panel responsable h-100">
+                            <div class="form-check">
+                                <input id="regResponsable"
+                                       type="checkbox"
+                                       class="form-check-input" />
+                                <label class="form-check-label fw-bold">
+                                    Responsable del Área
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn-cancelar-modal"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        class="btn-guardar-modal"
+                        onclick="guardarRegistro()">
+                    <i class="bi bi-check-circle-fill me-1"></i>
+                    Guardar Registro
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+    function abrirModalRegistrar()
+    {
+    document.getElementById("regNombre").value = "";
+    document.getElementById("regArea").value = "";
+    document.getElementById("regPuesto").value = "";
+    document.getElementById("regCorreo").value = "";
+    document.getElementById("regUnidadesRed").value = "";
+    document.getElementById("regActivo").checked = true;
+    document.getElementById("regResponsable").checked = false;
+
+    new bootstrap.Modal(
+    document.getElementById("modalRegistrar")
+    ).show();
+    }
+
+    async function editarEmpleado(id)
+    {
+        const response =
+            await fetch(`?handler=DetalleEmpleado&id=${id}`);
+
+        const data = await response.json();
+
+        document.getElementById("editId").value = data.id;
+        document.getElementById("editNombre").value = data.nombre;
+        document.getElementById("editArea").value = data.area;
+        document.getElementById("editPuesto").value = data.puesto;
+        document.getElementById("editCorreo").value = data.correo;
+        document.getElementById("editUnidadesRed").value = data.unidadesRed;
+        document.getElementById("editActivo").checked = data.activo;
+        document.getElementById("editResponsable").checked = data.esResponsable;
+
+        new bootstrap.Modal(
+            document.getElementById("modalEditar")
+        ).show();
+    }
+
+        async function guardarCambios()
+    {
+        const datos =
+        {
+            id: document.getElementById("editId").value,
+            nombre: document.getElementById("editNombre").value,
+            area: document.getElementById("editArea").value,
+            puesto: document.getElementById("editPuesto").value,
+            correo: document.getElementById("editCorreo").value,
+            unidadesRed: document.getElementById("editUnidadesRed").value,
+            activo: document.getElementById("editActivo").checked,
+            esResponsable: document.getElementById("editResponsable").checked
+        };
+
+        const response =
+            await fetch('?handler=GuardarCambios',
+            {
+                method: 'POST',
+                headers:
+                {
+                    'Content-Type':'application/json',
+                    'RequestVerificationToken':
+                    document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify(datos)
+            });
+
+        const result = await response.json();
+
+    if(result.success)
+    {
+    Swal.fire({
+    icon: 'success',
+    title: 'Datos actualizados',
+    text: 'Los datos del personal han sido actualizados con éxito.',
+    confirmButtonText: 'Aceptar',
+    customClass: {
+    popup: 'swal-dark',
+    confirmButton: 'swal-btn-confirm'
+    },
+    buttonsStyling: false
+    }).then(() => {
+    location.reload();
+    });
+    }
+    else
+    {
+    Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: result.message,
+    confirmButtonText: 'Aceptar',
+    customClass: {
+    popup: 'swal-dark',
+    confirmButton: 'swal-btn-confirm'
+    },
+    buttonsStyling: false
+    });
+    }
+    }
+
+    async function eliminarEmpleado(id, nombre)
+    {
+    const confirmacion = await Swal.fire({
+    icon: 'warning',
+    title: '¿Eliminar personal?',
+    text: `¿Estás seguro de eliminar a ${nombre}? Esta acción no se puede deshacer.`,
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    customClass: {
+    popup: 'swal-dark',
+    confirmButton: 'swal-btn-danger',
+    cancelButton: 'swal-btn-cancel'
+    },
+    buttonsStyling: false
+    });
+
+    if (!confirmacion.isConfirmed)
+    return;
+
+    const response = await fetch(`?handler=EliminarEmpleado&id=${id}`,
+    {
+    method:'POST',
+    headers:
+    {
+    'Content-Type': 'application/json',
+    'RequestVerificationToken':
+    document.querySelector('input[name="__RequestVerificationToken"]').value
+    }
+    });
+
+    const result = await response.json();
+
+    if(result.success)
+    {
+    Swal.fire({
+    icon: 'success',
+    title: 'Usuario eliminado',
+    text: 'El personal fue eliminado de manera correcta.',
+    confirmButtonText: 'Aceptar',
+    customClass: {
+    popup: 'swal-dark',
+    confirmButton: 'swal-btn-confirm'
+    },
+    buttonsStyling: false
+    }).then(() => {
+    location.reload();
+    });
+    }
+    else
+    {
+    Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: result.message,
+    confirmButtonText: 'Aceptar',
+    customClass: {
+    popup: 'swal-dark',
+    confirmButton: 'swal-btn-confirm'
+    },
+    buttonsStyling: false
+    });
+    }
+    }
+
+    async function guardarRegistro()
+    {
+    const datos =
+    {
+    nombre: document.getElementById("regNombre").value,
+    area: document.getElementById("regArea").value,
+    puesto: document.getElementById("regPuesto").value,
+    correo: document.getElementById("regCorreo").value,
+    unidadesRed: document.getElementById("regUnidadesRed").value,
+    activo: document.getElementById("regActivo").checked,
+    esResponsable: document.getElementById("regResponsable").checked
+    };
+
+    const response = await fetch('?handler=RegistrarEmpleado',
+    {
+    method: 'POST',
+    headers:
+    {
+    'Content-Type': 'application/json',
+    'RequestVerificationToken':
+    document.querySelector('input[name="__RequestVerificationToken"]').value
+    },
+    body: JSON.stringify(datos)
+    });
+
+    const result = await response.json();
+
+    if (result.success)
+    {
+    Swal.fire({
+    icon: 'success',
+    title: 'Personal registrado',
+    text: 'Se ha guardado con éxito el personal agregado.',
+    confirmButtonText: 'Aceptar',
+    customClass: {
+    popup: 'swal-dark',
+    confirmButton: 'swal-btn-confirm'
+    },
+    buttonsStyling: false
+    }).then(() => {
+    location.reload();
+    });
+    }
+    else
+    {
+    Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: result.message,
+    confirmButtonText: 'Aceptar',
+    customClass: {
+    popup: 'swal-dark',
+    confirmButton: 'swal-btn-confirm'
+    },
+    buttonsStyling: false
+    });
+    }
+    }
+
+   
+</script>
+
+

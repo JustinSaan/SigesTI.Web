@@ -21,6 +21,42 @@ namespace SigesTI.Web.Pages
 
         public List<Models.Personal> ListaPersonal { get; set; } = new();
 
+        public async Task<IActionResult> OnPostRegistrarEmpleadoAsync([FromBody] EmpleadoEditarDTO dto)
+        {
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Nombre))
+            {
+                return new JsonResult(new { success = false, message = "Datos inválidos." });
+            }
+
+            if (dto.EsResponsable)
+            {
+                var jefesAnteriores = await _context.Personal
+                    .Where(p => p.Area == dto.Area && p.EsResponsable)
+                    .ToListAsync();
+
+                foreach (var jefe in jefesAnteriores)
+                {
+                    jefe.EsResponsable = false;
+                }
+            }
+
+            var empleado = new SigesTI.Web.Models.Personal
+            {
+                Nombre = dto.Nombre,
+                Area = dto.Area,
+                Puesto = dto.Puesto,
+                Correo = dto.Correo,
+                UnidadesRed = dto.UnidadesRed,
+                Activo = dto.Activo,
+                EsResponsable = dto.EsResponsable
+            };
+
+            _context.Personal.Add(empleado);
+            await _context.SaveChangesAsync();
+
+            return new JsonResult(new { success = true });
+        }
+
         public async Task OnGetAsync()
         {
             // Trae todo el personal de la tabla real
@@ -44,6 +80,8 @@ namespace SigesTI.Web.Pages
                 area = empleado.Area,
                 puesto = empleado.Puesto,
                 correo = empleado.Correo,
+                unidadesRed = empleado.UnidadesRed,
+                activo = empleado.Activo,
                 esResponsable = empleado.EsResponsable
             });
         }
@@ -62,7 +100,7 @@ namespace SigesTI.Web.Pages
                 return new JsonResult(new { success = false, message = "El empleado ya no existe." });
             }
 
-            // Si este empleado se marca como jefe, desmarcamos temporalmente al anterior de esa misma área
+            // Si este empleado se marca como responsable del área, desmarcamos temporalmente al anterior de esa misma área
             if (dto.EsResponsable)
             {
                 var jefesAnteriores = await _context.Personal
@@ -80,6 +118,8 @@ namespace SigesTI.Web.Pages
             empleado.Puesto = dto.Puesto;
             empleado.Correo = dto.Correo;
             empleado.EsResponsable = dto.EsResponsable;
+            empleado.UnidadesRed = dto.UnidadesRed;
+            empleado.Activo = dto.Activo;
 
             await _context.SaveChangesAsync();
             return new JsonResult(new { success = true });
@@ -109,6 +149,8 @@ namespace SigesTI.Web.Pages
         public string Area { get; set; } = string.Empty;
         public string Puesto { get; set; } = string.Empty;
         public string Correo { get; set; } = string.Empty;
+        public string UnidadesRed { get; set; } = string.Empty;
+        public bool Activo { get; set; }
         public bool EsResponsable { get; set; }
     }
 }

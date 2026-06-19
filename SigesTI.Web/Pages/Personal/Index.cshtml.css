@@ -13,7 +13,7 @@
 
 /* Tipografía y Textos */
 .titulo-modulo {
-    color: #ffffff !important;
+    color: #000A5C !important;
     font-weight: 700;
     letter-spacing: -0.5px;
 }
@@ -49,8 +49,8 @@
     }
 
     .tabla-sigesti th {
-        color: #38bdf8 !important; /* Azul cielo tecnológico para los th */
-        font-weight: 600;
+        color: #022475 !important; /* Color para los encabezados */
+        font-weight: 900;
         text-transform: uppercase;
         font-size: 0.75rem;
         letter-spacing: 0.8px;
@@ -102,35 +102,42 @@
 }
 
     /* Colores Dinámicos e Iluminados por Área */
-    .badge-area.soporte-técnico,
-    .badge-area.soporte {
-        background-color: rgba(14, 165, 233, 0.15) !important;
-        color: #38bdf8 !important;
-        border: 1px solid rgba(56, 189, 248, 0.4);
+    .badge-area.soporte-técnico {
+        background-color: rgba(59, 130, 246, 0.12) !important;
+        color: #60a5fa !important;
+        border: 1px solid rgba(59, 130, 246, 0.4) !important;
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
     }
 
     .badge-area.ventas {
-        background-color: rgba(236, 72, 153, 0.15) !important;
+        background-color: rgba(236, 72, 153, 0.12) !important;
         color: #f472b6 !important;
-        border: 1px solid rgba(244, 114, 182, 0.4);
+        border: 1px solid rgba(236, 72, 153, 0.4) !important;
+        box-shadow: 0 0 10px rgba(236, 72, 153, 0.15);
     }
 
     .badge-area.administración {
-        background-color: rgba(168, 85, 247, 0.15) !important;
+        /* background-color: rgba(168, 85, 247, 0.15) !important;
         color: #c084fc !important;
-        border: 1px solid rgba(192, 132, 252, 0.4);
-    }
-
-    .badge-area.consultoría {
-        background-color: rgba(234, 179, 8, 0.15) !important;
-        color: #facc15 !important;
-        border: 1px solid rgba(250, 204, 21, 0.4);
-    }
-
-    .badge-area.cobranza {
+        border: 1px solid rgba(192, 132, 252, 0.4);*/
         background-color: rgba(20, 184, 166, 0.15) !important;
         color: #2dd4bf !important;
         border: 1px solid rgba(45, 212, 191, 0.4);
+        box-shadow: 0 0 10px rgba(45, 212, 191, 0.15);
+    }
+
+    .badge-area.consultoría {
+        background-color: rgba(139, 92, 246, 0.12) !important;
+        color: #a78bfa !important;
+        border: 1px solid rgba(139, 92, 246, 0.4) !important;
+        box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+    }
+
+    .badge-area.cobranza {
+        background-color: rgba(245, 158, 11, 0.12) !important;
+        color: #fbbf24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.4) !important;
+        box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
     }
 
 /* Badges de Estado (Activo / Inactivo) */
@@ -147,31 +154,211 @@
         background-color: rgba(16, 185, 129, 0.2) !important;
         color: #34d399 !important;
         border: 1px solid rgba(52, 211, 153, 0.4);
+        box-shadow: 0 0 10px rgba(52, 211, 153, 0.18);
     }
 
     .badge-estatus.inactivo {
         background-color: rgba(239, 68, 68, 0.2) !important;
         color: #f87171 !important;
         border: 1px solid rgba(248, 113, 113, 0.4);
+        box-shadow: 0 0 10px rgba(248, 113, 113, 0.18);
     }
 
 /* ==========================================================================
    BOTONES DE ACCIÓN
    ========================================================================== */
 .btn-registrar-custom {
-    background-color: rgba(56, 189, 248, 0.1) !important;
-    color: #38bdf8 !important;
-    border: 1px solid #38bdf8 !important;
-    padding: 8px 18px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border-radius: 6px;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 10px 18px !important;
+    border-radius: 8px !important;
+    background-color: red !important;
+    color: white !important;
+    text-decoration: none !important;
+    border: 1px solid red !important;
+    font-weight: 600 !important;
+}
+    a.btn-registrar-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(56, 189, 248, 0.35);
+        background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+        color: #0f172a !important;
+    }
+
+    a.btn-registrar-custom:active {
+        transform: translateY(0px);
+        box-shadow: 0 3px 8px rgba(56, 189, 248, 0.2);
+    }
+
+
+.btn-editar {
+    background: rgba(56,189,248,.15);
+    color: #38bdf8;
+    border: 1px solid #38bdf8;
+    margin-right: 5px;
 }
 
-    .btn-registrar-custom:hover {
-        background-color: #38bdf8 !important;
-        color: #0f172a !important;
-        box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
-        transform: translateY(-1px);
+    .btn-editar:hover {
+        background: #38bdf8;
+        color: #0f172a;
     }
+
+.btn-eliminar {
+    background: rgba(239,68,68,.15);
+    color: #f87171;
+    border: 1px solid #f87171;
+}
+
+    .btn-eliminar:hover {
+        background: #f87171;
+        color: white;
+    }
+
+.modal-dark {
+    background: #0f172a;
+    color: #f8fafc;
+    border: 1px solid #334155;
+}
+
+    .modal-dark .modal-header {
+        border-bottom: 1px solid #334155;
+    }
+
+    .modal-dark .modal-footer {
+        border-top: 1px solid #334155;
+    }
+
+    .modal-dark .form-control,
+    .modal-dark .form-select {
+        background: #1e293b;
+        border: 1px solid #334155;
+        color: white;
+    }
+
+        .modal-dark .form-control:focus,
+        .modal-dark .form-select:focus {
+            background: #1e293b;
+            color: white;
+        }
+
+.header-modulo .btn-registrar-custom {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 10px 18px !important;
+    border-radius: 8px !important;
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9) !important;
+    color: #0f172a !important;
+    text-decoration: none !important;
+    border: 1px solid #38bdf8 !important;
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25) !important;
+    transition: all 0.25s ease !important;
+}
+
+    .header-modulo .btn-registrar-custom:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #0ea5e9, #38bdf8) !important;
+        color: #0f172a !important;
+        box-shadow: 0 6px 18px rgba(56, 189, 248, 0.4) !important;
+    }
+
+.btn-cancelar-modal,
+.btn-guardar-modal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none !important;
+    border: none;
+    transition: all 0.25s ease;
+}
+
+.btn-cancelar-modal {
+    background: #334155;
+    color: #e2e8f0;
+}
+
+    .btn-cancelar-modal:hover {
+        background: #475569;
+        color: #ffffff;
+    }
+
+.btn-guardar-modal {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+}
+
+    .btn-guardar-modal:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(34, 197, 94, 0.35);
+    }
+
+/* SweetAlert Dark */
+.swal-dark {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155;
+    border-radius: 14px;
+}
+
+.swal2-title {
+    color: #38bdf8 !important;
+}
+
+.swal2-html-container {
+    color: #cbd5e1 !important;
+}
+
+.swal-btn-confirm,
+.swal-btn-danger,
+.swal-btn-cancel {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    border: none;
+    margin: 0 6px;
+    transition: all 0.25s ease;
+}
+
+.swal-btn-confirm {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    color: #0f172a;
+}
+
+.swal-btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #ffffff;
+}
+
+.swal-btn-cancel {
+    background: #334155;
+    color: #e2e8f0;
+}
+
+    .swal-btn-confirm:hover,
+    .swal-btn-danger:hover,
+    .swal-btn-cancel:hover {
+        transform: translateY(-2px);
+    }
+
+/* Flecha visible del combobox */
+.modal-dark .form-select,
+.input-dark.form-select {
+    appearance: none;
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155 !important;
+    background-image: linear-gradient(45deg, transparent 50%, #38bdf8 50%), linear-gradient(135deg, #38bdf8 50%, transparent 50%);
+    background-position: calc(100% - 18px) center, calc(100% - 12px) center;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 38px !important;
+}

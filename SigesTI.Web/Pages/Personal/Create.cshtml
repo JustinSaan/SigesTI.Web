@@ -4,73 +4,100 @@
     ViewData["Title"] = "Registrar Personal";
 }
 
-<div class="container mt-4">
-    <div style="max-width: 500px; margin: 0 auto;" class="card shadow-sm">
+<div class="container mt-4 mb-5">
+    <div class="form-personal-card">
 
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Registrar Nuevo Personal</h5>
+        <div class="form-personal-header">
+            <h5 class="mb-0">
+                <i class="bi bi-person-plus-fill me-2"></i>
+                Registrar Nuevo Personal
+            </h5>
+            <small>Alta de personal</small>
         </div>
 
-        <div class="card-body">
+        <div class="form-personal-body">
             <form method="post">
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Nombre Completo</label>
-                    <input asp-for="Personal.Nombre" class="form-control" placeholder="Ej. Juan Pérez" />
-                    <span asp-validation-for="Personal.Nombre" class="text-danger small"></span>
-                </div>
+                <div class="row">
 
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Área / Departamento</label>
-                    <select asp-for="Personal.Area" class="form-select">
-                        <option value="">-- Selecciona un Área --</option>
-                        <option value="Ventas">Ventas</option>
-                        <option value="Administración">Administración</option>
-                        <option value="Soporte Técnico">Soporte Técnico</option>
-                        <option value="Consultoría">Consultoría</option>
-                        <option value="Cobranza">Cobranza</option>
-                    </select>
-                    <span asp-validation-for="Personal.Area" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Puesto</label>
-                    <input asp-for="Personal.Puesto" class="form-control" placeholder="Ej. Gerente, Auxiliar, Coordinador" />
-                    <span asp-validation-for="Personal.Puesto" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Correo Electrónico</label>
-                    <input asp-for="Personal.Correo" type="email" class="form-control" placeholder="ejemplo@sigesti.com" />
-                    <span asp-validation-for="Personal.Correo" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Acceso a Unidades de Red</label>
-                    <input asp-for="Personal.UnidadesRed" class="form-control" placeholder="Compartida, Ventas.." />
-                    <span asp-validation-for="Personal.UnidadesRed" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3 form-check">
-                    <input asp-for="Personal.Activo" type="checkbox" class="form-check-input" checked />
-                    <label class="form-check-label">Personal Activo</label>
-                </div>
-
-                <div class="mb-3 p-3 bg-light border rounded form-check">
-                    <input asp-for="Personal.EsResponsable" type="checkbox" class="form-check-input" id="chkJefe" />
-                    <label class="form-check-label fw-bold text-primary" for="chkJefe">
-                        ¿Es el Responsable de esta Área?
-                    </label>
-                    <div class="form-text text-muted">
-                        Si marcas esta opción, su nombre aparecerá automáticamente como el responsable encargado de su área.
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nombre Completo</label>
+                        <input asp-for="Personal.Nombre" class="form-control input-dark" />
                     </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Área / Departamento</label>
+                        <select asp-for="Personal.Area" class="form-select input-dark">
+                            <option value="">-- Selecciona un Área --</option>
+                            <option>Ventas</option>
+                            <option>Administración</option>
+                            <option>Soporte Técnico</option>
+                            <option>Consultoría</option>
+                            <option>Cobranza</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Puesto</label>
+                        <input asp-for="Personal.Puesto" class="form-control input-dark" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Correo Electrónico</label>
+                        <input asp-for="Personal.Correo" class="form-control input-dark" />
+                    </div>
+
                 </div>
 
-                <hr />
+                <div class="mb-3">
+                    <label class="form-label">Acceso a Unidades de Red</label>
+                    <input asp-for="Personal.UnidadesRed"
+                           class="form-control input-dark" />
+                </div>
 
-                <div class="d-flex justify-content-between">
-                    <a asp-page="./Index" class="btn btn-secondary">Regresar</a>
-                    <button type="submit" class="btn btn-success">Guardar Registro</button>
+                <div class="row mt-3">
+
+                    <div class="col-md-6">
+                        <div class="check-panel h-100">
+                            <div class="form-check">
+                                <input asp-for="Personal.Activo"
+                                       class="form-check-input"
+                                       type="checkbox" />
+
+                                <label class="form-check-label">
+                                    Personal Activo
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="check-panel responsable h-100">
+                            <div class="form-check">
+                                <input asp-for="Personal.EsResponsable"
+                                       class="form-check-input"
+                                       id="chkJefe"
+                                       type="checkbox" />
+
+                                <label class="form-check-label fw-bold" for="chkJefe">
+                                    Responsable del Área
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+                    <a asp-page="./Index" class="btn-regresar-personal">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Regresar
+                    </a>
+
+                    <button type="submit" class="btn-guardar-personal">
+                        <i class="bi bi-check-circle-fill me-1"></i>
+                        Guardar Registro
+                    </button>
                 </div>
 
             </form>
