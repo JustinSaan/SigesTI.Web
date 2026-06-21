@@ -122,7 +122,7 @@
                                 <td class="text-center font-monospace small">
                                     @Convert.ToDateTime(item.FechaIngreso).ToString("dd/MM/yyyy") - @fechaEntregaTexto
                                 </td>
-                                <td><i class="bi bi-person-badge text-muted me-1"></i> @(string.IsNullOrEmpty(item.EjecutivoAsignado) ? "Sin asignar" : item.EjecutivoAsignado)</td>
+                                <td>@(string.IsNullOrEmpty(item.EjecutivoAsignado) ? "Sin asignar" : item.EjecutivoAsignado)</td>
                                 <td class="text-center">
                                     @if (item.Estatus == "Pendiente")
                                     {
@@ -153,7 +153,7 @@
 
                         <tr id="angularNoDataRow" class="d-none no-filtrado-row">
                             <td colspan="7" class="text-center py-4 text-warning fw-bold bg-dark">
-                                No data matching the filter "<span id="filterQueryValue"></span>"
+                                No existen coincidencias con los datos: "<span id="filterQueryValue"></span>"
                             </td>
                         </tr>
                     </tbody>
@@ -199,7 +199,7 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Estatus de la Solicitud:</label>
-                            <select id="modal_Estatus" class="form-select ctrl-modal fw-bold">
+                            <select id="modal_Estatus" class="form-select ctrl-modal fw-bold select-estatus-bold">
                                 <option value="Pendiente">Pendiente</option>
                                 <option value="Resuelto">Resuelto</option>
                             </select>
@@ -337,8 +337,9 @@
 
             <div class="modal-footer d-flex justify-content-end gap-2">
                 <button type="button" id="btnLiberarEdicion" class="btn btn-liberar-custom fw-bold"><i class="bi bi-unlock-fill"></i> Liberar Edición</button>
-                <button type="button" class="btn btn-secondary px-4 text-white" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" id="btnGuardarCambiosModal" class="btn btn-guardar-custom px-4 d-none"><i class="bi bi-save"></i> Guardar Modificaciones</button>
+                <button type="button" class="btn btn-cerrar-custom px-4" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" id="btnGuardarCambiosModal" class="btn btn-guardar-custom px-4 d-none"><i class="bi bi-save"></i> Guardar Modificaciones
+                </button>
             </div>
 
         </div>
@@ -406,7 +407,7 @@
         $contenedor.empty();
 
         var deshabilitadoAnt = (paginaActual === 1) ? "disabled" : "";
-        $contenedor.append(`<li class="page-item ${deshabilitadoAnt}"><a class="page-link" data-page="${paginaActual - 1}" href="#">◀</a></li>`);
+        $contenedor.append(`<li class="page-item ${deshabilitadoAnt}"><a class="page-link" data-page="${paginaActual - 1}" href="#"><i class="bi bi-arrow-left"></i></a></li>`);
 
         for (var i = 1; i <= totalPaginas; i++) {
         var activoNum = (i === paginaActual) ? "active" : "";
@@ -414,7 +415,7 @@
         }
 
         var deshabilitadoSig = (paginaActual === totalPaginas) ? "disabled" : "";
-        $contenedor.append(`<li class="page-item ${deshabilitadoSig}"><a class="page-link" data-page="${paginaActual + 1}" href="#">▶</a></li>`);
+        $contenedor.append(`<li class="page-item ${deshabilitadoSig}"><a class="page-link" data-page="${paginaActual + 1}" href="#"><i class="bi bi-arrow-right"></i></a></li>`);
         }
 
         $(document).on("click", "#contenedorControlesPagina .page-link", function (e) {
@@ -441,13 +442,15 @@
         });
 
         function actualizarColorEstatusModal() {
-        var valor = $("#modal_Estatus").val();
-        if (valor === "Pendiente") {
-        $("#modal_Estatus").css({ "color": "#e01b2f", "background-color": "#fff2f3", "border-color": "#ffb6bc" });
-        } else if (valor === "Resuelto") {
-        $("#modal_Estatus").css({ "color": "#129e3b", "background-color": "#f1faf3", "border-color": "#a1e4b4" });
-        } else {
-        $("#modal_Estatus").css({ "color": "#212529", "background-color": "#fff", "border-color": "#ced4da" });
+        const $estatus = $("#modal_Estatus");
+
+        $estatus.removeClass("estatus-pendiente estatus-resuelto");
+
+        if ($estatus.val() === "Pendiente") {
+        $estatus.addClass("estatus-pendiente");
+        }
+        else if ($estatus.val() === "Resuelto") {
+        $estatus.addClass("estatus-resuelto");
         }
         }
         $("#modal_Estatus").change(actualizarColorEstatusModal);

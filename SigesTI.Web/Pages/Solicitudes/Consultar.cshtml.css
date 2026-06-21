@@ -1,99 +1,374 @@
 ﻿/* ==========================================================================
-   PALETA DE COLORES (DARK BLUE MODE) - BITÁCORA Y MODAL DE CONSULTA
+   CONSULTAR SOLICITUDES - ESTILO GENERAL
+   Paleta basada en el módulo Generar Solicitudes
    ========================================================================== */
 
-/* Fondo general de la página exterior y filtros */
-html, body {
+/* Fondo general de la página */
+html,
+body {
     background-color: #0f172a !important;
-    color: #f8fafc !important;
+    color: #f1f5f9 !important;
 }
 
-/* Contenedor principal de la bitácora */
-.card-principal, .encabezado-bitacora {
+/* Tarjeta principal de la bitácora */
+.card-principal {
     background-color: #1e293b !important;
     border: 1px solid #334155 !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Encabezado principal y encabezado del modal */
+.encabezado-bitacora {
+    background: linear-gradient(135deg, #1e3a8a 0%, #334155 100%) !important;
+    border-bottom: 2px solid #38bdf8 !important;
     color: #ffffff !important;
 }
 
-/* Forzar que la tabla de la bitácora exterior sea oscura y legible */
-.table {
+    .encabezado-bitacora h4,
+    .encabezado-bitacora h5 {
+        color: #ffffff !important;
+        letter-spacing: 0.3px;
+    }
+
+/* ==========================================================================
+   FILTROS E INPUTS
+   ========================================================================== */
+
+/* Contenedor de filtros superiores */
+#formFiltros {
+    background-color: #334155 !important;
+    border: 1px solid #475569 !important;
+    border-radius: 12px !important;
     color: #f8fafc !important;
-    background-color: #0f172a !important;
-    border-collapse: separate !important;
-    width: 100% !important;
 }
 
-    /* ENCABEZADOS PERFECTAMENTE CENTRADOS EN MEDIO */
-    .table th {
-        background-color: #1e293b !important;
-        color: #38bdf8 !important;
-        border-bottom: 2px solid #334155 !important;
-        text-align: center !important;
-        vertical-align: middle !important;
+    /* Etiquetas de formularios */
+    #formFiltros label,
+    .form-label,
+    label {
+        color: #cbd5e1 !important;
+        font-weight: 600 !important;
     }
 
-    .table td {
-        background-color: #0f172a !important;
-        border-bottom: 1px solid #27272a !important;
-        color: #e2e8f0 !important;
-    }
-
-/* ELIMINACIÓN DE LA SCROLLBAR HORIZONTAL MOLESTA */
-.table-responsive {
-    overflow-x: hidden !important;
-    overflow-y: hidden !important;
-    padding: 2px !important;
-}
-
-/* --------------------------------------------------------------------------
-   EFECTO DE ANIMACIÓN Y RESALTADO INTERACTIVO EN FILAS (TR:HOVER)
-   -------------------------------------------------------------------------- */
-.tabla-sigesti tbody tr {
+/* Inputs, selects y textareas */
+.form-control,
+.form-select {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 2px solid #94a3b8 !important;
+    border-radius: 8px !important;
+    font-size: 0.95rem;
     transition: all 0.2s ease-in-out !important;
 }
 
-    .tabla-sigesti tbody tr:not(.no-filtrado-row):hover {
-        background-color: rgba(56, 189, 248, 0.08) !important;
-        transform: scale(1.002);
-        box-shadow: inset 4px 0 0 0 #38bdf8, 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+    /* Efecto focus en inputs y selects */
+    .form-control:focus,
+    .form-select:focus {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.25) !important;
     }
 
-        /* Forzar que las celdas hereden el color hover translúcido de la fila */
-        .tabla-sigesti tbody tr:not(.no-filtrado-row):hover td {
-            background-color: rgba(56, 189, 248, 0.04) !important;
-        }
+/* ==========================================================================
+   TABLA PRINCIPAL
+   ========================================================================== */
 
-/* Filtros superiores y buscador de la bitácora exterior */
-.form-control, .form-select {
+/* Contenedor de tabla redondeado */
+.table-responsive {
     background-color: #1e293b !important;
     border: 1px solid #475569 !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Tabla general */
+.tabla-sigesti {
+    width: 100% !important;
+    margin-bottom: 0 !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+}
+
+    /* Encabezados de la tabla */
+    .tabla-sigesti thead th {
+        background: linear-gradient(135deg, #1e3a8a 0%, #334155 100%) !important;
+        color: #38bdf8 !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+        font-weight: 700 !important;
+        font-size: 0.82rem !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 15px 12px !important;
+        border-bottom: 2px solid #38bdf8 !important;
+        border-right: 1px solid rgba(148, 163, 184, 0.25) !important;
+    }
+
+        .tabla-sigesti thead th:last-child {
+            border-right: none !important;
+        }
+
+    /* Celdas de la tabla */
+    .tabla-sigesti tbody td {
+        background-color: #1e293b !important;
+        color: #e2e8f0 !important;
+        border-bottom: 1px solid #334155 !important;
+        padding: 14px 12px !important;
+        vertical-align: middle !important;
+    }
+
+    /* Elimina línea inferior en última fila */
+    .tabla-sigesti tbody tr:last-child td {
+        border-bottom: none !important;
+    }
+
+    /* Hover de filas */
+    .tabla-sigesti tbody tr {
+        transition: all 0.2s ease-in-out !important;
+    }
+
+        .tabla-sigesti tbody tr:not(.no-filtrado-row):not(.no-data-fallback):hover td {
+            background-color: rgba(56, 189, 248, 0.08) !important;
+        }
+
+        .tabla-sigesti tbody tr:not(.no-filtrado-row):not(.no-data-fallback):hover {
+            box-shadow: inset 4px 0 0 #38bdf8 !important;
+        }
+
+/* Folio o número de solicitud */
+.solicitud-id {
+    color: #38bdf8 !important;
+    font-weight: 800 !important;
+}
+
+/* Nombre del solicitante */
+.name-target {
     color: #ffffff !important;
 }
 
-    .form-control:focus, .form-select:focus {
-        background-color: #1e293b !important;
-        color: #ffffff !important;
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+/* Textos secundarios */
+.text-secondary-custom,
+.text-muted,
+.text-muted-custom {
+    color: #94a3b8 !important;
+}
+
+/* Ejecutivo asignado centrado */
+#tablaBitacoraPrincipal th:nth-child(5),
+#tablaBitacoraPrincipal td:nth-child(5) {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+/* Filas sin datos */
+.no-data-fallback td,
+.no-filtrado-row td {
+    background-color: #1e293b !important;
+    color: #fbbf24 !important;
+}
+
+/* ==========================================================================
+   PAGINACIÓN
+   ========================================================================== */
+
+/* Texto de información de paginación */
+#infoPaginacion {
+    color: #cbd5e1 !important;
+}
+
+/* Botones de paginación */
+#contenedorControlesPagina {
+    gap: 6px;
+}
+
+.pagination .page-item {
+    margin: 0 2px;
+}
+
+.pagination .page-link {
+    min-width: 40px;
+    height: 38px;
+    padding: 0 12px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1e293b !important;
+    color: #cbd5e1 !important;
+    border: 1px solid #475569 !important;
+    border-radius: 10px !important;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+    .pagination .page-link:hover {
+        background: #334155 !important;
+        color: #38bdf8 !important;
+        border-color: #38bdf8 !important;
+        transform: translateY(-1px);
     }
 
-/* --------------------------------------------------------------------------
-   BADGES (INSIGNIAS) PERSONALIZADAS CON BORDES REDONDEADOS E ILUMINADOS
-   -------------------------------------------------------------------------- */
-.badge-area-custom, .badge-status-custom {
-    display: inline-block;
-    padding: 0.4em 0.8em;
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    color: #ffffff !important;
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.45) !important;
+}
+
+.pagination .page-item.disabled .page-link {
+    background: #0f172a !important;
+    color: #64748b !important;
+    border-color: #334155 !important;
+    opacity: 0.55;
+    box-shadow: none !important;
+}
+
+/* ==========================================================================
+   MODAL DETALLE / EDICIÓN
+   ========================================================================== */
+
+/* Contenedor del modal */
+.modal-sigesti,
+.modal-content {
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    color: #f8fafc !important;
+}
+
+/* Cuerpo del modal */
+.modal-body {
+    background-color: #0f172a !important;
+}
+
+/* Pie del modal */
+.modal-footer {
+    background-color: #1e293b !important;
+    border-top: 1px solid #334155 !important;
+}
+
+/* Títulos internos del modal */
+.modal-body h5 {
+    color: #38bdf8 !important;
+    border-bottom: 1px solid #475569 !important;
+    font-size: 1.08rem;
+    letter-spacing: 0.3px;
+}
+
+/* Bloques internos del modal */
+.glass-section {
+    background-color: #334155 !important;
+    border: 1px solid #475569 !important;
+    border-radius: 10px !important;
+    color: #f8fafc !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+    .glass-section:hover {
+        border-color: #38bdf8 !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+    }
+
+/* Campos bloqueados o de solo lectura */
+.modal-body .form-control:disabled,
+.modal-body .form-select:disabled,
+.modal-body .form-control[readonly],
+.modal-body .form-select[readonly] {
+    background-color: #e2e8f0 !important;
+    color: #334155 !important;
+    border: 2px dashed #94a3b8 !important;
+    opacity: 1 !important;
+    font-weight: 600 !important;
+}
+
+/* Checkboxes y switches activos */
+.form-check-input:checked {
+    background-color: #38bdf8 !important;
+    border-color: #38bdf8 !important;
+}
+
+/* Labels de checkboxes */
+.form-check-label {
+    color: #e2e8f0 !important;
+}
+
+/* Loader de carga */
+.glass-panel {
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
+    color: #f8fafc !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* ==========================================================================
+   ESTATUS DEL COMBO EN EL MODAL
+   Se activa con las clases que agrega JavaScript:
+   estatus-pendiente / estatus-resuelto
+   ========================================================================== */
+
+#modal_Estatus {
+    font-weight: 700 !important;
+}
+
+    #modal_Estatus.estatus-pendiente,
+    #modal_Estatus.estatus-pendiente:disabled {
+        background-color: #ffffff !important;
+        color: #ff4d4d !important;
+        border: 2px solid #ff4d4d !important;
+        font-weight: 700 !important;
+    }
+
+    #modal_Estatus.estatus-resuelto,
+    #modal_Estatus.estatus-resuelto:disabled {
+        background-color: #ffffff !important;
+        color: #00cc44 !important;
+        border: 2px solid #00cc44 !important;
+        font-weight: 700 !important;
+    }
+
+    /* Color de las opciones del combo estatus */
+    #modal_Estatus option[value="Pendiente"] {
+        color: #ff4d4d !important;
+        font-weight: bold !important;
+    }
+
+    #modal_Estatus option[value="Resuelto"] {
+        color: #00cc44 !important;
+        font-weight: bold !important;
+    }
+
+/* ==========================================================================
+   BADGES DE ÁREAS Y ESTATUS
+   No modificar: colores glow personalizados
+   ========================================================================== */
+
+/* Base de insignias */
+.badge-area-custom,
+.badge-status-custom {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 0.45em 0.85em;
     font-size: 0.82rem;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1;
     text-align: center;
-    white-space: nowrap;
-    vertical-align: baseline;
+    white-space: normal;
+    vertical-align: middle;
     border-radius: 8px !important;
     border: 1px solid transparent;
 }
 
-/* Colores Dinámicos Estilo Outline Glow para las Áreas */
+/* Área: Soporte Técnico */
 .badge-area-soportetecnico {
     background-color: rgba(59, 130, 246, 0.12) !important;
     color: #60a5fa !important;
@@ -101,6 +376,7 @@ html, body {
     box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
 }
 
+/* Área: Ventas */
 .badge-area-ventas {
     background-color: rgba(236, 72, 153, 0.12) !important;
     color: #f472b6 !important;
@@ -108,6 +384,7 @@ html, body {
     box-shadow: 0 0 10px rgba(236, 72, 153, 0.15);
 }
 
+/* Área: Consultoría */
 .badge-area-consultoria {
     background-color: rgba(139, 92, 246, 0.12) !important;
     color: #a78bfa !important;
@@ -115,6 +392,7 @@ html, body {
     box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
 }
 
+/* Área: Cobranza */
 .badge-area-cobranza {
     background-color: rgba(245, 158, 11, 0.12) !important;
     color: #fbbf24 !important;
@@ -122,6 +400,7 @@ html, body {
     box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
 }
 
+/* Área: Administración */
 .badge-area-administracion {
     background-color: rgba(45, 212, 191, 0.12) !important;
     color: #2dd4bf !important;
@@ -129,13 +408,14 @@ html, body {
     box-shadow: 0 0 10px rgba(45, 212, 191, 0.15);
 }
 
+/* Área no identificada */
 .badge-area-default {
     background-color: rgba(148, 163, 184, 0.12) !important;
     color: #cbd5e1 !important;
     border: 1px solid rgba(148, 163, 184, 0.4) !important;
 }
 
-/* Diseño de Iluminación Homogéneo para los Estatus */
+/* Estatus: Pendiente */
 .badge-status-pendiente {
     background-color: rgba(248, 113, 113, 0.12) !important;
     color: #f87171 !important;
@@ -143,6 +423,7 @@ html, body {
     box-shadow: 0 0 10px rgba(248, 113, 113, 0.18);
 }
 
+/* Estatus: Resuelto */
 .badge-status-resuelto {
     background-color: rgba(52, 211, 153, 0.12) !important;
     color: #34d399 !important;
@@ -151,64 +432,10 @@ html, body {
 }
 
 /* ==========================================================================
-   RESTAURACIÓN DEL MODAL (VISUALIZAR / EDICIÓN) - NO TOCAR SU INTERIOR
+   BOTONES
    ========================================================================== */
 
-::deep .modal-content {
-    background-color: #0f172a !important;
-    border: 1px solid #334155 !important;
-    color: #ffffff !important;
-}
-
-::deep .modal-header {
-    border-bottom: 1px solid #334155 !important;
-    background-color: #1e293b !important;
-}
-
-::deep .modal-footer {
-    border-top: 1px solid #334155 !important;
-    background-color: #1e293b !important;
-}
-
-::deep .glass-section, ::deep .card-interno, ::deep .bg-light-custom {
-    background-color: #1e293b !important;
-    border: 1px solid #334155 !important;
-    border-radius: 8px;
-}
-
-::deep .modal-body label, ::deep .modal-body h5, ::deep .modal-body h6, ::deep .modal-body .form-label {
-    color: #cbd5e1 !important;
-    font-weight: 600;
-}
-
-::deep #modal_DescripcionProblema {
-    text-align: left !important;
-    direction: ltr !important;
-}
-
-::deep .modal-body .form-control:disabled, ::deep .modal-body .form-select:disabled, ::deep .modal-body .form-control[readonly], ::deep .modal-body .form-select[readonly] {
-    background-color: #475569 !important;
-    color: #ffffff !important;
-    opacity: 1 !important;
-    font-weight: 600;
-    border: 1px solid #64748b !important;
-}
-
-::deep .modal-body .form-control:not(:disabled), ::deep .modal-body .form-select:not(:disabled) {
-    background-color: #ffffff !important;
-    color: #0f172a !important;
-    border: 1px solid #3b82f6 !important;
-}
-
-::deep .form-check-input:checked {
-    background-color: #2563eb !important;
-    border-color: #3b82f6 !important;
-}
-
-/* ==========================================================================
-   AGREGADO EXCLUSIVO: BOTONES MODERNOS OUTLINE Y DIÁLOGOS OSCUROS
-   ========================================================================== */
-
+/* Botón visualizar */
 .btn-visualizar-custom {
     background: transparent !important;
     color: #38bdf8 !important;
@@ -221,6 +448,7 @@ html, body {
         box-shadow: 0 0 12px rgba(56, 189, 248, 0.4) !important;
     }
 
+/* Botón editar */
 .btn-editar-custom {
     background: transparent !important;
     color: #fbbf24 !important;
@@ -233,6 +461,7 @@ html, body {
         box-shadow: 0 0 12px rgba(251, 191, 36, 0.4) !important;
     }
 
+/* Botón eliminar */
 .btn-eliminar-custom {
     background: transparent !important;
     color: #f87171 !important;
@@ -245,34 +474,59 @@ html, body {
         box-shadow: 0 0 12px rgba(248, 113, 113, 0.4) !important;
     }
 
-::deep .btn-liberar-custom {
-    background: transparent !important;
-    color: #818cf8 !important;
-    border: 1px solid #818cf8 !important;
-    transition: all 0.2s ease-in-out !important;
+/* Botón liberar edición */
+.btn-liberar-custom {
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid #8b5cf6 !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
 }
 
-    ::deep .btn-liberar-custom:hover {
-        background: rgba(129, 140, 248, 0.15) !important;
-        box-shadow: 0 0 12px rgba(129, 140, 248, 0.4) !important;
+    .btn-liberar-custom:hover {
+        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%) !important;
+        box-shadow: 0 6px 18px rgba(139, 92, 246, 0.5) !important;
     }
 
-::deep .btn-guardar-custom {
-    background: transparent !important;
-    color: #34d399 !important;
-    border: 1px solid #34d399 !important;
-    transition: all 0.2s ease-in-out !important;
+/* Botón guardar modificaciones */
+.btn-guardar-custom {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid #3b82f6 !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35) !important;
 }
 
-    ::deep .btn-guardar-custom:hover {
-        background: rgba(52, 211, 153, 0.15) !important;
-        box-shadow: 0 0 12px rgba(52, 211, 153, 0.4) !important;
+    .btn-guardar-custom:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        box-shadow: 0 6px 18px rgba(29, 78, 216, 0.5) !important;
     }
+
+/* Botón cerrar modal */
+.btn-cerrar-custom {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid #ef4444 !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35) !important;
+}
+
+    .btn-cerrar-custom:hover {
+        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+    }
+
+/* ==========================================================================
+   SWEETALERT OSCURO
+   ========================================================================== */
 
 .swal2-popup.swal-dark-custom {
     background-color: #1e293b !important;
     border: 1px solid #334155 !important;
-    border-radius: 12px !important;
+    border-radius: 14px !important;
 }
 
 .swal2-title.swal-dark-custom {
@@ -282,41 +536,3 @@ html, body {
 .swal2-html-container.swal-dark-custom {
     color: #cbd5e1 !important;
 }
-
-/* ==========================================================================
-   ESTILOS PARA EL MAT-PAGINATOR PERSONALIZADO
-   ========================================================================== */
-.pagination .page-link {
-    background-color: #1e293b !important;
-    border-color: #334155 !important;
-    color: #cbd5e1 !important;
-    transition: all 0.2s ease;
-    box-shadow: none !important;
-}
-
-    .pagination .page-link:hover {
-        background-color: #334155 !important;
-        color: #ffffff !important;
-    }
-
-.pagination .page-item.active .page-link {
-    background-color: #2563eb !important; /* Azul distintivo para la página activa */
-    border-color: #3b82f6 !important;
-    color: #ffffff !important;
-    font-weight: bold;
-}
-
-.pagination .page-item.disabled .page-link {
-    background-color: #0f172a !important;
-    border-color: #1e293b !important;
-    color: #475569 !important;
-    pointer-events: none;
-}
-
-/* Forzar que las celdas de texto largo no rompan filas en pantallas medianas */
-#tablaSolicitudes th, #tablaSolicitudes td {
-    white-space: nowrap;
-    padding: 12px 16px;
-}
-
-
