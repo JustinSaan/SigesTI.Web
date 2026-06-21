@@ -1,0 +1,73 @@
+﻿@page
+@model SigesTI.Web.Pages.CreateModel
+@{
+    ViewData["Title"] = "Registrar Personal";
+}
+
+<div class="container mt-4">
+    <div style="max-width: 500px; margin: 0 auto;" class="card shadow-sm">
+
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Registrar Nuevo Personal</h5>
+        </div>
+
+        <div class="card-body">
+            <form method="post">
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nombre Completo</label>
+                    <input asp-for="Personal.Nombre" class="form-control" placeholder="Ej. Juan Pérez" />
+                    <span asp-validation-for="Personal.Nombre" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Área / Departamento</label>
+                    <select asp-for="Personal.Area" class="form-select">
+                        <option value="">-- Selecciona un Área --</option>
+                        <option value="Ventas">Ventas</option>
+                        <option value="Administración">Administración</option>
+                        <option value="Soporte Técnico">Soporte Técnico</option>
+                        <option value="Consultoría">Consultoría</option>
+                        <option value="Cobranza">Cobranza</option>
+                    </select>
+                    <span asp-validation-for="Personal.Area" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Puesto o Cargo</label>
+                    <input asp-for="Personal.Puesto" class="form-control" placeholder="Ej. Gerente, Auxiliar, Coordinador" />
+                    <span asp-validation-for="Personal.Puesto" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Correo Electrónico</label>
+                    <input asp-for="Personal.Correo" type="email" class="form-control" placeholder="ejemplo@sigesti.com" />
+                    <span asp-validation-for="Personal.Correo" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input asp-for="Personal.Activo" type="checkbox" class="form-check-input" checked />
+                    <label class="form-check-label">Personal Activo</label>
+                </div>
+
+                <div class="mb-3 p-3 bg-light border rounded form-check">
+                    <input asp-for="Personal.EsResponsable" type="checkbox" class="form-check-input" id="chkJefe" />
+                    <label class="form-check-label fw-bold text-primary" for="chkJefe">
+                        ¿Es el Responsable / Jefe de esta Área?
+                    </label>
+                    <div class="form-text text-muted">
+                        Si marcas esta opción, su nombre aparecerá automáticamente como el responsable encargado de autorizar las solicitudes de soporte de su área.
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="d-flex justify-content-between">
+                    <a asp-page="./Index" class="btn btn-secondary">Regresar</a>
+                    <button type="submit" class="btn btn-success">Guardar Registro</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

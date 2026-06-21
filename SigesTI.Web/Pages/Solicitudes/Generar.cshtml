@@ -1,4 +1,328 @@
 ﻿@page
 @model SigesTI.Web.Pages.Solicitudes.GenerarModel
 @{
+    ViewData["Title"] = "Nueva Solicitud";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<div class="container mt-4 mb-5">
+    <div class="card shadow-lg border-0 custom-card">
+        <div class="card-header bg-gradient-primary-modern text-white py-3 shadow-sm">
+            <h4 class="mb-0 fw-bold"><i class="bi bi-file-earmark-text"></i> Formato de Requerimientos de Soporte Técnico</h4>
+        </div>
+        <div class="card-body p-4 bg-light-modern">
+            <form method="post" id="formSolicitud">
+
+                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-clock-history"></i> Control de Tiempos y Estado</h5>
+                <div class="row g-3 mb-4 Flyout-fechas p-3 rounded border bg-white shadow-sm section-hover">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark">Fecha de Ingreso:</label>
+                        <input type="date" asp-for="NuevaSolicitud.FechaIngreso" class="form-control custom-input" required />
+                        <span asp-validation-for="NuevaSolicitud.FechaIngreso" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark">Fecha de Entrega:</label>
+                        <input type="date" asp-for="NuevaSolicitud.FechaEntrega" class="form-control custom-input" required />
+                        <span asp-validation-for="NuevaSolicitud.FechaEntrega" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark">Estatus de la Solicitud:</label>
+                        <select asp-for="NuevaSolicitud.Estatus" asp-items="Model.EstatusOptions" id="estatusCombo" class="form-select custom-input select-estatus-bold">
+                        </select>
+                        <span asp-validation-for="NuevaSolicitud.Estatus" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-person-badge"></i> Datos del Solicitante</h5>
+                <div class="row g-3 mb-4 p-3 rounded border bg-white shadow-sm section-hover">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Área:</label>
+                        <select asp-for="AreaAuxiliar" asp-items="Model.AreasOptions" id="ddlArea" class="form-select custom-input" required>
+                            <option value="">-- Seleccione Área --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Nombre del Solicitante:</label>
+                        <select asp-for="NuevaSolicitud.IdPersonal" id="ddlPersonal" class="form-select custom-input" required>
+                            <option value="">-- Seleccione Personal --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Puesto:</label>
+                        <input type="text" asp-for="NuevaSolicitud.PuestoSolicitante" id="txtPuesto" class="form-control custom-input input-readonly" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Correo Electrónico:</label>
+                        <input type="email" asp-for="NuevaSolicitud.CorreoSolicitante" id="txtCorreo" class="form-control custom-input input-readonly" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Responsable del Área (Jefe):</label>
+                        <input type="text" asp-for="NuevaSolicitud.ResponsableArea" id="txtResponsable" class="form-control custom-input input-readonly" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Unidades de red compartidas:</label>
+                        <input type="text" asp-for="NuevaSolicitud.UnidadesRed" class="form-control custom-input" placeholder="Ruta de carpetas de red" />
+                    </div>
+                    <div class="col-md-4 mt-4 d-flex flex-column justify-content-center">
+                        <label class="form-label fw-bold d-block mb-2">¿Tiene impresora configurada?</label>
+                        <div>
+                            <div class="form-check form-check-inline custom-checkbox-wrapper">
+                                <input class="form-check-input chk-impresora-grupo custom-cb" type="checkbox" name="ImpresoraConfiguradaAux" id="config_si" value="Si">
+                                <label class="form-check-label fw-semibold" for="config_si">Sí</label>
+                            </div>
+                            <div class="form-check form-check-inline custom-checkbox-wrapper">
+                                <input class="form-check-input chk-impresora-grupo custom-cb" type="checkbox" name="ImpresoraConfiguradaAux" id="config_no" value="No" checked>
+                                <label class="form-check-label fw-semibold" for="config_no">No</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-cpu"></i> Sistemas Requeridos</h5>
+                <div class="row mb-4 p-3 rounded border bg-white shadow-sm section-hover">
+                    <div class="col-12 mb-2">
+                        <div class="form-check form-switch custom-switch-wrapper">
+                            <input class="form-check-input custom-switch-input" type="checkbox" asp-for="NuevaSolicitud.ReqSistemas" id="chkReqSistemas">
+                            <label class="form-check-label fw-bold text-dark" for="chkReqSistemas">¿Requiere Acceso/Soporte a Sistemas?</label>
+                        </div>
+                    </div>
+
+                    <div class="col-12 ps-4 d-none toggle-animation" id="seccionSistemas">
+                        <div class="row g-2 p-2 rounded bg-light">
+                            @foreach (var sistema in new[] { "Encuentro.NET", "ADMIN", "BDD", "SITA", "COA", "DNLP", "VUCEM", "ADCO" })
+                            {
+                                <div class="col-md-3">
+                                    <div class="form-check custom-checkbox-wrapper py-1">
+                                        <input class="form-check-input custom-cb" type="checkbox" name="SistemasSeleccionados" value="@sistema" id="chk_@sistema">
+                                        <label class="form-check-label fw-semibold" for="chk_@sistema">@sistema</label>
+                                    </div>
+                                </div>
+                            }
+                            <div class="col-md-6 d-flex align-items-center mt-2">
+                                <div class="form-check me-2 custom-checkbox-wrapper">
+                                    <input class="form-check-input custom-cb" type="checkbox" name="SistemasSeleccionados" value="Otros" id="chkOtros">
+                                    <label class="form-check-label fw-bold" for="chkOtros">Otros:</label>
+                                </div>
+                                <input type="text" asp-for="NuevaSolicitud.OtrosSistemas" id="txtOtrosSistemas" class="form-control form-control-sm custom-input d-none scale-in" placeholder="Especifique el sistema" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-gear-widg-select"></i> Otras Configuraciones</h5>
+                <div class="row g-3 mb-4 p-3 rounded border bg-white shadow-sm section-hover">
+                    <div class="col-md-6">
+                        <div class="form-check mb-2 custom-checkbox-wrapper">
+                            <input class="form-check-input custom-cb" type="checkbox" id="chkHabilitarRed">
+                            <label class="form-check-label fw-bold" for="chkHabilitarRed">Habilitar unidad de red</label>
+                        </div>
+                        <div id="divContenedorRed" class="d-none scale-in">
+                            <input type="text" asp-for="NuevaSolicitud.SistemasDetalle" id="txtDetalleRed" class="form-control custom-input" placeholder="Escribe los detalles de la unidad de red..." />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mb-2 custom-checkbox-wrapper">
+                            <input class="form-check-input custom-cb" type="checkbox" id="chkConfigurarImpresora">
+                            <label class="form-check-label fw-bold" for="chkConfigurarImpresora">Configurar impresora</label>
+                        </div>
+                        <div id="divContenedorImpresora" class="d-none scale-in">
+                            <input type="text" asp-for="NuevaSolicitud.Impresora" id="txtDetalleImpresora" class="form-control custom-input" placeholder="Escribe el modelo o detalles de la impresora..." />
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-tools"></i> Detalles del Servicio</h5>
+                <div class="row g-3 mb-4 p-3 rounded border bg-white shadow-sm section-hover">
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Descripción del Problema o Requerimiento:</label>
+                        <textarea asp-for="NuevaSolicitud.DescripcionProblema" class="form-control custom-input" rows="3" placeholder="Escriba aquí la relatoría detallada de la solicitud..."></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Ejecutivo de Soporte Asignado:</label>
+                        <select asp-for="NuevaSolicitud.EjecutivoAsignado" asp-items="Model.SoporteOptions" class="form-select custom-input">
+                            <option value="">-- Seleccione Técnico --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Autorización (Administración):</label>
+                        <select asp-for="NuevaSolicitud.AutorizaAdmin" asp-items="Model.AdminOptions" class="form-select custom-input">
+                            <option value="">-- Seleccione Administrador --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end border-top pt-3">
+                    <button type="submit" class="btn btn-modern-success btn-lg px-5 shadow">
+                        <i class="bi bi-save"></i> Guardar Solicitud
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function () {
+
+        // ========================================================
+        // INTERACTIVIDAD: ACTUALIZACIÓN DINÁMICA DE COLOR DE ESTATUS
+        // ========================================================
+        function actualizarColorEstatus() {
+        var valor = $("#estatusCombo").val();
+        if (valor === "Pendiente") {
+        // Rojo vivo de alta visibilidad con fondo suave
+        $("#estatusCombo").css({ "color": "#e01b2f", "background-color": "#fff2f3", "border-color": "#ffb6bc" });
+        } else if (valor === "Resuelto") {
+        // Verde vivo brillante con fondo suave
+        $("#estatusCombo").css({ "color": "#129e3b", "background-color": "#f1faf3", "border-color": "#a1e4b4" });
+        } else {
+        $("#estatusCombo").css({ "color": "#212529", "background-color": "#fff", "border-color": "#ced4da" });
+        }
+        }
+
+        // Ejecutar al iniciar la pantalla y al cambiar selección
+        actualizarColorEstatus();
+        $("#estatusCombo").change(actualizarColorEstatus);
+
+
+        // ==========================================
+        // TU INTERCEPTOR AJAX ORIGINAL PARA SWEETALERT2
+        // ==========================================
+        $("#formSolicitud").on("submit", function (e) {
+        e.preventDefault();
+
+        var form = $(this);
+        var url = form.attr('action') || window.location.href;
+        var formData = form.serialize();
+
+        Swal.fire({
+        title: 'Procesando Solicitud',
+        text: 'Guardando datos en la bitácora...',
+        allowOutsideClick: false,
+        didOpen: () => {
+        Swal.showLoading();
+        }
+        });
+
+        $.ajax({
+        type: "POST",
+        url: url,
+        data: formData,
+        success: function (response) {
+        if (response.success) {
+        Swal.fire({
+        icon: 'success',
+        title: '¡Solicitud Guardada con Éxito!',
+        text: 'El folio y tiempos se registraron correctamente.',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#129e3b',
+        allowOutsideClick: false
+        }).then((result) => {
+        if (result.isConfirmed) {
+        window.location.href = "https://localhost:7160/Solicitudes/Consultar";
+        }
+        });
+        }
+        },
+        error: function (xhr) {
+        Swal.fire({
+        icon: 'error',
+        title: 'Error al procesar el formulario',
+        text: xhr.responseText || 'Verifica que las llaves foráneas de Personal correspondan con IDs válidos.',
+        confirmButtonColor: '#e01b2f'
+        });
+        }
+        });
+        });
+
+        // Tu lógica original de filtrado de Personal por Área
+        $("#ddlArea").change(function () {
+        var areaSeleccionada = $(this).val();
+        var $ddlPersonal = $("#ddlPersonal");
+
+        $ddlPersonal.empty().append('<option value="">-- Seleccione Personal --</option>');
+        $("#txtCorreo").val('');
+        $("#txtPuesto").val('');
+        $("#txtResponsable").val('');
+
+        if (areaSeleccionada) {
+        $.getJSON('?handler=FiltrarPersonal', { area: areaSeleccionada }, function (data) {
+        var jefeDelArea = "";
+        $.each(data, function (i, item) {
+        if (item.esResponsable === true) {
+        jefeDelArea = item.nombre;
+        }
+        $ddlPersonal.append('<option value="' + item.id + '" data-correo="' + item.correo + '" data-puesto="' + item.puesto + '">' + item.nombre + '</option>');
+        });
+
+        if(jefeDelArea !== "") {
+        $("#txtResponsable").val(jefeDelArea);
+        } else {
+        $("#txtResponsable").val("Sin jefe asignado");
+        }
+        });
+        }
+        });
+
+        $("#ddlPersonal").change(function () {
+        var $opcionSeleccionada = $(this).find('option:selected');
+        if ($(this).val()) {
+        $("#txtCorreo").val($opcionSeleccionada.data('correo'));
+        $("#txtPuesto").val($opcionSeleccionada.data('puesto'));
+        } else {
+        $("#txtCorreo").val('');
+        $("#txtPuesto").val('');
+        }
+        });
+
+        $(".chk-impresora-grupo").change(function () {
+        $(".chk-impresora-grupo").not(this).prop('checked', false);
+        if($(".chk-impresora-grupo:checked").length == 0){
+        $("#config_no").prop('checked', true);
+        }
+        });
+
+        $("#chkReqSistemas").change(function () {
+        if ($(this).is(':checked')) {
+        $("#seccionSistemas").removeClass('d-none');
+        } else {
+        $("#seccionSistemas").addClass('d-none');
+        $("#seccionSistemas input:checkbox").prop('checked', false);
+        $("#txtOtrosSistemas").addClass('d-none').val('');
+        }
+        });
+
+        $("#chkOtros").change(function () {
+        if ($(this).is(':checked')) {
+        $("#txtOtrosSistemas").removeClass('d-none').focus();
+        } else {
+        $("#txtOtrosSistemas").addClass('d-none').val('');
+        }
+        });
+
+        $("#chkHabilitarRed").change(function () {
+        if ($(this).is(':checked')) {
+        $("#divContenedorRed").removeClass('d-none');
+        $("#txtDetalleRed").focus();
+        } else {
+        $("#divContenedorRed").addClass('d-none').find('input').val('');
+        }
+        });
+
+        $("#chkConfigurarImpresora").change(function () {
+        if ($(this).is(':checked')) {
+        $("#divContenedorImpresora").removeClass('d-none');
+        $("#txtDetalleImpresora").focus();
+        } else {
+        $("#divContenedorImpresora").addClass('d-none').find('input').val('');
+        }
+        });
+        });
+    </script>
 }
