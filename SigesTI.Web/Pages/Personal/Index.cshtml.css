@@ -9,6 +9,8 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    max-width: 1800px;
+    margin: 0 auto;
 }
 
 /* Tipografía y Textos */
@@ -193,27 +195,51 @@
     }
 
 
+.acciones-personal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-accion-tabla {
+    width: 36px;
+    height: 36px;
+    padding: 0 !important;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    background: transparent;
+    transition: all 0.25s ease;
+    font-size: 0.95rem;
+}
+
 .btn-editar {
-    background: rgba(56,189,248,.15);
     color: #38bdf8;
-    border: 1px solid #38bdf8;
-    margin-right: 5px;
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
 }
 
     .btn-editar:hover {
         background: #38bdf8;
         color: #0f172a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.35);
     }
 
 .btn-eliminar {
-    background: rgba(239,68,68,.15);
     color: #f87171;
-    border: 1px solid #f87171;
+    border-color: #f87171;
+    background: rgba(248, 113, 113, 0.12);
 }
 
     .btn-eliminar:hover {
         background: #f87171;
-        color: white;
+        color: #0f172a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(248, 113, 113, 0.35);
     }
 
 .modal-dark {
@@ -281,13 +307,15 @@
 }
 
 .btn-cancelar-modal {
-    background: #334155;
+    background: #bf0000;
     color: #e2e8f0;
+    box-shadow: 0 4px 12px rgba(197, 48, 34, 0.25);
 }
 
     .btn-cancelar-modal:hover {
-        background: #475569;
-        color: #ffffff;
+        transform: translateY(-2px);
+        /*color: #ffffff;*/
+        box-shadow: 0 4px 12px rgba(197, 48, 34, 0.25);
     }
 
 .btn-guardar-modal {
@@ -361,4 +389,13 @@
     background-size: 6px 6px, 6px 6px;
     background-repeat: no-repeat;
     padding-right: 38px !important;
+}
+
+.badge-area {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-width: 110px;
+    min-height: 36px;
 }

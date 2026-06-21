@@ -4,7 +4,7 @@
     ViewData["Title"] = "Lista de Personal";
 }
 
-<div class="container mt-4 mb-5">
+<div class="container-fluid px-4 mt-4 mb-5">
     <div class="header-modulo d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="titulo-modulo m-0">Administración de Personal</h2>
@@ -23,7 +23,7 @@
             <table class="table tabla-sigesti m-0">
                 <thead>
                     <tr>
-                        <th class="text-center">Nombre Completo</th>
+                        <th class="text-center">Nombre</th>
                         <th class="text-center">Área</th>
                         <th class="text-center">Puesto</th>
                         <th class="text-center">Correo Electrónico</th>
@@ -48,7 +48,7 @@
                         {
                             <tr>
                                 <td class="fw-semibold text-bright font-accent">@persona.Nombre</td>
-                                <td>
+                                <td class="text-center">
                                     <span class="badge-area @persona.Area.ToLower().Replace(" ", "-")">
                                         @persona.Area
                                     </span>
@@ -62,7 +62,7 @@
                                     }
                                     else
                                     {
-                                        <span class="text-unidades"><i class="bi bi-folder-symlink me-1"></i> @persona.UnidadesRed</span>
+                                        <span class="text-unidades">@persona.UnidadesRed</span>
                                     }
                                 </td>
                                 <td class="text-center">
@@ -76,17 +76,21 @@
                                     }
                                 </td>
                                 <td class="text-center">
-                                    <button type="button"
-                                            class="btn btn-editar"
-                                            onclick="editarEmpleado(@persona.Id)">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
+                                    <div class="acciones-personal">
+                                        <button type="button"
+                                                class="btn-accion-tabla btn-editar"
+                                                title="Editar"
+                                                onclick="editarEmpleado(@persona.Id)">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
 
-                                    <button type="button"
-                                            class="btn btn-eliminar"
-                                            onclick="eliminarEmpleado(@persona.Id, `@persona.Nombre`)">
-                                        <i class="bi bi-trash-fill"></i>
-                                    </button>
+                                        <button type="button"
+                                                class="btn-accion-tabla btn-eliminar"
+                                                title="Eliminar"
+                                                onclick="eliminarEmpleado(@persona.Id, `@persona.Nombre`)">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -98,6 +102,22 @@
 </div>
 
 @Html.AntiForgeryToken()
+
+<div class="modal fade" id="modalEditar" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content modal-dark">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-pencil-square me-2"></i>
+                    Editar Personal
+                </h5>
+
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
 
 <div class="modal-body">
 
@@ -166,6 +186,26 @@
 
 </div>
 
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn-cancelar-modal"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        class="btn-guardar-modal"
+                        onclick="guardarCambios()">
+                    <i class="bi bi-check-circle-fill me-1"></i>
+                    Guardar Cambios
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="modalRegistrar" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content modal-dark">
@@ -181,6 +221,7 @@
                         data-bs-dismiss="modal">
                 </button>
             </div>
+
 
             @* Modal de registro *@
             <div class="modal-body">
@@ -263,7 +304,6 @@
                     Guardar Registro
                 </button>
             </div>
-
         </div>
     </div>
 </div>
