@@ -1,4 +1,782 @@
 ﻿@page
 @model SigesTI.Web.Pages.Solicitudes.ConsultarModel
 @{
+    ViewData["Title"] = "Bitácora de Consultas";
+    string rolActual = "Admin";
+}
+
+@Html.AntiForgeryToken()
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<div id="loaderFiltro" class="d-none animate-fade-in" style="position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(15,23,42,0.6); z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+    <div class="glass-panel p-4 text-center" style="min-width: 250px; border-radius: 12px !important;">
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+        <h5 class="fw-bold mb-1">Cargando proceso</h5>
+        <span style="color:#7d8590;">Sincronizando con el servidor...</span>
+    </div>
+</div>
+
+<div class="container-fluid mt-4 mb-5 px-4">
+    <div class="card card-principal">
+        <div class="card-header encabezado-bitacora py-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <h4 class="mb-0 fw-bold"><i class="bi bi-collection"></i> Bitácora General de Requerimientos</h4>
+
+            <div class="d-flex align-items-center gap-2">
+                <label for="itemsPorPagina" class="form-label m-0 text-nowrap fw-semibold" style="font-size: 0.85rem; color: #cbd5e1;">Elementos por página:</label>
+                <select id="itemsPorPagina" class="form-select form-select-sm form-select-paginator" style="width: auto;">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+            <form method="get" id="formFiltros" class="mb-4 p-3">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Filtro Reactivo (Cualquier columna):</label>
+                        <div class="input-group">
+                            <input type="text" id="inputFiltroReactivo" class="form-control" placeholder="Escribe para buscar al instante (Ej. ium)..." />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Área:</label>
+                        <select asp-for="FiltrarArea" asp-items="Model.ListaAreas" class="form-select">
+                            <option value="">-- Todas --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Solicitante:</label>
+                        <select asp-for="FiltrarSolicitante" asp-items="Model.ListaPersonalFiltro" class="form-select">
+                            <option value="">-- Todos --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Fecha Ingreso:</label>
+                        <input type="date" asp-for="FiltrarFecha" class="form-control" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Estatus:</label>
+                        <select asp-for="FiltrarEstatus" class="form-select">
+                            <option value="">-- Todos --</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Resuelto">Resuelto</option>
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                        <a href="/Solicitudes/Consultar" class="btn btn-secondary text-white"><i class="bi bi-arrow-counterclockwise"></i> Limpiar</a>
+                        <button type="submit" class="btn btn-primary px-4"><i class="bi bi-funnel"></i> Filtrar Servidor</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 tabla-sigesti" id="tablaBitacoraPrincipal">
+                    <thead>
+                        <tr>
+                            <th style="width: 8%;">No. Solicitud</th>
+                            <th style="width: 18%;">Solicitante</th>
+                            <th style="width: 12%;">Área</th>
+                            <th style="width: 18%;">Término de Solicitud</th>
+                            <th style="width: 18%;">Ejecutivo Soporte Asignado</th>
+                            <th style="width: 10%;">Estatus</th>
+                            <th style="width: 16%;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Solicitudes.Any())
+                        {
+                            <tr class="no-data-fallback">
+                                <td colspan="7" class="text-center py-4 text-muted fw-bold">Ninguna solicitud coincide con los términos o filtros aplicados.</td>
+                            </tr>
+                        }
+                        @foreach (var item in Model.Solicitudes)
+                        {
+                            bool isAdmin = (rolActual == "Admin");
+                            bool esAsignadoAmi = true;
+                            bool esPendiente = (item.Estatus == "Pendiente");
+
+                            bool puedeEditar = isAdmin || (esAsignadoAmi && esPendiente);
+                            bool puedeEliminar = isAdmin;
+
+                            DateTime fEntrega = Convert.ToDateTime(item.FechaEntrega);
+                            string fechaEntregaTexto = (fEntrega.Year <= 1901 || item.Estatus == "Pendiente") ? "S/A" : fEntrega.ToString("dd/MM/yyyy");
+
+                            <tr>
+                                <td class="text-center fw-bold solicitud-id">@item.IdSolicitud.ToString("D4")</td>
+                                <td>
+                                    <div class="fw-bold name-target">@(item.Personal?.Nombre ?? "N/A")</div>
+                                    <span class="small text-secondary-custom">@item.CorreoSolicitante</span>
+                                </td>
+                                <td class="text-center">
+                                    @{
+                                        string areaTexto = item.Personal?.Area ?? "N/A";
+                                        string areaClase = areaTexto.Replace(" ", "").Replace("É", "E").Replace("é", "e").Replace("ó", "o").Replace("Ó", "O").Replace("í", "i").Replace("Í", "I").ToLower();
+                                    }
+                                    <span class="badge-area-custom badge-area-@areaClase">
+                                        @areaTexto
+                                    </span>
+                                </td>
+                                <td class="text-center font-monospace small">
+                                    @Convert.ToDateTime(item.FechaIngreso).ToString("dd/MM/yyyy") - @fechaEntregaTexto
+                                </td>
+                                <td>@(string.IsNullOrEmpty(item.EjecutivoAsignado) ? "Sin asignar" : item.EjecutivoAsignado)</td>
+                                <td class="text-center">
+                                    @if (item.Estatus == "Pendiente")
+                                    {
+                                        <span class="badge-status-custom badge-status-pendiente w-100">Pendiente</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-status-custom badge-status-resuelto w-100">Resuelto</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-visualizar-custom btn-visualizar" data-id="@item.IdSolicitud" title="Visualizar Formato Completo">
+                                            <i class="bi bi-eye-fill"></i>
+                                        </button>
+
+                                        <button type="button" class="btn btn-editar-custom btn-editar-directo" data-id="@item.IdSolicitud" @(puedeEditar ? "" : "disabled title='Bloqueado por perfil o estatus'")>
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+
+                                        <button type="button" class="btn btn-eliminar-custom btn-eliminar" data-id="@item.IdSolicitud" @(puedeEliminar ? "" : "disabled title='Acceso restringido a administradores'")>
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+
+                        <tr id="angularNoDataRow" class="d-none no-filtrado-row">
+                            <td colspan="7" class="text-center py-4 text-warning fw-bold bg-dark">
+                                No existen coincidencias con los datos: "<span id="filterQueryValue"></span>"
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2 pt-3" style="border-top: 1px solid #334155;">
+                <div id="infoPaginacion" class="text-muted small fw-semibold">
+                    Mostrando 0-0 de 0 registros
+                </div>
+                <nav>
+                    <ul class="pagination pagination-sm m-0" id="contenedorControlesPagina">
+                    </ul>
+                </nav>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSolicitud" data-bs-backdrop="static" tabindex="-1" aria-labelledby="modalSolicitudLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content modal-sigesti">
+
+            <div class="modal-header encabezado-bitacora py-3">
+                <h5 class="modal-title fw-bold" id="modalSolicitudLabel"><i class="bi bi-file-earmark-text"></i> Detalle del Formato de Requerimiento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <form id="formFormatoSolicitud">
+                    <input type="hidden" id="modal_IdSolicitud" />
+
+                    <h5 class="text-primary border-bottom pb-2 fw-bold"><i class="bi bi-clock-history"></i> Control de Tiempos y Estado</h5>
+                    <div class="row g-3 mb-4 p-3 rounded glass-section">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Fecha de Ingreso:</label>
+                            <input type="date" id="modal_FechaIngreso" class="form-control ctrl-modal" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Fecha de Entrega:</label>
+                            <input type="date" id="modal_FechaEntrega" class="form-control ctrl-modal" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Estatus de la Solicitud:</label>
+                            <select id="modal_Estatus" class="form-select ctrl-modal fw-bold select-estatus-bold">
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Resuelto">Resuelto</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h5 class="text-primary border-bottom pb-2 fw-bold"><i class="bi bi-person-badge"></i> Datos del Solicitante</h5>
+                    <div class="row g-3 mb-4 p-3 rounded glass-section">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Área:</label>
+                            <select id="modal_Area" class="form-select ctrl-modal" required>
+                                @foreach (var area in Model.ListaAreas)
+                                {
+                                    <option value="@area.Value">@area.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Nombre del Solicitante:</label>
+                            <select id="modal_IdPersonal" class="form-select ctrl-modal" required></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Puesto:</label>
+                            <input type="text" id="modal_Puesto" class="form-control" readonly />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Correo Electrónico:</label>
+                            <input type="email" id="modal_Correo" class="form-control" readonly />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Responsable del Área (Jefe):</label>
+                            <input type="text" id="modal_Responsable" class="form-control" readonly />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Unidades de red compartidas:</label>
+                            <input type="text" id="modal_UnidadesRed" class="form-control" readonly />
+                        </div>
+                        <div class="col-md-4 mt-4 d-flex flex-column justify-content-center">
+                            <label class="form-label fw-bold d-block mb-2">¿Tiene impresora configurada?</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input chk-modal-impresora-grupo ctrl-modal" type="checkbox" id="modal_config_si" value="Si">
+                                    <label class="form-check-label fw-semibold" for="modal_config_si">Sí</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input chk-modal-impresora-grupo ctrl-modal" type="checkbox" id="modal_config_no" value="No">
+                                    <label class="form-check-label fw-semibold" for="modal_config_no">No</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="text-primary border-bottom pb-2 fw-bold"><i class="bi bi-cpu"></i> Sistemas Requeridos</h5>
+                    <div class="row g-3 mb-4 p-3 rounded glass-section" id="modal_bloque_global_sistemas">
+                        <div class="col-12 mb-2">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input ctrl-modal" type="checkbox" id="modal_chkReqSistemas">
+                                <label class="form-check-label fw-bold" for="modal_chkReqSistemas">¿Requiere Acceso/Soporte a Sistemas?</label>
+                            </div>
+                        </div>
+                        <div class="col-12 ps-4 d-none" id="modal_seccionSistemas">
+                            <div class="row g-2 p-2 rounded glass-section">
+                                @foreach (var sistema in new[] { "Encuentro.NET", "ADMIN", "BDD", "SITA", "COA", "DNLP", "VUCEM", "ADCO" })
+                                {
+                                    <div class="col-md-3">
+                                        <div class="form-check py-1">
+                                            <input class="form-check-input custom-modal-sistemas-chk ctrl-modal" type="checkbox" value="@sistema" id="modal_chk_@sistema">
+                                            <label class="form-check-label fw-semibold" for="modal_chk_@sistema">@sistema</label>
+                                        </div>
+                                    </div>
+                                }
+                                <div class="col-md-6 d-flex align-items-center mt-2">
+                                    <div class="form-check me-2">
+                                        <input class="form-check-input ctrl-modal" type="checkbox" value="Otros" id="modal_chkOtros">
+                                        <label class="form-check-label fw-bold" for="modal_chkOtros">Otros:</label>
+                                    </div>
+                                    <input type="text" id="modal_txtOtrosSistemas" class="form-control form-control-sm ctrl-modal d-none" placeholder="Especifique el sistema" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="text-primary border-bottom pb-2 fw-bold"><i class="bi bi-gear-widg-select"></i> Otras Configuraciones</h5>
+                    <div class="row g-3 mb-4 p-3 rounded glass-section">
+                        <div class="col-md-6" id="modal_bloque_red">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input ctrl-modal" type="checkbox" id="modal_chkHabilitarRed">
+                                <label class="form-check-label fw-bold" for="modal_chkHabilitarRed">Habilitar unidad de red</label>
+                            </div>
+                            <div id="modal_divContenedorRed" class="d-none">
+                                <label class="form-label fw-bold">Nueva unidad de red:</label>
+                                <input type="text" id="modal_txtDetalleRed" class="form-control ctrl-modal" placeholder="Ejemplo: Cobranza" />
+                            </div>
+                        </div>
+                        <div class="col-md-6" id="modal_bloque_impresora">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input ctrl-modal" type="checkbox" id="modal_chkConfigurarImpresora">
+                                <label class="form-check-label fw-bold" for="modal_chkConfigurarImpresora">Configurar impresora</label>
+                            </div>
+                            <div id="modal_divContenedorImpresora" class="d-none">
+                                <input type="text" id="modal_txtDetalleImpresora" class="form-control ctrl-modal" placeholder="Escribe el modelo o detalles de la impresora..." />
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="text-primary border-bottom pb-2 fw-bold"><i class="bi bi-tools"></i> Detalles del Servicio</h5>
+                    <div class="row g-3 mb-4 p-3 rounded glass-section">
+                        <div class="col-12">
+                            <label class="form-label fw-bold" id="lblDescripcionModal">Descripción del Problema o Requerimiento:</label>
+                            <textarea id="modal_DescripcionProblema" class="form-control ctrl-modal" rows="5" placeholder="Escriba aquí la relatoría detallada..."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Ejecutivo de Soporte Asignado:</label>
+                            <select id="modal_EjecutivoAsignado" class="form-select ctrl-modal">
+                                <option value="">-- Seleccione Técnico --</option>
+                                @foreach (var tech in Model.SoporteOptions)
+                                {
+                                    <option value="@tech.Value">@tech.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Autorización (Administración):</label>
+                            <select id="modal_AutorizaAdmin" class="form-select ctrl-modal">
+                                <option value="">-- Seleccione Administrator --</option>
+                                @foreach (var adm in Model.AdminOptions)
+                                {
+                                    <option value="@adm.Value">@adm.Text</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-end gap-2">
+                <button type="button" id="btnLiberarEdicion" class="btn btn-liberar-custom fw-bold"><i class="bi bi-unlock-fill"></i> Liberar Edición</button>
+                <button type="button" class="btn btn-cerrar-custom px-4" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" id="btnGuardarCambiosModal" class="btn btn-guardar-custom px-4 d-none"><i class="bi bi-save"></i> Guardar Modificaciones
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function () {
+
+        var historialCompletoGuardado = "";
+        let paginaActual = 1;
+        let filasPorPagina = parseInt($("#itemsPorPagina").val());
+
+        function aplicarPaginacionYFiltro() {
+        filasPorPagina = parseInt($("#itemsPorPagina").val());
+        var filterValue = $("#inputFiltroReactivo").val().trim().toLowerCase();
+        var $rows = $("#tablaBitacoraPrincipal tbody tr").not(".no-data-fallback, #angularNoDataRow");
+
+        $rows.each(function () {
+        var rowText = $(this).text().toLowerCase();
+        if (filterValue === "" || rowText.indexOf(filterValue) > -1) {
+        $(this).addClass("coincide-con-busqueda");
+        } else {
+        $(this).removeClass("coincide-con-busqueda").addClass("d-none");
+        }
+        });
+
+        var $filasFiltradas = $("#tablaBitacoraPrincipal tbody tr.coincide-con-busqueda");
+        var totalRegistros = $filasFiltradas.length;
+
+        if (totalRegistros === 0) {
+        if (filterValue !== "") {
+        $("#filterQueryValue").text($("#inputFiltroReactivo").val());
+        $("#angularNoDataRow").removeClass("d-none");
+        }
+        $("#contenedorControlesPagina").empty();
+        $("#infoPaginacion").text("Mostrando 0-0 de 0 registros");
+        return;
+        } else {
+        $("#angularNoDataRow").addClass("d-none");
+        }
+
+        var totalPaginas = Math.ceil(totalRegistros / filasPorPagina);
+        if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+        if (paginaActual < 1) paginaActual = 1;
+
+        var indiceInicial = (paginaActual - 1) * filasPorPagina;
+        var indiceFinal = indiceInicial + filasPorPagina;
+
+        $rows.addClass("d-none");
+        $filasFiltradas.slice(indiceInicial, indiceFinal).removeClass("d-none");
+
+        var registroHasta = indiceFinal > totalRegistros ? totalRegistros : indiceFinal;
+        $("#infoPaginacion").text(`Mostrando ${indiceInicial + 1}-${registroHasta} de ${totalRegistros} registros`);
+
+        dibujarBotonesNavegacion(totalPaginas);
+        }
+
+        function dibujarBotonesNavegacion(totalPaginas) {
+        var $contenedor = $("#contenedorControlesPagina");
+        $contenedor.empty();
+
+        var deshabilitadoAnt = (paginaActual === 1) ? "disabled" : "";
+        $contenedor.append(`<li class="page-item ${deshabilitadoAnt}"><a class="page-link" data-page="${paginaActual - 1}" href="#"><i class="bi bi-arrow-left"></i></a></li>`);
+
+        for (var i = 1; i <= totalPaginas; i++) {
+        var activoNum = (i === paginaActual) ? "active" : "";
+        $contenedor.append(`<li class="page-item ${activoNum}"><a class="page-link" data-page="${i}" href="#">${i}</a></li>`);
+        }
+
+        var deshabilitadoSig = (paginaActual === totalPaginas) ? "disabled" : "";
+        $contenedor.append(`<li class="page-item ${deshabilitadoSig}"><a class="page-link" data-page="${paginaActual + 1}" href="#"><i class="bi bi-arrow-right"></i></a></li>`);
+        }
+
+        $(document).on("click", "#contenedorControlesPagina .page-link", function (e) {
+        e.preventDefault();
+        var targetPage = $(this).data("page");
+        if (targetPage && !$(this).parent().hasClass("disabled") && !$(this).parent().hasClass("active")) {
+        paginaActual = parseInt(targetPage);
+        aplicarPaginacionYFiltro();
+        }
+        });
+
+        $("#itemsPorPagina").change(function () {
+        paginaActual = 1;
+        aplicarPaginacionYFiltro();
+        });
+
+        $("#inputFiltroReactivo").on("keyup", function () {
+        paginaActual = 1;
+        aplicarPaginacionYFiltro();
+        });
+
+        $("#formFiltros").on("submit", function() {
+        $("#loaderFiltro").removeClass("d-none");
+        });
+
+        function actualizarColorEstatusModal() {
+        const $estatus = $("#modal_Estatus");
+
+        $estatus.removeClass("estatus-pendiente estatus-resuelto");
+
+        if ($estatus.val() === "Pendiente") {
+        $estatus.addClass("estatus-pendiente");
+        }
+        else if ($estatus.val() === "Resuelto") {
+        $estatus.addClass("estatus-resuelto");
+        }
+        }
+        $("#modal_Estatus").change(actualizarColorEstatusModal);
+
+        $(".btn-visualizar, .btn-editar-directo").on("click", function () {
+        var idSol = $(this).data("id");
+        var esModoEdicionDirecta = $(this).hasClass("btn-editar-directo");
+
+        $("#loaderFiltro").removeClass("d-none");
+
+        $.ajax({
+        type: "GET",
+        url: "?handler=DetalleSolicitud",
+        data: { id: idSol },
+        success: function (data) {
+        $("#loaderFiltro").addClass("d-none");
+        if (!data) {
+        Swal.fire("Error", "No se encontraron los datos de la solicitud.", "error");
+        return;
+        }
+
+        historialCompletoGuardado = data.descripcionProblema || "";
+
+        $("#modal_IdSolicitud").val(data.idSolicitud);
+        $("#modal_FechaIngreso").val(data.fechaIngreso);
+        $("#modal_FechaEntrega").val(data.fechaEntrega ? data.fechaEntrega : "");
+        $("#modal_Estatus").val(data.estatus);
+        $("#modal_Area").val(data.area);
+        $("#modal_Puesto").val(data.puesto);
+        $("#modal_Correo").val(data.correo);
+        $("#modal_Responsable").val(data.responsableArea);
+        $("#modal_UnidadesRed").val(data.unidadesRed);
+        $("#modal_EjecutivoAsignado").val(data.ejecutivoAsignado);
+        $("#modal_AutorizaAdmin").val(data.autorizaAdmin);
+
+        cargarPersonalModal(data.area, data.idPersonal);
+
+        $(".chk-modal-impresora-grupo").prop("checked", false);
+        if (data.impresoraConfigurada === "Si") {
+        $("#modal_config_si").prop("checked", true);
+        } else {
+        $("#modal_config_no").prop("checked", true);
+        }
+
+        if (data.reqSistemas) {
+        $("#modal_chkReqSistemas").prop("checked", true);
+        $("#modal_seccionSistemas").removeClass("d-none");
+        $("#modal_bloque_global_sistemas").removeClass("d-none");
+
+        $(".custom-modal-sistemas-chk").prop("checked", false);
+        if (data.sistemasDetalle) {
+        var arreglosSistemas = data.sistemasDetalle.split(", ");
+        $.each(arreglosSistemas, function(i, val){
+        $(".custom-modal-sistemas-chk[value='" + val + "']").prop("checked", true);
+        });
+        }
+        } else {
+        $("#modal_chkReqSistemas").prop("checked", false);
+        $("#modal_seccionSistemas").addClass("d-none");
+        if (!esModoEdicionDirecta) $("#modal_bloque_global_sistemas").addClass("d-none");
+        }
+
+        if (data.otrosSistemas) {
+        $("#modal_chkOtros").prop("checked", true);
+        $("#modal_txtOtrosSistemas").removeClass("d-none").val(data.otrosSistemas);
+        } else {
+        $("#modal_chkOtros").prop("checked", false);
+        $("#modal_txtOtrosSistemas").addClass("d-none").val('');
+        }
+
+        if (data.nuevaUnidadRed) {
+        $("#modal_chkHabilitarRed").prop("checked", true);
+        $("#modal_divContenedorRed").removeClass("d-none");
+        $("#modal_txtDetalleRed").val(data.nuevaUnidadRed);
+        } else {
+        $("#modal_chkHabilitarRed").prop("checked", false);
+        $("#modal_divContenedorRed").addClass("d-none");
+        $("#modal_txtDetalleRed").val("");
+        }
+
+        if (data.detalleImpresora && $.trim(data.detalleImpresora) !== "") {
+        $("#modal_chkConfigurarImpresora").prop("checked", true);
+        $("#modal_divContenedorImpresora").removeClass("d-none");
+        $("#modal_txtDetalleImpresora").val(data.detalleImpresora);
+        $("#modal_bloque_impresora").removeClass("d-none");
+        } else {
+        $("#modal_chkConfigurarImpresora").prop("checked", false);
+        $("#modal_divContenedorImpresora").addClass("d-none").find('input').val('');
+        if (!esModoEdicionDirecta) $("#modal_bloque_impresora").addClass("d-none");
+        }
+
+        actualizarColorEstatusModal();
+
+        if (esModoEdicionDirecta) {
+        activarEdicionModal();
+        } else {
+        $("#modal_DescripcionProblema").val(historialCompletoGuardado);
+        $("#lblDescripcionModal").text("Historial Acumulativo de Revisiones (Modo Lectura):");
+        bloquearCamposModal();
+        }
+
+        $("#modalSolicitud").modal("show");
+        },
+        error: function () {
+        $("#loaderFiltro").addClass("d-none");
+        Swal.fire("Error", "Error crítico al comunicar con el servidor de bases de datos.", "error");
+        }
+        });
+        });
+
+        function bloquearCamposModal() {
+        $(".ctrl-modal").prop("disabled", true);
+        $("#btnLiberarEdicion").removeClass("d-none");
+        $("#btnGuardarCambiosModal").addClass("d-none");
+        }
+
+        function activarEdicionModal() {
+        $(".ctrl-modal").prop("disabled", false);
+        $("#btnLiberarEdicion").addClass("d-none");
+        $("#btnGuardarCambiosModal").removeClass("d-none");
+
+        $("#modal_DescripcionProblema").val('').attr("placeholder", "Escriba aquí el nuevo apunte o relatoría técnica (se agregará arriba del historial previo)...");
+        $("#lblDescripcionModal").html('<i class="bi bi-pencil-fill text-success"></i> Agregar nueva actualización al Historial:');
+
+        $("#modal_bloque_global_sistemas, #modal_bloque_red, #modal_bloque_impresora").removeClass("d-none");
+        }
+
+        $("#btnLiberarEdicion").on("click", function () {
+        activarEdicionModal();
+        });
+
+        function cargarPersonalModal(areaName, idSeleccionar) {
+        var $ddl = $("#modal_IdPersonal");
+        $ddl.empty().append('<option value="">-- Seleccione Personal --</option>');
+
+        if (areaName) {
+        $.getJSON('?handler=FiltrarPersonal', { area: areaName }, function (data) {
+        var jefe = "";
+        $.each(data, function (i, item) {
+        if (item.esResponsable) jefe = item.nombre;
+        var selected = (item.id == idSeleccionar) ? "selected" : "";
+        $ddl.append('<option value="' + item.id + '" data-correo="' + item.correo + '" data-puesto="' + item.puesto + '" ' + selected + '>' + item.nombre + '</option>');
+        });
+        if(jefe) $("#modal_Responsable").val(jefe);
+        });
+        }
+        }
+
+        $("#modal_Area").change(function () {
+        $("#modal_Puesto, #modal_Correo, #modal_Responsable").val('');
+        cargarPersonalModal($(this).val(), 0);
+        });
+
+        $("#modal_IdPersonal").change(function () {
+        var $opt = $(this).find('option:selected');
+        if ($(this).val()) {
+        $("#modal_Correo").val($opt.data('correo'));
+        $("#modal_Puesto").val($opt.data('puesto'));
+        } else {
+        $("#modal_Correo, #modal_Puesto").val('');
+        }
+        });
+
+        $(".chk-modal-impresora-grupo").change(function () {
+        $(".chk-modal-impresora-grupo").not(this).prop('checked', false);
+        if($(".chk-modal-impresora-grupo:checked").length == 0) $("#modal_config_no").prop('checked', true);
+        });
+
+        $("#modal_chkReqSistemas").change(function () {
+        if ($(this).is(':checked')) {
+        $("#modal_seccionSistemas").removeClass('d-none');
+        } else {
+        $("#modal_seccionSistemas").addClass('d-none').find("input:checkbox").prop('checked', false);
+        $("#modal_txtOtrosSistemas").addClass('d-none').val('');
+        }
+        });
+
+        $("#modal_chkOtros").change(function () {
+        if ($(this).is(':checked')) $("#modal_txtOtrosSistemas").removeClass('d-none').focus();
+        else $("#modal_txtOtrosSistemas").addClass('d-none').val('');
+        });
+
+        $("#modal_chkHabilitarRed").change(function () {
+        if ($(this).is(':checked')) {
+        $("#modal_divContenedorRed").removeClass('d-none').find('input').focus();
+        } else {
+        $("#modal_divContenedorRed").addClass('d-none');
+        }
+        });
+
+        $("#modal_chkConfigurarImpresora").change(function () {
+        if ($(this).is(':checked')) $("#modal_divContenedorImpresora").removeClass('d-none').find('input').focus();
+        else $("#modal_divContenedorImpresora").addClass('d-none').find('input').val('');
+        });
+
+        $("#btnGuardarCambiosModal").on("click", function () {
+        var sistemasArr = [];
+        $(".custom-modal-sistemas-chk:checked").each(function () {
+        sistemasArr.push($(this).val());
+        });
+
+        var tieneImpresoraVal = $("#modal_config_si").is(":checked") ? "Si" : "No";
+        var detalleImpresoraVal = null;
+
+        if ($("#modal_chkConfigurarImpresora").is(":checked")) {
+        detalleImpresoraVal = $("#modal_txtDetalleImpresora").val();
+        }
+
+        var nuevoApunteIngresado = $("#modal_DescripcionProblema").val();
+        var stringProblemaFinal = $.trim(nuevoApunteIngresado) === "" ? historialCompletoGuardado : nuevoApunteIngresado;
+
+        var fEntregaVal = $("#modal_FechaEntrega").val();
+        if ($.trim(fEntregaVal) === "") fEntregaVal = null;
+
+        var unidadesRedFinal = null;
+        if ($("#modal_chkHabilitarRed").is(":checked")) {
+        unidadesRedFinal = $("#modal_txtDetalleRed").val();
+        } else {
+        unidadesRedFinal = $("#modal_txtDetalleRed").val() || null;
+        }
+
+        var dto = {
+        idSolicitud: parseInt($("#modal_IdSolicitud").val()),
+        fechaIngreso: $("#modal_FechaIngreso").val(),
+        fechaEntrega: fEntregaVal,
+        estatus: $("#modal_Estatus").val(),
+        idPersonal: parseInt($("#modal_IdPersonal").val()) || 0,
+        puestoSolicitante: $("#modal_Puesto").val(),
+        correoSolicitante: $("#modal_Correo").val(),
+        unidadesRed: unidadesRedFinal,
+        nuevaUnidadRed: $("#modal_chkHabilitarRed").is(":checked") ? $("#modal_txtDetalleRed").val() : null,
+        tieneImpresoraConfigurada: tieneImpresoraVal,
+        detalleImpresora: $("#modal_chkConfigurarImpresora").is(":checked") ? $("#modal_txtDetalleImpresora").val() : null,
+        reqSistemas: $("#modal_chkReqSistemas").is(":checked"),
+        sistemasDetalle: sistemasArr.length > 0 ? sistemasArr.join(", ") : null,
+        otrosSistemas: $("#modal_chkOtros").is(":checked") ? $("#modal_txtOtrosSistemas").val() : null,
+        descripcionProblema: stringProblemaFinal,
+        ejecutivoAsignado: $("#modal_EjecutivoAsignado").val(),
+        autorizaAdmin: $("#modal_AutorizaAdmin").val()
+        };
+
+        if (!dto.fechaIngreso || !dto.descripcionProblema) {
+        Swal.fire("Atención", "Por favor completa la descripción de la falla obligatoriamente.", "warning");
+        return;
+        }
+
+        $("#modalSolicitud").modal("hide");
+        $("#loaderFiltro").removeClass("d-none");
+
+        $.ajax({
+        type: "POST",
+        url: "/Solicitudes/Consultar?handler=EditarSolicitud",
+        contentType: "application/json; charset=utf-8",
+        headers: { "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val() },
+        data: JSON.stringify(dto),
+        success: function (response) {
+        $("#loaderFiltro").addClass("d-none");
+        if (response.success) {
+        Swal.fire({
+        icon: 'success',
+        iconColor: '#34d399',
+        title: '¡Solicitud Modificada!',
+        text: 'Cambios realizados con éxito en el sistema.',
+        customClass: {
+        popup: 'swal-dark-custom',
+        title: 'swal-dark-custom',
+        htmlContainer: 'swal-dark-custom'
+        },
+        confirmButtonText: 'Aceptar'
+        }).then(() => { window.location.reload(); });
+        } else {
+        Swal.fire("Error", "Hubo un problema de validación: " + (response.message || ""), "error");
+        }
+        },
+        error: function (xhr) {
+        $("#loaderFiltro").addClass("d-none");
+        Swal.fire("Error", "No se pudo actualizar el registro. Revise consola de Red (F12).", "error");
+        }
+        });
+        });
+
+        $(".btn-eliminar").on("click", function () {
+        var idEliminar = $(this).data("id");
+
+        Swal.fire({
+        title: '¿Está seguro de eliminar?',
+        text: "Esta acción borrará definitivamente el folio " + idEliminar + " de SQL Server.",
+        icon: 'warning',
+        iconColor: '#fbbf24',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        customClass: {
+        popup: 'swal-dark-custom',
+        title: 'swal-dark-custom',
+        htmlContainer: 'swal-dark-custom'
+        }
+        }).then((result) => {
+        if (result.isConfirmed) {
+        $("#loaderFiltro").removeClass("d-none");
+
+        $.ajax({
+        type: "POST",
+        url: "/Solicitudes/Consultar?handler=EliminarSolicitud",
+        headers: { "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val() },
+        data: { id: idEliminar },
+        success: function (response) {
+        $("#loaderFiltro").addClass("d-none");
+        if (response.success) {
+        Swal.fire('¡Eliminado!', 'El folio fue removido de la bitácora.', 'success')
+        .then(() => { window.location.reload(); });
+        } else {
+        Swal.fire('Error', response.message, 'error');
+        }
+        },
+        error: function () {
+        $("#loaderFiltro").addClass("d-none");
+        Swal.fire('Error', 'Error de enlace. Comuníquese con el administrador del sistema.', 'error');
+        }
+        });
+        }
+        });
+        });
+
+        aplicarPaginacionYFiltro();
+
+        });
+    </script>
 }

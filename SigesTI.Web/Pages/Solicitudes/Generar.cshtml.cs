@@ -88,8 +88,29 @@ namespace SigesTI.Web.Pages.Solicitudes
                 NuevaSolicitud.SistemasDetalle = string.Join(", ", SistemasSeleccionados);
             }
 
-            _context.Solicitudes.Add(NuevaSolicitud);
-            _context.SaveChanges();
+            NuevaSolicitud.TieneImpresoraConfigurada = ImpresoraConfiguradaAux;
+
+            // FORMATO INICIAL DEL HISTORIAL
+            string fechaBitacora =
+                DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt")
+                .Replace("AM", "a. m.")
+                .Replace("PM", "p. m.");
+
+            string ejecutivo =
+                string.IsNullOrWhiteSpace(NuevaSolicitud.EjecutivoAsignado)
+                    ? "Sin asignar"
+                    : NuevaSolicitud.EjecutivoAsignado;
+
+            NuevaSolicitud.DescripcionProblema =
+            $@"📌 SOLICITUD INICIAL
+            Entrado el: {fechaBitacora} Por: {ejecutivo}
+            ──────────────────────────────────────
+
+            {NuevaSolicitud.DescripcionProblema}
+
+            ═══════════════════════════════════════
+
+            ";
 
             // Enviamos señal en limpio diciendo que la base de datos procesó el registro exitosamente
             return new JsonResult(new { success = true });
@@ -105,7 +126,8 @@ namespace SigesTI.Web.Pages.Solicitudes
                     nombre = p.Nombre,
                     correo = p.Correo,
                     puesto = p.Puesto,
-                    esResponsable = p.EsResponsable
+                    esResponsable = p.EsResponsable,
+                    unidadesRed = p.UnidadesRed
                 }).ToList();
 
             return new JsonResult(listaPersonal);
