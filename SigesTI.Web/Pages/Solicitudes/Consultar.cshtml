@@ -19,7 +19,7 @@
 <div class="container-fluid mt-4 mb-5 px-4">
     <div class="card card-principal">
         <div class="card-header encabezado-bitacora py-3 d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <h4 class="mb-0 fw-bold"><i class="bi bi-collection"></i> Bitácora General de Requerimientos</h4>
+            <h4 class="mb-0 fw-bold"><i class="bi bi-collection"></i> Concentrado de Solicitudes de Requerimientos</h4>
 
             <div class="d-flex align-items-center gap-2">
                 <label for="itemsPorPagina" class="form-label m-0 text-nowrap fw-semibold" style="font-size: 0.85rem; color: #cbd5e1;">Elementos por página:</label>
@@ -36,30 +36,30 @@
             <form method="get" id="formFiltros" class="mb-4 p-3">
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label fw-bold">Filtro Reactivo (Cualquier columna):</label>
+                        <label class="form-label fw-bold">Búsqueda General:</label>
                         <div class="input-group">
-                            <input type="text" id="inputFiltroReactivo" class="form-control" placeholder="Escribe para buscar al instante (Ej. ium)..." />
+                            <input type="text" id="inputFiltroReactivo" class="form-control" placeholder="Búsqueda por Área, Solicitante, etc..." />
                         </div>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label fw-bold">Área:</label>
-                        <select asp-for="FiltrarArea" asp-items="Model.ListaAreas" class="form-select">
+                        <select asp-for="FiltrarArea" asp-items="Model.ListaAreas" class="form-select filtro-servidor-auto">
                             <option value="">-- Todas --</option>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label fw-bold">Solicitante:</label>
-                        <select asp-for="FiltrarSolicitante" asp-items="Model.ListaPersonalFiltro" class="form-select">
+                        <select asp-for="FiltrarSolicitante" asp-items="Model.ListaPersonalFiltro" class="form-select filtro-servidor-auto">
                             <option value="">-- Todos --</option>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label fw-bold">Fecha Ingreso:</label>
-                        <input type="date" asp-for="FiltrarFecha" class="form-control" />
+                        <input type="date" asp-for="FiltrarFecha" class="form-control filtro-servidor-auto" />
                     </div>
                     <div class="col-md-2">
                         <label class="form-label fw-bold">Estatus:</label>
-                        <select asp-for="FiltrarEstatus" class="form-select">
+                        <select asp-for="FiltrarEstatus" class="form-select filtro-servidor-auto">
                             <option value="">-- Todos --</option>
                             <option value="Pendiente">Pendiente</option>
                             <option value="Resuelto">Resuelto</option>
@@ -67,7 +67,9 @@
                     </div>
                     <div class="col-12 d-flex justify-content-end gap-2 mt-2">
                         <a href="/Solicitudes/Consultar" class="btn btn-secondary text-white"><i class="bi bi-arrow-counterclockwise"></i> Limpiar</a>
-                        <button type="submit" class="btn btn-primary px-4"><i class="bi bi-funnel"></i> Filtrar Servidor</button>
+                        <button type="button" class="btn btn-guardar-custom px-4" data-bs-toggle="modal" data-bs-target="#modalExportarSolicitudes">
+                            <i class="bi bi-file-earmark-text"></i> Exportar solicitudes
+                        </button>
                     </div>
                 </div>
             </form>
@@ -79,7 +81,7 @@
                             <th style="width: 8%;">No. Solicitud</th>
                             <th style="width: 18%;">Solicitante</th>
                             <th style="width: 12%;">Área</th>
-                            <th style="width: 18%;">Término de Solicitud</th>
+                            <th style="width: 18%;">Inicio - Término de Solicitud</th>
                             <th style="width: 18%;">Ejecutivo Soporte Asignado</th>
                             <th style="width: 10%;">Estatus</th>
                             <th style="width: 16%;">Acciones</th>
@@ -346,6 +348,99 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalExportarSolicitudes" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content modal-sigesti">
+            <div class="modal-header encabezado-bitacora py-3">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-file-earmark-text"></i> Exportar solicitudes
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Fecha inicial:</label>
+                        <input type="date" id="reporteFechaInicio" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Fecha final:</label>
+                        <input type="date" id="reporteFechaFin" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Área:</label>
+                        <select id="reporteArea" class="form-select">
+                            <option value="">Todas las áreas</option>
+                            @foreach (var area in Model.ListaAreas)
+                            {
+                                <option value="@area.Value">@area.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Solicitante:</label>
+                        <select id="reporteSolicitante" class="form-select">
+                            <option value="">Todos los solicitantes</option>
+                            @foreach (var persona in Model.ListaPersonalFiltro)
+                            {
+                                <option value="@persona.Value">@persona.Text</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Estatus:</label>
+                        <select id="reporteEstatus" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Resuelto">Resuelto</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-cerrar-custom px-4" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <button type="button" class="btn btn-guardar-custom px-4" id="btnGenerarReporteSolicitudes">
+                    <i class="bi bi-file-earmark-check"></i> Generar reporte
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalVistaReporte" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content modal-sigesti">
+            <div class="modal-header encabezado-bitacora py-3">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-eye-fill"></i> Vista previa del reporte
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-0" style="height:80vh;">
+                <div id="reporteLoading" class="flex-column align-items-center justify-content-center h-100" style="display:flex;">
+                    <div class="spinner-border text-primary mb-3" role="status" style="width:3rem;height:3rem;"></div>
+                    <h5 class="fw-bold">Generando reporte...</h5>
+                    <span style="color:#7d8590;">Preparando vista previa del documento...</span>
+                </div>
+
+                <iframe id="iframeReporteSolicitudes"
+                        style="width:100%; height:100%; border:0; display:none;">
+                </iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -439,6 +534,52 @@
 
         $("#formFiltros").on("submit", function() {
         $("#loaderFiltro").removeClass("d-none");
+        });
+
+        $(".filtro-servidor-auto").on("change", function () {
+        $("#loaderFiltro").removeClass("d-none");
+        $("#formFiltros").submit();
+        });
+
+        $("#btnGenerarReporteSolicitudes").on("click", function () {
+        const params = new URLSearchParams();
+
+        const fechaInicio = $("#reporteFechaInicio").val();
+        const fechaFin = $("#reporteFechaFin").val();
+        const area = $("#reporteArea").val();
+        const solicitante = $("#reporteSolicitante").val();
+        const estatus = $("#reporteEstatus").val();
+
+        if (fechaInicio) params.append("fechaInicio", fechaInicio);
+        if (fechaFin) params.append("fechaFin", fechaFin);
+        if (area) params.append("area", area);
+        if (solicitante) params.append("solicitante", solicitante);
+        if (estatus) params.append("estatus", estatus);
+
+        const urlReporte = "/Solicitudes/Consultar?handler=ReporteSolicitudes&" + params.toString();
+
+        document.activeElement.blur();
+
+        $("#modalExportarSolicitudes").modal("hide");
+
+        $("#reporteLoading").css("display", "flex");
+        $("#iframeReporteSolicitudes").css("display", "none").removeAttr("src").removeAttr("srcdoc");
+
+        $("#modalVistaReporte").modal("show");
+
+        fetch(urlReporte)
+        .then(response => response.text())
+        .then(html => {
+        $("#iframeReporteSolicitudes").attr("srcdoc", html);
+
+        $("#reporteLoading").css("display", "none");
+        $("#iframeReporteSolicitudes").css("display", "block");
+        });
+        });
+
+        $("#modalVistaReporte").on("hidden.bs.modal", function () {
+        $("#iframeReporteSolicitudes").removeAttr("src").removeAttr("srcdoc").css("display", "none");
+        $("#reporteLoading").css("display", "flex");
         });
 
         function actualizarColorEstatusModal() {
