@@ -1,0 +1,401 @@
+﻿/* ==========================================================================
+   PALETA DE COLORES (DARK BLUE MODE) - BITÁCORA DE PERSONAL
+   ========================================================================== */
+
+/* Variables de Identidad de Módulo */
+.panel-personal {
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+/* Tipografía y Textos */
+.titulo-modulo {
+    color: #000A5C !important;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.text-muted-custom {
+    color: #94a3b8 !important;
+    font-size: 0.9rem;
+}
+
+.text-muted-dim {
+    color: #64748b !important;
+}
+
+.text-bright {
+    color: #f8fafc !important;
+}
+
+.font-accent {
+    font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   ESTILOS DE LA TABLA PERSONALIZADA
+   ========================================================================== */
+.tabla-sigesti {
+    color: #f8fafc !important;
+    background-color: #0f172a !important;
+    width: 100%;
+}
+
+    .tabla-sigesti thead {
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    }
+
+    .tabla-sigesti th {
+        color: #022475 !important; /* Color para los encabezados */
+        font-weight: 900;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.8px;
+        padding: 14px 16px !important;
+        border-bottom: 2px solid #334155 !important;
+    }
+
+    .tabla-sigesti td {
+        padding: 14px 16px !important;
+        vertical-align: middle;
+        border-bottom: 1px solid #1e293b !important;
+        color: #cbd5e1;
+        font-size: 0.9rem;
+        background-color: #0f172a !important;
+        transition: all 0.2s ease;
+    }
+
+    /* Animación Interactiva al pasar por encima de las Filas */
+    .tabla-sigesti tbody tr:hover td {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+        border-left-color: #38bdf8 !important;
+    }
+
+    .tabla-sigesti tbody tr {
+        transition: transform 0.15s ease;
+    }
+
+.text-unidades {
+    color: #e2e8f0;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   BADGES PERSONALIZADAS (ÁREAS Y ESTATUS)
+   ========================================================================== */
+
+/* Formato Base de Badges de Área */
+.badge-area {
+    display: inline-block;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 6px;
+    text-transform: capitalize;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+    /* Colores Dinámicos e Iluminados por Área */
+    .badge-area.soporte-técnico {
+        background-color: rgba(59, 130, 246, 0.12) !important;
+        color: #60a5fa !important;
+        border: 1px solid rgba(59, 130, 246, 0.4) !important;
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
+    }
+
+    .badge-area.ventas {
+        background-color: rgba(236, 72, 153, 0.12) !important;
+        color: #f472b6 !important;
+        border: 1px solid rgba(236, 72, 153, 0.4) !important;
+        box-shadow: 0 0 10px rgba(236, 72, 153, 0.15);
+    }
+
+    .badge-area.administración {
+        /* background-color: rgba(168, 85, 247, 0.15) !important;
+        color: #c084fc !important;
+        border: 1px solid rgba(192, 132, 252, 0.4);*/
+        background-color: rgba(20, 184, 166, 0.15) !important;
+        color: #2dd4bf !important;
+        border: 1px solid rgba(45, 212, 191, 0.4);
+        box-shadow: 0 0 10px rgba(45, 212, 191, 0.15);
+    }
+
+    .badge-area.consultoría {
+        background-color: rgba(139, 92, 246, 0.12) !important;
+        color: #a78bfa !important;
+        border: 1px solid rgba(139, 92, 246, 0.4) !important;
+        box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+    }
+
+    .badge-area.cobranza {
+        background-color: rgba(245, 158, 11, 0.12) !important;
+        color: #fbbf24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.4) !important;
+        box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+    }
+
+/* Badges de Estado (Activo / Inactivo) */
+.badge-estatus {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 50px;
+    letter-spacing: 0.3px;
+}
+
+    .badge-estatus.activo {
+        background-color: rgba(16, 185, 129, 0.2) !important;
+        color: #34d399 !important;
+        border: 1px solid rgba(52, 211, 153, 0.4);
+        box-shadow: 0 0 10px rgba(52, 211, 153, 0.18);
+    }
+
+    .badge-estatus.inactivo {
+        background-color: rgba(239, 68, 68, 0.2) !important;
+        color: #f87171 !important;
+        border: 1px solid rgba(248, 113, 113, 0.4);
+        box-shadow: 0 0 10px rgba(248, 113, 113, 0.18);
+    }
+
+/* ==========================================================================
+   BOTONES DE ACCIÓN
+   ========================================================================== */
+.btn-registrar-custom {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 10px 18px !important;
+    border-radius: 8px !important;
+    background-color: red !important;
+    color: white !important;
+    text-decoration: none !important;
+    border: 1px solid red !important;
+    font-weight: 600 !important;
+}
+    a.btn-registrar-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(56, 189, 248, 0.35);
+        background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+        color: #0f172a !important;
+    }
+
+    a.btn-registrar-custom:active {
+        transform: translateY(0px);
+        box-shadow: 0 3px 8px rgba(56, 189, 248, 0.2);
+    }
+
+
+.acciones-personal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-accion-tabla {
+    width: 36px;
+    height: 36px;
+    padding: 0 !important;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    background: transparent;
+    transition: all 0.25s ease;
+    font-size: 0.95rem;
+}
+
+.btn-editar {
+    color: #38bdf8;
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+}
+
+    .btn-editar:hover {
+        background: #38bdf8;
+        color: #0f172a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.35);
+    }
+
+.btn-eliminar {
+    color: #f87171;
+    border-color: #f87171;
+    background: rgba(248, 113, 113, 0.12);
+}
+
+    .btn-eliminar:hover {
+        background: #f87171;
+        color: #0f172a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(248, 113, 113, 0.35);
+    }
+
+.modal-dark {
+    background: #0f172a;
+    color: #f8fafc;
+    border: 1px solid #334155;
+}
+
+    .modal-dark .modal-header {
+        border-bottom: 1px solid #334155;
+    }
+
+    .modal-dark .modal-footer {
+        border-top: 1px solid #334155;
+    }
+
+    .modal-dark .form-control,
+    .modal-dark .form-select {
+        background: #1e293b;
+        border: 1px solid #334155;
+        color: white;
+    }
+
+        .modal-dark .form-control:focus,
+        .modal-dark .form-select:focus {
+            background: #1e293b;
+            color: white;
+        }
+
+.header-modulo .btn-registrar-custom {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    padding: 10px 18px !important;
+    border-radius: 8px !important;
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9) !important;
+    color: #0f172a !important;
+    text-decoration: none !important;
+    border: 1px solid #38bdf8 !important;
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25) !important;
+    transition: all 0.25s ease !important;
+}
+
+    .header-modulo .btn-registrar-custom:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #0ea5e9, #38bdf8) !important;
+        color: #0f172a !important;
+        box-shadow: 0 6px 18px rgba(56, 189, 248, 0.4) !important;
+    }
+
+.btn-cancelar-modal,
+.btn-guardar-modal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none !important;
+    border: none;
+    transition: all 0.25s ease;
+}
+
+.btn-cancelar-modal {
+    background: #bf0000;
+    color: #e2e8f0;
+    box-shadow: 0 4px 12px rgba(197, 48, 34, 0.25);
+}
+
+    .btn-cancelar-modal:hover {
+        transform: translateY(-2px);
+        /*color: #ffffff;*/
+        box-shadow: 0 4px 12px rgba(197, 48, 34, 0.25);
+    }
+
+.btn-guardar-modal {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+}
+
+    .btn-guardar-modal:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(34, 197, 94, 0.35);
+    }
+
+/* SweetAlert Dark */
+.swal-dark {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155;
+    border-radius: 14px;
+}
+
+.swal2-title {
+    color: #38bdf8 !important;
+}
+
+.swal2-html-container {
+    color: #cbd5e1 !important;
+}
+
+.swal-btn-confirm,
+.swal-btn-danger,
+.swal-btn-cancel {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    border: none;
+    margin: 0 6px;
+    transition: all 0.25s ease;
+}
+
+.swal-btn-confirm {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    color: #0f172a;
+}
+
+.swal-btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #ffffff;
+}
+
+.swal-btn-cancel {
+    background: #334155;
+    color: #e2e8f0;
+}
+
+    .swal-btn-confirm:hover,
+    .swal-btn-danger:hover,
+    .swal-btn-cancel:hover {
+        transform: translateY(-2px);
+    }
+
+/* Flecha visible del combobox */
+.modal-dark .form-select,
+.input-dark.form-select {
+    appearance: none;
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155 !important;
+    background-image: linear-gradient(45deg, transparent 50%, #38bdf8 50%), linear-gradient(135deg, #38bdf8 50%, transparent 50%);
+    background-position: calc(100% - 18px) center, calc(100% - 12px) center;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 38px !important;
+}
+
+.badge-area {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-width: 110px;
+    min-height: 36px;
+}
