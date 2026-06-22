@@ -3,58 +3,73 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] SigesTI</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"]SigesTI</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SigesTI.Web.styles.css" asp-append-version="true" />
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">SigesTI</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-page="/Solicitudes/Generar">
-                                <i class="bi bi-plus-square-fill me-1"></i> Registro de Solicitud
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-page="/Solicitudes/Consultar">
-                                <i class="bi bi-search me-1"></i> Consulta de Solicitudes
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-page="/Personal/Index">
-                                <i class="bi bi-people-fill me-1"></i> Personal
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="" asp-page="/Cuenta/Index">
-                                <i class="bi bi-person-badge-fill"></i> Cuenta
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - SigesTI - Área de Soporte Técnico
+
+
+<body class="layout-body">
+
+    <header class="layout-header">
+    <nav class="layout-navbar">
+        <div class="layout-navbar-inner">
+
+            <!-- Logo izquierdo -->
+            <a class="layout-brand" asp-area="" asp-page="/Index">
+                <i class="bi bi-pc-display-horizontal"></i>
+                <span>SigesTI</span>
+            </a>
+
+            <!-- Menú centrado -->
+            <div class="layout-menu">
+                <a class="layout-link" asp-area="" asp-page="/Solicitudes/Generar">
+                    <i class="bi bi-plus-square-fill"></i>
+                    Registro
+                </a>
+
+                <a class="layout-link" asp-area="" asp-page="/Solicitudes/Consultar">
+                    <i class="bi bi-search"></i>
+                    Consultas
+                </a>
+
+                <a class="layout-link" asp-area="" asp-page="/Personal/Index">
+                    <i class="bi bi-people-fill"></i>
+                    Personal
+                </a>
+
+                <a class="layout-link" asp-area="" asp-page="/Cuenta/Index">
+                    <i class="bi bi-person-badge-fill"></i>
+                    Cuenta
+                </a>
+            </div>
+
+            <!-- Bienvenida derecha -->
+<div class="layout-user">
+    <i class="bi bi-person-circle"></i>
+    <span>
+        Bienvenido: <strong>Usuario</strong>
+    </span>
+</div>
+
+        </div>
+    </nav>
+</header>
+
+    <main role="main" class="layout-main">
+        <div class="layout-content">
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer class="layout-footer">
+        <div class="container-fluid px-4">
+            <span>&copy; 2026 - SigesTI</span>
+            <span>Área de Soporte Técnico</span>
         </div>
     </footer>
 
@@ -63,5 +78,6 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

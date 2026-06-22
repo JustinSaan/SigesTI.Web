@@ -126,3 +126,166 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* ==========================================================
+   LAYOUT SIGESTI - DARK BLUE CRYSTAL GLASS
+   ========================================================== */
+
+body.layout-body {
+    min-height: 100vh !important;
+    margin: 0 !important;
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* CONTENEDOR DEL HEADER */
+.layout-header {
+    width: 100%;
+    padding: 18px 32px 10px;
+    background: #0f172a;
+}
+
+/* BARRA PRINCIPAL */
+.layout-navbar {
+    width: 100%;
+    min-height: 78px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 64, 175, 0.82)) !important;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(18px);
+}
+
+/* DISTRIBUCIÓN INTERNA */
+.layout-navbar-inner {
+    min-height: 78px;
+    padding: 0 26px;
+    display: grid;
+    grid-template-columns: 180px 1fr 300px;
+    align-items: center;
+    gap: 20px;
+}
+
+/* LOGO */
+.layout-brand {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none !important;
+    color: #ffffff !important;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+    .layout-brand i {
+        color: #38bdf8;
+        font-size: 1.3rem;
+    }
+
+/* MENÚ CENTRADO */
+.layout-menu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+}
+
+.layout-link {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 145px;
+    padding: 13px 20px;
+    border-radius: 16px;
+    text-decoration: none !important;
+    color: #e0f2fe !important;
+    font-size: 0.98rem;
+    font-weight: 700;
+    background: rgba(15, 23, 42, 0.35);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    transition: all 0.25s ease;
+}
+
+    .layout-link i {
+        color: #38bdf8;
+        font-size: 1rem;
+    }
+
+    .layout-link:hover {
+        color: #ffffff !important;
+        background: rgba(56, 189, 248, 0.20);
+        border-color: rgba(56, 189, 248, 0.65);
+        box-shadow: 0 0 22px rgba(56, 189, 248, 0.30);
+        transform: translateY(-2px);
+    }
+
+/* USUARIO DERECHA */
+.layout-user {
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 18px;
+    border-radius: 18px;
+    color: #dbeafe;
+    font-weight: 600;
+    background: rgba(15, 23, 42, 0.62);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+    .layout-user i {
+        color: #38bdf8;
+        font-size: 1.25rem;
+    }
+
+    .layout-user strong {
+        color: #ffffff;
+    }
+
+/* CONTENIDO */
+.layout-main {
+    flex: 1;
+    width: 100%;
+    background: #0f172a;
+}
+
+.layout-content {
+    width: 100%;
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 28px 28px 38px;
+}
+
+/* FOOTER */
+.layout-footer {
+    background: #111827;
+    border-top: 1px solid rgba(56, 189, 248, 0.25);
+    color: #94a3b8;
+    padding: 16px 0;
+}
+
+    .layout-footer .container-fluid {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+/* RESPONSIVE */
+@media (max-width: 1200px) {
+    .layout-navbar-inner {
+        grid-template-columns: 1fr;
+        padding: 20px;
+        justify-items: center;
+    }
+
+    .layout-menu {
+        flex-wrap: wrap;
+    }
+
+    .layout-user {
+        justify-self: center;
+    }
+}

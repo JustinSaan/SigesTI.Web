@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SigesTI.Web.Pages
+namespace SigesTI.Web.Pages.Personal
 {
     public class IndexModel : PageModel
     {
