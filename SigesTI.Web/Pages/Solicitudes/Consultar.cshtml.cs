@@ -7,6 +7,8 @@ using SigesTI.Web.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Net;
 
 namespace SigesTI.Web.Pages.Solicitudes
 {
@@ -116,6 +118,166 @@ namespace SigesTI.Web.Pages.Solicitudes
                 new SelectListItem { Value = "Pendiente", Text = "Pendiente" },
                 new SelectListItem { Value = "Resuelto", Text = "Resuelto" }
             };
+        }
+
+        public IActionResult OnGetReporteSolicitudes(DateTime? fechaInicio, DateTime? fechaFin, string? area, int? solicitante, string? estatus)
+        {
+            var query = _context.Solicitudes
+                .Include(s => s.Personal)
+                .AsQueryable();
+
+            if (fechaInicio.HasValue)
+            {
+                var inicio = fechaInicio.Value.Date;
+                query = query.Where(s => s.FechaIngreso >= inicio);
+            }
+
+            if (fechaFin.HasValue)
+            {
+                var fin = fechaFin.Value.Date.AddDays(1);
+                query = query.Where(s => s.FechaIngreso < fin);
+            }
+
+            if (!string.IsNullOrWhiteSpace(area))
+            {
+                query = query.Where(s => s.Personal != null && s.Personal.Area == area);
+            }
+
+            if (solicitante.HasValue)
+            {
+                query = query.Where(s => s.IdPersonal == solicitante.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(estatus))
+            {
+                query = query.Where(s => s.Estatus == estatus);
+            }
+
+            var solicitudesReporte = query
+    .AsNoTracking()
+    .OrderByDescending(s => s.FechaIngreso)
+    .Take(500)
+    .ToList();
+
+            var html = new StringBuilder();
+
+            string nombreSolicitanteReporte = "Todos";
+
+            if (solicitante.HasValue)
+            {
+                nombreSolicitanteReporte = _context.Personal
+                    .Where(p => p.Id == solicitante.Value)
+                    .Select(p => p.Nombre)
+                    .FirstOrDefault() ?? solicitante.Value.ToString();
+            }
+
+            html.Append(@"
+<!DOCTYPE html>
+<html lang='es'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Reporte de Solicitudes</title>
+    <link rel='stylesheet' href='/css/Reportes/reporte-solicitudes.css' />
+</head>
+<body>
+    <div class='hoja'>
+
+        <div class='acciones'>
+            <button class='btn-imprimir' onclick='window.print()'>
+                Descargar / Imprimir
+            </button>
+        </div>
+
+        <div class='encabezado-reporte'>
+            <div>
+                <div class='logo-reporte'>SigesTI</div>
+                <div class='descripcion-reporte'>Sistema de Gestión de Solicitudes TI</div>
+            </div>
+
+            <div class='fecha-reporte'>
+                <strong>Generado:</strong> " + DateTime.Now.ToString("dd/MM/yyyy hh:mm tt") + @"
+            </div>
+        </div>
+
+        <div class='titulo-reporte'>
+            Reporte General de Solicitudes
+        </div>
+");
+
+            html.Append(@"
+        <div class='filtros-reporte'>
+            <div>
+                <strong>Fecha inicial:</strong> " + (fechaInicio.HasValue ? fechaInicio.Value.ToString("dd/MM/yyyy") : "Todas") + @"
+            </div>
+            <div>
+                <strong>Fecha final:</strong> " + (fechaFin.HasValue ? fechaFin.Value.ToString("dd/MM/yyyy") : "Todas") + @"
+            </div>
+            <div>
+                <strong>Área:</strong> " + WebUtility.HtmlEncode(string.IsNullOrWhiteSpace(area) ? "Todas" : area) + @"
+            </div>
+            <div>
+                <strong>Solicitante:</strong> " + WebUtility.HtmlEncode(nombreSolicitanteReporte) + @"
+            </div>
+            <div>
+                <strong>Estatus:</strong> " + WebUtility.HtmlEncode(string.IsNullOrWhiteSpace(estatus) ? "Todos" : estatus) + @"
+            </div>
+            <div>
+                <strong>Total:</strong> " + solicitudesReporte.Count + @" solicitudes
+            </div>
+        </div>
+");
+
+            html.Append(@"
+        <table class='tabla-reporte'>
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Solicitante</th>
+                    <th>Área</th>
+                    <th>Fecha Ingreso</th>
+                    <th>Fecha Entrega</th>
+                    <th>Ejecutivo</th>
+                    <th>Estatus</th>
+                </tr>
+            </thead>
+            <tbody>
+");
+
+            foreach (var item in solicitudesReporte)
+            {
+                DateTime fEntrega = Convert.ToDateTime(item.FechaEntrega);
+                string fechaEntregaTexto = (fEntrega.Year <= 1901 || item.Estatus == "Pendiente") ? "S/A" : fEntrega.ToString("dd/MM/yyyy");
+                string claseEstatus = item.Estatus == "Pendiente" ? "pendiente" : "resuelto";
+
+                html.Append("<tr>");
+                html.Append("<td class='text-center folio-reporte'>" + item.IdSolicitud.ToString("D4") + "</td>");
+                html.Append("<td>" + WebUtility.HtmlEncode(item.Personal?.Nombre ?? "N/A") + "</td>");
+                html.Append("<td>" + WebUtility.HtmlEncode(item.Personal?.Area ?? "N/A") + "</td>");
+                html.Append("<td class='text-center'>" + item.FechaIngreso.ToString("dd/MM/yyyy") + "</td>");
+                html.Append("<td class='text-center'>" + fechaEntregaTexto + "</td>");
+                html.Append("<td>" + WebUtility.HtmlEncode(string.IsNullOrEmpty(item.EjecutivoAsignado) ? "Sin asignar" : item.EjecutivoAsignado) + "</td>");
+                html.Append("<td class='text-center " + claseEstatus + "'>" + WebUtility.HtmlEncode(item.Estatus) + "</td>");
+                html.Append("</tr>");
+            }
+
+            if (!solicitudesReporte.Any())
+            {
+                html.Append("<tr><td colspan='7' class='text-center'>No existen solicitudes con los filtros seleccionados.</td></tr>");
+            }
+
+            html.Append(@"
+            </tbody>
+        </table>
+
+        <div class='pie-reporte'>
+            Sistema SigesTI · Reporte generado automáticamente
+        </div>
+    </div>
+</body>
+</html>
+");
+
+            return Content(html.ToString(), "text/html");
         }
 
         public JsonResult OnGetDetalleSolicitud(int id)
