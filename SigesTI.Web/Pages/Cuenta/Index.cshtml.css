@@ -1,0 +1,732 @@
+﻿html,
+body {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+}
+/* Estilos para el contenedor principal de la sección de cuentas */
+.cuenta-admin {
+    padding: 26px;
+    background: radial-gradient(circle at top right, rgba(37, 99, 235, .25), transparent 34%), radial-gradient(circle at bottom left, rgba(56, 189, 248, .13), transparent 30%), #0f172a;
+    min-height: 100vh;
+}
+
+.cuenta-panel {
+    background: rgba(15, 23, 42, .72);
+    border: 1px solid rgba(148, 163, 184, .18);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .38);
+}
+
+.cuenta-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+    .cuenta-top h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 850;
+    }
+
+    .cuenta-top p {
+        margin: 6px 0 0;
+        color: #94a3b8;
+    }
+
+.cuenta-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Botones para la gestión de cuentas */
+.btn-outline-cuenta,
+.btn-primary-cuenta {
+    border-radius: 14px;
+    padding: 12px 18px;
+    font-weight: 800;
+    border: 1px solid rgba(148, 163, 184, .25);
+    color: #f8fafc;
+}
+
+.btn-outline-cuenta {
+    background: rgba(15, 23, 42, .75);
+}
+
+.btn-primary-cuenta {
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    border: none;
+    box-shadow: 0 0 26px rgba(56, 189, 248, .28);
+}
+
+/* Tarjetas de resumen */
+.cards-resumen {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.card-resumen {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    background: linear-gradient(145deg, rgba(30, 41, 59, .96), rgba(15, 23, 42, .92));
+    border: 1px solid rgba(148, 163, 184, .18);
+    border-radius: 18px;
+    padding: 18px;
+    min-height: 126px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04), 0 16px 38px rgba(0, 0, 0, .28);
+}
+
+/* Iconos de resumen */
+.icono-resumen {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    font-size: 1.45rem;
+}
+
+    .icono-resumen.azul {
+        background: rgba(37, 99, 235, .22);
+        color: #60a5fa;
+    }
+
+    .icono-resumen.verde {
+        background: rgba(34, 197, 94, .16);
+        color: #4ade80;
+    }
+
+    .icono-resumen.gris {
+        background: rgba(100, 116, 139, .22);
+        color: #cbd5e1;
+    }
+
+    .icono-resumen.morado {
+        background: rgba(168, 85, 247, .18);
+        color: #c084fc;
+    }
+
+    /* Contenido de las tarjetas de resumen */
+.card-resumen span {
+    display: block;
+    color: #cbd5e1;
+    font-size: .9rem;
+    font-weight: 700;
+}
+
+.card-resumen strong {
+    display: block;
+    margin: 5px 0;
+    font-size: 2rem;
+    line-height: 1;
+    color: #ffffff;
+}
+
+.card-resumen small {
+    color: #64748b;
+    font-size: .78rem;
+}
+
+/* Contenedores de usuarios y modales */
+.usuarios-box,
+.modal-preview {
+    background: linear-gradient(145deg, rgba(30, 41, 59, .96), rgba(15, 23, 42, .94));
+    border: 1px solid rgba(148, 163, 184, .18);
+    border-radius: 20px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, .32);
+}
+
+.usuarios-box {
+    overflow: hidden;
+    margin-bottom: 22px;
+}
+
+.usuarios-header {
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(148, 163, 184, .16);
+}
+
+    .usuarios-header h2 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 850;
+    }
+
+.usuarios-tools {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Buscador */
+
+.search-box {
+    position: relative;
+}
+
+    .search-box input {
+        width: 270px;
+        background: rgba(15, 23, 42, .84);
+        border: 1px solid rgba(148, 163, 184, .22);
+        border-radius: 14px;
+        padding: 11px 42px 11px 14px;
+        color: #f8fafc;
+        outline: none;
+    }
+
+    .search-box i {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+
+/* Tabla de usuarios */
+
+.tabla-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Tabla de cuentas */
+.tabla-cuenta
+{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .tabla-cuenta th {
+        background: rgba(15, 23, 42, .88);
+        color: #38bdf8;
+        font-size: .76rem;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        padding: 14px 16px;
+        text-align: center;
+        border-bottom: 1px solid rgba(148, 163, 184, .16);
+    }
+
+    .tabla-cuenta td {
+        padding: 15px 16px;
+        text-align: center;
+        color: #e2e8f0;
+        border-bottom: 1px solid rgba(148, 163, 184, .12);
+        vertical-align: middle;
+    }
+
+ /* Tabla de bitácora */
+
+.tabla-bitacora {
+width: 100%;
+border-collapse: collapse;
+}
+
+    .tabla-bitacora th {
+    background: rgba(15, 23, 42, .88);
+    color: #38bdf8;
+    font-size: .76rem;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    padding: 14px 62px;
+    text-align: center;
+    border-bottom: 1px solid rgba(148, 163, 184, .16);
+    }
+
+    .tabla-bitacora td {
+    padding: 15px 16px;
+    text-align: center;
+    color: #e2e8f0;
+    border-bottom: 1px solid rgba(148, 163, 184, .12);
+    vertical-align: middle;
+    }
+
+
+    .tabla-cuenta tbody tr:hover,
+    .tabla-bitacora tbody tr:hover {
+        background: rgba(56, 189, 248, .07);
+    }
+
+ /* Etiquetas de estado y rol */
+
+.badge-rol,
+.badge-estado,
+.badge-password,
+.tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 6px 11px;
+    font-size: .73rem;
+    font-weight: 850;
+    white-space: nowrap;
+}
+
+    .badge-rol.administrador {
+        color: #bfdbfe;
+        border: 1px solid #3b82f6;
+        background: rgba(59, 130, 246, .13);
+    }
+
+    .badge-rol.soporte {
+        color: #bae6fd;
+        border: 1px solid #38bdf8;
+        background: rgba(56, 189, 248, .12);
+    }
+
+    .badge-estado.activo {
+        color: #bbf7d0;
+        border: 1px solid #22c55e;
+        background: rgba(34, 197, 94, .12);
+    }
+
+    .badge-estado.inactivo {
+        color: #fecaca;
+        border: 1px solid #ef4444;
+        background: rgba(239, 68, 68, .12);
+    }
+
+    .badge-password.pendiente {
+        color: #fde68a;
+        border: 1px solid #f59e0b;
+        background: rgba(245, 158, 11, .12);
+    }
+
+ /* Acciones de cuenta */
+
+.acciones-cuenta {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+}
+
+.btn-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    border: 1px solid rgba(255,255,255,.08);
+    display: grid;
+    place-items: center;
+    color: white;
+}
+
+    .btn-icon.edit {
+        background: rgba(37, 99, 235, .85);
+    }
+
+    .btn-icon.key {
+        background: rgba(245, 158, 11, .85);
+    }
+
+    .btn-icon.lock {
+        background: rgba(239, 68, 68, .82);
+    }
+
+    .btn-icon.menu {
+        background: rgba(100, 116, 139, .82);
+    }
+
+    /* Pie de tabla */
+
+.tabla-footer {
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #94a3b8;
+    font-size: .86rem;
+}
+
+.paginacion-falsa {
+    display: flex;
+    gap: 7px;
+}
+
+    .paginacion-falsa button {
+        background: rgba(15, 23, 42, .85);
+        color: #cbd5e1;
+        border: 1px solid rgba(148, 163, 184, .22);
+        border-radius: 9px;
+        min-width: 32px;
+        height: 32px;
+    }
+
+        .paginacion-falsa button.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+.paneles-inferiores {
+    display: grid;
+    grid-template-columns: .9fr 1.4fr;
+    gap: 18px;
+}
+
+.modal-preview {
+    padding: 18px;
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+    .preview-header h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 850;
+    }
+
+    .preview-header i {
+        color: #94a3b8;
+    }
+
+.form-grid-preview {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+    .form-grid-preview label,
+    .checks-preview label {
+        color: #cbd5e1;
+        font-size: .82rem;
+        font-weight: 750;
+        margin-bottom: 6px;
+    }
+
+    .form-grid-preview input,
+    .form-grid-preview select,
+    .filtros-bitacora input,
+    .filtros-bitacora select {
+        width: 100%;
+        background: rgba(15, 23, 42, .84);
+        border: 1px solid rgba(148, 163, 184, .22);
+        border-radius: 12px;
+        padding: 11px 12px;
+        color: #f8fafc;
+        outline: none;
+    }
+
+        .form-grid-preview input::placeholder {
+            color: #64748b;
+        }
+
+        .form-grid-preview input:focus,
+        .form-grid-preview select:focus,
+        .filtros-bitacora input:focus,
+        .filtros-bitacora select:focus,
+        .search-box input:focus {
+            border-color: rgba(56, 189, 248, .65);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, .12);
+        }
+
+.checks-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin: 16px 0;
+}
+
+    .checks-preview label {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+.preview-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-cancelar,
+.btn-guardar,
+.btn-buscar,
+.btn-limpiar {
+    border-radius: 12px;
+    padding: 10px 15px;
+    font-weight: 800;
+    border: 1px solid rgba(148, 163, 184, .22);
+}
+
+.btn-cancelar,
+.btn-limpiar {
+    background: rgba(100, 116, 139, .26);
+    color: #e2e8f0;
+}
+
+.btn-guardar,
+.btn-buscar {
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    color: white;
+    border: none;
+}
+
+.filtros-bitacora {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr) auto auto;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.tag.creacion {
+    color: #bbf7d0;
+    border: 1px solid #22c55e;
+    background: rgba(34, 197, 94, .12);
+}
+
+.tag.edicion {
+    color: #fde68a;
+    border: 1px solid #f59e0b;
+    background: rgba(245, 158, 11, .12);
+}
+
+.tag.acceso {
+    color: #bae6fd;
+    border: 1px solid #38bdf8;
+    background: rgba(56, 189, 248, .12);
+}
+
+button {
+    transition: .18s ease;
+}
+
+    button:hover {
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+    }
+
+@media (max-width: 1200px) {
+    .cards-resumen {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .paneles-inferiores {
+        grid-template-columns: 1fr;
+    }
+
+    .filtros-bitacora {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 760px) {
+    .cuenta-admin {
+        padding: 16px;
+    }
+
+    .cuenta-top,
+    .usuarios-header,
+    .tabla-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .cuenta-actions,
+    .usuarios-tools {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .btn-outline-cuenta,
+    .btn-primary-cuenta,
+    .btn-filtro,
+    .search-box,
+    .search-box input {
+        width: 100%;
+    }
+
+    .cards-resumen,
+    .form-grid-preview {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+.modal-cuenta-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, .76);
+    backdrop-filter: blur(9px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 24px;
+}
+
+    .modal-cuenta-overlay.show {
+        display: flex;
+    }
+
+.modal-cuenta {
+    width: min(780px, 96vw);
+    background: linear-gradient(145deg, rgba(30, 41, 59, .98), rgba(15, 23, 42, .98));
+    border: 1px solid rgba(148, 163, 184, .18);
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, .58);
+}
+
+.btn-cerrar-modal {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 1rem;
+}
+
+    .btn-cerrar-modal:hover {
+        color: #f8fafc;
+    }
+
+/* Campo de contraseña con botón de visualizar */
+.password-box {
+    display: flex;
+    align-items: center;
+    background: transparent !important;
+    border: 1px solid rgba(148, 163, 184, .22);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+    .password-box input {
+        border: none !important;
+        background: transparent;
+        box-shadow: none !important;
+    }
+
+    .password-box button {
+        width: 44px;
+        min-width: 44px;
+        padding: 10px;
+        border: none;
+        background: transparent;
+        color: #94a3b8;
+    }
+
+/* ==========================================================================
+   SWEETALERT DARK BLUE
+   ========================================================================== */
+
+.swal-dark-blue {
+    border: 1px solid rgba(56, 189, 248, .25) !important;
+    border-radius: 18px !important;
+    background: #0f172a !important;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .6) !important;
+}
+
+.swal-btn-confirm {
+    background: linear-gradient(135deg, #2563eb, #38bdf8) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 10px 22px !important;
+    font-weight: 800 !important;
+}
+
+.swal-password-box {
+    margin-top: 10px;
+    background: rgba(15, 23, 42, .92);
+    border: 1px solid rgba(56, 189, 248, .25);
+    border-radius: 14px;
+    padding: 14px;
+}
+
+    .swal-password-box span {
+        display: block;
+        color: #94a3b8;
+        font-size: .85rem;
+        margin-bottom: 6px;
+    }
+
+    .swal-password-box strong {
+        color: #38bdf8;
+        font-size: 1.25rem;
+        letter-spacing: 1px;
+    }
+
+/* MODAL NUEVO USUARIO - MISMO DISEÑO DEL PANEL ORIGINAL */
+#modalNuevoUsuario .modal-cuenta {
+    width: min(760px, 96vw);
+    padding: 18px;
+}
+
+#modalNuevoUsuario .form-grid-preview {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+    #modalNuevoUsuario .form-grid-preview > div {
+        display: flex;
+        flex-direction: column;
+    }
+
+#modalNuevoUsuario label {
+    color: #cbd5e1 !important;
+    font-size: .82rem;
+    font-weight: 750;
+    margin-bottom: 6px;
+}
+
+#modalNuevoUsuario input:not([type="checkbox"]),
+#modalNuevoUsuario select {
+    width: 100% !important;
+    height: 40px !important;
+    background: rgba(15, 23, 42, .84) !important;
+    border: 1px solid rgba(148, 163, 184, .22) !important;
+    border-radius: 8px !important;
+    color: #f8fafc !important;
+    padding: 9px 11px !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#modalNuevoUsuario input::placeholder {
+    color: #64748b !important;
+}
+
+#modalNuevoUsuario .password-box {
+    height: 40px;
+    background: rgba(15, 23, 42, .84) !important;
+    border: 1px solid rgba(148, 163, 184, .22) !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+}
+
+    #modalNuevoUsuario .password-box input {
+        height: 38px !important;
+        border: none !important;
+        background: transparent !important;
+    }
+
+    #modalNuevoUsuario .password-box button {
+        height: 38px;
+        width: 44px;
+        border: none;
+        background: transparent;
+        color: #94a3b8;
+    }
+
+#modalNuevoUsuario .checks-preview {
+    margin-top: 16px;
+}
+
+#modalNuevoUsuario .preview-actions {
+    margin-top: 18px;
+}

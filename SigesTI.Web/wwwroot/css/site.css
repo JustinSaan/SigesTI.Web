@@ -289,3 +289,74 @@ body.layout-body {
         justify-self: center;
     }
 }
+
+/* MODAL NUEVO USUARIO - MISMO DISEÑO DEL PANEL ORIGINAL */
+#modalNuevoUsuario .modal-cuenta {
+    width: min(760px, 96vw);
+    padding: 18px;
+}
+
+#modalNuevoUsuario .form-grid-preview {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+    #modalNuevoUsuario .form-grid-preview > div {
+        display: flex;
+        flex-direction: column;
+    }
+
+#modalNuevoUsuario label {
+    color: #cbd5e1 !important;
+    font-size: .82rem;
+    font-weight: 750;
+    margin-bottom: 6px;
+}
+
+#modalNuevoUsuario input:not([type="checkbox"]),
+#modalNuevoUsuario select {
+    width: 100% !important;
+    height: 40px !important;
+    background: rgba(15, 23, 42, .84) !important;
+    border: 1px solid rgba(148, 163, 184, .22) !important;
+    border-radius: 8px !important;
+    color: #f8fafc !important;
+    padding: 9px 11px !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#modalNuevoUsuario input::placeholder {
+    color: #64748b !important;
+}
+
+#modalNuevoUsuario .password-box {
+    height: 40px;
+    background: rgba(15, 23, 42, .84) !important;
+    border: 1px solid rgba(148, 163, 184, .22) !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+}
+
+    #modalNuevoUsuario .password-box input {
+        height: 38px !important;
+        border: none !important;
+        background: transparent !important;
+    }
+
+    #modalNuevoUsuario .password-box button {
+        height: 38px;
+        width: 44px;
+        border: none;
+        background: transparent;
+        color: #94a3b8;
+    }
+
+#modalNuevoUsuario .checks-preview {
+    margin-top: 16px;
+}
+
+#modalNuevoUsuario .preview-actions {
+    margin-top: 18px;
+}

@@ -1,4 +1,429 @@
 ﻿@page
 @model SigesTI.Web.Pages.Cuenta.IndexModel
 @{
+    ViewData["Title"] = "Cuenta";
+}
+
+<div class="cuenta-admin">
+
+    <section class="cuenta-panel">
+
+        <div class="cuenta-top">
+            <div>
+                <h1>Cuenta</h1>
+                <p>Gestión de usuarios y control de acceso</p>
+            </div>
+
+            <div class="cuenta-actions">
+                <button type="button" class="btn-outline-cuenta">
+                    <i class="bi bi-clipboard-data"></i>
+                    Ver bitácora
+                </button>
+
+                <button type="button" class="btn-primary-cuenta" onclick="abrirModalNuevoUsuario()">
+                    <i class="bi bi-plus-lg"></i>
+                    Nuevo usuario
+                </button>
+            </div>
+        </div>
+
+        <div class="cards-resumen">
+            <div class="card-resumen">
+                <div class="icono-resumen azul">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <span>Total de usuarios</span>
+                    <strong>@Model.ListaUsuarios.Count</strong>
+                    <small>Usuarios registrados en el sistema</small>
+                </div>
+            </div>
+
+            <div class="card-resumen">
+                <div class="icono-resumen verde">
+                    <i class="bi bi-person-check-fill"></i>
+                </div>
+                <div>
+                    <span>Usuarios activos</span>
+                    <strong>@Model.ListaUsuarios.Count(u => u.Activo)</strong>
+                    <small>Cuentas con acceso activo</small>
+                </div>
+            </div>
+
+            <div class="card-resumen">
+                <div class="icono-resumen gris">
+                    <i class="bi bi-person-dash-fill"></i>
+                </div>
+                <div>
+                    <span>Usuarios inactivos</span>
+                    <strong>@Model.ListaUsuarios.Count(u => !u.Activo)</strong>
+                    <small>Cuentas desactivadas</small>
+                </div>
+            </div>
+
+            <div class="card-resumen">
+                <div class="icono-resumen morado">
+                    <i class="bi bi-key-fill"></i>
+                </div>
+                <div>
+                    <span>Pendientes cambio contraseña</span>
+                    <strong>@Model.ListaUsuarios.Count(u => u.RequiereCambioPassword)</strong>
+                    <small>Usuarios con contraseña temporal</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="usuarios-box">
+            <div class="usuarios-header">
+                <h2>Usuarios</h2>
+
+                <div class="usuarios-tools">
+                    <div class="search-box">
+                        <input type="text" placeholder="Buscar usuario..." />
+                        <i class="bi bi-search"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tabla-wrap">
+                <table class="tabla-cuenta">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Nombre completo</th>
+                            <th>Correo</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Último acceso</th>
+                            <th>Cambio de contraseña</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var usuario in Model.ListaUsuarios)
+                        {
+                            <tr>
+                                <td>@usuario.NombreUsuario</td>
+                                <td>@usuario.NombreCompleto</td>
+                                <td>@usuario.Correo</td>
+                                <td>
+                                    <span class="badge-rol @usuario.Rol.ToLower()">
+                                        @usuario.Rol
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (usuario.Activo)
+                                    {
+                                        <span class="badge-estado activo">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-estado inactivo">Inactivo</span>
+                                    }
+                                </td>
+                                <td>
+                                    @(usuario.UltimoAcceso.HasValue
+                                        ? usuario.UltimoAcceso.Value.ToString("dd/MM/yyyy hh:mm tt")
+                                        : "—")
+                                </td>
+                                <td>
+                                    @if (usuario.RequiereCambioPassword)
+                                    {
+                                        <span class="badge-password pendiente">Pendiente cambio</span>
+                                    }
+                                    else
+                                    {
+                                        @(usuario.UltimoAcceso.HasValue
+                                            ? usuario.UltimoAcceso.Value.ToString("dd/MM/yyyy hh:mm tt")
+                                            : "—")
+                                    }
+                                </td>
+                                <td>
+                                    <div class="acciones-cuenta">
+                                        <button type="button" class="btn-icon edit" title="Editar usuario">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+
+                                        <button type="button" class="btn-icon key" title="Restablecer contraseña">
+                                            <i class="bi bi-key"></i>
+                                        </button>
+
+                                        <button type="button" class="btn-icon lock" title="Activar/Desactivar usuario">
+                                            <i class="bi bi-lock"></i>
+                                        </button>
+
+                                        <button type="button" class="btn-icon menu" title="Más opciones">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tabla-footer">
+                <span>Mostrando @Model.ListaUsuarios.Count usuarios registrados</span>
+
+                <div class="paginacion-falsa">
+                    <button type="button">«</button>
+                    <button type="button">‹</button>
+                    <button type="button" class="active">1</button>
+                    <button type="button">›</button>
+                    <button type="button">»</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="paneles-inferiores">
+
+            <div class="modal-preview bitacora-preview">
+                <div class="preview-header">
+                    <h3>
+                        <i class="bi bi-clipboard-data"></i>
+                        Bitácora de actividades
+                    </h3>
+                    <i class="bi bi-x-lg"></i>
+                </div>
+
+                <div class="filtros-bitacora">
+                    <select>
+                        <option>Todos</option>
+                    </select>
+
+                    <select>
+                        <option>Todos los módulos</option>
+                    </select>
+
+                    <select>
+                        <option>Todas las acciones</option>
+                    </select>
+
+                    <input type="date" />
+                    <input type="date" />
+
+                    <button type="button" class="btn-buscar">Buscar</button>
+                    <button type="button" class="btn-limpiar">Limpiar</button>
+                </div>
+
+                <div class="tabla-wrap">
+                    <table class="tabla-bitacora">
+                        <thead>
+                            <tr>
+                                <th>Fecha y hora</th>
+                                <th>Usuario</th>
+                                <th>Módulo</th>
+                                <th>Acción</th>
+                                <th>Descripción</th>
+                                <th>IP / Equipo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>22/05/2026 09:15 a.m.</td>
+                                <td>admin</td>
+                                <td>Cuenta</td>
+                                <td><span class="tag creacion">Creación</span></td>
+                                <td>Creó el usuario soporte1</td>
+                                <td>192.168.1.10 / PC-ADM</td>
+                            </tr>
+                            <tr>
+                                <td>22/05/2026 09:10 a.m.</td>
+                                <td>admin</td>
+                                <td>Personal</td>
+                                <td><span class="tag edicion">Edición</span></td>
+                                <td>Editó el registro de Juan Pérez</td>
+                                <td>192.168.1.10 / PC-ADM</td>
+                            </tr>
+                            <tr>
+                                <td>22/05/2026 08:40 a.m.</td>
+                                <td>soporte1</td>
+                                <td>Consultas</td>
+                                <td><span class="tag acceso">Acceso</span></td>
+                                <td>Ingresó al módulo Consultas</td>
+                                <td>192.168.1.25 / LAPTOP-JC</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <div id="modalNuevoUsuario" class="modal-cuenta-overlay">
+        <div class="modal-cuenta modal-cuenta-form">
+            <div class="preview-header">
+                <h3>
+                    <i class="bi bi-person-plus-fill"></i>
+                    Nuevo usuario
+                </h3>
+
+                <button type="button" class="btn-cerrar-modal" onclick="cerrarModalNuevoUsuario()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <form method="post" asp-page-handler="RegistrarUsuario" onsubmit="return validarPasswordTemporal();">
+                @Html.AntiForgeryToken()
+
+                <div class="form-grid-preview">
+                    <div>
+                        <label>Nombre completo</label>
+                        <input asp-for="UsuarioForm.NombreCompleto" type="text" placeholder="Ej. Ana Belén Morales" required />
+                    </div>
+
+                    <div>
+                        <label>Usuario</label>
+                        <input asp-for="UsuarioForm.NombreUsuario" type="text" placeholder="Ej. anamorales" required />
+                    </div>
+
+                    <div>
+                        <label>Correo</label>
+                        <input asp-for="UsuarioForm.Correo" type="email" placeholder="Ej. ana.morales@sigesst.com" required />
+                    </div>
+
+                    <div>
+                        <label>Rol</label>
+                        <select asp-for="UsuarioForm.Rol" required>
+                            <option value="">Seleccione un rol</option>
+                            <option value="Administrador">Administrador</option>
+                            <option value="Soporte">Soporte</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Contraseña temporal</label>
+                        <div class="password-box">
+                            <input asp-for="UsuarioForm.PasswordTemporal" id="passwordTemporal" type="password" placeholder="********" required />
+                            <button type="button" onclick="togglePassword('passwordTemporal', this)" title="Mostrar / ocultar contraseña">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label>Confirmar contraseña temporal</label>
+                        <div class="password-box">
+                            <input id="confirmarPasswordTemporal" type="password" placeholder="********" required />
+                            <button type="button" onclick="togglePassword('confirmarPasswordTemporal', this)" title="Mostrar / ocultar contraseña">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checks-preview">
+                    <label>
+                        <input asp-for="UsuarioForm.Activo" type="checkbox" checked />
+                        Usuario activo
+                    </label>
+
+                    <label>
+                        <input type="checkbox" checked enabled />
+                        Requiere cambio de contraseña al iniciar sesión
+                    </label>
+                </div>
+
+                <div class="preview-actions">
+                    <button type="button" class="btn-cancelar" onclick="cerrarModalNuevoUsuario()">
+                        Cancelar
+                    </button>
+
+                    <button type="submit" class="btn-guardar">
+                        <i class="bi bi-save"></i>
+                        Guardar usuario
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function abrirModalNuevoUsuario() {
+            document.getElementById("modalNuevoUsuario").classList.add("show");
+        }
+
+        function cerrarModalNuevoUsuario() {
+            document.getElementById("modalNuevoUsuario").classList.remove("show");
+        }
+
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector("i");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("bi-eye");
+                icon.classList.add("bi-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("bi-eye-slash");
+                icon.classList.add("bi-eye");
+            }
+        }
+
+        function alertaDarkBlue(icono, titulo, mensaje) {
+            Swal.fire({
+                icon: icono,
+                title: titulo,
+                html: mensaje,
+                background: "#0f172a",
+                color: "#f8fafc",
+                confirmButtonColor: "#2563eb",
+                customClass: {
+                    popup: "swal-dark-blue",
+                    confirmButton: "swal-btn-confirm"
+                },
+                buttonsStyling: false
+            });
+        }
+
+        function validarPasswordTemporal() {
+            const pass = document.getElementById("passwordTemporal").value.trim();
+            const confirm = document.getElementById("confirmarPasswordTemporal").value.trim();
+
+            if (pass !== confirm) {
+                alertaDarkBlue(
+                    "error",
+                    "Contraseñas diferentes",
+                    "La contraseña temporal y la confirmación no coinciden."
+                );
+
+                return false;
+            }
+
+            return true;
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const exito = '@TempData["Exito"]';
+            const error = '@TempData["Error"]';
+            const passwordTemporal = '@TempData["PasswordTemporal"]';
+
+            if (exito) {
+                let mensaje = exito;
+
+                if (passwordTemporal) {
+                    mensaje += `<br><br>
+                        <div class="swal-password-box">
+                            <span>Contraseña temporal:</span>
+                            <strong>${passwordTemporal}</strong>
+                        </div>`;
+                }
+
+                alertaDarkBlue("success", "Operación exitosa", mensaje);
+            }
+
+            if (error) {
+                alertaDarkBlue("error", "Ocurrió un problema", error);
+            }
+        });
+    </script>
+}
 }
