@@ -15,9 +15,9 @@
             </div>
 
             <div class="cuenta-actions">
-                <button type="button" class="btn-outline-cuenta">
+                <button type="button" class="btn-outline-cuenta" onclick="imprimirBitacora()">
                     <i class="bi bi-clipboard-data"></i>
-                    Ver bitácora
+                    Imprimir bitácora
                 </button>
 
                 <button type="button" class="btn-primary-cuenta" onclick="abrirModalNuevoUsuario()">
@@ -134,27 +134,30 @@
                                     }
                                     else
                                     {
-                                        @(usuario.UltimoAcceso.HasValue
-                                            ? usuario.UltimoAcceso.Value.ToString("dd/MM/yyyy hh:mm tt")
-                                            : "—")
+                                        <span>Actualizada</span>
                                     }
                                 </td>
                                 <td>
                                     <div class="acciones-cuenta">
-                                        <button type="button" class="btn-icon edit" title="Editar usuario">
+                                        <button type="button"
+                                                class="btn-icon edit"
+                                                title="Editar usuario"
+                                                onclick="abrirModalEditarUsuario('@usuario.IdUsuario', '@usuario.NombreCompleto', '@usuario.NombreUsuario', '@usuario.Correo', '@usuario.Rol', '@usuario.Activo.ToString().ToLower()')">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
 
-                                        <button type="button" class="btn-icon key" title="Restablecer contraseña">
+                                        <button type="button"
+                                                class="btn-icon key"
+                                                title="Restablecer contraseña"
+                                                onclick="confirmarRestablecerPassword('@usuario.IdUsuario', '@usuario.NombreUsuario')">
                                             <i class="bi bi-key"></i>
                                         </button>
 
-                                        <button type="button" class="btn-icon lock" title="Activar/Desactivar usuario">
+                                        <button type="button"
+                                                class="btn-icon lock"
+                                                title="Activar/Desactivar usuario"
+                                                onclick="confirmarCambiarEstado('@usuario.IdUsuario', '@usuario.NombreUsuario')">
                                             <i class="bi bi-lock"></i>
-                                        </button>
-
-                                        <button type="button" class="btn-icon menu" title="Más opciones">
-                                            <i class="bi bi-three-dots-vertical"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -178,7 +181,6 @@
         </div>
 
         <div class="paneles-inferiores">
-
             <div class="modal-preview bitacora-preview">
                 <div class="preview-header">
                     <h3>
@@ -217,43 +219,47 @@
                                 <th>Módulo</th>
                                 <th>Acción</th>
                                 <th>Descripción</th>
-                                <th>IP / Equipo</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>22/05/2026 09:15 a.m.</td>
-                                <td>admin</td>
-                                <td>Cuenta</td>
-                                <td><span class="tag creacion">Creación</span></td>
-                                <td>Creó el usuario soporte1</td>
-                                <td>192.168.1.10 / PC-ADM</td>
-                            </tr>
-                            <tr>
-                                <td>22/05/2026 09:10 a.m.</td>
-                                <td>admin</td>
-                                <td>Personal</td>
-                                <td><span class="tag edicion">Edición</span></td>
-                                <td>Editó el registro de Juan Pérez</td>
-                                <td>192.168.1.10 / PC-ADM</td>
-                            </tr>
-                            <tr>
-                                <td>22/05/2026 08:40 a.m.</td>
-                                <td>soporte1</td>
-                                <td>Consultas</td>
-                                <td><span class="tag acceso">Acceso</span></td>
-                                <td>Ingresó al módulo Consultas</td>
-                                <td>192.168.1.25 / LAPTOP-JC</td>
-                            </tr>
+                            @if (Model.ListaBitacora.Any())
+                            {
+                                @foreach (var item in Model.ListaBitacora)
+                                {
+                                    <tr>
+                                        <td>@item.FechaHora.ToString("dd/MM/yyyy hh:mm tt")</td>
+                                        <td>@(item.UsuarioSistema?.NombreUsuario ?? "Sistema")</td>
+                                        <td>@item.Modulo</td>
+                                        <td>
+                                            <span class="tag @(item.Accion.ToLower().Contains("cre") ? "creacion" :
+                                                                                         item.Accion.ToLower().Contains("edit") ? "edicion" :
+                                                                                         item.Accion.ToLower().Contains("estado") ? "edicion" :
+                                                                                         item.Accion.ToLower().Contains("contraseña") ? "edicion" :
+                                                                                         "acceso")">
+                                                @item.Accion
+                                            </span>
+                                        </td>
+                                        <td>@item.Descripcion</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">
+                                        No hay registros en la bitácora.
+                                    </td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
             </div>
-
         </div>
 
     </section>
 
+    <!-- MODAL NUEVO USUARIO -->
     <div id="modalNuevoUsuario" class="modal-cuenta-overlay">
         <div class="modal-cuenta modal-cuenta-form">
             <div class="preview-header">
@@ -323,7 +329,7 @@
                     </label>
 
                     <label>
-                        <input type="checkbox" checked enabled />
+                        <input type="checkbox" checked disabled />
                         Requiere cambio de contraseña al iniciar sesión
                     </label>
                 </div>
@@ -341,19 +347,111 @@
             </form>
         </div>
     </div>
+
+    <!-- FORMULARIOS OCULTOS -->
+    <form id="formCambiarEstado" method="post" asp-page-handler="CambiarEstado">
+        @Html.AntiForgeryToken()
+        <input type="hidden" id="estadoIdUsuario" name="idUsuario" />
+    </form>
+
+    <form id="formRestablecerPassword" method="post" asp-page-handler="RestablecerPassword">
+        @Html.AntiForgeryToken()
+        <input type="hidden" id="passwordIdUsuario" name="idUsuario" />
+    </form>
+
+    <!-- MODAL EDITAR USUARIO -->
+    <div id="modalEditarUsuario" class="modal-cuenta-overlay">
+        <div class="modal-cuenta modal-cuenta-form">
+            <div class="preview-header">
+                <h3>
+                    <i class="bi bi-pencil-square"></i>
+                    Editar usuario
+                </h3>
+
+                <button type="button" class="btn-cerrar-modal" onclick="cerrarModalEditarUsuario()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <form method="post" asp-page-handler="EditarUsuario">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" id="editIdUsuario" name="UsuarioForm.IdUsuario" />
+
+                <div class="form-grid-preview">
+                    <div>
+                        <label>Nombre completo</label>
+                        <input id="editNombreCompleto" name="UsuarioForm.NombreCompleto" type="text" required />
+                    </div>
+
+                    <div>
+                        <label>Usuario</label>
+                        <input id="editNombreUsuario" name="UsuarioForm.NombreUsuario" type="text" required />
+                    </div>
+
+                    <div>
+                        <label>Correo</label>
+                        <input id="editCorreo" name="UsuarioForm.Correo" type="email" required />
+                    </div>
+
+                    <div>
+                        <label>Rol</label>
+                        <select id="editRol" name="UsuarioForm.Rol" required>
+                            <option value="Administrador">Administrador</option>
+                            <option value="Soporte">Soporte</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="checks-preview">
+                    <label>
+                        <input id="editActivo" name="UsuarioForm.Activo" type="checkbox" value="true" />
+                        Usuario activo
+                    </label>
+                </div>
+
+                <div class="preview-actions">
+                    <button type="button" class="btn-cancelar" onclick="cerrarModalEditarUsuario()">
+                        Cancelar
+                    </button>
+
+                    <button type="submit" class="btn-guardar">
+                        <i class="bi bi-save"></i>
+                        Guardar cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 
 @section Scripts {
     <script>
-        function abrirModalNuevoUsuario() {
+        window.abrirModalNuevoUsuario = function () {
             document.getElementById("modalNuevoUsuario").classList.add("show");
         }
 
-        function cerrarModalNuevoUsuario() {
+        window.cerrarModalNuevoUsuario = function () {
             document.getElementById("modalNuevoUsuario").classList.remove("show");
         }
 
-        function togglePassword(inputId, btn) {
+        window.abrirModalEditarUsuario = function (id, nombre, usuario, correo, rol, activo) {
+            document.getElementById("editIdUsuario").value = id;
+            document.getElementById("editNombreCompleto").value = nombre;
+            document.getElementById("editNombreUsuario").value = usuario;
+            document.getElementById("editCorreo").value = correo;
+            document.getElementById("editRol").value = rol;
+            document.getElementById("editActivo").checked = activo === "true";
+
+            document.getElementById("modalEditarUsuario").classList.add("show");
+        }
+
+        window.cerrarModalEditarUsuario = function () {
+            document.getElementById("modalEditarUsuario").classList.remove("show");
+        }
+
+        window.togglePassword = function (inputId, btn) {
             const input = document.getElementById(inputId);
             const icon = btn.querySelector("i");
 
@@ -368,14 +466,13 @@
             }
         }
 
-        function alertaDarkBlue(icono, titulo, mensaje) {
+        window.alertaDarkBlue = function (icono, titulo, mensaje) {
             Swal.fire({
                 icon: icono,
                 title: titulo,
                 html: mensaje,
                 background: "#0f172a",
                 color: "#f8fafc",
-                confirmButtonColor: "#2563eb",
                 customClass: {
                     popup: "swal-dark-blue",
                     confirmButton: "swal-btn-confirm"
@@ -384,27 +481,94 @@
             });
         }
 
-        function validarPasswordTemporal() {
+        window.validarPasswordTemporal = function () {
             const pass = document.getElementById("passwordTemporal").value.trim();
             const confirm = document.getElementById("confirmarPasswordTemporal").value.trim();
 
             if (pass !== confirm) {
-                alertaDarkBlue(
-                    "error",
-                    "Contraseñas diferentes",
-                    "La contraseña temporal y la confirmación no coinciden."
-                );
-
+                alertaDarkBlue("error", "Contraseñas diferentes", "La contraseña temporal y la confirmación no coinciden.");
                 return false;
             }
 
             return true;
         }
 
+        window.confirmarCambiarEstado = function (idUsuario, nombreUsuario) {
+            Swal.fire({
+                icon: "question",
+                title: "¿Cambiar estado?",
+                html: `Se activará o desactivará el usuario <b>${nombreUsuario}</b>.`,
+                background: "#0f172a",
+                color: "#f8fafc",
+                showCancelButton: true,
+                confirmButtonText: "Sí, cambiar",
+                cancelButtonText: "Cancelar",
+                customClass: {
+                    popup: "swal-dark-blue",
+                    confirmButton: "swal-btn-confirm",
+                    cancelButton: "swal-btn-cancel"
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById("estadoIdUsuario").value = idUsuario;
+                    document.getElementById("formCambiarEstado").submit();
+                }
+            });
+        }
+
+        window.confirmarRestablecerPassword = function (idUsuario, nombreUsuario) {
+            Swal.fire({
+                icon: "warning",
+                title: "¿Restablecer contraseña?",
+                html: `Se generará una nueva contraseña temporal para <b>${nombreUsuario}</b>.`,
+                background: "#0f172a",
+                color: "#f8fafc",
+                showCancelButton: true,
+                confirmButtonText: "Sí, restablecer",
+                cancelButtonText: "Cancelar",
+                customClass: {
+                    popup: "swal-dark-blue",
+                    confirmButton: "swal-btn-confirm",
+                    cancelButton: "swal-btn-cancel"
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById("passwordIdUsuario").value = idUsuario;
+                    document.getElementById("formRestablecerPassword").submit();
+                }
+            });
+        }
+
+        window.imprimirBitacora = function () {
+            const contenido = document.querySelector(".bitacora-preview").innerHTML;
+            const ventana = window.open("", "_blank");
+
+            ventana.document.write(`
+                <html>
+                <head>
+                    <title>Bitácora de actividades</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 24px; color: #111827; }
+                        .filtros-bitacora { display: none; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { border: 1px solid #d1d5db; padding: 8px; font-size: 12px; text-align: center; }
+                        th { background: #1e3a8a; color: white; }
+                    </style>
+                </head>
+                <body>${contenido}</body>
+                </html>
+            `);
+
+            ventana.document.close();
+            ventana.print();
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
-            const exito = '@TempData["Exito"]';
-            const error = '@TempData["Error"]';
-            const passwordTemporal = '@TempData["PasswordTemporal"]';
+        const exito = '@TempData["Exito"]';
+        const error = '@TempData["Error"]';
+        const passwordTemporal = '@TempData["PasswordTemporal"]';
 
             if (exito) {
                 let mensaje = exito;
@@ -425,5 +589,4 @@
             }
         });
     </script>
-}
 }

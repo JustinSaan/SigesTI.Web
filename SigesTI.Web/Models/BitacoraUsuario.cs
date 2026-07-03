@@ -12,11 +12,7 @@ namespace SigesTI.Web.Models
         public int? IdUsuario { get; set; }
 
         [ForeignKey("IdUsuario")]
-        public required UsuarioSistema UsuarioSistema { get; set; }
-
-        [Required]
-        [StringLength(50)]
-        public required string Usuario { get; set; }
+        public UsuarioSistema? UsuarioSistema { get; set; }
 
         [Required]
         [StringLength(50)]
@@ -29,9 +25,6 @@ namespace SigesTI.Web.Models
         [Required]
         [StringLength(300)]
         public required string Descripcion { get; set; }
-
-        [StringLength(80)]
-        public required string IpEquipo { get; set; }
 
         public DateTime FechaHora { get; set; } = DateTime.Now;
     }

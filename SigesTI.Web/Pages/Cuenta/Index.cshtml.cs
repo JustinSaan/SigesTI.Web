@@ -19,13 +19,14 @@ namespace SigesTI.Web.Pages.Cuenta
         }
 
         public IList<UsuarioSistema> ListaUsuarios { get; set; } = new List<UsuarioSistema>();
+        public IList<BitacoraUsuario> ListaBitacora { get; set; } = new List<BitacoraUsuario>();
 
         [BindProperty]
         public UsuarioInput UsuarioForm { get; set; } = new();
 
         public async Task OnGetAsync()
         {
-            await CargarUsuarios();
+            await CargarDatos();
         }
 
         public async Task<IActionResult> OnPostRegistrarUsuarioAsync()
@@ -45,8 +46,8 @@ namespace SigesTI.Web.Pages.Cuenta
                 Activo = UsuarioForm.Activo,
                 RequiereCambioPassword = true,
                 FechaCreacion = DateTime.Now,
-                PasswordHash = string.Empty, // Inicialización temporal, se sobrescribe abajo
-                Bitacoras = new List<BitacoraUsuario>() // Inicializa la colección requerida
+                PasswordHash = string.Empty,
+                Bitacoras = new List<BitacoraUsuario>()
             };
 
             usuario.PasswordHash = _passwordHasher.HashPassword(usuario, UsuarioForm.PasswordTemporal);
@@ -54,8 +55,7 @@ namespace SigesTI.Web.Pages.Cuenta
             _context.UsuariosSistema.Add(usuario);
             await _context.SaveChangesAsync();
 
-            await RegistrarBitacora(usuario.IdUsuario, "Cuenta", "Crear usuario",
-                $"Se creó el usuario {usuario.NombreUsuario}");
+            await RegistrarBitacora(usuario.IdUsuario, "Cuenta", "Creación", $"Creó el usuario {usuario.NombreUsuario}");
 
             TempData["Exito"] = "Usuario registrado correctamente.";
             return RedirectToPage();
@@ -79,8 +79,7 @@ namespace SigesTI.Web.Pages.Cuenta
 
             await _context.SaveChangesAsync();
 
-            await RegistrarBitacora(usuario.IdUsuario, "Cuenta", "Editar usuario",
-                $"Se editó el usuario {usuario.NombreUsuario}");
+            await RegistrarBitacora(usuario.IdUsuario, "Cuenta", "Edición", $"Editó el usuario {usuario.NombreUsuario}");
 
             TempData["Exito"] = "Usuario actualizado correctamente.";
             return RedirectToPage();
@@ -100,10 +99,10 @@ namespace SigesTI.Web.Pages.Cuenta
 
             await _context.SaveChangesAsync();
 
-            await RegistrarBitacora(usuario.IdUsuario, "Cuenta", "Cambiar estado",
-                $"Se cambió el estado del usuario {usuario.NombreUsuario} a {(usuario.Activo ? "Activo" : "Inactivo")}");
+            await RegistrarBitacora(usuario.IdUsuario, "Cuenta", "Cambio de estado",
+                $"Cambió el usuario {usuario.NombreUsuario} a {(usuario.Activo ? "Activo" : "Inactivo")}");
 
-            TempData["Exito"] = "Estado actualizado correctamente.";
+            TempData["Exito"] = "Estado del usuario actualizado correctamente.";
             return RedirectToPage();
         }
 
@@ -125,7 +124,7 @@ namespace SigesTI.Web.Pages.Cuenta
             await _context.SaveChangesAsync();
 
             await RegistrarBitacora(usuario.IdUsuario, "Cuenta", "Restablecer contraseña",
-                $"Se restableció la contraseña temporal del usuario {usuario.NombreUsuario}");
+                $"Restableció la contraseña temporal del usuario {usuario.NombreUsuario}");
 
             TempData["PasswordTemporal"] = passwordTemporal;
             TempData["Exito"] = $"Contraseña temporal generada para {usuario.NombreUsuario}.";
@@ -133,26 +132,30 @@ namespace SigesTI.Web.Pages.Cuenta
             return RedirectToPage();
         }
 
-        private async Task CargarUsuarios()
+        private async Task CargarDatos()
         {
             ListaUsuarios = await _context.UsuariosSistema
                 .OrderBy(u => u.NombreCompleto)
+                .ToListAsync();
+
+            ListaBitacora = await _context.BitacoraUsuarios
+                .Include(b => b.UsuarioSistema)
+                .OrderByDescending(b => b.FechaHora)
+                .Take(100)
                 .ToListAsync();
         }
 
         private async Task RegistrarBitacora(int idUsuario, string modulo, string accion, string descripcion)
         {
-            var usuario = await _context.UsuariosSistema.FindAsync(idUsuario);
-
             var bitacora = new BitacoraUsuario
             {
                 IdUsuario = idUsuario,
-                Usuario = usuario?.NombreUsuario ?? "Sistema", // <- AQUÍ
                 Modulo = modulo,
                 Accion = accion,
                 Descripcion = descripcion,
                 FechaHora = DateTime.Now
             };
+
             _context.BitacoraUsuarios.Add(bitacora);
             await _context.SaveChangesAsync();
         }
