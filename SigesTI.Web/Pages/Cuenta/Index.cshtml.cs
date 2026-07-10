@@ -29,11 +29,56 @@ namespace SigesTI.Web.Pages.Cuenta
             await CargarDatos();
         }
 
+
         public async Task<IActionResult> OnPostRegistrarUsuarioAsync()
         {
-            if (await _context.UsuariosSistema.AnyAsync(u => u.NombreUsuario == UsuarioForm.NombreUsuario))
+            UsuarioForm.NombreCompleto = UsuarioForm.NombreCompleto.Trim();
+            UsuarioForm.NombreUsuario = UsuarioForm.NombreUsuario.Trim();
+            UsuarioForm.Correo = UsuarioForm.Correo.Trim();
+            UsuarioForm.Rol = UsuarioForm.Rol.Trim();
+
+            if (string.IsNullOrWhiteSpace(UsuarioForm.NombreCompleto) ||
+                string.IsNullOrWhiteSpace(UsuarioForm.NombreUsuario) ||
+                string.IsNullOrWhiteSpace(UsuarioForm.Correo) ||
+                string.IsNullOrWhiteSpace(UsuarioForm.Rol) ||
+                string.IsNullOrWhiteSpace(UsuarioForm.PasswordTemporal))
+            {
+                TempData["Error"] = "Todos los campos son obligatorios.";
+                TempData["AbrirModalNuevoUsuario"] = "true";
+                return RedirectToPage();
+            }
+
+            if (UsuarioForm.Rol != "Administrador" && UsuarioForm.Rol != "Soporte")
+            {
+                TempData["Error"] = "El rol seleccionado no es válido.";
+                TempData["AbrirModalNuevoUsuario"] = "true";
+                return RedirectToPage();
+            }
+
+            if (UsuarioForm.PasswordTemporal.Length < 8)
+            {
+                TempData["Error"] = "La contraseña temporal debe tener al menos 8 caracteres.";
+                TempData["AbrirModalNuevoUsuario"] = "true";
+                return RedirectToPage();
+            }
+
+            bool existeUsuario = await _context.UsuariosSistema
+                .AnyAsync(u => u.NombreUsuario.ToLower() == UsuarioForm.NombreUsuario.ToLower());
+
+            if (existeUsuario)
             {
                 TempData["Error"] = "El nombre de usuario ya existe.";
+                TempData["AbrirModalNuevoUsuario"] = "true"; ;
+                return RedirectToPage();
+            }
+
+            bool existeCorreo = await _context.UsuariosSistema
+                .AnyAsync(u => u.Correo.ToLower() == UsuarioForm.Correo.ToLower());
+
+            if (existeCorreo)
+            {
+                TempData["Error"] = "Ya existe un usuario con ese correo.";
+                TempData["AbrirModalNuevoUsuario"] = "true";
                 return RedirectToPage();
             }
 
@@ -63,11 +108,46 @@ namespace SigesTI.Web.Pages.Cuenta
 
         public async Task<IActionResult> OnPostEditarUsuarioAsync()
         {
+            UsuarioForm.NombreCompleto = UsuarioForm.NombreCompleto.Trim();
+            UsuarioForm.NombreUsuario = UsuarioForm.NombreUsuario.Trim();
+            UsuarioForm.Correo = UsuarioForm.Correo.Trim();
+            UsuarioForm.Rol = UsuarioForm.Rol.Trim();
+
+
             var usuario = await _context.UsuariosSistema.FindAsync(UsuarioForm.IdUsuario);
 
             if (usuario == null)
             {
                 TempData["Error"] = "No se encontró el usuario.";
+                return RedirectToPage();
+            }
+
+            bool existeUsuario = await _context.UsuariosSistema
+                .AnyAsync(u => u.IdUsuario != UsuarioForm.IdUsuario &&
+                               u.NombreUsuario.ToLower() == UsuarioForm.NombreUsuario.ToLower());
+
+            if (existeUsuario)
+            {
+                TempData["Error"] = "Ya existe ese nombre de usuario, intenta con otro.";
+                TempData["AbrirModalEditarUsuario"] = "true";
+                return RedirectToPage();
+            }
+
+            bool existeCorreo = await _context.UsuariosSistema
+                .AnyAsync(u => u.IdUsuario != UsuarioForm.IdUsuario &&
+                               u.Correo.ToLower() == UsuarioForm.Correo.ToLower());
+
+            if (existeCorreo)
+            {
+                TempData["Error"] = "Ya existe un usuario con ese correo.";
+                TempData["AbrirModalEditarUsuario"] = "true";
+                return RedirectToPage();
+            }
+
+            if (UsuarioForm.Rol != "Administrador" && UsuarioForm.Rol != "Soporte")
+            {
+                TempData["Error"] = "El rol seleccionado no es válido.";
+                TempData["AbrirModalEditarUsuario"] = "true";
                 return RedirectToPage();
             }
 
@@ -85,9 +165,11 @@ namespace SigesTI.Web.Pages.Cuenta
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnPostCambiarEstadoAsync(int idUsuario)
+        public async Task<IActionResult> OnPostEliminarUsuarioAsync(int idUsuario)
         {
-            var usuario = await _context.UsuariosSistema.FindAsync(idUsuario);
+            var usuario = await _context.UsuariosSistema
+                .Include(u => u.Bitacoras)
+                .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario);
 
             if (usuario == null)
             {
@@ -95,14 +177,12 @@ namespace SigesTI.Web.Pages.Cuenta
                 return RedirectToPage();
             }
 
-            usuario.Activo = !usuario.Activo;
+            var nombreUsuario = usuario.NombreUsuario;
 
+            _context.UsuariosSistema.Remove(usuario);
             await _context.SaveChangesAsync();
 
-            await RegistrarBitacora(usuario.IdUsuario, "Cuenta", "Cambio de estado",
-                $"Cambió el usuario {usuario.NombreUsuario} a {(usuario.Activo ? "Activo" : "Inactivo")}");
-
-            TempData["Exito"] = "Estado del usuario actualizado correctamente.";
+            TempData["Exito"] = $"Usuario {nombreUsuario} eliminado correctamente.";
             return RedirectToPage();
         }
 

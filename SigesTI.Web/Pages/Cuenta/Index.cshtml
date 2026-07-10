@@ -79,7 +79,7 @@
 
                 <div class="usuarios-tools">
                     <div class="search-box">
-                        <input type="text" placeholder="Buscar usuario..." />
+                        <input id="buscarUsuario" type="text" placeholder="Buscar usuario..." onkeyup="filtrarUsuarios()" />
                         <i class="bi bi-search"></i>
                     </div>
                 </div>
@@ -155,9 +155,9 @@
 
                                         <button type="button"
                                                 class="btn-icon lock"
-                                                title="Activar/Desactivar usuario"
-                                                onclick="confirmarCambiarEstado('@usuario.IdUsuario', '@usuario.NombreUsuario')">
-                                            <i class="bi bi-lock"></i>
+                                                title="Eliminar usuario"
+                                                onclick="confirmarEliminarUsuario('@usuario.IdUsuario', '@usuario.NombreUsuario')">
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -349,17 +349,19 @@
     </div>
 
     <!-- FORMULARIOS OCULTOS -->
-    <form id="formCambiarEstado" method="post" asp-page-handler="CambiarEstado">
-        @Html.AntiForgeryToken()
-        <input type="hidden" id="estadoIdUsuario" name="idUsuario" />
-    </form>
 
     <form id="formRestablecerPassword" method="post" asp-page-handler="RestablecerPassword">
         @Html.AntiForgeryToken()
         <input type="hidden" id="passwordIdUsuario" name="idUsuario" />
     </form>
 
+    <form id="formEliminarUsuario" method="post" asp-page-handler="EliminarUsuario">
+        @Html.AntiForgeryToken()
+        <input type="hidden" id="eliminarIdUsuario" name="idUsuario" />
+    </form>
+
     <!-- MODAL EDITAR USUARIO -->
+
     <div id="modalEditarUsuario" class="modal-cuenta-overlay">
         <div class="modal-cuenta modal-cuenta-form">
             <div class="preview-header">
@@ -430,11 +432,24 @@
     <script>
         window.abrirModalNuevoUsuario = function () {
             document.getElementById("modalNuevoUsuario").classList.add("show");
-        }
+        };
 
         window.cerrarModalNuevoUsuario = function () {
             document.getElementById("modalNuevoUsuario").classList.remove("show");
-        }
+        };
+
+        window.imprimirBitacora = function () {
+            const contenido = document.querySelector(".bitacora-preview").innerHTML;
+            const ventana = window.open("", "_blank");
+
+            ventana.document.open();
+            ventana.document.write("<title>Bitácora de actividades</title>");
+            ventana.document.write(contenido);
+            ventana.document.close();
+
+            ventana.focus();
+            ventana.print();
+        };
 
         window.abrirModalEditarUsuario = function (id, nombre, usuario, correo, rol, activo) {
             document.getElementById("editIdUsuario").value = id;
@@ -445,11 +460,11 @@
             document.getElementById("editActivo").checked = activo === "true";
 
             document.getElementById("modalEditarUsuario").classList.add("show");
-        }
+        };
 
         window.cerrarModalEditarUsuario = function () {
             document.getElementById("modalEditarUsuario").classList.remove("show");
-        }
+        };
 
         window.togglePassword = function (inputId, btn) {
             const input = document.getElementById(inputId);
@@ -464,7 +479,7 @@
                 icon.classList.remove("bi-eye-slash");
                 icon.classList.add("bi-eye");
             }
-        }
+        };
 
         window.alertaDarkBlue = function (icono, titulo, mensaje) {
             Swal.fire({
@@ -479,7 +494,7 @@
                 },
                 buttonsStyling: false
             });
-        }
+        };
 
         window.validarPasswordTemporal = function () {
             const pass = document.getElementById("passwordTemporal").value.trim();
@@ -491,17 +506,17 @@
             }
 
             return true;
-        }
+        };
 
-        window.confirmarCambiarEstado = function (idUsuario, nombreUsuario) {
+          window.confirmarEliminarUsuario = function (idUsuario, nombreUsuario) {
             Swal.fire({
-                icon: "question",
-                title: "¿Cambiar estado?",
-                html: `Se activará o desactivará el usuario <b>${nombreUsuario}</b>.`,
+                icon: "warning",
+                title: "¿Eliminar usuario?",
+                html: "Esta acción eliminará al usuario <b>" + nombreUsuario + "</b>.",
                 background: "#0f172a",
                 color: "#f8fafc",
                 showCancelButton: true,
-                confirmButtonText: "Sí, cambiar",
+                confirmButtonText: "Sí, eliminar",
                 cancelButtonText: "Cancelar",
                 customClass: {
                     popup: "swal-dark-blue",
@@ -509,19 +524,19 @@
                     cancelButton: "swal-btn-cancel"
                 },
                 buttonsStyling: false
-            }).then((result) => {
+            }).then(function (result) {
                 if (result.isConfirmed) {
-                    document.getElementById("estadoIdUsuario").value = idUsuario;
-                    document.getElementById("formCambiarEstado").submit();
+                    document.getElementById("eliminarIdUsuario").value = idUsuario;
+                    document.getElementById("formEliminarUsuario").submit();
                 }
             });
-        }
+        };
 
         window.confirmarRestablecerPassword = function (idUsuario, nombreUsuario) {
             Swal.fire({
                 icon: "warning",
                 title: "¿Restablecer contraseña?",
-                html: `Se generará una nueva contraseña temporal para <b>${nombreUsuario}</b>.`,
+                html: "Se generará una nueva contraseña temporal para <b>" + nombreUsuario + "</b>.",
                 background: "#0f172a",
                 color: "#f8fafc",
                 showCancelButton: true,
@@ -533,52 +548,49 @@
                     cancelButton: "swal-btn-cancel"
                 },
                 buttonsStyling: false
-            }).then((result) => {
+            }).then(function (result) {
                 if (result.isConfirmed) {
                     document.getElementById("passwordIdUsuario").value = idUsuario;
                     document.getElementById("formRestablecerPassword").submit();
                 }
             });
-        }
+        };
 
-        window.imprimirBitacora = function () {
-            const contenido = document.querySelector(".bitacora-preview").innerHTML;
-            const ventana = window.open("", "_blank");
+         window.filtrarUsuarios = function () {
+            const texto = document.getElementById("buscarUsuario").value.toLowerCase();
+            const filas = document.querySelectorAll(".tabla-cuenta tbody tr");
 
-            ventana.document.write(`
-                <html>
-                <head>
-                    <title>Bitácora de actividades</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 24px; color: #111827; }
-                        .filtros-bitacora { display: none; }
-                        table { width: 100%; border-collapse: collapse; }
-                        th, td { border: 1px solid #d1d5db; padding: 8px; font-size: 12px; text-align: center; }
-                        th { background: #1e3a8a; color: white; }
-                    </style>
-                </head>
-                <body>${contenido}</body>
-                </html>
-            `);
-
-            ventana.document.close();
-            ventana.print();
-        }
+            filas.forEach(function (fila) {
+                const contenido = fila.innerText.toLowerCase();
+                fila.style.display = contenido.includes(texto) ? "" : "none";
+            });
+        };
 
         document.addEventListener("DOMContentLoaded", function () {
-        const exito = '@TempData["Exito"]';
-        const error = '@TempData["Error"]';
-        const passwordTemporal = '@TempData["PasswordTemporal"]';
+            const exito = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Exito"]));
+            const error = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Error"]));
+            const passwordTemporal = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["PasswordTemporal"]));
+            const abrirModalNuevo = '@TempData["AbrirModalNuevoUsuario"]';
+            const abrirNuevo = '@TempData["AbrirModalNuevoUsuario"]';
+            const abrirEditar = '@TempData["AbrirModalEditarUsuario"]';
+
+        if (abrirNuevo === "true") {
+            abrirModalNuevoUsuario();
+        }
+
+        if (abrirEditar === "true") {
+            abrirModalEditarUsuario();
+        }
+
+        if (abrirModalNuevo === "true") {
+            abrirModalNuevoUsuario();
+        }
 
             if (exito) {
                 let mensaje = exito;
 
                 if (passwordTemporal) {
-                    mensaje += `<br><br>
-                        <div class="swal-password-box">
-                            <span>Contraseña temporal:</span>
-                            <strong>${passwordTemporal}</strong>
-                        </div>`;
+                    mensaje += "<br><br><div class='swal-password-box'><span>Contraseña temporal:</span><strong>" + passwordTemporal + "</strong></div>";
                 }
 
                 alertaDarkBlue("success", "Operación exitosa", mensaje);
