@@ -11,7 +11,7 @@ namespace SigesTI.Web.Models
 
         public int? IdUsuario { get; set; }
 
-        [ForeignKey("IdUsuario")]
+        [ForeignKey(nameof(IdUsuario))]
         public UsuarioSistema? UsuarioSistema { get; set; }
 
         [Required]
@@ -27,5 +27,14 @@ namespace SigesTI.Web.Models
         public required string Descripcion { get; set; }
 
         public DateTime FechaHora { get; set; } = DateTime.Now;
+
+        [StringLength(50)]
+        public string? NombreUsuario { get; set; }
+
+        [StringLength(150)]
+        public string? NombreCompleto { get; set; }
+
+        [StringLength(150)]
+        public string? Correo { get; set; }
     }
 }
