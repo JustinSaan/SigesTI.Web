@@ -826,3 +826,76 @@ body.layout-body {
         width: 100% !important;
     }
 }
+
+/* ==========================================================================
+   PAGINACIÓN GLOBAL DEL MÓDULO CUENTA
+   Los botones se generan dinámicamente desde JavaScript, por eso este bloque
+   debe permanecer en site.css y no en AdminVista.cshtml.css.
+   ========================================================================== */
+
+.cuenta-admin .paginacion-tabla {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 7px !important;
+}
+
+    /* Botones de página, anterior y siguiente */
+    .cuenta-admin .paginacion-tabla button {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 34px !important;
+        height: 34px !important;
+        margin: 0 !important;
+        padding: 0 10px !important;
+        color: #cbd5e1 !important;
+        font-family: inherit !important;
+        font-size: .82rem !important;
+        font-weight: 750 !important;
+        line-height: 1 !important;
+        background: rgba(15, 23, 42, .85) !important;
+        border: 1px solid rgba(148, 163, 184, .22) !important;
+        border-radius: 9px !important;
+        outline: none !important;
+        box-shadow: none !important;
+        cursor: pointer !important;
+        appearance: none !important;
+        transition: .18s ease !important;
+    }
+
+        /* Página seleccionada */
+        .cuenta-admin .paginacion-tabla button.active {
+            color: #ffffff !important;
+            background: #2563eb !important;
+            border-color: #2563eb !important;
+            box-shadow: 0 0 14px rgba(56, 189, 248, .20) !important;
+        }
+
+        /* Botones al pasar el cursor */
+        .cuenta-admin
+        .paginacion-tabla
+        button:hover:not(:disabled):not(.active) {
+            color: #ffffff !important;
+            background: rgba(56, 189, 248, .16) !important;
+            border-color: rgba(56, 189, 248, .55) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        /* Flechas deshabilitadas */
+        .cuenta-admin .paginacion-tabla button:disabled {
+            color: #64748b !important;
+            background: rgba(30, 41, 59, .55) !important;
+            border-color: rgba(100, 116, 139, .18) !important;
+            opacity: .45 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+        }
+
+        /* Evitar borde blanco al seleccionar */
+        .cuenta-admin .paginacion-tabla button:focus,
+        .cuenta-admin .paginacion-tabla button:active {
+            color: #ffffff !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }

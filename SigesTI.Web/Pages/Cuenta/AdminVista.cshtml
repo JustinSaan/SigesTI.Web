@@ -94,36 +94,52 @@
         <!-- ================================================================
              USUARIOS DEL SISTEMA
              ================================================================ -->
-        <div class="usuarios-tools">
+        <div class="usuarios-box">
 
-            <div class="search-box">
-                <input id="buscarUsuario"
-                       type="text"
-                       placeholder="Buscar usuario..." />
+            <div class="usuarios-header">
 
-                <i class="bi bi-search"></i>
+                <h2>Usuarios</h2>
+
+                <div class="usuarios-tools">
+
+                    <!-- Buscador automático -->
+                    <div class="search-box">
+
+                        <input id="buscarUsuario"
+                               type="text"
+                               placeholder="Buscar usuario..."
+                               autocomplete="off" />
+
+                        <i class="bi bi-search"></i>
+
+                    </div>
+
+                    <!-- Cantidad de resultados por página -->
+                    <div class="cantidad-resultados">
+
+                        <label for="cantidadUsuarios">
+                            Mostrar:
+                        </label>
+
+                        <select id="cantidadUsuarios">
+                            <option value="10" selected>10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+
+                    </div>
+
+                </div>
+
             </div>
-
-            <div class="cantidad-resultados">
-                <label for="cantidadUsuarios">
-                    Mostrar:
-                </label>
-
-                <select id="cantidadUsuarios">
-                    <option value="10" selected>10</option>
-                    <option value="15">15</option>
-                    <option value="20">20</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                </select>
-            </div>
-
-        </div>
 
             <div class="tabla-wrap">
 
-                <table class="tabla-cuenta">
+                <table id="tablaUsuarios"
+                       class="tabla-cuenta">
 
                     <thead>
                         <tr>
@@ -144,9 +160,12 @@
                         {
                             @foreach (var usuario in Model.ListaUsuarios)
                             {
-                                <tr>
+                                <tr class="fila-usuario">
+
                                     <td>@usuario.NombreUsuario</td>
+
                                     <td>@usuario.NombreCompleto</td>
+
                                     <td>@usuario.Correo</td>
 
                                     <td>
@@ -191,8 +210,10 @@
                                     </td>
 
                                     <td>
+
                                         <div class="acciones-cuenta">
 
+                                            <!-- Editar usuario -->
                                             <button type="button"
                                                     class="btn-icon edit js-editar-usuario"
                                                     title="Editar usuario"
@@ -204,8 +225,10 @@
                                                     data-activo="@usuario.Activo.ToString().ToLowerInvariant()">
 
                                                 <i class="bi bi-pencil-square"></i>
+
                                             </button>
 
+                                            <!-- Restablecer contraseña -->
                                             <button type="button"
                                                     class="btn-icon key js-restablecer-password"
                                                     title="Restablecer contraseña"
@@ -213,8 +236,10 @@
                                                     data-usuario="@usuario.NombreUsuario">
 
                                                 <i class="bi bi-key"></i>
+
                                             </button>
 
+                                            <!-- Eliminar usuario -->
                                             <button type="button"
                                                     class="btn-icon lock js-eliminar-usuario"
                                                     title="Eliminar usuario"
@@ -222,10 +247,13 @@
                                                     data-usuario="@usuario.NombreUsuario">
 
                                                 <i class="bi bi-trash"></i>
+
                                             </button>
 
                                         </div>
+
                                     </td>
+
                                 </tr>
                             }
                         }
@@ -235,7 +263,8 @@
                                 <td colspan="8"
                                     class="text-center text-muted py-4">
 
-                                    No hay usuarios que coincidan con la búsqueda.
+                                    No hay usuarios registrados.
+
                                 </td>
                             </tr>
                         }
@@ -246,10 +275,17 @@
 
             </div>
 
+            <!-- Pie y paginación de usuarios -->
             <div class="tabla-footer">
-                <span>
+
+                <span id="resultadoUsuarios">
                     Mostrando @Model.ListaUsuarios.Count usuarios
                 </span>
+
+                <div id="paginacionUsuarios"
+                     class="paginacion-tabla">
+                </div>
+
             </div>
 
         </div>
@@ -262,68 +298,112 @@
             <div class="modal-preview bitacora-preview">
 
                 <div class="preview-header">
+
                     <h3>
                         <i class="bi bi-clipboard-data"></i>
                         Bitácora de actividades
                     </h3>
+
                 </div>
 
-                <!-- Filtros procesados en C# -->
-                <form method="get"
-                      class="filtros-bitacora">
+                <!-- ========================================================
+                     FILTROS AUTOMÁTICOS DE BITÁCORA
+                     No recargan la página
+                     ======================================================== -->
+                <div class="filtros-bitacora">
 
-                    <select asp-for="FiltroNombre">
-                        <option value="">Todos los nombres</option>
+                    <!-- Filtro por nombre -->
+                    <select id="filtroNombre">
+
+                        <option value="">
+                            Todos los nombres
+                        </option>
 
                         @foreach (var nombre in Model.ListaNombresBitacora)
                         {
-                            <option value="@nombre">@nombre</option>
+                            <option value="@nombre">
+                                @nombre
+                            </option>
                         }
+
                     </select>
 
-                    <select asp-for="FiltroModulo">
-                        <option value="">Todos los módulos</option>
+                    <!-- Filtro por módulo -->
+                    <select id="filtroModulo">
+
+                        <option value="">
+                            Todos los módulos
+                        </option>
 
                         @foreach (var modulo in Model.ListaModulosBitacora)
                         {
-                            <option value="@modulo">@modulo</option>
+                            <option value="@modulo">
+                                @modulo
+                            </option>
                         }
+
                     </select>
 
-                    <select asp-for="FiltroAccion">
-                        <option value="">Todas las acciones</option>
+                    <!-- Filtro por acción -->
+                    <select id="filtroAccion">
+
+                        <option value="">
+                            Todas las acciones
+                        </option>
 
                         @foreach (var accion in Model.ListaAccionesBitacora)
                         {
-                            <option value="@accion">@accion</option>
+                            <option value="@accion">
+                                @accion
+                            </option>
                         }
+
                     </select>
 
-                    <input asp-for="FechaInicio"
+                    <!-- Fecha inicial -->
+                    <input id="filtroFechaInicio"
                            type="date"
                            title="Fecha inicial" />
 
-                    <input asp-for="FechaFin"
+                    <!-- Fecha final -->
+                    <input id="filtroFechaFin"
                            type="date"
                            title="Fecha final" />
 
-                    <button type="submit"
-                            class="btn-buscar">
+                    <!-- Cantidad de resultados -->
+                    <div class="cantidad-resultados">
 
-                        Buscar
+                        <label for="cantidadBitacora">
+                            Mostrar:
+                        </label>
+
+                        <select id="cantidadBitacora">
+                            <option value="10" selected>10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+
+                    </div>
+
+                    <!-- Limpiar filtros -->
+                    <button type="button"
+                            id="btnLimpiarFiltrosBitacora"
+                            class="btn-limpiar">
+
+                        <i class="bi bi-eraser"></i>
+                        Limpiar
+
                     </button>
 
-                    <a asp-page="/Cuenta/AdminVista"
-                       class="btn-limpiar">
-
-                        Limpiar
-                    </a>
-
-                </form>
+                </div>
 
                 <div class="tabla-wrap">
 
-                    <table class="tabla-bitacora">
+                    <table id="tablaBitacora"
+                           class="tabla-bitacora">
 
                         <thead>
                             <tr>
@@ -368,7 +448,13 @@
                                         claseAccion = "eliminacion";
                                     }
 
-                                    <tr>
+                                    <tr class="fila-bitacora"
+                                        data-nombre="@(item.NombreCompleto ?? string.Empty)"
+                                        data-correo="@(item.Correo ?? string.Empty)"
+                                        data-modulo="@item.Modulo"
+                                        data-accion="@item.Accion"
+                                        data-fecha="@item.FechaHora.ToString("yyyy-MM-dd")">
+
                                         <td>
                                             @item.FechaHora.ToString(
                                                 "dd/MM/yyyy hh:mm tt")
@@ -384,7 +470,9 @@
                                                 ?? "Sin correo")
                                         </td>
 
-                                        <td>@item.Modulo</td>
+                                        <td>
+                                            @item.Modulo
+                                        </td>
 
                                         <td>
                                             <span class="tag @claseAccion">
@@ -392,7 +480,10 @@
                                             </span>
                                         </td>
 
-                                        <td>@item.Descripcion</td>
+                                        <td>
+                                            @item.Descripcion
+                                        </td>
+
                                     </tr>
                                 }
                             }
@@ -402,7 +493,8 @@
                                     <td colspan="6"
                                         class="text-center text-muted py-4">
 
-                                        No hay registros que coincidan con los filtros.
+                                        No hay registros en la bitácora.
+
                                     </td>
                                 </tr>
                             }
@@ -413,10 +505,17 @@
 
                 </div>
 
+                <!-- Pie y paginación de bitácora -->
                 <div class="tabla-footer">
-                    <span>
+
+                    <span id="resultadoBitacora">
                         Mostrando @Model.ListaBitacora.Count registros
                     </span>
+
+                    <div id="paginacionBitacora"
+                         class="paginacion-tabla">
+                    </div>
+
                 </div>
 
             </div>
@@ -444,6 +543,7 @@
                         class="btn-cerrar-modal js-cerrar-nuevo">
 
                     <i class="bi bi-x-lg"></i>
+
                 </button>
 
             </div>
@@ -521,6 +621,7 @@
                                     title="Mostrar u ocultar contraseña">
 
                                 <i class="bi bi-eye"></i>
+
                             </button>
 
                         </div>
@@ -542,6 +643,7 @@
                                     title="Mostrar u ocultar contraseña">
 
                                 <i class="bi bi-eye"></i>
+
                             </button>
 
                         </div>
@@ -552,18 +654,22 @@
                 <div class="checks-preview">
 
                     <label>
+
                         <input asp-for="UsuarioForm.Activo"
                                type="checkbox" />
 
                         Usuario activo
+
                     </label>
 
                     <label>
+
                         <input type="checkbox"
                                checked
                                disabled />
 
                         Requiere cambio de contraseña al iniciar sesión
+
                     </label>
 
                 </div>
@@ -574,6 +680,7 @@
                             class="btn-cancelar js-cerrar-nuevo">
 
                         Cancelar
+
                     </button>
 
                     <button type="submit"
@@ -581,6 +688,7 @@
 
                         <i class="bi bi-save"></i>
                         Guardar usuario
+
                     </button>
 
                 </div>
@@ -610,6 +718,7 @@
                         class="btn-cerrar-modal js-cerrar-editar">
 
                     <i class="bi bi-x-lg"></i>
+
                 </button>
 
             </div>
@@ -675,17 +784,21 @@
                 <div class="checks-preview">
 
                     <label>
+
                         <input id="editActivo"
                                name="UsuarioForm.Activo"
                                type="checkbox"
                                value="true" />
 
                         Usuario activo
+
                     </label>
 
+                    <!-- Permite enviar false cuando el checkbox está desmarcado -->
                     <input type="hidden"
                            name="UsuarioForm.Activo"
                            value="false" />
+
                 </div>
 
                 <div class="preview-actions">
@@ -694,6 +807,7 @@
                             class="btn-cancelar js-cerrar-editar">
 
                         Cancelar
+
                     </button>
 
                     <button type="submit"
@@ -701,6 +815,7 @@
 
                         <i class="bi bi-save"></i>
                         Guardar cambios
+
                     </button>
 
                 </div>
@@ -731,6 +846,7 @@
                         onclick="cerrarModal('modalConfigurarReporte')">
 
                     <i class="bi bi-x-lg"></i>
+
                 </button>
 
             </div>
@@ -745,23 +861,29 @@
                     <div class="reporte-filtros-grid">
 
                         <div class="campo-reporte">
+
                             <label>Fecha inicial:</label>
 
                             <input name="fechaInicio"
                                    type="date" />
+
                         </div>
 
                         <div class="campo-reporte">
+
                             <label>Fecha final:</label>
 
                             <input name="fechaFin"
                                    type="date" />
+
                         </div>
 
                         <div class="campo-reporte">
+
                             <label>Nombre:</label>
 
                             <select name="filtroNombre">
+
                                 <option value="">
                                     Todos los nombres
                                 </option>
@@ -774,13 +896,17 @@
                                         @nombre
                                     </option>
                                 }
+
                             </select>
+
                         </div>
 
                         <div class="campo-reporte">
+
                             <label>Correo:</label>
 
                             <select name="filtroCorreo">
+
                                 <option value="">
                                     Todos los correos
                                 </option>
@@ -793,13 +919,17 @@
                                         @correo
                                     </option>
                                 }
+
                             </select>
+
                         </div>
 
                         <div class="campo-reporte">
+
                             <label>Módulo:</label>
 
                             <select name="filtroModulo">
+
                                 <option value="">
                                     Todos los módulos
                                 </option>
@@ -812,13 +942,17 @@
                                         @modulo
                                     </option>
                                 }
+
                             </select>
+
                         </div>
 
                         <div class="campo-reporte">
+
                             <label>Acción:</label>
 
                             <select name="filtroAccion">
+
                                 <option value="">
                                     Todas las acciones
                                 </option>
@@ -831,7 +965,9 @@
                                         @accion
                                     </option>
                                 }
+
                             </select>
+
                         </div>
 
                     </div>
@@ -845,6 +981,7 @@
                             onclick="cerrarModal('modalConfigurarReporte')">
 
                         Cancelar
+
                     </button>
 
                     <button type="submit"
@@ -852,6 +989,7 @@
 
                         <i class="bi bi-file-earmark-check"></i>
                         Generar reporte
+
                     </button>
 
                 </div>
@@ -863,14 +1001,13 @@
     </div>
 
     <!-- ================================================================
-     MODAL DE VISTA PREVIA DEL REPORTE
-     ================================================================ -->
+         MODAL VISTA PREVIA DEL REPORTE
+         ================================================================ -->
     <div id="modalVistaPreviaReporte"
          class="modal-cuenta-overlay">
 
         <div class="modal-vista-previa-reporte">
 
-            <!-- Encabezado de la ventana flotante -->
             <div class="modal-reporte-header">
 
                 <h3>
@@ -884,11 +1021,11 @@
                         title="Cerrar">
 
                     <i class="bi bi-x-lg"></i>
+
                 </button>
 
             </div>
 
-            <!-- Botones de la vista previa -->
             <div class="vista-previa-acciones">
 
                 <button type="button"
@@ -897,11 +1034,11 @@
 
                     <i class="bi bi-printer-fill"></i>
                     Descargar / Imprimir
+
                 </button>
 
             </div>
 
-            <!-- Aquí se carga ReporteBitacora.cshtml -->
             <div class="iframe-reporte-contenedor">
 
                 <iframe id="iframeReporteBitacora"
@@ -918,6 +1055,7 @@
     <!-- ================================================================
          FORMULARIOS OCULTOS
          ================================================================ -->
+    <!-- Restablecer contraseña -->
     <form id="formRestablecerPassword"
           method="post"
           asp-page-handler="RestablecerPassword">
@@ -927,8 +1065,10 @@
         <input type="hidden"
                id="passwordIdUsuario"
                name="idUsuario" />
+
     </form>
 
+    <!-- Eliminar usuario -->
     <form id="formEliminarUsuario"
           method="post"
           asp-page-handler="EliminarUsuario">
@@ -938,11 +1078,13 @@
         <input type="hidden"
                id="eliminarIdUsuario"
                name="idUsuario" />
+
     </form>
 
     <!-- ================================================================
          MENSAJES ENVIADOS DESDE C#
          ================================================================ -->
+
     <input type="hidden"
            id="mensajeExito"
            value="@TempData["Exito"]" />

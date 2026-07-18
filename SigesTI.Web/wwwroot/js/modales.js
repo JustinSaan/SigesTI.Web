@@ -254,6 +254,357 @@ function abrirModalDesdeServidor() {
 }
 
 /* ==========================================================================
+   TABLAS DEL MÓDULO CUENTA
+   Filtrado y paginación sin recargar la página.
+   ========================================================================== */
+
+let paginaUsuarios = 1;
+let paginaBitacora = 1;
+
+
+/**
+ * Normaliza un texto para realizar búsquedas.
+ */
+function normalizarTexto(texto) {
+    return (texto || "")
+        .toString()
+        .trim()
+        .toLocaleLowerCase("es-MX");
+}
+
+
+/**
+ * Crea los botones de una paginación.
+ */
+function crearPaginacion(
+    contenedorId,
+    paginaActual,
+    totalPaginas,
+    cambiarPagina
+) {
+    const contenedor =
+        document.getElementById(contenedorId);
+
+    if (!contenedor) {
+        return;
+    }
+
+    contenedor.innerHTML = "";
+
+    if (totalPaginas <= 1) {
+        return;
+    }
+
+    const botonAnterior =
+        document.createElement("button");
+
+    botonAnterior.type = "button";
+    botonAnterior.innerHTML = "&lsaquo;";
+    botonAnterior.disabled = paginaActual === 1;
+
+    botonAnterior.addEventListener("click", function () {
+        cambiarPagina(paginaActual - 1);
+    });
+
+    contenedor.appendChild(botonAnterior);
+
+    for (
+        let numero = 1;
+        numero <= totalPaginas;
+        numero++
+    ) {
+        const boton =
+            document.createElement("button");
+
+        boton.type = "button";
+        boton.textContent = numero;
+
+        if (numero === paginaActual) {
+            boton.classList.add("active");
+        }
+
+        boton.addEventListener("click", function () {
+            cambiarPagina(numero);
+        });
+
+        contenedor.appendChild(boton);
+    }
+
+    const botonSiguiente =
+        document.createElement("button");
+
+    botonSiguiente.type = "button";
+    botonSiguiente.innerHTML = "&rsaquo;";
+    botonSiguiente.disabled =
+        paginaActual === totalPaginas;
+
+    botonSiguiente.addEventListener("click", function () {
+        cambiarPagina(paginaActual + 1);
+    });
+
+    contenedor.appendChild(botonSiguiente);
+}
+
+
+/* ==========================================================================
+   USUARIOS
+   ========================================================================== */
+
+function actualizarTablaUsuarios() {
+    const buscador =
+        document.getElementById("buscarUsuario");
+
+    const selectorCantidad =
+        document.getElementById("cantidadUsuarios");
+
+    const resultado =
+        document.getElementById("resultadoUsuarios");
+
+    const filas = Array.from(
+        document.querySelectorAll(".fila-usuario")
+    );
+
+    if (!selectorCantidad) {
+        return;
+    }
+
+    const textoBusqueda =
+        normalizarTexto(buscador ? buscador.value : "");
+
+    const cantidad =
+        parseInt(selectorCantidad.value, 10);
+
+    const filasFiltradas = filas.filter(function (fila) {
+        const contenido =
+            normalizarTexto(fila.innerText);
+
+        return contenido.includes(textoBusqueda);
+    });
+
+    const totalPaginas = Math.max(
+        1,
+        Math.ceil(filasFiltradas.length / cantidad)
+    );
+
+    if (paginaUsuarios > totalPaginas) {
+        paginaUsuarios = totalPaginas;
+    }
+
+    const inicio =
+        (paginaUsuarios - 1) * cantidad;
+
+    const fin =
+        inicio + cantidad;
+
+    filas.forEach(function (fila) {
+        fila.style.display = "none";
+    });
+
+    filasFiltradas
+        .slice(inicio, fin)
+        .forEach(function (fila) {
+            fila.style.display = "";
+        });
+
+    if (resultado) {
+        if (filasFiltradas.length === 0) {
+            resultado.textContent =
+                "No se encontraron usuarios";
+        } else {
+            const desde = inicio + 1;
+            const hasta = Math.min(
+                fin,
+                filasFiltradas.length
+            );
+
+            resultado.textContent =
+                "Mostrando " +
+                desde +
+                " a " +
+                hasta +
+                " de " +
+                filasFiltradas.length +
+                " usuarios";
+        }
+    }
+
+    crearPaginacion(
+        "paginacionUsuarios",
+        paginaUsuarios,
+        totalPaginas,
+        function (pagina) {
+            paginaUsuarios = pagina;
+            actualizarTablaUsuarios();
+        }
+    );
+}
+
+
+/* ==========================================================================
+   BITÁCORA
+   ========================================================================== */
+
+function actualizarTablaBitacora() {
+    const nombre =
+        normalizarTexto(
+            document.getElementById("filtroNombre")?.value
+        );
+
+    const modulo =
+        normalizarTexto(
+            document.getElementById("filtroModulo")?.value
+        );
+
+    const accion =
+        normalizarTexto(
+            document.getElementById("filtroAccion")?.value
+        );
+
+    const fechaInicio =
+        document.getElementById("filtroFechaInicio")?.value || "";
+
+    const fechaFin =
+        document.getElementById("filtroFechaFin")?.value || "";
+
+    const selectorCantidad =
+        document.getElementById("cantidadBitacora");
+
+    const resultado =
+        document.getElementById("resultadoBitacora");
+
+    const filas = Array.from(
+        document.querySelectorAll(".fila-bitacora")
+    );
+
+    if (!selectorCantidad) {
+        return;
+    }
+
+    const cantidad =
+        parseInt(selectorCantidad.value, 10);
+
+    const filasFiltradas = filas.filter(function (fila) {
+        const nombreFila =
+            normalizarTexto(fila.dataset.nombre);
+
+        const moduloFila =
+            normalizarTexto(fila.dataset.modulo);
+
+        const accionFila =
+            normalizarTexto(fila.dataset.accion);
+
+        const fechaFila =
+            fila.dataset.fecha || "";
+
+        const cumpleNombre =
+            !nombre || nombreFila === nombre;
+
+        const cumpleModulo =
+            !modulo || moduloFila === modulo;
+
+        const cumpleAccion =
+            !accion || accionFila === accion;
+
+        const cumpleFechaInicio =
+            !fechaInicio || fechaFila >= fechaInicio;
+
+        const cumpleFechaFin =
+            !fechaFin || fechaFila <= fechaFin;
+
+        return (
+            cumpleNombre &&
+            cumpleModulo &&
+            cumpleAccion &&
+            cumpleFechaInicio &&
+            cumpleFechaFin
+        );
+    });
+
+    const totalPaginas = Math.max(
+        1,
+        Math.ceil(filasFiltradas.length / cantidad)
+    );
+
+    if (paginaBitacora > totalPaginas) {
+        paginaBitacora = totalPaginas;
+    }
+
+    const inicio =
+        (paginaBitacora - 1) * cantidad;
+
+    const fin =
+        inicio + cantidad;
+
+    filas.forEach(function (fila) {
+        fila.style.display = "none";
+    });
+
+    filasFiltradas
+        .slice(inicio, fin)
+        .forEach(function (fila) {
+            fila.style.display = "";
+        });
+
+    if (resultado) {
+        if (filasFiltradas.length === 0) {
+            resultado.textContent =
+                "No se encontraron registros";
+        } else {
+            const desde = inicio + 1;
+            const hasta = Math.min(
+                fin,
+                filasFiltradas.length
+            );
+
+            resultado.textContent =
+                "Mostrando " +
+                desde +
+                " a " +
+                hasta +
+                " de " +
+                filasFiltradas.length +
+                " registros";
+        }
+    }
+
+    crearPaginacion(
+        "paginacionBitacora",
+        paginaBitacora,
+        totalPaginas,
+        function (pagina) {
+            paginaBitacora = pagina;
+            actualizarTablaBitacora();
+        }
+    );
+}
+
+
+/**
+ * Limpia todos los filtros de la bitácora.
+ */
+function limpiarFiltrosBitacora() {
+    const campos = [
+        "filtroNombre",
+        "filtroModulo",
+        "filtroAccion",
+        "filtroFechaInicio",
+        "filtroFechaFin"
+    ];
+
+    campos.forEach(function (id) {
+        const campo =
+            document.getElementById(id);
+
+        if (campo) {
+            campo.value = "";
+        }
+    });
+
+    paginaBitacora = 1;
+    actualizarTablaBitacora();
+}
+
+/* ==========================================================================
    EVENTOS GENERALES
    ========================================================================== */
 
@@ -269,6 +620,88 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const formReporteBitacora =
         document.getElementById("formReporteBitacora");
+
+    /* Buscador y paginación de usuarios */
+    const buscarUsuario =
+        document.getElementById("buscarUsuario");
+
+    const cantidadUsuarios =
+        document.getElementById("cantidadUsuarios");
+
+    if (buscarUsuario) {
+        buscarUsuario.addEventListener(
+            "input",
+            function () {
+                paginaUsuarios = 1;
+                actualizarTablaUsuarios();
+            }
+        );
+    }
+
+    if (cantidadUsuarios) {
+        cantidadUsuarios.addEventListener(
+            "change",
+            function () {
+                paginaUsuarios = 1;
+                actualizarTablaUsuarios();
+            }
+        );
+    }
+
+
+    /* Filtros y paginación de bitácora */
+    const filtrosBitacora = [
+        "filtroNombre",
+        "filtroModulo",
+        "filtroAccion",
+        "filtroFechaInicio",
+        "filtroFechaFin"
+    ];
+
+    filtrosBitacora.forEach(function (id) {
+        const campo =
+            document.getElementById(id);
+
+        if (campo) {
+            campo.addEventListener(
+                "change",
+                function () {
+                    paginaBitacora = 1;
+                    actualizarTablaBitacora();
+                }
+            );
+        }
+    });
+
+    const cantidadBitacora =
+        document.getElementById("cantidadBitacora");
+
+    if (cantidadBitacora) {
+        cantidadBitacora.addEventListener(
+            "change",
+            function () {
+                paginaBitacora = 1;
+                actualizarTablaBitacora();
+            }
+        );
+    }
+
+    const btnLimpiarFiltros =
+        document.getElementById(
+            "btnLimpiarFiltrosBitacora"
+        );
+
+    if (btnLimpiarFiltros) {
+        btnLimpiarFiltros.addEventListener(
+            "click",
+            limpiarFiltrosBitacora
+        );
+    }
+
+
+    /* Carga inicial */
+    actualizarTablaUsuarios();
+    actualizarTablaBitacora();
 
     if (formReporteBitacora) {
         formReporteBitacora.addEventListener(
