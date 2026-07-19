@@ -10,6 +10,9 @@ namespace SigesTI.Web.Data
         {
         }
 
+        public DbSet<UsuarioSistema> UsuariosSistema { get; set; }
+        public DbSet<BitacoraUsuario> BitacoraUsuarios { get; set; }
+
         public DbSet<SigesTI.Web.Models.Personal> Personal { get; set; }
         public DbSet<Solicitud> Solicitudes { get; set; }
 

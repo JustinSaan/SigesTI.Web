@@ -1,0 +1,1252 @@
+﻿/* ==========================================================================
+   ADMINISTRACIÓN DE CUENTAS
+   Vista exclusiva para usuarios con rol Administrador
+   ========================================================================== */
+
+html,
+body {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+}
+
+
+/* ==========================================================================
+   CONTENEDOR PRINCIPAL
+   ========================================================================== */
+
+.cuenta-admin {
+    min-height: 100vh;
+    padding: 26px;
+    background: radial-gradient( circle at top right, rgba(37, 99, 235, .25), transparent 34% ), radial-gradient( circle at bottom left, rgba(56, 189, 248, .13), transparent 30% ), #0f172a;
+}
+
+.cuenta-panel {
+    padding: 24px;
+    background: rgba(15, 23, 42, .72);
+    border: 1px solid rgba(148, 163, 184, .18);
+    border-radius: 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .38);
+}
+
+
+/* ==========================================================================
+   ENCABEZADO
+   ========================================================================== */
+
+.cuenta-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+    .cuenta-top h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 850;
+    }
+
+    .cuenta-top p {
+        margin: 6px 0 0;
+        color: #94a3b8;
+    }
+
+.cuenta-actions {
+    display: flex;
+    gap: 12px;
+}
+
+
+/* ==========================================================================
+   BOTONES PRINCIPALES
+   ========================================================================== */
+
+.btn-outline-cuenta,
+.btn-primary-cuenta {
+    padding: 12px 18px;
+    color: #f8fafc;
+    font-weight: 800;
+    border-radius: 14px;
+    transition: .18s ease;
+}
+
+.btn-outline-cuenta {
+    background: rgba(15, 23, 42, .75);
+    border: 1px solid rgba(148, 163, 184, .25);
+}
+
+.btn-primary-cuenta {
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    border: none;
+    box-shadow: 0 0 26px rgba(56, 189, 248, .28);
+}
+
+    .btn-outline-cuenta:hover,
+    .btn-primary-cuenta:hover {
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+    }
+
+
+/* ==========================================================================
+   TARJETAS DE RESUMEN
+   ========================================================================== */
+
+.cards-resumen {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.card-resumen {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    min-height: 126px;
+    padding: 18px;
+    background: linear-gradient( 145deg, rgba(30, 41, 59, .96), rgba(15, 23, 42, .92) );
+    border: 1px solid rgba(148, 163, 184, .18);
+    border-radius: 18px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04), 0 16px 38px rgba(0, 0, 0, .28);
+}
+
+.icono-resumen {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    min-width: 56px;
+    height: 56px;
+    font-size: 1.45rem;
+    border-radius: 18px;
+}
+
+    .icono-resumen.azul {
+        color: #60a5fa;
+        background: rgba(37, 99, 235, .22);
+    }
+
+    .icono-resumen.verde {
+        color: #4ade80;
+        background: rgba(34, 197, 94, .16);
+    }
+
+    .icono-resumen.morado {
+        color: #c084fc;
+        background: rgba(168, 85, 247, .18);
+    }
+
+.card-resumen span {
+    display: block;
+    color: #cbd5e1;
+    font-size: .9rem;
+    font-weight: 700;
+}
+
+.card-resumen strong {
+    display: block;
+    margin: 5px 0;
+    color: #ffffff;
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.card-resumen small {
+    color: #64748b;
+    font-size: .78rem;
+}
+
+
+/* ==========================================================================
+   PANELES DE USUARIOS Y BITÁCORA
+   ========================================================================== */
+
+.usuarios-box,
+.modal-preview {
+    background: linear-gradient( 145deg, rgba(30, 41, 59, .96), rgba(15, 23, 42, .94) );
+    border: 1px solid rgba(148, 163, 184, .18);
+    border-radius: 20px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, .32);
+}
+
+.usuarios-box {
+    margin-bottom: 22px;
+    overflow: hidden;
+}
+
+.modal-preview {
+    padding: 18px;
+}
+
+.paneles-inferiores {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+}
+
+
+/* ==========================================================================
+   ENCABEZADO DE LA TABLA DE USUARIOS
+   ========================================================================== */
+
+.usuarios-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    border-bottom: 1px solid rgba(148, 163, 184, .16);
+}
+
+    .usuarios-header h2 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 850;
+    }
+
+.usuarios-tools {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+
+/* --------------------------------------------------------------------------
+   BUSCADOR DE USUARIOS
+   -------------------------------------------------------------------------- */
+
+.usuarios-box .usuarios-header .usuarios-tools {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.usuarios-box .usuarios-header .search-box {
+    position: relative !important;
+    width: 270px !important;
+}
+
+    .usuarios-box .usuarios-header .search-box input {
+        width: 270px !important;
+        height: 42px !important;
+        padding: 11px 42px 11px 14px !important;
+        color: #f8fafc !important;
+        background: rgba(15, 23, 42, .84) !important;
+        border: 1px solid rgba(148, 163, 184, .22) !important;
+        border-radius: 14px !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+        .usuarios-box .usuarios-header .search-box input::placeholder {
+            color: #64748b !important;
+            opacity: 1 !important;
+        }
+
+        .usuarios-box .usuarios-header .search-box input:focus {
+            border-color: rgba(56, 189, 248, .65) !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, .12) !important;
+        }
+
+    .usuarios-box .usuarios-header .search-box i {
+        position: absolute !important;
+        top: 50% !important;
+        right: 14px !important;
+        color: #94a3b8 !important;
+        pointer-events: none !important;
+        transform: translateY(-50%) !important;
+    }
+
+
+/* --------------------------------------------------------------------------
+   BOTONES BUSCAR Y LIMPIAR
+   -------------------------------------------------------------------------- */
+
+.usuarios-box .btn-buscar,
+.bitacora-preview .btn-buscar {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 42px !important;
+    padding: 0 16px !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    text-decoration: none !important;
+    background: linear-gradient(135deg, #2563eb, #38bdf8) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+}
+
+.usuarios-box .btn-limpiar,
+.bitacora-preview .btn-limpiar {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 42px !important;
+    padding: 0 16px !important;
+    color: #e2e8f0 !important;
+    font-weight: 800 !important;
+    text-decoration: none !important;
+    background: rgba(100, 116, 139, .26) !important;
+    border: 1px solid rgba(148, 163, 184, .22) !important;
+    border-radius: 12px !important;
+    cursor: pointer !important;
+}
+
+    .usuarios-box .btn-buscar:hover,
+    .usuarios-box .btn-limpiar:hover,
+    .bitacora-preview .btn-buscar:hover,
+    .bitacora-preview .btn-limpiar:hover {
+        color: #ffffff !important;
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+    }
+
+
+/* --------------------------------------------------------------------------
+   FILTROS DE LA BITÁCORA
+   -------------------------------------------------------------------------- */
+
+.bitacora-preview .filtros-bitacora {
+    display: grid !important;
+    grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(180px, 1fr) minmax(150px, .8fr) minmax(150px, .8fr) auto auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+}
+
+
+    /* Selects de los filtros */
+    .bitacora-preview .filtros-bitacora select {
+        width: 100% !important;
+        height: 42px !important;
+        padding: 9px 38px 9px 12px !important;
+        color: #f8fafc !important;
+        background-color: rgba(15, 23, 42, .84) !important;
+        border: 1px solid rgba(148, 163, 184, .22) !important;
+        border-radius: 12px !important;
+        outline: none !important;
+        box-shadow: none !important;
+        color-scheme: dark;
+    }
+
+
+    /* Inputs de fecha */
+    .bitacora-preview .filtros-bitacora input[type="date"] {
+        width: 100% !important;
+        height: 42px !important;
+        padding: 9px 12px !important;
+        color: #f8fafc !important;
+        background-color: rgba(15, 23, 42, .84) !important;
+        border: 1px solid rgba(148, 163, 184, .22) !important;
+        border-radius: 12px !important;
+        outline: none !important;
+        box-shadow: none !important;
+        color-scheme: dark;
+    }
+
+
+        /* Ícono del calendario */
+        .bitacora-preview
+        .filtros-bitacora
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            filter: invert(78%) sepia(15%) saturate(565%) hue-rotate(176deg);
+        }
+
+
+        /* Enfoque de selects y fechas */
+        .bitacora-preview .filtros-bitacora select:focus,
+        .bitacora-preview .filtros-bitacora input[type="date"]:focus {
+            border-color: rgba(56, 189, 248, .65) !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, .12) !important;
+        }
+
+
+    /* Opciones desplegables */
+    .bitacora-preview .filtros-bitacora select option {
+        color: #f8fafc !important;
+        background: #0f172a !important;
+    }
+
+
+/* ==========================================================================
+   RESPONSIVE PARA BUSCADOR Y FILTROS
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+    .bitacora-preview .filtros-bitacora {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .usuarios-box .usuarios-header .usuarios-tools {
+        width: 100% !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .usuarios-box .usuarios-header .search-box,
+    .usuarios-box .usuarios-header .search-box input,
+    .usuarios-box .btn-buscar,
+    .usuarios-box .btn-limpiar {
+        width: 100% !important;
+    }
+
+    .bitacora-preview .filtros-bitacora {
+        grid-template-columns: 1fr !important;
+    }
+
+    .bitacora-preview .btn-buscar,
+    .bitacora-preview .btn-limpiar {
+        width: 100% !important;
+    }
+}
+
+
+/* ==========================================================================
+   CONTENEDOR DE TABLAS
+   ========================================================================== */
+
+.tabla-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+
+/* ==========================================================================
+   TABLA DE USUARIOS
+   ========================================================================== */
+
+.tabla-cuenta {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .tabla-cuenta th {
+        padding: 14px 16px;
+        color: #38bdf8;
+        font-size: .76rem;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        background: rgba(15, 23, 42, .88);
+        border-bottom: 1px solid rgba(148, 163, 184, .16);
+    }
+
+    .tabla-cuenta td {
+        padding: 15px 16px;
+        color: #e2e8f0;
+        text-align: center;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(148, 163, 184, .12);
+    }
+
+    .tabla-cuenta tbody tr:hover {
+        background: rgba(56, 189, 248, .07);
+    }
+
+
+/* ==========================================================================
+   TABLA DE BITÁCORA
+   ========================================================================== */
+
+.tabla-bitacora {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .tabla-bitacora th {
+        padding: 14px 18px;
+        color: #38bdf8;
+        font-size: .76rem;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        background: rgba(15, 23, 42, .88);
+        border-bottom: 1px solid rgba(148, 163, 184, .16);
+    }
+
+    .tabla-bitacora td {
+        padding: 15px 16px;
+        color: #e2e8f0;
+        text-align: center;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(148, 163, 184, .12);
+    }
+
+    .tabla-bitacora tbody tr:hover {
+        background: rgba(56, 189, 248, .07);
+    }
+
+
+/* ==========================================================================
+   ETIQUETAS DE ROL, ESTADO Y ACCIONES
+   ========================================================================== */
+
+.badge-rol,
+.badge-estado,
+.badge-password,
+.tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 11px;
+    font-size: .73rem;
+    font-weight: 850;
+    white-space: nowrap;
+    border-radius: 999px;
+}
+
+    .badge-rol.administrador {
+        color: #bfdbfe;
+        background: rgba(59, 130, 246, .13);
+        border: 1px solid #3b82f6;
+    }
+
+    .badge-rol.soporte {
+        color: #bae6fd;
+        background: rgba(56, 189, 248, .12);
+        border: 1px solid #38bdf8;
+    }
+
+    .badge-estado.activo {
+        color: #bbf7d0;
+        background: rgba(34, 197, 94, .12);
+        border: 1px solid #22c55e;
+    }
+
+    .badge-estado.inactivo {
+        color: #fecaca;
+        background: rgba(239, 68, 68, .12);
+        border: 1px solid #ef4444;
+    }
+
+    .badge-password.pendiente {
+        color: #fde68a;
+        background: rgba(245, 158, 11, .12);
+        border: 1px solid #f59e0b;
+    }
+
+    .tag.creacion {
+        color: #bbf7d0;
+        background: rgba(34, 197, 94, .12);
+        border: 1px solid #22c55e;
+    }
+
+    .tag.edicion {
+        color: #fde68a;
+        background: rgba(245, 158, 11, .12);
+        border: 1px solid #f59e0b;
+    }
+
+    .tag.eliminacion {
+        color: #fecaca;
+        background: rgba(239, 68, 68, .12);
+        border: 1px solid #ef4444;
+    }
+
+    .tag.acceso {
+        color: #bae6fd;
+        background: rgba(56, 189, 248, .12);
+        border: 1px solid #38bdf8;
+    }
+
+
+/* ==========================================================================
+   BOTONES DE ACCIÓN DE USUARIOS
+   ========================================================================== */
+
+.acciones-cuenta {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+}
+
+.btn-icon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 11px;
+    transition: .18s ease;
+}
+
+    .btn-icon.edit {
+        background: rgba(37, 99, 235, .85);
+    }
+
+    .btn-icon.key {
+        background: rgba(245, 158, 11, .85);
+    }
+
+    .btn-icon.lock {
+        background: rgba(239, 68, 68, .82);
+    }
+
+    .btn-icon:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+    }
+
+
+/* ==========================================================================
+   PIE DE LAS TABLAS
+   ========================================================================== */
+
+.tabla-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    color: #94a3b8;
+    font-size: .86rem;
+}
+
+
+/* ==========================================================================
+   ENCABEZADOS DE MODALES Y PANELES
+   ========================================================================== */
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+    .preview-header h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 850;
+    }
+
+        .preview-header h3 i {
+            margin-right: 6px;
+        }
+
+    .preview-header i {
+        color: #94a3b8;
+    }
+
+
+/* ==========================================================================
+   FORMULARIOS
+   ========================================================================== */
+
+.form-grid-preview {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+    .form-grid-preview > div {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-grid-preview label,
+    .checks-preview label {
+        margin-bottom: 6px;
+        color: #cbd5e1;
+        font-size: .82rem;
+        font-weight: 750;
+    }
+
+    .form-grid-preview input,
+    .form-grid-preview select,
+    .filtros-bitacora input,
+    .filtros-bitacora select {
+        width: 100%;
+        padding: 11px 12px;
+        color: #f8fafc;
+        background: rgba(15, 23, 42, .84);
+        border: 1px solid rgba(148, 163, 184, .22);
+        border-radius: 12px;
+        outline: none;
+    }
+
+        .form-grid-preview input::placeholder {
+            color: #64748b;
+        }
+
+        .form-grid-preview input:focus,
+        .form-grid-preview select:focus,
+        .filtros-bitacora input:focus,
+        .filtros-bitacora select:focus {
+            border-color: rgba(56, 189, 248, .65);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, .12);
+        }
+
+.checks-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin: 16px 0;
+}
+
+    .checks-preview label {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+
+/* ==========================================================================
+   BOTONES DE FORMULARIOS
+   ========================================================================== */
+
+.preview-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-cancelar,
+.btn-guardar,
+.btn-buscar,
+.btn-limpiar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 42px;
+    padding: 10px 16px;
+    font-weight: 800;
+    text-decoration: none !important;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: .18s ease;
+}
+
+/* Botón cancelar del modal */
+.btn-cancelar {
+    color: #e2e8f0 !important;
+    background: rgba(100, 116, 139, .32);
+    border: 1px solid rgba(148, 163, 184, .25);
+}
+
+/* Botón guardar */
+.btn-guardar {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    border: none;
+    box-shadow: 0 0 18px rgba(56, 189, 248, .18);
+}
+
+/* Botón buscar */
+.btn-buscar {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    border: none;
+    box-shadow: 0 0 18px rgba(56, 189, 248, .16);
+}
+
+/* Botón limpiar */
+.btn-limpiar {
+    color: #e2e8f0 !important;
+    background: rgba(100, 116, 139, .26);
+    border: 1px solid rgba(148, 163, 184, .22);
+}
+
+    /* Efecto al pasar el cursor */
+    .btn-cancelar:hover,
+    .btn-guardar:hover,
+    .btn-buscar:hover,
+    .btn-limpiar:hover {
+        color: #ffffff !important;
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+    }
+
+/* ==========================================================================
+   FILTROS DE BITÁCORA
+   ========================================================================== */
+
+.bitacora-preview .filtros-bitacora {
+    display: grid;
+    grid-template-columns: minmax(170px, 1fr) minmax(170px, 1fr) minmax(170px, 1fr) minmax(145px, .8fr) minmax(145px, .8fr) auto auto;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+    .bitacora-preview .filtros-bitacora input,
+    .bitacora-preview .filtros-bitacora select {
+        width: 100% !important;
+        height: 42px !important;
+        padding: 9px 12px !important;
+        color: #f8fafc !important;
+        background-color: rgba(15, 23, 42, .84) !important;
+        border: 1px solid rgba(148, 163, 184, .22) !important;
+        border-radius: 12px !important;
+        outline: none !important;
+        box-shadow: none;
+    }
+
+        .bitacora-preview .filtros-bitacora input:focus,
+        .bitacora-preview .filtros-bitacora select:focus {
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, .12) !important;
+        }
+
+        /* Mejora el indicador de calendario en modo oscuro */
+        .bitacora-preview .filtros-bitacora input[type="date"] {
+            color-scheme: dark;
+        }
+
+
+/* ==========================================================================
+   CAPA GENERAL DE LOS MODALES
+   ========================================================================== */
+
+.modal-cuenta-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(2, 6, 23, .76);
+    backdrop-filter: blur(9px);
+}
+
+    .modal-cuenta-overlay.show {
+        display: flex;
+    }
+
+.modal-cuenta {
+    width: min(780px, 96vw);
+    padding: 18px;
+    background: linear-gradient( 145deg, rgba(30, 41, 59, .98), rgba(15, 23, 42, .98) );
+    border: 1px solid rgba(148, 163, 184, .18);
+    border-radius: 20px;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, .58);
+}
+
+.btn-cerrar-modal {
+    padding: 6px;
+    color: #94a3b8;
+    font-size: 1rem;
+    background: transparent;
+    border: none;
+    transition: .18s ease;
+}
+
+    .btn-cerrar-modal:hover {
+        color: #f8fafc;
+        transform: scale(1.05);
+    }
+
+
+/* ==========================================================================
+   CAMPO DE CONTRASEÑA
+   ========================================================================== */
+
+.password-box {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    background: rgba(15, 23, 42, .84);
+    border: 1px solid rgba(148, 163, 184, .22);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+    .password-box input {
+        height: 40px;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .password-box button {
+        width: 44px;
+        min-width: 44px;
+        height: 40px;
+        padding: 10px;
+        color: #94a3b8;
+        background: transparent;
+        border: none;
+    }
+
+
+/* ==========================================================================
+   MODAL DE NUEVO USUARIO
+   ========================================================================== */
+
+#modalNuevoUsuario .modal-cuenta {
+    width: min(760px, 96vw);
+}
+
+#modalNuevoUsuario input:not([type="checkbox"]),
+#modalNuevoUsuario select {
+    height: 40px;
+    padding: 9px 11px;
+    border-radius: 8px;
+}
+
+#modalNuevoUsuario .password-box {
+    height: 40px;
+    border-radius: 8px;
+}
+
+    #modalNuevoUsuario .password-box input,
+    #modalNuevoUsuario .password-box button {
+        height: 38px;
+    }
+
+#modalNuevoUsuario .preview-actions {
+    margin-top: 18px;
+}
+
+
+/* ==========================================================================
+   MODAL PARA CONFIGURAR EL REPORTE
+   El contenido del reporte impreso irá en reportes.css.
+   ========================================================================== */
+
+.modal-reporte-config {
+    width: min(800px, 95vw);
+    background: #111c32;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, .65);
+}
+
+.modal-reporte-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 62px;
+    padding: 15px 22px;
+    background: linear-gradient(135deg, #27458c, #243a6c);
+    border-bottom: 2px solid #38bdf8;
+}
+
+    .modal-reporte-header h3 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 1.15rem;
+        font-weight: 800;
+    }
+
+        .modal-reporte-header h3 i {
+            margin-right: 8px;
+        }
+
+.modal-reporte-body {
+    padding: 26px;
+}
+
+.reporte-filtros-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.campo-reporte {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+    .campo-reporte label {
+        color: #cbd5e1;
+        font-size: .88rem;
+        font-weight: 750;
+    }
+
+    .campo-reporte input,
+    .campo-reporte select {
+        width: 100%;
+        height: 43px;
+        padding: 9px 12px;
+        color: #f8fafc;
+        background: #0f172a;
+        border: 1px solid #475569;
+        border-radius: 10px;
+        outline: none;
+    }
+
+        .campo-reporte input:focus,
+        .campo-reporte select:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, .12);
+        }
+
+.modal-reporte-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+    padding: 16px 20px;
+    background: #1e293b;
+    border-top: 1px solid #334155;
+}
+
+.btn-cancelar-reporte,
+.btn-generar-reporte {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 10px 20px;
+    color: #ffffff;
+    font-weight: 800;
+    border: none;
+    border-radius: 10px;
+    transition: .18s ease;
+}
+
+.btn-cancelar-reporte {
+    background: #dc2626;
+    box-shadow: 0 0 18px rgba(220, 38, 38, .22);
+}
+
+.btn-generar-reporte {
+    background: linear-gradient(135deg, #2563eb, #2855d9);
+    box-shadow: 0 0 18px rgba(37, 99, 235, .28);
+}
+
+    .btn-cancelar-reporte:hover,
+    .btn-generar-reporte:hover {
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+    }
+
+
+/* ==========================================================================
+   DISEÑO RESPONSIVO
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+    .cards-resumen {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .filtros-bitacora {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 760px) {
+    .cuenta-admin {
+        padding: 16px;
+    }
+
+    .cuenta-panel {
+        padding: 16px;
+        border-radius: 18px;
+    }
+
+    .cuenta-top,
+    .usuarios-header,
+    .tabla-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .cuenta-actions,
+    .usuarios-tools {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .btn-outline-cuenta,
+    .btn-primary-cuenta,
+    .btn-buscar,
+    .btn-limpiar,
+    .search-box,
+    .search-box input {
+        width: 100%;
+    }
+
+    .cards-resumen,
+    .form-grid-preview,
+    .reporte-filtros-grid,
+    .filtros-bitacora {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-reporte-footer {
+        flex-direction: column;
+    }
+
+    .modal-cuenta-overlay {
+        padding: 12px;
+    }
+
+    .modal-cuenta,
+    .modal-reporte-config {
+        max-height: 92vh;
+        overflow-y: auto;
+    }
+}
+
+/* ==========================================================================
+   MODAL DE VISTA PREVIA DEL REPORTE
+   ========================================================================== */
+
+.modal-vista-previa-reporte {
+    display: flex;
+    flex-direction: column;
+    width: min(1250px, 97vw);
+    height: min(900px, 94vh);
+    background: #dbe2ea;
+    border: 1px solid rgba(56, 189, 248, .30);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 35px 100px rgba(0, 0, 0, .70);
+}
+
+
+/* Barra donde se encuentra el botón de imprimir */
+.vista-previa-acciones {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 14px 20px;
+    background: #e2e8f0;
+    border-bottom: 1px solid #cbd5e1;
+}
+
+
+/* Contenedor del iframe */
+.iframe-reporte-contenedor {
+    flex: 1;
+    padding: 18px;
+    background: #dbe2ea;
+    overflow: hidden;
+}
+
+
+/* Página del reporte cargada dentro del modal */
+#iframeReporteBitacora {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 12px 35px rgba(15, 23, 42, .20);
+}
+
+
+/* Adaptación para pantallas pequeñas */
+@media (max-width: 760px) {
+    .modal-vista-previa-reporte {
+        width: 98vw;
+        height: 96vh;
+    }
+
+    .vista-previa-acciones {
+        justify-content: center;
+    }
+
+        .vista-previa-acciones .btn-generar-reporte {
+            width: 100%;
+        }
+
+    .iframe-reporte-contenedor {
+        padding: 10px;
+    }
+}
+
+/* ==========================================================================
+   CANTIDAD DE RESULTADOS
+   ========================================================================== */
+
+.cantidad-resultados {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .cantidad-resultados label {
+        margin: 0;
+        color: #94a3b8;
+        font-size: .82rem;
+        font-weight: 700;
+    }
+
+    .cantidad-resultados select {
+        width: 76px !important;
+        height: 42px !important;
+        padding: 8px 10px !important;
+        color: #f8fafc !important;
+        background: rgba(15, 23, 42, .84) !important;
+        border: 1px solid rgba(148, 163, 184, .22) !important;
+        border-radius: 10px !important;
+        outline: none !important;
+    }
+
+
+/* ==========================================================================
+   PAGINACIÓN
+   ========================================================================== */
+
+.paginacion-tabla {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 7px;
+}
+
+    /* Botones generales */
+    .paginacion-tabla button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 10px;
+        color: #cbd5e1 !important;
+        font-size: .82rem;
+        font-weight: 750;
+        background: rgba(15, 23, 42, .85) !important;
+        border: 1px solid rgba(148, 163, 184, .22) !important;
+        border-radius: 9px !important;
+        cursor: pointer;
+        outline: none;
+        box-shadow: none !important;
+        transition: .18s ease;
+    }
+
+        /* Página seleccionada */
+        .paginacion-tabla button.active {
+            color: #ffffff !important;
+            background: linear-gradient( 135deg, #2563eb, #38bdf8 ) !important;
+            border-color: #2563eb !important;
+            box-shadow: 0 0 14px rgba(56, 189, 248, .20) !important;
+        }
+
+        /* Efecto al pasar el cursor */
+        .paginacion-tabla button:hover:not(:disabled):not(.active) {
+            color: #ffffff !important;
+            background: rgba(56, 189, 248, .16) !important;
+            border-color: rgba(56, 189, 248, .55) !important;
+            transform: translateY(-1px);
+        }
+
+        /* Botones anterior y siguiente deshabilitados */
+        .paginacion-tabla button:disabled {
+            color: #64748b !important;
+            background: rgba(30, 41, 59, .55) !important;
+            border-color: rgba(100, 116, 139, .18) !important;
+            cursor: not-allowed;
+            opacity: .45;
+        }
+
+        /* Evita el borde blanco de Bootstrap al enfocar */
+        .paginacion-tabla button:focus,
+        .paginacion-tabla button:active {
+            outline: none !important;
+            box-shadow: none !important;
+        }

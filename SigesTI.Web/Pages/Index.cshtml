@@ -1,3 +1,87 @@
 ﻿@page
 @model SigesTI.Web.Pages.IndexModel
 
+@{
+    ViewData["Title"] = "SigesST | Sistema de Gestión de Soporte Técnico";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Bienvenida -->
+    <div class="card dashboard-card mb-4">
+        <div class="card-body">
+            <h2 class="fw-bold mb-2">
+                Bienvenido, Usuario
+            </h2>
+
+            <p class="mb-0 text-light opacity-75">
+                Sistema de Gestión de Solicitudes del Área de Soporte Técnico.
+            </p>
+        </div>
+    </div>
+
+    <!-- Tarjetas -->
+    <div class="row g-4">
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card total-card h-100">
+                <div class="card-body text-center">
+                    <h5>Total Solicitudes</h5>
+                    <h1>@Model.TotalSolicitudes</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card pendiente-card h-100">
+                <div class="card-body text-center">
+                    <h5>Pendientes</h5>
+                    <h1>@Model.SolicitudesPendientes</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card resuelto-card h-100">
+                <div class="card-body text-center">
+                    <h5>Resueltas</h5>
+                    <h1>@Model.SolicitudesResueltas</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card personal-card h-100">
+                <div class="card-body text-center">
+                    <h5>Personal Registrado</h5>
+                    <h1>@Model.TotalPersonal</h1>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Información -->
+    <div class="card dashboard-card mt-5">
+        <div class="card-body text-center">
+
+            <h5 class="mb-3">Información del Sistema</h5>
+
+            <p class="mb-1">
+                <strong>Versión:</strong> 1.0.0
+            </p>
+
+            <p class="mb-1">
+                <strong>Desarrollado por:</strong>
+                Ing. Justin Sánchez
+            </p>
+
+            <p class="mb-0">
+                <strong>Fecha:</strong>
+                Junio 2026
+            </p>
+
+        </div>
+    </div>
+
+</div>

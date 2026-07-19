@@ -1,0 +1,45 @@
+﻿.dashboard-card {
+    background: rgba(30, 41, 59, 0.65);
+    backdrop-filter: blur(14px);
+    border: 1px solid #334155;
+    border-radius: 18px;
+    color: #f8fafc;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+}
+
+.stat-card {
+    border-radius: 18px;
+    border: none;
+    color: white;
+    transition: .25s;
+}
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+.total-card {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.pendiente-card {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.resuelto-card {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.personal-card {
+    background: linear-gradient(135deg, #0891b2, #0e7490);
+}
+
+.stat-card h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-top: 10px;
+}
+
+.stat-card h5 {
+    opacity: .95;
+}

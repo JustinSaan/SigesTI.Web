@@ -1,26 +1,35 @@
 using Microsoft.EntityFrameworkCore;
-using SigesTI.Web.Data;
 using QuestPDF.Infrastructure;
+using SigesTI.Web.Data;
 
 QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- ------------------------------- ---
+// Conexión con SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-// ----------------------------------------
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add services to the container.
+// Razor Pages
 builder.Services.AddRazorPages();
+
+// Sesiones del sistema
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configuración para producción
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -28,9 +37,38 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseSession();
+
+/*
+ * Protege todos los módulos.
+ * Sin una sesión activa, el usuario regresa al Login.
+ */
+app.Use(async (context, next) =>
+{
+    var ruta = context.Request.Path;
+
+    bool esInicioSesion =
+        ruta.StartsWithSegments("/InicioSesion");
+
+    bool esArchivoEstatico =
+        Path.HasExtension(ruta.Value);
+
+    bool tieneSesion =
+        context.Session.GetInt32("IdUsuario") != null;
+
+    if (!tieneSesion && !esInicioSesion && !esArchivoEstatico)
+    {
+        context.Response.Redirect("/InicioSesion/Login");
+        return;
+    }
+
+    await next();
+});
+
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
 app.MapRazorPages()
    .WithStaticAssets();
 

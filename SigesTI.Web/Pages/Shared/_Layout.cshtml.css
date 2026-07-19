@@ -1,48 +1,190 @@
-﻿/* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-for details on configuring this project to bundle and minify static web assets. */
+﻿/* ==========================================================================
+   LAYOUT SIGESTI - DARK BLUE CRYSTAL GLASS
+   ========================================================================== */
 
-a.navbar-brand {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
+html,
+body {
+    min-height: 100%;
+    margin: 0;
 }
 
-a {
-  color: #0077cc;
+.layout-body {
+    min-height: 100vh;
+    background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 30%), radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.18), transparent 35%), #0f172a;
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
 }
 
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+/* Barra superior */
+.layout-header {
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+    padding: 18px 28px 8px;
 }
 
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+.layout-navbar {
+    background: rgba(15, 23, 42, 0.70);
+    border: 1px solid rgba(56, 189, 248, 0.30);
+    border-radius: 22px;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.border-top {
-  border-top: 1px solid #e5e5e5;
-}
-.border-bottom {
-  border-bottom: 1px solid #e5e5e5;
-}
-
-.box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+.layout-navbar-inner {
+    min-height: 72px;
+    padding: 0 22px;
+    display: grid;
+    grid-template-columns: 220px 1fr 280px;
+    align-items: center;
+    gap: 18px;
 }
 
-button.accept-policy {
-  font-size: 1rem;
-  line-height: inherit;
+/* Logo */
+.layout-brand {
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 18px;
+    border-radius: 16px;
+    text-decoration: none;
+    color: #ffffff !important;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    box-shadow: 0 0 22px rgba(56, 189, 248, 0.16);
 }
 
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px;
+    .layout-brand i {
+        color: #38bdf8;
+        font-size: 1.25rem;
+    }
+
+/* Menú centrado */
+.layout-menu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+}
+
+.layout-link {
+    min-width: 132px;
+    padding: 13px 18px;
+    border-radius: 16px;
+    text-align: center;
+    text-decoration: none;
+    color: #dbeafe !important;
+    font-weight: 700;
+    background: rgba(30, 41, 59, 0.42);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    transition: all 0.25s ease;
+}
+
+    .layout-link i {
+        margin-right: 7px;
+        color: #38bdf8;
+    }
+
+    .layout-link:hover {
+        color: #ffffff !important;
+        background: rgba(56, 189, 248, 0.18);
+        border-color: rgba(56, 189, 248, 0.55);
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.22);
+        transform: translateY(-2px);
+    }
+
+/* Usuario derecha */
+.layout-user {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #cbd5e1;
+    font-weight: 600;
+    padding: 12px 16px;
+    border-radius: 16px;
+    background: rgba(15, 23, 42, 0.48);
+    border: 1px solid rgba(56, 189, 248, 0.22);
+}
+
+    .layout-user i {
+        color: #38bdf8;
+        font-size: 1.25rem;
+    }
+
+    .layout-user strong {
+        color: #ffffff;
+    }
+
+/* Contenido */
+.layout-main {
+    flex: 1;
+    width: 100%;
+}
+
+.layout-content {
+    width: 100%;
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 28px 28px 38px;
+}
+
+/* Footer */
+.layout-footer {
+    border-top: 1px solid rgba(56, 189, 248, 0.22);
+    background: rgba(15, 23, 42, 0.80);
+    color: #94a3b8;
+    font-size: 0.9rem;
+    padding: 16px 0;
+}
+
+    .layout-footer .container-fluid {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .layout-navbar-inner {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        padding: 18px;
+    }
+
+    .layout-menu {
+        flex-wrap: wrap;
+    }
+
+    .layout-user {
+        justify-self: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .layout-header {
+        padding: 12px;
+    }
+
+    .layout-link {
+        width: 100%;
+    }
+
+    .layout-menu {
+        width: 100%;
+    }
+
+    .layout-user {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .layout-content {
+        padding: 20px 14px 30px;
+    }
 }

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace SigesTI.Web.Pages.Cuenta
 {
-    public class IndexModel : PageModel
+    public class SoporteVistaModel : PageModel
     {
         public void OnGet()
         {

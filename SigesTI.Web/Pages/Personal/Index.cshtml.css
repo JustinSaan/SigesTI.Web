@@ -266,6 +266,7 @@
         .modal-dark .form-control:focus,
         .modal-dark .form-select:focus {
             background: #1e293b;
+            backdrop-filter: blur(9px);
             color: white;
         }
 

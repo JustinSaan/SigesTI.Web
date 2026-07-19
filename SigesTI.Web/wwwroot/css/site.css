@@ -1,128 +1,901 @@
+/* ==========================================================================
+   CONFIGURACIÓN GENERAL
+   ========================================================================== */
+
 html {
-  font-size: 14px;
+    position: relative;
+    min-height: 100%;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+body {
+    margin-bottom: 60px;
 }
+
+
+/* ==========================================================================
+   ENFOQUE DE CONTROLES DE BOOTSTRAP
+   ========================================================================== */
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+
+/* ==========================================================================
+   BOTÓN REGISTRAR GENERAL
+   ========================================================================== */
 
 .btn-registrar-custom {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
-    background: linear-gradient(135deg, #2563eb, #3b82f6);
     color: #ffffff !important;
-    border: 1px solid rgba(59, 130, 246, 0.5);
-    border-radius: 10px;
-    text-decoration: none !important;
     font-size: 0.95rem;
     font-weight: 600;
+    text-decoration: none !important;
     cursor: pointer;
-    transition: all 0.25s ease-in-out;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    border-radius: 10px;
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    transition: all 0.25s ease-in-out;
 }
 
     .btn-registrar-custom:hover {
-        background: linear-gradient(135deg, #1d4ed8, #2563eb);
         color: #ffffff !important;
-        transform: translateY(-2px);
+        background: linear-gradient(135deg, #1d4ed8, #2563eb);
         box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+        transform: translateY(-2px);
     }
 
     .btn-registrar-custom:active {
-        transform: translateY(0);
         box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+        transform: translateY(0);
     }
 
     .btn-registrar-custom i {
         font-size: 1rem;
     }
 
-.swal2-popup.swal-dark {
-    background: #0f172a !important;
-    color: #f8fafc !important;
-    border: 1px solid #334155 !important;
-    border-radius: 16px !important;
+
+/* ==========================================================================
+   SWEETALERT GLOBAL - DARK BLUE SIGESTS
+   Estas clases se utilizan en todos los módulos del sistema.
+   ========================================================================== */
+
+/*
+   Fondo exterior de SweetAlert.
+   También garantiza que la alerta aparezca encima de cualquier modal.
+*/
+.swal2-container {
+    z-index: 99999 !important;
+    background: rgba(2, 6, 23, 0.48) !important;
+    backdrop-filter: blur(3px);
 }
 
+/* Ventana principal de SweetAlert */
+.swal2-popup.swal-dark-blue,
+.swal2-popup.swal-dark {
+    color: #f8fafc !important;
+    background: linear-gradient( 145deg, rgba(30, 41, 59, 0.99), rgba(15, 23, 42, 0.99) ) !important;
+    border: 1px solid rgba(56, 189, 248, 0.30) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65), 0 0 32px rgba(37, 99, 235, 0.14) !important;
+}
+
+/*
+   Este selector aplica también el diseño Dark Blue cuando alguna alerta
+   no haya recibido la clase personalizada swal-dark-blue.
+*/
+.swal2-popup {
+    color: #f8fafc;
+    background: linear-gradient( 145deg, rgba(30, 41, 59, 0.99), rgba(15, 23, 42, 0.99) );
+    border: 1px solid rgba(56, 189, 248, 0.30);
+    border-radius: 18px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65), 0 0 32px rgba(37, 99, 235, 0.14);
+}
+
+/* Título */
 .swal2-title {
     color: #38bdf8 !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
 }
 
+/* Texto o contenido HTML */
 .swal2-html-container {
     color: #cbd5e1 !important;
 }
 
+/* Mensajes de validación */
+.swal2-validation-message {
+    color: #fecaca !important;
+    background: rgba(239, 68, 68, 0.12) !important;
+    border: 1px solid rgba(239, 68, 68, 0.30) !important;
+    border-radius: 10px !important;
+}
+
+/* Botón para cerrar la alerta */
+.swal2-close {
+    color: #94a3b8 !important;
+}
+
+    .swal2-close:hover {
+        color: #ffffff !important;
+    }
+
+/* Contenedor de acciones */
+.swal2-actions {
+    gap: 10px !important;
+}
+
+/* Estilo general de botones */
 .swal-btn-confirm,
 .swal-btn-danger,
 .swal-btn-cancel {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+    min-width: 115px;
     padding: 10px 20px !important;
-    border-radius: 8px !important;
-    font-weight: 700 !important;
-    border: none !important;
-    margin: 0 6px !important;
-    transition: all 0.25s ease !important;
+    margin: 0 !important;
+    font-weight: 800 !important;
     cursor: pointer !important;
+    border: none !important;
+    border-radius: 10px !important;
+    transition: all 0.20s ease !important;
 }
 
+/* Botón de aceptar, guardar o continuar */
 .swal-btn-confirm {
-    background: linear-gradient(135deg, #38bdf8, #0ea5e9) !important;
-    color: #0f172a !important;
-}
-
-.swal-btn-danger {
-    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
     color: #ffffff !important;
+    background: linear-gradient( 135deg, #2563eb, #38bdf8 ) !important;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.22) !important;
 }
 
+/* Botón para confirmar eliminación */
+.swal-btn-danger {
+    color: #ffffff !important;
+    background: linear-gradient( 135deg, #ef4444, #dc2626 ) !important;
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.22) !important;
+}
+
+/* Botón cancelar */
 .swal-btn-cancel {
-    background: #334155 !important;
     color: #e2e8f0 !important;
+    background: rgba(100, 116, 139, 0.35) !important;
+    border: 1px solid rgba(148, 163, 184, 0.25) !important;
 }
 
+    /* Efecto al pasar el cursor */
     .swal-btn-confirm:hover,
     .swal-btn-danger:hover,
     .swal-btn-cancel:hover {
+        filter: brightness(1.08);
         transform: translateY(-2px) !important;
     }
 
-.modal-dark .form-select {
-    background-color: #1e293b !important;
+/*
+   Respaldo para alertas que utilicen los botones predeterminados
+   de SweetAlert y no las clases personalizadas.
+*/
+.swal2-confirm {
+    color: #ffffff !important;
+    background: linear-gradient( 135deg, #2563eb, #38bdf8 ) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.22) !important;
+}
+
+.swal2-cancel {
+    color: #e2e8f0 !important;
+    background: rgba(100, 116, 139, 0.35) !important;
+    border: 1px solid rgba(148, 163, 184, 0.25) !important;
+    border-radius: 10px !important;
+}
+
+/* Campo de texto dentro de SweetAlert */
+.swal2-input,
+.swal2-textarea,
+.swal2-select {
     color: #f8fafc !important;
-    border: 1px solid #334155 !important;
+    background: #0f172a !important;
+    border: 1px solid #475569 !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+}
+
+    .swal2-input:focus,
+    .swal2-textarea:focus,
+    .swal2-select:focus {
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12) !important;
+    }
+
+/* Caja donde se muestra una contraseña temporal */
+.swal-password-box {
+    margin-top: 14px;
+    padding: 14px;
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 14px;
+}
+
+    .swal-password-box span {
+        display: block;
+        margin-bottom: 6px;
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+
+    .swal-password-box strong {
+        display: block;
+        color: #38bdf8;
+        font-size: 1.25rem;
+        letter-spacing: 1px;
+    }
+
+
+/* ==========================================================================
+   SELECT DE MODALES OSCUROS
+   ========================================================================== */
+
+.modal-dark .form-select {
     padding-right: 42px !important;
-    background-image: linear-gradient(45deg, transparent 50%, #38bdf8 50%), linear-gradient(135deg, #38bdf8 50%, transparent 50%) !important;
+    color: #f8fafc !important;
+    background-color: #1e293b !important;
+    background-image: linear-gradient( 45deg, transparent 50%, #38bdf8 50% ), linear-gradient( 135deg, #38bdf8 50%, transparent 50% ) !important;
     background-position: calc(100% - 18px) center, calc(100% - 12px) center !important;
-    background-size: 6px 6px, 6px 6px !important;
     background-repeat: no-repeat !important;
+    background-size: 6px 6px, 6px 6px !important;
+    border: 1px solid #334155 !important;
     appearance: none !important;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+
+/* ==========================================================================
+   FORMULARIOS FLOTANTES DE BOOTSTRAP
+   ========================================================================== */
+
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
+    color: var(--bs-secondary-color);
+    text-align: end;
 }
 
-body {
-  margin-bottom: 60px;
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
+    text-align: start;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+
+/* ==========================================================================
+   LAYOUT SIGESTS - DARK BLUE CRYSTAL GLASS
+   ========================================================================== */
+
+body.layout-body {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    color: #f8fafc !important;
+    background: #0f172a !important;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+
+.layout-header {
+    width: 100%;
+    padding: 18px 32px 10px;
+    background: #0f172a;
 }
+
+
+/* ==========================================================================
+   BARRA PRINCIPAL
+   ========================================================================== */
+
+.layout-navbar {
+    width: 100%;
+    min-height: 78px;
+    background: linear-gradient( 135deg, rgba(15, 23, 42, 0.95), rgba(30, 64, 175, 0.82) ) !important;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 22px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(18px);
+}
+
+
+/* ==========================================================================
+   DISTRIBUCIÓN INTERNA DEL MENÚ
+   ========================================================================== */
+
+.layout-navbar-inner {
+    display: grid;
+    grid-template-columns: 180px 1fr 300px;
+    align-items: center;
+    min-height: 78px;
+    padding: 0 26px;
+    gap: 20px;
+}
+
+
+/* ==========================================================================
+   LOGO
+   ========================================================================== */
+
+.layout-brand {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 10px;
+    color: #ffffff !important;
+    font-size: 1.15rem;
+    font-weight: 800;
+    text-decoration: none !important;
+}
+
+    .layout-brand i {
+        color: #38bdf8;
+        font-size: 1.3rem;
+    }
+
+
+/* ==========================================================================
+   MENÚ CENTRADO
+   ========================================================================== */
+
+.layout-menu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+}
+
+.layout-link {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 145px;
+    padding: 13px 20px;
+    gap: 8px;
+    color: #e0f2fe !important;
+    font-size: 0.98rem;
+    font-weight: 700;
+    text-decoration: none !important;
+    background: rgba(15, 23, 42, 0.35);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 16px;
+    transition: all 0.25s ease;
+}
+
+    .layout-link i {
+        color: #38bdf8;
+        font-size: 1rem;
+    }
+
+    .layout-link:hover {
+        color: #ffffff !important;
+        background: rgba(56, 189, 248, 0.20);
+        border-color: rgba(56, 189, 248, 0.65);
+        box-shadow: 0 0 22px rgba(56, 189, 248, 0.30);
+        transform: translateY(-2px);
+    }
+
+
+/* ==========================================================================
+   USUARIO DEL LADO DERECHO
+   ========================================================================== */
+
+.layout-user {
+    display: inline-flex;
+    justify-self: end;
+    align-items: center;
+    padding: 13px 18px;
+    gap: 10px;
+    color: #dbeafe;
+    font-weight: 600;
+    background: rgba(15, 23, 42, 0.62);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 18px;
+}
+
+    .layout-user i {
+        color: #38bdf8;
+        font-size: 1.25rem;
+    }
+
+    .layout-user strong {
+        color: #ffffff;
+    }
+
+
+/* ==========================================================================
+   CONTENIDO PRINCIPAL
+   ========================================================================== */
+
+.layout-main {
+    flex: 1;
+    width: 100%;
+    background: #0f172a;
+}
+
+.layout-content {
+    width: 100%;
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 28px 28px 38px;
+}
+
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+
+.layout-footer {
+    padding: 16px 0;
+    color: #94a3b8;
+    background: #111827;
+    border-top: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+    .layout-footer .container-fluid {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+
+/* ==========================================================================
+   MODAL NUEVO USUARIO
+   Se conserva temporalmente aquí para evitar cambios de diseño.
+   Después puede retirarse porque también está en AdminVista.cshtml.css.
+   ========================================================================== */
+
+#modalNuevoUsuario .modal-cuenta {
+    width: min(760px, 96vw);
+    padding: 18px;
+}
+
+#modalNuevoUsuario .form-grid-preview {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+    #modalNuevoUsuario .form-grid-preview > div {
+        display: flex;
+        flex-direction: column;
+    }
+
+#modalNuevoUsuario label {
+    margin-bottom: 6px;
+    color: #cbd5e1 !important;
+    font-size: 0.82rem;
+    font-weight: 750;
+}
+
+#modalNuevoUsuario input:not([type="checkbox"]),
+#modalNuevoUsuario select {
+    width: 100% !important;
+    height: 40px !important;
+    padding: 9px 11px !important;
+    color: #f8fafc !important;
+    background: rgba(15, 23, 42, 0.84) !important;
+    border: 1px solid rgba(148, 163, 184, 0.22) !important;
+    border-radius: 8px !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#modalNuevoUsuario input::placeholder {
+    color: #64748b !important;
+}
+
+#modalNuevoUsuario .password-box {
+    height: 40px;
+    background: rgba(15, 23, 42, 0.84) !important;
+    border: 1px solid rgba(148, 163, 184, 0.22) !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+}
+
+    #modalNuevoUsuario .password-box input {
+        height: 38px !important;
+        background: transparent !important;
+        border: none !important;
+    }
+
+    #modalNuevoUsuario .password-box button {
+        width: 44px;
+        height: 38px;
+        color: #94a3b8;
+        background: transparent;
+        border: none;
+    }
+
+#modalNuevoUsuario .checks-preview {
+    margin-top: 16px;
+}
+
+#modalNuevoUsuario .preview-actions {
+    margin-top: 18px;
+}
+
+
+/* ==========================================================================
+   DISEÑO RESPONSIVO DEL LAYOUT
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+    .layout-navbar-inner {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        padding: 20px;
+    }
+
+    .layout-menu {
+        flex-wrap: wrap;
+    }
+
+    .layout-user {
+        justify-self: center;
+    }
+}
+
+@media (max-width: 760px) {
+    .layout-header {
+        padding: 12px;
+    }
+
+    .layout-navbar {
+        border-radius: 16px;
+    }
+
+    .layout-navbar-inner {
+        padding: 16px;
+    }
+
+    .layout-menu {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .layout-link {
+        width: 100%;
+    }
+
+    .layout-user {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .layout-content {
+        padding: 18px 14px 30px;
+    }
+
+    .layout-footer .container-fluid {
+        flex-direction: column;
+        gap: 6px;
+        text-align: center;
+    }
+
+    #modalNuevoUsuario .form-grid-preview {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================================
+   CONTROLES DEL MÓDULO CUENTA
+   Se dejan globales porque algunos controles generados con asp-for
+   no están tomando correctamente el CSS aislado de AdminVista.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   BUSCADOR DE USUARIOS
+   ========================================================================== */
+
+.cuenta-admin .usuarios-header .usuarios-tools {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.cuenta-admin .usuarios-header .search-box {
+    position: relative !important;
+    width: 280px !important;
+}
+
+    .cuenta-admin .usuarios-header .search-box input {
+        display: block !important;
+        width: 100% !important;
+        height: 42px !important;
+        margin: 0 !important;
+        padding: 10px 42px 10px 14px !important;
+        color: #f8fafc !important;
+        font-size: .9rem !important;
+        background-color: rgba(15, 23, 42, .84) !important;
+        border: 1px solid rgba(148, 163, 184, .22) !important;
+        border-radius: 12px !important;
+        outline: none !important;
+        box-shadow: none !important;
+        appearance: none !important;
+    }
+
+        .cuenta-admin .usuarios-header .search-box input::placeholder {
+            color: #64748b !important;
+            opacity: 1 !important;
+        }
+
+        .cuenta-admin .usuarios-header .search-box input:focus {
+            color: #f8fafc !important;
+            background-color: rgba(15, 23, 42, .95) !important;
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, .12) !important;
+        }
+
+    .cuenta-admin .usuarios-header .search-box i {
+        position: absolute !important;
+        top: 50% !important;
+        right: 14px !important;
+        color: #94a3b8 !important;
+        pointer-events: none !important;
+        transform: translateY(-50%) !important;
+    }
+
+
+/* ==========================================================================
+   FILTROS DE LA BITÁCORA
+   ========================================================================== */
+
+.cuenta-admin .bitacora-preview .filtros-bitacora {
+    display: grid !important;
+    grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(180px, 1fr) minmax(150px, .8fr) minmax(150px, .8fr) auto auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+}
+
+
+    /* Selects de los filtros */
+    .cuenta-admin .bitacora-preview .filtros-bitacora select {
+        display: block !important;
+        width: 100% !important;
+        height: 42px !important;
+        margin: 0 !important;
+        padding: 9px 38px 9px 12px !important;
+        color: #f8fafc !important;
+        font-size: .88rem !important;
+        background-color: rgba(15, 23, 42, .84) !important;
+        border: 1px solid rgba(148, 163, 184, .22) !important;
+        border-radius: 12px !important;
+        outline: none !important;
+        box-shadow: none !important;
+        color-scheme: dark !important;
+    }
+
+
+        /* Opciones de los combos */
+        .cuenta-admin .bitacora-preview .filtros-bitacora select option {
+            color: #f8fafc !important;
+            background-color: #0f172a !important;
+        }
+
+
+    /* Inputs de fecha */
+    .cuenta-admin
+    .bitacora-preview
+    .filtros-bitacora
+    input[type="date"] {
+        display: block !important;
+        width: 100% !important;
+        height: 42px !important;
+        margin: 0 !important;
+        padding: 9px 12px !important;
+        color: #f8fafc !important;
+        font-size: .88rem !important;
+        background-color: rgba(15, 23, 42, .84) !important;
+        border: 1px solid rgba(148, 163, 184, .22) !important;
+        border-radius: 12px !important;
+        outline: none !important;
+        box-shadow: none !important;
+        color-scheme: dark !important;
+    }
+
+
+        /* Enfoque de combos y fechas */
+        .cuenta-admin .bitacora-preview .filtros-bitacora select:focus,
+        .cuenta-admin
+        .bitacora-preview
+        .filtros-bitacora
+        input[type="date"]:focus {
+            color: #f8fafc !important;
+            background-color: rgba(15, 23, 42, .95) !important;
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, .12) !important;
+        }
+
+
+/* ==========================================================================
+   BOTONES BUSCAR Y LIMPIAR
+   ========================================================================== */
+
+.cuenta-admin .btn-buscar,
+.cuenta-admin .btn-limpiar {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 78px !important;
+    height: 42px !important;
+    margin: 0 !important;
+    padding: 0 16px !important;
+    font-size: .88rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    text-decoration: none !important;
+    border-radius: 12px !important;
+    cursor: pointer !important;
+    transition: .18s ease !important;
+}
+
+
+/* Botón Buscar */
+.cuenta-admin .btn-buscar {
+    color: #ffffff !important;
+    background: linear-gradient( 135deg, #2563eb, #38bdf8 ) !important;
+    border: none !important;
+    box-shadow: 0 0 18px rgba(56, 189, 248, .16) !important;
+}
+
+
+/* Botón Limpiar */
+.cuenta-admin .btn-limpiar {
+    color: #e2e8f0 !important;
+    background-color: rgba(100, 116, 139, .26) !important;
+    border: 1px solid rgba(148, 163, 184, .22) !important;
+}
+
+
+    /* Efecto de los botones */
+    .cuenta-admin .btn-buscar:hover,
+    .cuenta-admin .btn-limpiar:hover {
+        color: #ffffff !important;
+        text-decoration: none !important;
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+    }
+
+
+/* ==========================================================================
+   CORRECCIÓN PARA BOOTSTRAP
+   Evita que los controles vuelvan a tener fondo blanco.
+   ========================================================================== */
+
+.cuenta-admin input.form-control,
+.cuenta-admin select.form-select {
+    color: #f8fafc !important;
+    background-color: rgba(15, 23, 42, .84) !important;
+    border-color: rgba(148, 163, 184, .22) !important;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+    .cuenta-admin .bitacora-preview .filtros-bitacora {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .cuenta-admin .usuarios-header .usuarios-tools {
+        width: 100% !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .cuenta-admin .usuarios-header .search-box,
+    .cuenta-admin .usuarios-header .search-box input,
+    .cuenta-admin .usuarios-header .btn-buscar,
+    .cuenta-admin .usuarios-header .btn-limpiar {
+        width: 100% !important;
+    }
+
+    .cuenta-admin .bitacora-preview .filtros-bitacora {
+        grid-template-columns: 1fr !important;
+    }
+
+    .cuenta-admin .bitacora-preview .btn-buscar,
+    .cuenta-admin .bitacora-preview .btn-limpiar {
+        width: 100% !important;
+    }
+}
+
+/* ==========================================================================
+   PAGINACIÓN GLOBAL DEL MÓDULO CUENTA
+   Los botones se generan dinámicamente desde JavaScript, por eso este bloque
+   debe permanecer en site.css y no en AdminVista.cshtml.css.
+   ========================================================================== */
+
+.cuenta-admin .paginacion-tabla {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 7px !important;
+}
+
+    /* Botones de página, anterior y siguiente */
+    .cuenta-admin .paginacion-tabla button {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 34px !important;
+        height: 34px !important;
+        margin: 0 !important;
+        padding: 0 10px !important;
+        color: #cbd5e1 !important;
+        font-family: inherit !important;
+        font-size: .82rem !important;
+        font-weight: 750 !important;
+        line-height: 1 !important;
+        background: rgba(15, 23, 42, .85) !important;
+        border: 1px solid rgba(148, 163, 184, .22) !important;
+        border-radius: 9px !important;
+        outline: none !important;
+        box-shadow: none !important;
+        cursor: pointer !important;
+        appearance: none !important;
+        transition: .18s ease !important;
+    }
+
+        /* Página seleccionada */
+        .cuenta-admin .paginacion-tabla button.active {
+            color: #ffffff !important;
+            background: #2563eb !important;
+            border-color: #2563eb !important;
+            box-shadow: 0 0 14px rgba(56, 189, 248, .20) !important;
+        }
+
+        /* Botones al pasar el cursor */
+        .cuenta-admin
+        .paginacion-tabla
+        button:hover:not(:disabled):not(.active) {
+            color: #ffffff !important;
+            background: rgba(56, 189, 248, .16) !important;
+            border-color: rgba(56, 189, 248, .55) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        /* Flechas deshabilitadas */
+        .cuenta-admin .paginacion-tabla button:disabled {
+            color: #64748b !important;
+            background: rgba(30, 41, 59, .55) !important;
+            border-color: rgba(100, 116, 139, .18) !important;
+            opacity: .45 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+        }
+
+        /* Evitar borde blanco al seleccionar */
+        .cuenta-admin .paginacion-tabla button:focus,
+        .cuenta-admin .paginacion-tabla button:active {
+            color: #ffffff !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }

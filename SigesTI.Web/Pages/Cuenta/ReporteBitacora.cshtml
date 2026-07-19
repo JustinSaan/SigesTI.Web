@@ -1,0 +1,205 @@
+﻿@page
+@model SigesTI.Web.Pages.Cuenta.ReporteBitacoraModel
+
+@{
+    Layout = null;
+
+    string nombreReporte =
+        $"ReporteBitacora_{Model.FechaGeneracion:ddMMyyyyHHmm}";
+
+    ViewData["Title"] = nombreReporte;
+}
+
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>@nombreReporte</title>
+
+    <link rel="stylesheet"
+          href="~/css/reportes.css"
+          asp-append-version="true" />
+</head>
+
+<body class="reporte-body reporte-bitacora">
+    <main class="reporte-hoja">
+
+        <!-- Encabezado -->
+        <header class="reporte-encabezado">
+
+            <div class="reporte-logo-contenedor">
+
+                <img src="~/titulo2.png"
+                     alt="SigesST"
+                     class="reporte-logo" />
+            </div>
+
+            <div class="reporte-generado">
+
+                <strong>Generado:</strong>
+
+                @Model.FechaGeneracion.ToString(
+                    "dd/MM/yyyy hh:mm tt")
+
+            </div>
+
+        </header>
+
+        <div class="reporte-linea"></div>
+
+        <!-- Título -->
+        <section class="reporte-titulo">
+            Reporte de Bitácora de Actividades
+        </section>
+
+        <!-- Resumen de filtros -->
+        <section class="reporte-resumen">
+
+            <div>
+                <strong>Fecha inicial:</strong>
+
+                @Model.MostrarFecha(Model.FechaInicio)
+            </div>
+
+            <div>
+                <strong>Fecha final:</strong>
+
+                @Model.MostrarFecha(Model.FechaFin)
+            </div>
+
+            <div>
+                <strong>Nombre:</strong>
+
+                @Model.MostrarTexto(
+                    Model.FiltroNombre,
+                    "Todos")
+            </div>
+
+            <div>
+                <strong>Correo:</strong>
+
+                @Model.MostrarTexto(
+                    Model.FiltroCorreo,
+                    "Todos")
+            </div>
+
+            <div>
+                <strong>Módulo:</strong>
+
+                @Model.MostrarTexto(
+                    Model.FiltroModulo,
+                    "Todos")
+            </div>
+
+            <div>
+                <strong>Acción:</strong>
+
+                @Model.MostrarTexto(
+                    Model.FiltroAccion,
+                    "Todas")
+            </div>
+
+            <div>
+                <strong>Total:</strong>
+
+                @Model.Registros.Count registros
+            </div>
+
+        </section>
+
+        <!-- Tabla del reporte -->
+        <section class="reporte-tabla-contenedor">
+
+            <table class="reporte-tabla">
+
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Fecha y hora</th>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Módulo</th>
+                        <th>Acción</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (Model.Registros.Any())
+                    {
+                        int numero = 1;
+
+                        @foreach (var item in Model.Registros)
+                        {
+                            <tr>
+                                <td>@numero</td>
+
+                                <td>
+                                    @item.FechaHora.ToString(
+                                        "dd/MM/yyyy hh:mm tt")
+                                </td>
+
+                                <td>
+                                    @(item.NombreCompleto
+                                        ?? "Sin nombre")
+                                </td>
+
+                                <td>
+                                    @(item.Correo
+                                        ?? "Sin correo")
+                                </td>
+
+                                <td>@item.Modulo</td>
+
+                                <td>
+                                    <span class="reporte-tag @Model.ObtenerClaseAccion(item.Accion)">
+                                        @item.Accion
+                                    </span>
+                                </td>
+
+                                <td>@item.Descripcion</td>
+                            </tr>
+
+                            numero++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7"
+                                class="reporte-sin-registros">
+
+                                No existen registros para los filtros seleccionados.
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+        <!-- Pie del reporte -->
+        <footer class="reporte-pie">
+
+            <span>Sistema SigesST</span>
+
+            <span>
+                Reporte generado automáticamente
+            </span>
+
+        </footer>
+
+    </main>
+
+</body>
+
+</html>

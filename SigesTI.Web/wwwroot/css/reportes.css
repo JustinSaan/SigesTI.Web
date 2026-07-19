@@ -1,0 +1,473 @@
+﻿/* ==========================================================================
+   DISEÑO GENERAL DE REPORTES - SIGESST
+   Compartido por reportes de solicitudes, bitácora y futuros reportes.
+   ========================================================================== */
+
+* {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+    body.reporte-body {
+        padding: 28px;
+        color: #172033;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #dbe2ea;
+    }
+
+
+/* ==========================================================================
+   BARRA DE ACCIONES
+   ========================================================================== */
+
+.reporte-barra {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: min(1400px, 100%);
+    margin: 0 auto 18px;
+}
+
+.reporte-btn-volver,
+.reporte-btn-imprimir {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 42px;
+    padding: 10px 18px;
+    color: #ffffff;
+    font-size: .9rem;
+    font-weight: 800;
+    text-decoration: none;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: .18s ease;
+}
+
+.reporte-btn-volver {
+    background: #475569;
+}
+
+.reporte-btn-imprimir {
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, .25);
+}
+
+    .reporte-btn-volver:hover,
+    .reporte-btn-imprimir:hover {
+        color: #ffffff;
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+    }
+
+
+/* ==========================================================================
+   HOJA DEL REPORTE
+   ========================================================================== */
+
+.reporte-hoja {
+    width: min(1400px, 100%);
+    min-height: 720px;
+    margin: 0 auto;
+    padding: 38px 42px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, .22);
+}
+
+
+/* ==========================================================================
+   ENCABEZADO
+   ========================================================================== */
+
+.reporte-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+}
+
+.reporte-logo-contenedor {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.reporte-logo {
+    width: 190px;
+    max-height: 68px;
+    object-fit: contain;
+    object-position: left center;
+}
+
+.reporte-logo-contenedor span {
+    margin-top: 5px;
+    color: #64748b;
+    font-size: .72rem;
+}
+
+.reporte-generado {
+    color: #334155;
+    font-size: .76rem;
+    text-align: right;
+}
+
+.reporte-linea {
+    height: 4px;
+    margin: 15px 0 20px;
+    background: linear-gradient(90deg, #2563eb, #38bdf8);
+}
+
+
+/* ==========================================================================
+   TÍTULO DEL REPORTE
+   ========================================================================== */
+
+.reporte-titulo {
+    padding: 12px 18px;
+    margin-bottom: 18px;
+    color: #ffffff;
+    font-size: 1.12rem;
+    font-weight: 800;
+    text-align: center;
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    border-radius: 8px;
+}
+
+
+/* ==========================================================================
+   RESUMEN DE FILTROS
+   ========================================================================== */
+
+.reporte-resumen {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px 24px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    color: #334155;
+    font-size: .76rem;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-left: 5px solid #2563eb;
+    border-radius: 10px;
+}
+
+    .reporte-resumen strong {
+        color: #1d4ed8;
+    }
+
+
+/* ==========================================================================
+   TABLA DEL REPORTE
+   ========================================================================== */
+
+.reporte-tabla-contenedor {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.reporte-tabla {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: auto;
+    font-size: .72rem;
+}
+
+    .reporte-tabla th {
+        padding: 10px 8px;
+        color: #ffffff;
+        font-weight: 800;
+        text-align: center;
+        background: #2563eb;
+        border-right: 1px solid rgba(255, 255, 255, .25);
+    }
+
+        .reporte-tabla th:first-child {
+            border-top-left-radius: 8px;
+        }
+
+        .reporte-tabla th:last-child {
+            border-top-right-radius: 8px;
+            border-right: none;
+        }
+
+    .reporte-tabla td {
+        padding: 9px 8px;
+        color: #1e293b;
+        text-align: center;
+        vertical-align: middle;
+        overflow-wrap: anywhere;
+        border-right: 1px solid #cbd5e1;
+        border-bottom: 1px solid #cbd5e1;
+    }
+
+        .reporte-tabla td:first-child {
+            border-left: 1px solid #cbd5e1;
+        }
+
+    .reporte-tabla tbody tr:nth-child(even) {
+        background: #f8fafc;
+    }
+
+    .reporte-tabla tbody tr:hover {
+        background: #eff6ff;
+    }
+
+.reporte-sin-registros {
+    padding: 25px !important;
+    color: #64748b !important;
+    font-size: .82rem;
+}
+
+
+/* ==========================================================================
+   ETIQUETAS DE ACCIONES
+   ========================================================================== */
+
+.reporte-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 9px;
+    font-size: .67rem;
+    font-weight: 800;
+    white-space: nowrap;
+    border-radius: 999px;
+}
+
+    .reporte-tag.creacion {
+        color: #15803d;
+        background: #dcfce7;
+        border: 1px solid #22c55e;
+    }
+
+    .reporte-tag.edicion {
+        color: #b45309;
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+    }
+
+    .reporte-tag.eliminacion {
+        color: #b91c1c;
+        background: #fee2e2;
+        border: 1px solid #ef4444;
+    }
+
+    .reporte-tag.acceso {
+        color: #0369a1;
+        background: #e0f2fe;
+        border: 1px solid #38bdf8;
+    }
+
+
+/* ==========================================================================
+   PIE DEL REPORTE
+   ========================================================================== */
+
+.reporte-pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+    padding-top: 12px;
+    color: #64748b;
+    font-size: .68rem;
+    border-top: 1px solid #cbd5e1;
+}
+
+
+/* ==========================================================================
+   CONFIGURACIÓN PARA IMPRESIÓN
+   ========================================================================== */
+
+@page {
+    size: landscape;
+    margin: 12mm;
+}
+
+@media print {
+
+    /* Conservar fondos y colores */
+    * {
+        box-sizing: border-box !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    html,
+    body {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+    }
+
+        body.reporte-body {
+            width: 100% !important;
+            padding: 0 !important;
+        }
+
+    /* Elementos que no deben imprimirse */
+    .no-imprimir {
+        display: none !important;
+    }
+
+    /* Hoja principal */
+    .reporte-hoja {
+        width: 100% !important;
+        max-width: none !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+
+    /* Encabezado */
+    .reporte-encabezado {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .reporte-logo {
+        width: 150px !important;
+        max-height: 60px !important;
+        object-fit: contain !important;
+    }
+
+    /* Título azul */
+    .reporte-titulo {
+        display: block !important;
+        color: #ffffff !important;
+        background: #2563eb !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    /*
+       IMPORTANTE:
+       Mantiene los filtros en tres columnas, igual que en la vista previa.
+    */
+    .reporte-resumen {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        grid-auto-flow: row !important;
+        width: 100% !important;
+        gap: 10px 22px !important;
+        padding: 14px 18px !important;
+        margin-bottom: 18px !important;
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        border-left: 5px solid #2563eb !important;
+        border-radius: 10px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+        .reporte-resumen > div {
+            display: block !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            white-space: normal !important;
+            overflow-wrap: anywhere !important;
+        }
+
+    /* Tabla */
+    .reporte-tabla-contenedor {
+        width: 100% !important;
+        overflow: visible !important;
+    }
+
+    .reporte-tabla {
+        width: 100% !important;
+        font-size: 8.5pt !important;
+        border-collapse: collapse !important;
+    }
+
+        .reporte-tabla th {
+            padding: 7px 5px !important;
+            color: #ffffff !important;
+            background: #2563eb !important;
+            border: 1px solid #cbd5e1 !important;
+        }
+
+        .reporte-tabla td {
+            padding: 6px 5px !important;
+            border: 1px solid #cbd5e1 !important;
+        }
+
+        .reporte-tabla tbody tr:nth-child(even) {
+            background: #f8fafc !important;
+        }
+
+        .reporte-tabla tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+
+    /* Etiquetas */
+    .reporte-tag {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Pie */
+    .reporte-pie {
+        display: flex !important;
+        justify-content: space-between !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+}
+
+
+/* ==========================================================================
+   DISEÑO RESPONSIVO
+   ========================================================================== */
+
+@media (max-width: 850px) {
+    body.reporte-body {
+        padding: 14px;
+    }
+
+    .reporte-hoja {
+        padding: 24px 18px;
+    }
+
+    .reporte-encabezado {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .reporte-generado {
+        text-align: left;
+    }
+
+    .reporte-resumen {
+        grid-template-columns: 1fr;
+    }
+
+    .reporte-pie {
+        flex-direction: column;
+        gap: 6px;
+        text-align: center;
+    }
+}
