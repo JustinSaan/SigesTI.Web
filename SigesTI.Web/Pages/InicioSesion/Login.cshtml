@@ -1,0 +1,309 @@
+﻿@page
+@model SigesTI.Web.Pages.InicioSesion.LoginModel
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - SigesTI</title>
+
+    <link rel="icon"
+          type="image/x-icon"
+          href="~/icono.png" />
+
+    <!-- Iconos -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <!-- Estilos exclusivos del Login -->
+    <link rel="stylesheet"
+          href="~/css/login.css"
+          asp-append-version="true" />
+</head>
+
+<body>
+
+    <main class="login-page">
+
+        <!-- Figuras decorativas -->
+        <div class="figura figura-izquierda"></div>
+        <div class="figura figura-derecha"></div>
+
+        <!-- Tarjeta del Login -->
+        <section class="login-card">
+
+            <div class="login-logo">
+
+                <div class="logo-s">
+                    S
+                </div>
+
+                <h1>
+                    Siges<span>TI</span>
+                </h1>
+
+            </div>
+
+            <form method="post"
+                  id="formLogin">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="mensaje-error">
+                </div>
+
+                <!-- Usuario -->
+                <div class="campo-login">
+
+                    <label asp-for="Login.Usuario"
+                           class="login-label">
+                    </label>
+
+                    <div class="input-login">
+
+                        <i class="bi bi-person"></i>
+
+                        <input asp-for="Login.Usuario"
+                               class="login-input"
+                               autocomplete="username"
+                               placeholder="Ingresa tu usuario"
+                               autofocus />
+
+                    </div>
+
+                    <span asp-validation-for="Login.Usuario"
+                          class="mensaje-validacion">
+                    </span>
+
+                </div>
+
+                <!-- Contraseña -->
+                <div class="campo-login">
+
+                    <label asp-for="Login.Password"
+                           class="login-label">
+                    </label>
+
+                    <div class="input-login">
+
+                        <i class="bi bi-lock"></i>
+
+                        <input asp-for="Login.Password"
+                               id="password"
+                               class="login-input"
+                               autocomplete="current-password"
+                               placeholder="Ingresa tu contraseña" />
+
+                        <button type="button"
+                                id="btnMostrarPassword"
+                                class="btn-password"
+                                aria-label="Mostrar contraseña">
+
+                            <i class="bi bi-eye"></i>
+
+                        </button>
+
+                    </div>
+
+                    <span asp-validation-for="Login.Password"
+                          class="mensaje-validacion">
+                    </span>
+
+                    <div id="avisoMayusculas"
+                         class="aviso-mayusculas">
+
+                        <i class="bi bi-capslock"></i>
+
+                        <span>
+                            Bloq Mayús está activado
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <!-- Recuérdame -->
+                <div class="recordarme">
+
+                    <input asp-for="Login.Recordarme" />
+
+                    <label asp-for="Login.Recordarme">
+                    </label>
+
+                </div>
+
+                <!-- Botón iniciar sesión -->
+                <button type="submit"
+                        id="btnIniciarSesion"
+                        class="btn-iniciar">
+
+                    <span>Iniciar sesión</span>
+
+                    <i class="bi bi-arrow-right"></i>
+
+                </button>
+
+            </form>
+
+        </section>
+
+        <!-- Modal obligatorio para cambiar contraseña -->
+        <div id="modalCambiarPassword"
+             class="modal-password @(Model.MostrarModalCambio ? "mostrar" : "")"
+             aria-hidden="@(Model.MostrarModalCambio ? "false" : "true")">
+
+            <div class="modal-password-contenido"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="tituloCambioPassword">
+
+                <div class="modal-password-icono">
+
+                    <i class="bi bi-shield-lock"></i>
+
+                </div>
+
+                <h2 id="tituloCambioPassword"
+                    class="modal-password-titulo">
+
+                    Cambiar contraseña
+
+                </h2>
+
+                <p class="modal-password-texto">
+
+                    Es necesario cambiar tu contraseña, ingresa una nueva.
+
+                </p>
+
+                <form method="post"
+                      asp-page-handler="CambiarPassword"
+                      id="formCambiarPassword">
+
+                    <!-- Contraseña nueva -->
+                    <div class="campo-login">
+
+                        <label for="passwordNueva"
+                               class="login-label">
+
+                            Contraseña nueva
+
+                        </label>
+
+                        <div class="input-login">
+
+                            <i class="bi bi-lock"></i>
+
+                            <input type="password"
+                                   id="passwordNueva"
+                                   name="passwordNueva"
+                                   class="login-input"
+                                   autocomplete="new-password"
+                                   placeholder="Ingresa la contraseña nueva"
+                                   minlength="6"
+                                   required />
+
+                            <button type="button"
+                                    class="btn-password btn-mostrar-modal"
+                                    data-input="passwordNueva"
+                                    aria-label="Mostrar contraseña nueva">
+
+                                <i class="bi bi-eye"></i>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Confirmación -->
+                    <div class="campo-login">
+
+                        <label for="confirmarPassword"
+                               class="login-label">
+
+                            Confirmar contraseña
+
+                        </label>
+
+                        <div class="input-login">
+
+                            <i class="bi bi-lock-fill"></i>
+
+                            <input type="password"
+                                   id="confirmarPassword"
+                                   name="confirmarPassword"
+                                   class="login-input"
+                                   autocomplete="new-password"
+                                   placeholder="Confirma la contraseña nueva"
+                                   minlength="6"
+                                   required />
+
+                            <button type="button"
+                                    class="btn-password btn-mostrar-modal"
+                                    data-input="confirmarPassword"
+                                    aria-label="Mostrar confirmación de contraseña">
+
+                                <i class="bi bi-eye"></i>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div id="errorCoincidencia"
+                         class="mensaje-modal">
+
+                        @Model.MensajeCambio
+
+                    </div>
+
+                    <div class="modal-acciones">
+
+                        <button type="submit"
+                                id="btnCambiarPassword"
+                                class="btn-cambiar-password">
+
+                            Cambiar contraseña
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <input type="hidden"
+           id="passwordCambiada"
+           value="@((TempData["PasswordCambiada"] != null).ToString().ToLower())" />
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Alertas generales -->
+    <script src="~/js/alertas.js"
+            asp-append-version="true">
+    </script>
+
+    <!-- Comportamiento del Login -->
+    <script src="~/js/login.js"
+            asp-append-version="true">
+    </script>
+
+</body>
+
+</html>

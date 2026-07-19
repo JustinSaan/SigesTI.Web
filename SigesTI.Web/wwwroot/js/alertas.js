@@ -14,7 +14,7 @@ function mostrarAlerta(icono, titulo, mensaje) {
         return;
     }
 
-    Swal.fire({
+    return Swal.fire({
         icon: icono,
         title: titulo,
         html: mensaje,
@@ -33,7 +33,8 @@ function mostrarAlerta(icono, titulo, mensaje) {
  * Alerta de operación exitosa.
  */
 function mostrarExito(mensaje, titulo) {
-    mostrarAlerta(
+
+    return mostrarAlerta(
         "success",
         titulo || "Operación exitosa",
         mensaje

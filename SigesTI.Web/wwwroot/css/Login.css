@@ -1,0 +1,532 @@
+﻿/* ==========================================================================
+   LOGIN - SIGESTI
+   ========================================================================== */
+
+:root {
+    --login-fondo: #07101f;
+    --login-texto: #f8fafc;
+    --login-texto-suave: #94a3b8;
+    --login-azul: #2563eb;
+    --login-celeste: #38bdf8;
+    --login-error: #f87171;
+    --login-borde: rgba(56, 189, 248, 0.35);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    color: var(--login-texto);
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--login-fondo);
+}
+
+/* ==========================================================================
+   CONTENEDOR
+   ========================================================================== */
+
+.login-page {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    overflow: hidden;
+    background: radial-gradient( circle at 15% 25%, rgba(37, 99, 235, 0.22), transparent 35% ), radial-gradient( circle at 85% 80%, rgba(14, 165, 233, 0.13), transparent 35% ), linear-gradient( 135deg, #152443 0%, #071426 55%, #030914 100% );
+}
+
+/* ==========================================================================
+   FIGURAS DECORATIVAS
+   ========================================================================== */
+
+.figura {
+    position: absolute;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    pointer-events: none;
+}
+
+.figura-izquierda {
+    width: 500px;
+    height: 500px;
+    top: 120px;
+    left: -340px;
+    border-radius: 95px;
+    transform: rotate(43deg);
+}
+
+.figura-derecha {
+    width: 570px;
+    height: 570px;
+    top: -260px;
+    right: -350px;
+    border-radius: 130px;
+    transform: rotate(45deg);
+}
+
+/* ==========================================================================
+   TARJETA
+   ========================================================================== */
+
+.login-card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 500px;
+    padding: 46px 48px 50px;
+    overflow: hidden;
+    background: linear-gradient( 145deg, rgba(30, 58, 95, 0.38), rgba(7, 20, 38, 0.88) );
+    border: 1px solid var(--login-borde);
+    border-radius: 28px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.52), 0 0 35px rgba(37, 99, 235, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+    .login-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 12%;
+        width: 76%;
+        height: 1px;
+        background: linear-gradient( 90deg, transparent, rgba(56, 189, 248, 0.8), transparent );
+    }
+
+/* ==========================================================================
+   LOGOTIPO
+   ========================================================================== */
+
+.login-logo {
+    margin-bottom: 38px;
+    text-align: center;
+}
+
+.logo-s {
+    width: 74px;
+    height: 74px;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 48px;
+    font-weight: 800;
+    background: linear-gradient( 145deg, #38bdf8, #2563eb 55%, #1e3a8a );
+    border: 1px solid rgba(125, 211, 252, 0.75);
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.38), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+
+.login-logo h1 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 38px;
+    font-weight: 700;
+}
+
+    .login-logo h1 span {
+        color: var(--login-celeste);
+    }
+
+/* ==========================================================================
+   CAMPOS
+   ========================================================================== */
+
+.campo-login {
+    width: 100%;
+    margin-bottom: 22px;
+}
+
+.login-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #dbeafe;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.input-login {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+    .input-login > i {
+        position: absolute;
+        z-index: 2;
+        left: 18px;
+        color: #9fb3ce;
+        font-size: 20px;
+        pointer-events: none;
+    }
+
+.login-input {
+    display: block;
+    width: 100%;
+    height: 56px;
+    margin: 0;
+    padding: 0 52px;
+    color: var(--login-texto);
+    font-family: inherit;
+    font-size: 15px;
+    background: rgba(8, 24, 44, 0.85);
+    border: 1px solid rgba(96, 165, 250, 0.35);
+    border-radius: 13px;
+    outline: none;
+    box-shadow: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .login-input::placeholder {
+        color: #64748b;
+        opacity: 1;
+    }
+
+    .login-input:hover {
+        border-color: rgba(96, 165, 250, 0.55);
+    }
+
+    .login-input:focus {
+        color: #ffffff;
+        background: rgba(8, 28, 52, 0.96);
+        border-color: var(--login-celeste);
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.11), 0 0 18px rgba(37, 99, 235, 0.15);
+    }
+
+    .login-input:-webkit-autofill,
+    .login-input:-webkit-autofill:hover,
+    .login-input:-webkit-autofill:focus {
+        -webkit-text-fill-color: var(--login-texto);
+        caret-color: var(--login-texto);
+        -webkit-box-shadow: 0 0 0 1000px #0a1b31 inset;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+
+/* ==========================================================================
+   BOTÓN DEL OJO
+   ========================================================================== */
+
+.btn-password {
+    position: absolute;
+    z-index: 3;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #94a3b8;
+    font-size: 20px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+    .btn-password:hover {
+        color: var(--login-celeste);
+        background: rgba(56, 189, 248, 0.09);
+    }
+
+    .btn-password:focus-visible {
+        outline: 2px solid rgba(56, 189, 248, 0.65);
+        outline-offset: 1px;
+    }
+
+/* ==========================================================================
+   BLOQ MAYÚS
+   ========================================================================== */
+
+.aviso-mayusculas {
+    display: none;
+    align-items: center;
+    gap: 7px;
+    margin-top: 9px;
+    color: #7dd3fc;
+    font-size: 13px;
+}
+
+    .aviso-mayusculas.activo {
+        display: flex;
+    }
+
+/* ==========================================================================
+   RECUÉRDAME
+   ========================================================================== */
+
+.recordarme {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 4px 0 28px;
+}
+
+    .recordarme input {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        accent-color: var(--login-azul);
+        cursor: pointer;
+    }
+
+    .recordarme label {
+        margin: 0;
+        color: #cbd5e1;
+        font-size: 14px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+/* ==========================================================================
+   BOTONES
+   ========================================================================== */
+
+.btn-iniciar,
+.btn-cambiar-password {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-family: inherit;
+    font-weight: 600;
+    background: linear-gradient( 135deg, #2563eb, #1d4ed8 55%, #1e40af );
+    border: 1px solid rgba(96, 165, 250, 0.75);
+    border-radius: 13px;
+    cursor: pointer;
+    box-shadow: 0 12px 25px rgba(37, 99, 235, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-iniciar {
+    height: 58px;
+    gap: 15px;
+    font-size: 16px;
+}
+
+.btn-cambiar-password {
+    height: 54px;
+    font-size: 15px;
+}
+
+    .btn-iniciar:hover,
+    .btn-cambiar-password:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.07);
+        box-shadow: 0 16px 30px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-iniciar:disabled,
+    .btn-cambiar-password:disabled {
+        opacity: 0.65;
+        cursor: wait;
+        transform: none;
+    }
+
+/* ==========================================================================
+   VALIDACIONES
+   ========================================================================== */
+
+.mensaje-validacion,
+.mensaje-error,
+.mensaje-modal {
+    color: var(--login-error);
+    font-size: 13px;
+}
+
+.mensaje-validacion {
+    display: block;
+    margin-top: 7px;
+}
+
+.mensaje-error:empty,
+.mensaje-modal:empty {
+    display: none;
+}
+
+.mensaje-error ul {
+    margin: 0 0 20px;
+    padding: 12px 16px 12px 36px;
+    background: rgba(127, 29, 29, 0.2);
+    border: 1px solid rgba(248, 113, 113, 0.32);
+    border-radius: 11px;
+}
+
+.mensaje-modal {
+    min-height: 18px;
+    margin-top: 3px;
+    text-align: center;
+}
+
+.input-validation-error {
+    border-color: var(--login-error);
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.08);
+}
+
+.field-validation-valid,
+.validation-summary-valid {
+    display: none;
+}
+
+/* ==========================================================================
+   MODAL DE CAMBIO DE CONTRASEÑA
+   ========================================================================== */
+
+.modal-password {
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    /* Fondo transparente para seguir viendo el Login */
+    background: rgba(2, 8, 23, 0.48);
+    /* Desenfoque ligero, no tapa la pantalla */
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+
+    .modal-password.mostrar {
+        display: flex;
+    }
+
+.modal-password-contenido {
+    position: relative;
+    width: 100%;
+    max-width: 470px;
+    padding: 35px;
+    background: linear-gradient( 145deg, rgba(24, 48, 82, 0.98), rgba(7, 20, 38, 0.99) );
+    border: 1px solid rgba(56, 189, 248, 0.55);
+    border-radius: 22px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.72), 0 0 35px rgba(37, 99, 235, 0.22);
+    animation: mostrarModalPassword 0.22s ease;
+}
+
+.modal-password-icono {
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 27px;
+    background: linear-gradient( 145deg, #38bdf8, #2563eb );
+    border-radius: 16px;
+}
+
+.modal-password-titulo {
+    margin: 0 0 10px;
+    color: #ffffff;
+    font-size: 24px;
+    text-align: center;
+}
+
+.modal-password-texto {
+    margin: 0 0 26px;
+    color: #aebfd3;
+    font-size: 14px;
+    line-height: 1.55;
+    text-align: center;
+}
+
+.modal-password .campo-login {
+    margin-bottom: 18px;
+}
+
+.modal-acciones {
+    margin-top: 22px;
+}
+
+@keyframes mostrarModalPassword {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ==========================================================================
+   SWEETALERT
+   ========================================================================== */
+
+.swal-dark-blue {
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 18px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6);
+}
+
+.swal-btn-confirm {
+    min-width: 120px;
+    padding: 10px 22px;
+    color: #ffffff;
+    font-weight: 600;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border: 1px solid rgba(96, 165, 250, 0.7);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   RESPONSIVO
+   ========================================================================== */
+
+@media (max-width: 600px) {
+
+    .login-page {
+        padding: 20px 15px;
+    }
+
+    .login-card {
+        max-width: 430px;
+        padding: 38px 25px 42px;
+        border-radius: 23px;
+    }
+
+    .login-logo {
+        margin-bottom: 32px;
+    }
+
+    .logo-s {
+        width: 66px;
+        height: 66px;
+        font-size: 43px;
+        border-radius: 17px;
+    }
+
+    .login-logo h1 {
+        font-size: 33px;
+    }
+
+    .modal-password-contenido {
+        padding: 30px 24px;
+    }
+}
+
+@media (max-width: 380px) {
+
+    .login-card {
+        padding: 34px 20px 38px;
+    }
+
+    .login-logo h1 {
+        font-size: 30px;
+    }
+}
