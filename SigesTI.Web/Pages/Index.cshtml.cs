@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SigesTI.Web.Data;
 
@@ -13,21 +14,54 @@ namespace SigesTI.Web.Pages
         }
 
         public int TotalSolicitudes { get; set; }
+
         public int SolicitudesPendientes { get; set; }
+
         public int SolicitudesResueltas { get; set; }
+
         public int TotalPersonal { get; set; }
 
-        public void OnGet()
+        /*
+         * Información del usuario que tiene iniciada la sesión.
+         */
+        public string NombreUsuarioActual { get; set; } = string.Empty;
+
+        public string RolUsuarioActual { get; set; } = string.Empty;
+
+        public IActionResult OnGet()
         {
-            TotalSolicitudes = _context.Solicitudes.Count();
+            int? idUsuario =
+                HttpContext.Session.GetInt32("IdUsuario");
 
-            SolicitudesPendientes = _context.Solicitudes
-                .Count(s => s.Estatus == "Pendiente");
+            if (idUsuario == null)
+            {
+                return RedirectToPage("/InicioSesion/Login");
+            }
 
-            SolicitudesResueltas = _context.Solicitudes
-                .Count(s => s.Estatus == "Resuelto");
+            NombreUsuarioActual =
+                HttpContext.Session.GetString("NombreCompleto")
+                ?? HttpContext.Session.GetString("Usuario")
+                ?? "Usuario";
 
-            TotalPersonal = _context.Personal.Count();
+            RolUsuarioActual =
+                HttpContext.Session.GetString("Rol")
+                ?? "Sin rol";
+
+            TotalSolicitudes =
+                _context.Solicitudes.Count();
+
+            SolicitudesPendientes =
+                _context.Solicitudes.Count(
+                    s => s.Estatus == "Pendiente");
+
+            SolicitudesResueltas =
+                _context.Solicitudes.Count(
+                    s => s.Estatus == "Resuelto");
+
+            TotalPersonal =
+                _context.Personal.Count();
+
+            return Page();
         }
     }
 }

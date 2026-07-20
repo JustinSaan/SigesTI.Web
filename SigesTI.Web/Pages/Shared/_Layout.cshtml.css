@@ -99,27 +99,162 @@ body {
     }
 
 /* Usuario derecha */
-.layout-user {
+.layout-user-dropdown {
     justify-self: end;
+    position: relative;
+}
+
+/* Botón principal del usuario */
+.layout-user {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 245px;
+    padding: 11px 15px;
+    border-radius: 16px;
     color: #cbd5e1;
     font-weight: 600;
-    padding: 12px 16px;
-    border-radius: 16px;
+    text-align: left;
+    cursor: pointer;
+    appearance: none;
+    outline: none;
     background: rgba(15, 23, 42, 0.48);
     border: 1px solid rgba(56, 189, 248, 0.22);
+    transition: all 0.25s ease;
 }
 
-    .layout-user i {
-        color: #38bdf8;
-        font-size: 1.25rem;
+    .layout-user:hover,
+    .layout-user:focus,
+    .layout-user[aria-expanded="true"] {
+        color: #ffffff;
+        background: rgba(30, 41, 59, 0.85);
+        border-color: rgba(56, 189, 248, 0.55);
+        box-shadow: 0 0 22px rgba(56, 189, 248, 0.18);
     }
 
-    .layout-user strong {
-        color: #ffffff;
+    .layout-user > i:first-child {
+        flex-shrink: 0;
+        color: #38bdf8;
+        font-size: 1.35rem;
     }
+
+.layout-user-text {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.layout-user-welcome {
+    color: #94a3b8;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.layout-user strong {
+    display: block;
+    max-width: 175px;
+    margin-top: 2px;
+    overflow: hidden;
+    color: #ffffff;
+    font-size: 0.9rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.layout-user small {
+    margin-top: 3px;
+    color: #38bdf8;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.layout-user-arrow {
+    flex-shrink: 0;
+    color: #64748b !important;
+    font-size: 0.78rem !important;
+    transition: transform 0.25s ease;
+}
+
+.layout-user[aria-expanded="true"] .layout-user-arrow {
+    transform: rotate(180deg);
+}
+
+/* Menú desplegable */
+.layout-user-menu {
+    width: 260px;
+    margin-top: 10px !important;
+    padding: 10px;
+    overflow: hidden;
+    background: rgba(15, 23, 42, 0.97);
+    border: 1px solid rgba(56, 189, 248, 0.30);
+    border-radius: 16px;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.layout-user-menu-header {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 10px 5px;
+}
+
+    .layout-user-menu-header span {
+        color: #64748b;
+        font-size: 0.72rem;
+    }
+
+    .layout-user-menu-header strong {
+        margin-top: 3px;
+        overflow: hidden;
+        color: #f8fafc;
+        font-size: 0.88rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+.layout-user-menu .dropdown-divider {
+    border-color: rgba(148, 163, 184, 0.16);
+}
+
+/* Botón cerrar sesión */
+.layout-logout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border-radius: 11px;
+    color: #fca5a5;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+    .layout-logout i {
+        color: #fb7185;
+        font-size: 1rem;
+    }
+
+    .layout-logout:hover,
+    .layout-logout:focus {
+        color: #ffffff;
+        background: rgba(225, 29, 72, 0.18);
+    }
+
+/*
+ * En computadoras, el menú también puede abrirse
+ * al colocar el cursor encima.
+ */
+@media (hover: hover) and (pointer: fine) {
+    .layout-user-dropdown:hover > .dropdown-menu {
+        display: block;
+    }
+
+    .layout-user-dropdown:hover .layout-user-arrow {
+        transform: rotate(180deg);
+    }
+}
 
 /* Contenido */
 .layout-main {
@@ -179,9 +314,17 @@ body {
         width: 100%;
     }
 
+    .layout-user-dropdown {
+        width: 100%;
+    }
+
     .layout-user {
         width: 100%;
-        justify-content: center;
+        justify-content: flex-start;
+    }
+
+    .layout-user-menu {
+        width: 100%;
     }
 
     .layout-content {
