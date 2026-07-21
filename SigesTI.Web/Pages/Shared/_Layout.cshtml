@@ -1,4 +1,17 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+
+@{
+    string nombreUsuario =
+        /* Context.Session.GetString("NombreCompleto")
+        ??*/ Context.Session.GetString("Usuario")
+        ?? "Usuario";
+
+    string rolUsuario =
+        Context.Session.GetString("Rol")
+        ?? "Sin rol";
+}
+
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -41,10 +54,10 @@
                    asp-area=""
                    asp-page="/Index">
 
-                    <img src="~/titulo2.png"
+                    <img src="~/SigesST.png"
                          alt="Logo"
-                         width="180"
-                         height="60">
+                         width="200"
+                         height="55">
                 </a>
 
                 <!-- Menú centrado -->
@@ -74,6 +87,16 @@
                         Personal
                     </a>
 
+                    @*
+                        De momento todos los usuarios entran a AdminVista.
+
+                        Cuando tengas la vista para Soporte, esta ruta
+                        se cambiará por una página intermedia como:
+
+                        asp-page="/Cuenta/Index"
+
+                        Y desde su PageModel se redirigirá según el rol.
+                    *@
                     <a class="layout-link"
                        asp-area=""
                        asp-page="/Cuenta/AdminVista">
@@ -84,15 +107,76 @@
 
                 </div>
 
-                <!-- Bienvenida derecha -->
-                <div class="layout-user">
+                <!-- Usuario y menú desplegable -->
+                <div class="dropdown layout-user-dropdown">
 
-                    <i class="bi bi-person-circle"></i>
+                    <button type="button"
+                            class="layout-user"
+                            id="menuUsuario"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
 
-                    <span>
-                        Bienvenido(a):
-                        <strong>Usuario</strong>
-                    </span>
+                        <i class="bi bi-person-circle"></i>
+
+                        <span class="layout-user-text">
+
+                            <span class="layout-user-welcome">
+                                Bienvenido(a):
+                            </span>
+
+                            <strong>
+                                @nombreUsuario
+                            </strong>
+
+                            <small>
+                                @rolUsuario
+                            </small>
+
+                        </span>
+
+                        <i class="bi bi-chevron-down layout-user-arrow"></i>
+
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end layout-user-menu"
+                        aria-labelledby="menuUsuario">
+
+                        <li class="layout-user-menu-header">
+
+                            <span>
+                                Sesión iniciada como
+                            </span>
+
+                            <strong>
+                                @nombreUsuario
+                            </strong>
+
+                        </li>
+
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+
+                            <form method="post"
+                                  asp-page="/InicioSesion/CerrarSesion"
+                                  id="formCerrarSesion">
+
+                                <button type="submit"
+                                        class="dropdown-item layout-logout">
+
+                                    <i class="bi bi-box-arrow-right"></i>
+
+                                    Cerrar sesión
+
+                                </button>
+
+                            </form>
+
+                        </li>
+
+                    </ul>
 
                 </div>
 
@@ -144,6 +228,47 @@
     <!-- Modales globales -->
     <script src="~/js/modales.js"
             asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const formCerrarSesion =
+                document.getElementById("formCerrarSesion");
+
+            if (!formCerrarSesion) {
+                return;
+            }
+
+            formCerrarSesion.addEventListener("submit", function (event) {
+
+                event.preventDefault();
+
+                Swal.fire({
+                    title: "Cerrando sesión",
+                    html: "Espera un momento...",
+                    background: "#0f172a",
+                    color: "#f8fafc",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    customClass: {
+                        popup: "swal-dark-blue"
+                    },
+                    didOpen: function () {
+                        Swal.showLoading();
+                    }
+                });
+
+                /*
+                 * Se deja visible la animación brevemente
+                 * antes de enviar el formulario.
+                 */
+                setTimeout(function () {
+                    formCerrarSesion.submit();
+                }, 900);
+            });
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 
