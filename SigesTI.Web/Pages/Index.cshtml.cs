@@ -39,9 +39,10 @@ namespace SigesTI.Web.Pages
             }
 
             NombreUsuarioActual =
-                HttpContext.Session.GetString("NombreCompleto")
-                ?? HttpContext.Session.GetString("Usuario")
-                ?? "Usuario";
+               HttpContext.Session.GetString("NombreCompleto")
+               ?? "Usuario";
+            /*?? HttpContext.Session.GetString("Usuario")
+            ?? "Usuario";*/
 
             RolUsuarioActual =
                 HttpContext.Session.GetString("Rol")
