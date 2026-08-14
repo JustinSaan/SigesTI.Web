@@ -63,51 +63,77 @@
                 <!-- Menú centrado -->
                 <div class="layout-menu">
 
+                    <!-- Dropdown: Requerimientos -->
+                    <div class="dropdown d-inline-block">
+                        <a class="layout-link dropdown-toggle" 
+                           href="#" 
+                           id="navbarUserDropdown" 
+                           role="button" 
+                           data-bs-toggle="dropdown" 
+                           aria-expanded="false">
+                            <i class="bi bi-clipboard2-fill"></i>
+                            Requerimientos
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarUserDropdown">
+                            <li>
+                                <a class="dropdown-item py-2" asp-page="/Solicitudes/Generar">
+                                    <i class="bi bi-plus-square me-2 text-secondary"></i>Generar Solicitud
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2" asp-page="/Solicitudes/Consultar">
+                                    <i class="bi bi-search me-2 text-secondary"></i>Consultar Solicitudes
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                     <!-- Dropdown: Actividades -->
+                    <div class="dropdown d-inline-block">
+                        <a class="layout-link dropdown-toggle" 
+                           href="#" 
+                           id="navbarUserDropdown" 
+                           role="button" 
+                           data-bs-toggle="dropdown" 
+                           aria-expanded="false">
+                            <i class="bi bi-file-earmark-check-filll"></i>
+                            Actividades
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarUserDropdown">
+                            <li>
+                                <a class="dropdown-item py-2" asp-page="/Solicitudes/Generar">
+                                    <i class="bi bi-plus-square me-2 text-secondary"></i>Generar Solicitud
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2" asp-page="/Solicitudes/Consultar">
+                                    <i class="bi bi-search me-2 text-secondary"></i>Consultar Solicitudes
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Enlace: Personal -->
                     <a class="layout-link"
                        asp-area=""
-                       asp-page="/Solicitudes/Generar">
-
-                        <i class="bi bi-plus-square-fill"></i>
-                        Registro
-                    </a>
-
-                    <a class="layout-link"
-                       asp-area=""
-                       asp-page="/Solicitudes/Consultar">
-
-                        <i class="bi bi-search"></i>
-                        Consultas
-                    </a>
-
-                    <a class="layout-link"
-                       asp-area=""
-                       asp-page="/Personal/Index">
-
+                       asp-page="/Personal/AdministracionPersonal">
                         <i class="bi bi-people-fill"></i>
                         Personal
                     </a>
 
-                    @*
-                        De momento todos los usuarios entran a AdminVista.
-
-                        Cuando tengas la vista para Soporte, esta ruta
-                        se cambiará por una página intermedia como:
-
-                        asp-page="/Cuenta/Index"
-
-                        Y desde su PageModel se redirigirá según el rol.
-                    *@
+                    <!-- Enlace: Cuenta -->
                     <a class="layout-link"
                        asp-area=""
                        asp-page="/Cuenta/AdminVista">
-
                         <i class="bi bi-person-badge-fill"></i>
                         Cuenta
                     </a>
 
                 </div>
 
-                <!-- Usuario y menú desplegable -->
+                <!-- Usuario y menú desplegable (Derecha) -->
                 <div class="dropdown layout-user-dropdown">
 
                     <button type="button"
@@ -119,19 +145,15 @@
                         <i class="bi bi-person-circle"></i>
 
                         <span class="layout-user-text">
-
                             <span class="layout-user-welcome">
                                 Bienvenido(a):
                             </span>
-
                             <strong>
                                 @nombreUsuario
                             </strong>
-
                             <small>
                                 @rolUsuario
                             </small>
-
                         </span>
 
                         <i class="bi bi-chevron-down layout-user-arrow"></i>
@@ -142,15 +164,12 @@
                         aria-labelledby="menuUsuario">
 
                         <li class="layout-user-menu-header">
-
                             <span>
                                 Sesión iniciada como
                             </span>
-
                             <strong>
                                 @nombreUsuario
                             </strong>
-
                         </li>
 
                         <li>
@@ -158,22 +177,15 @@
                         </li>
 
                         <li>
-
                             <form method="post"
                                   asp-page="/InicioSesion/CerrarSesion"
                                   id="formCerrarSesion">
-
                                 <button type="submit"
                                         class="dropdown-item layout-logout">
-
                                     <i class="bi bi-box-arrow-right"></i>
-
                                     Cerrar sesión
-
                                 </button>
-
                             </form>
-
                         </li>
 
                     </ul>
@@ -229,49 +241,10 @@
     <script src="~/js/modales.js"
             asp-append-version="true"></script>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+    <!-- Logout -->
+    <script src="~/js/logout.js"
+            asp-append-version="true"></script>
 
-            const formCerrarSesion =
-                document.getElementById("formCerrarSesion");
-
-            if (!formCerrarSesion) {
-                return;
-            }
-
-            formCerrarSesion.addEventListener("submit", function (event) {
-
-                event.preventDefault();
-
-                Swal.fire({
-                    title: "Cerrando sesión",
-                    html: "Espera un momento...",
-                    background: "#0f172a",
-                    color: "#f8fafc",
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showConfirmButton: false,
-                    customClass: {
-                        popup: "swal-dark-blue"
-                    },
-                    didOpen: function () {
-                        Swal.showLoading();
-                    }
-                });
-
-                /*
-                 * Se deja visible la animación brevemente
-                 * antes de enviar el formulario.
-                 */
-                setTimeout(function () {
-                    formCerrarSesion.submit();
-                }, 900);
-            });
-        });
-    </script>
-
-    @await RenderSectionAsync("Scripts", required: false)
-
-</body>
+   </body>
 
 </html>
