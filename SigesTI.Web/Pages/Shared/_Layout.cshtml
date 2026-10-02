@@ -97,19 +97,14 @@
                            role="button" 
                            data-bs-toggle="dropdown" 
                            aria-expanded="false">
-                            <i class="bi bi-file-earmark-check-filll"></i>
+                            <i class="bi bi-file-earmark-check-fill"></i>
                             Actividades
                         </a>
 
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarUserDropdown">
                             <li>
                                 <a class="dropdown-item py-2" asp-page="/Solicitudes/Generar">
-                                    <i class="bi bi-plus-square me-2 text-secondary"></i>Generar Solicitud
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2" asp-page="/Solicitudes/Consultar">
-                                    <i class="bi bi-search me-2 text-secondary"></i>Consultar Solicitudes
+                                    <i class="bi bi-plus-square me-2 text-secondary"></i>Plan de respaldos
                                 </a>
                             </li>
                         </ul>
@@ -244,6 +239,8 @@
     <!-- Logout -->
     <script src="~/js/logout.js"
             asp-append-version="true"></script>
+
+            @await RenderSectionAsync("Scripts", required: false)
 
    </body>
 
