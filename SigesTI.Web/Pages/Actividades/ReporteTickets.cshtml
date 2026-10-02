@@ -1,0 +1,202 @@
+@page
+@model SigesTI.Web.Pages.Actividades.Pages_Actividades_ReporteTickets
+@{
+    ViewData["Title"] = "Reporte Diario de Tickets";
+}
+
+<div class="container-fluid px-4 mt-3">
+    <!-- Encabezado y Acciones -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-white mb-1"><i class="bi bi-journal-check me-2"></i>Reporte Diario de Tickets</h3>
+            <p class="text-muted small mb-0">Gestión de atención diaria y generación de reportes consolidados.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-success shadow-sm" id="btnExportarExcel">
+                <i class="bi bi-file-earmark-excel me-1"></i> Exportar Excel
+            </button>
+            <button class="btn btn-danger shadow-sm" id="btnExportarPdf">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Exportar PDF (2 Págs.)
+            </button>
+            <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoTicket">
+                <i class="bi bi-plus-lg me-1"></i> Nuevo Ticket
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros de Búsqueda -->
+    <div class="card bg-dark text-white border-secondary mb-4 shadow-sm">
+        <div class="card-body py-2">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Fecha de Consulta</label>
+                    <input type="date" class="form-control form-control-sm bg-dark text-white border-secondary" name="fechaReporte" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Sistema</label>
+                    <select class="form-select form-select-sm bg-dark text-white border-secondary" name="filtroSistema">
+                        <option value="">-- Todos los Sistemas --</option>
+                        <option value="SITA">SITA</option>
+                        <option value="DIAWEB">DIAWEB</option>
+                        <option value="MED">MED</option>
+                        <option value="COA">COA</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Origen Servicio</label>
+                    <select class="form-select form-select-sm bg-dark text-white border-secondary" name="filtroOrigen">
+                        <option value="">-- Todos --</option>
+                        <option value="Externo">Externo (Clientes)</option>
+                        <option value="Interno">Interno (Sistemas)</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-sm btn-secondary w-100"><i class="bi bi-filter me-1"></i> Filtrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla 1: Indicadores Resumen (Sistemas, Tipos, Estatus) -->
+    <div class="card bg-dark border-secondary mb-4 shadow-sm">
+        <div class="card-header bg-secondary bg-opacity-20 text-white fw-bold">
+            <i class="bi bi-bar-chart-steps me-2"></i>Indicadores de Atención del Día
+        </div>
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-dark table-bordered table-hover text-center align-middle mb-0 small">
+                <thead>
+                    <tr class="table-active">
+                        <th rowspan="2" class="align-middle bg-primary bg-opacity-20">Tickets</th>
+                        <th rowspan="2" class="align-middle bg-primary bg-opacity-20">Total</th>
+                        <th colspan="4" class="bg-danger bg-opacity-20">Tipo</th>
+                        <th colspan="7" class="bg-success bg-opacity-20">Sistemas Externos</th>
+                        <th class="bg-warning bg-opacity-20">Sistema Int.</th>
+                    </tr>
+                    <tr class="table-active">
+                        <th>Servicio</th>
+                        <th>Incidencia</th>
+                        <th>Ajuste</th>
+                        <th>Mejora</th>
+                        <th>DIA</th>
+                        <th>DIAWEB</th>
+                        <th>MED</th>
+                        <th>SITA</th>
+                        <th>VUCEM</th>
+                        <th>DIAENLINEA</th>
+                        <th>COA</th>
+                        <th>ADMIN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="fw-bold text-info">Seguimiento</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold text-info">Entrada</td>
+                        <td>1</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>1</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Sección de Redacción para el Reporte -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card bg-dark border-secondary h-100 shadow-sm">
+                <div class="card-header bg-secondary bg-opacity-20 text-white fw-bold">
+                    <i class="bi bi-card-text me-2"></i>Puntos Relevantes del Día (Redacción para Reporte)
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control bg-dark text-white border-secondary" rows="5" placeholder="Escribe aquí los puntos más relevantes de los tickets atendidos hoy..."></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-dark border-secondary h-100 shadow-sm">
+                <div class="card-header bg-secondary bg-opacity-20 text-white fw-bold">
+                    <i class="bi bi-person-workspace me-2"></i>Soportes Internos / Actividades Adicionales
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control bg-dark text-white border-secondary" rows="5" placeholder="Escribe aquí el soporte brindado a compañeros sin folio de ticket formal..."></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla 2: Matriz Detallada (15 Columnas del Excel) -->
+    <div class="card bg-dark border-secondary mb-4 shadow-sm">
+        <div class="card-header bg-secondary bg-opacity-20 text-white fw-bold d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-table me-2"></i>Detalle Completo de Tickets</span>
+            <span class="badge bg-primary">Registros: 2</span>
+        </div>
+        <div class="card-body p-0 table-responsive">
+            <table class="table table-dark table-striped table-hover align-middle mb-0 text-nowrap small">
+                <thead class="table-light text-dark">
+                    <tr>
+                        <th>Fecha Entrada</th>
+                        <th>Última Modif.</th>
+                        <th>Hora</th>
+                        <th>No. Ticket</th>
+                        <th>Cliente</th>
+                        <th>Ejecutivo</th>
+                        <th>Reportó</th>
+                        <th>Estatus</th>
+                        <th>Sistema</th>
+                        <th>Tipo</th>
+                        <th>Comentarios</th>
+                        <th>Solución</th>
+                        <th>Escalado</th>
+                        <th>Área Escalada</th>
+                        <th>Fecha Solución</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>01/10/2026</td>
+                        <td>01/10/2026</td>
+                        <td>09:30 AM</td>
+                        <td><span class="badge bg-info text-dark">7014</span></td>
+                        <td>CONSULTORES Y OPERADORES</td>
+                        <td>Ing. Justin Sánchez</td>
+                        <td>Lic. Juan Flores</td>
+                        <td><span class="badge bg-warning text-dark">En curso</span></td>
+                        <td>SITA</td>
+                        <td>Servicio</td>
+                        <td>Error en firma M3...</td>
+                        <td>Ajuste de dirección MAC local</td>
+                        <td><span class="badge bg-danger">SI</span></td>
+                        <td>Desarrollo</td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
