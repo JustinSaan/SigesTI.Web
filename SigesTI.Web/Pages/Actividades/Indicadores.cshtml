@@ -1,0 +1,252 @@
+@page
+@model SigesTI.Web.Pages.Actividades.IndicadoresModel
+@{
+    ViewData["Title"] = "Indicadores y Métricas del Área";
+}
+
+<link rel="stylesheet" href="~/css/actividades.css" asp-append-version="true" />
+
+<div class="actividades-container px-4 py-3">
+    <!-- Encabezado y Filtro de Fecha -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-white mb-1">
+                <i class="bi bi-bar-chart-line-fill me-2 text-info"></i>Indicadores y Métricas
+            </h3>
+            <p class="text-muted small mb-0">Tablero ejecutivo de rendimiento, porcentajes de solución y actividades programadas.</p>
+        </div>
+        <div>
+            <button class="btn btn-secondary-sigest btn-sm shadow-sm px-3" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Imprimir / Guardar PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Barra de Filtros por Período -->
+    <div class="glass-panel mb-4 p-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <label class="form-label small text-muted mb-1">Fecha Inicio</label>
+                <input type="date" class="form-control form-control-sm" name="fechaInicio" value="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted mb-1">Fecha Fin</label>
+                <input type="date" class="form-control form-control-sm" name="fechaFin" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted mb-1">Origen Servicio</label>
+                <select class="form-select form-select-sm" name="filtroOrigen">
+                    <option value="">-- Todos --</option>
+                    <option value="Externo">Clientes Externos</option>
+                    <option value="Interno">Soporte Interno</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-sm btn-primary-sigest w-100">
+                    <i class="bi bi-funnel me-1"></i> Actualizar Métricas
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tarjetas de KPIs Principales (4 Bloques) -->
+    <div class="row g-3 mb-4">
+        <!-- KPI 1: Total Solicitudes -->
+        <div class="col-md-3">
+            <div class="glass-panel p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small d-block mb-1">Total Atendidos</span>
+                        <h2 class="fw-bold mb-0 text-info">24</h2>
+                        <span class="text-success small"><i class="bi bi-arrow-up-right me-1"></i>En el período</span>
+                    </div>
+                    <div class="fs-1 text-info bg-info bg-opacity-10 p-3 rounded-3">
+                        <i class="bi bi-headset"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI 2: Porcentaje de Resolución -->
+        <div class="col-md-3">
+            <div class="glass-panel p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small d-block mb-1">% Eficiencia Resolución</span>
+                        <h2 class="fw-bold mb-0 text-success">91.6%</h2>
+                        <span class="text-muted small">22 Cerrados / 2 En curso</span>
+                    </div>
+                    <div class="fs-1 text-success bg-success bg-opacity-10 p-3 rounded-3">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI 3: Balance Interno vs Externo -->
+        <div class="col-md-3">
+            <div class="glass-panel p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small d-block mb-1">Servicios Externos vs Int.</span>
+                        <h2 class="fw-bold mb-0 text-primary">75% / 25%</h2>
+                        <span class="text-muted small">18 Ext. / 6 Int.</span>
+                    </div>
+                    <div class="fs-1 text-primary bg-primary bg-opacity-10 p-3 rounded-3">
+                        <i class="bi bi-diagram-3-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI 4: Programa de Mantenimientos -->
+        <div class="col-md-3">
+            <div class="glass-panel p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small d-block mb-1">Tareas Programadas</span>
+                        <h2 class="fw-bold mb-0 text-warning">85%</h2>
+                        <span class="text-muted small">Avance del programa</span>
+                    </div>
+                    <div class="fs-1 text-warning bg-warning bg-opacity-10 p-3 rounded-3">
+                        <i class="bi bi-calendar-check-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Gráficos y Tablas Resumen -->
+    <div class="row g-3 mb-4">
+        <!-- Distribución por Sistema -->
+        <div class="col-md-6">
+            <div class="glass-panel h-100 overflow-hidden">
+                <div class="glass-header">
+                    <i class="bi bi-pie-chart-fill me-2 text-info"></i>Tickets por Sistema (Porcentajes)
+                </div>
+                <div class="p-3">
+                    <ul class="list-group list-group-flush bg-transparent text-white small">
+                        <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border-secondary py-2">
+                            <span><i class="bi bi-box me-2 text-primary"></i>SITA</span>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="badge bg-primary rounded-pill">10 tickets</span>
+                                <span class="fw-bold text-info">41.6%</span>
+                            </div>
+                        </li>
+                        <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border-secondary py-2">
+                            <span><i class="bi bi-box me-2 text-success"></i>DIAWEB</span>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="badge bg-success rounded-pill">6 tickets</span>
+                                <span class="fw-bold text-info">25.0%</span>
+                            </div>
+                        </li>
+                        <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border-secondary py-2">
+                            <span><i class="bi bi-box me-2 text-warning"></i>MED</span>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="badge bg-warning text-dark rounded-pill">4 tickets</span>
+                                <span class="fw-bold text-info">16.6%</span>
+                            </div>
+                        </li>
+                        <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border-secondary py-2">
+                            <span><i class="bi bi-box me-2 text-danger"></i>ADMIN (Interno)</span>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="badge bg-danger rounded-pill">4 tickets</span>
+                                <span class="fw-bold text-info">16.6%</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribución por Tipo de Requerimiento -->
+        <div class="col-md-6">
+            <div class="glass-panel h-100 overflow-hidden">
+                <div class="glass-header">
+                    <i class="bi bi-tags-fill me-2 text-warning"></i>Distribución por Tipo de Requerimiento
+                </div>
+                <div class="p-3">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small text-muted mb-1">
+                            <span>Servicios (Peticiones)</span>
+                            <span class="fw-bold text-white">12 (50%)</span>
+                        </div>
+                        <div class="progress bg-secondary bg-opacity-50" style="height: 10px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: 50%;"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small text-muted mb-1">
+                            <span>Incidencias (Fallas)</span>
+                            <span class="fw-bold text-white">6 (25%)</span>
+                        </div>
+                        <div class="progress bg-secondary bg-opacity-50" style="height: 10px;">
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: 25%;"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small text-muted mb-1">
+                            <span>Mejoras / Solicitudes Especiales</span>
+                            <span class="fw-bold text-white">4 (16.6%)</span>
+                        </div>
+                        <div class="progress bg-secondary bg-opacity-50" style="height: 10px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 16.6%;"></div>
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <div class="d-flex justify-content-between small text-muted mb-1">
+                            <span>Ajustes</span>
+                            <span class="fw-bold text-white">2 (8.4%)</span>
+                        </div>
+                        <div class="progress bg-secondary bg-opacity-50" style="height: 10px;">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: 8.4%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen de Cumplimiento de Mantenimientos y Respaldos -->
+    <div class="glass-panel mb-4 overflow-hidden">
+        <div class="glass-header">
+            <i class="bi bi-shield-check me-2 text-success"></i>Estado del Programa de Actividades y Mantenimientos
+        </div>
+        <div class="p-0 table-responsive">
+            <table class="tabla-sigest align-middle text-nowrap mb-0 small">
+                <thead>
+                    <tr>
+                        <th>Programa / Actividad</th>
+                        <th>Tipo</th>
+                        <th>Fecha Programada</th>
+                        <th>Estatus</th>
+                        <th>Responsable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="fw-bold text-white">Renovación de Licencias ESET Antivirus</td>
+                        <td>Licenciamiento</td>
+                        <td class="text-center">05/10/2026</td>
+                        <td class="text-center"><span class="badge bg-warning text-dark px-2 py-1">En Proceso</span></td>
+                        <td>Ing. Justin Sánchez</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold text-white">Respaldo Trimestral Servidor SITA / Base de Datos</td>
+                        <td>Respaldo</td>
+                        <td class="text-center">02/10/2026</td>
+                        <td class="text-center"><span class="badge bg-success px-2 py-1">Realizado</span></td>
+                        <td>Ing. Justin Sánchez</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold text-white">Mantenimiento Preventivo Equipos Dirección General</td>
+                        <td>Mantenimiento</td>
+                        <td class="text-center">12/10/2026</td>
+                        <td class="text-center"><span class="badge bg-secondary px-2 py-1">Pendiente</span></td>
+                        <td>Ing. Justin Sánchez</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

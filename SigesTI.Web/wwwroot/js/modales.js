@@ -858,11 +858,107 @@ function imprimirReporteBitacora() {
     }, 1500);
 }
 
+/* ==========================================================================
+   MÓDULO REPORTE DE TICKETS - FUNCIONALIDAD Y MODALES
+   ========================================================================== */
+
+// 1. Carga dinámica de contactos según el Cliente seleccionado
+function cambiarCliente(elem) {
+    const boxNuevo = document.getElementById("boxClienteNuevo");
+    const ddlContactos = document.getElementById("ddlContactos");
+    
+    // Limpiar selector de contactos
+    ddlContactos.innerHTML = '<option value="">-- Selecciona quien reporta --</option><option value="OTRO">+ Agregar otra persona...</option>';
+
+    if (elem.value === "OTRO") {
+        boxNuevo.classList.remove("d-none");
+    } else {
+        boxNuevo.classList.add("d-none");
+        if (elem.value) {
+            // Consulta AJAX al Handler C# del Backend
+            fetch(`?handler=ContactosPorCliente&clienteId=${elem.value}`)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(c => {
+                        const opt = document.createElement("option");
+                        opt.value = c.nombreContacto;
+                        opt.dataset.correo = c.correo || "";
+                        opt.textContent = c.nombreContacto;
+                        ddlContactos.insertBefore(opt, ddlContactos.lastElementChild);
+                    });
+                })
+                .catch(err => console.error("Error al obtener los contactos:", err));
+        }
+    }
+}
+
+// 2. Autocompletar el correo electrónico según la persona que reporta
+function cambiarContacto(elem) {
+    const txtManual = document.getElementById("txtReportoManual");
+    const txtCorreo = document.getElementById("txtCorreoReporto");
+
+    if (elem.value === "OTRO") {
+        txtManual.classList.remove("d-none");
+        txtCorreo.value = "";
+    } else {
+        txtManual.classList.add("d-none");
+        const optionSelected = elem.options[elem.selectedIndex];
+        txtCorreo.value = optionSelected.dataset.correo || "";
+    }
+}
+
+// 3. Mostrar u ocultar el campo de Área Escalada
+function cambiarEscalado(elem) {
+    const boxArea = document.getElementById("boxAreaEscalada");
+    if (elem.value === "true") {
+        boxArea.classList.remove("d-none");
+    } else {
+        boxArea.classList.add("d-none");
+    }
+}
+
+// 4. Abrir la Vista Previa / Edición con Doble Clic sobre la fila del Ticket
+function abrirModalDetalle(id, numTicket, cliente, reporto, ejecutivo, estatus, comentarios, solucion) {
+    document.getElementById("editTicketId").value = id;
+    document.getElementById("lblNumTicket").textContent = "#" + numTicket;
+    document.getElementById("lblCliente").textContent = cliente;
+    document.getElementById("lblReporto").textContent = reporto;
+    document.getElementById("lblEjecutivo").textContent = ejecutivo;
+    document.getElementById("lblEstatus").textContent = estatus;
+
+    const txtComentarios = document.getElementById("txtDetalleComentarios");
+    const txtSolucion = document.getElementById("txtDetalleSolucion");
+    const btnGuardar = document.getElementById("btnGuardarCambios");
+
+    txtComentarios.value = comentarios || "";
+    txtSolucion.value = solucion || "";
+
+    // Permisos por Rol:
+    // - Administrador: Editar siempre
+    // - Soporte: Editar solo si está "En curso" y está asignado a su usuario
+    const esAdmin = (typeof rolUsuario !== 'undefined' && rolUsuario === "Administrador");
+    const esMio = (typeof usuarioSesion !== 'undefined' && ejecutivo === usuarioSesion);
+    const estaAbierto = (estatus !== "Cerrado");
+
+    if (esAdmin || (estaAbierto && esMio)) {
+        txtComentarios.removeAttribute("readonly");
+        txtSolucion.removeAttribute("readonly");
+        btnGuardar.classList.remove("d-none");
+    } else {
+        txtComentarios.setAttribute("readonly", true);
+        txtSolucion.setAttribute("readonly", true);
+        btnGuardar.classList.add("d-none");
+    }
+
+    // Modal usando Bootstrap Native
+    const modalElem = document.getElementById("modalDetalleTicket");
+    const modal = new bootstrap.Modal(modalElem);
+    modal.show();
+}
 
 /* ==========================================================================
    MODALES DE PERSONAL
    ========================================================================== */
-
 
 function abrirModalRegistrar() {
     document.getElementById("regNombre").value = "";
@@ -1071,5 +1167,62 @@ async function guardarRegistro() {
             },
             buttonsStyling: false
         });
+    }
+}
+
+                /* ==========================================================================
+   FUNCIÓN PARA ABRIR MODAL DETALLE DE TICKET CON DOBLE CLIC
+   ========================================================================== */
+function abrirModalDetalleDesdeFila(filaElem) {
+    // Extraer datos desde los atributos HTML data-* de la fila
+    const id = filaElem.dataset.id;
+    const numTicket = filaElem.dataset.numticket;
+    const cliente = filaElem.dataset.cliente;
+    const reporto = filaElem.dataset.reporto;
+    const ejecutivo = filaElem.dataset.ejecutivo;
+    const estatus = filaElem.dataset.estatus;
+    const descripcion = filaElem.dataset.descripcion;
+    const comentarios = filaElem.dataset.comentarios;
+    const solucion = filaElem.dataset.solucion;
+
+    // Asignar datos al modal
+    document.getElementById("editTicketId").value = id;
+    document.getElementById("lblNumTicket").textContent = "#" + numTicket;
+    document.getElementById("lblCliente").textContent = cliente;
+    document.getElementById("lblReporto").textContent = reporto;
+    document.getElementById("lblEjecutivo").textContent = ejecutivo;
+    document.getElementById("lblEstatus").textContent = estatus;
+
+    const txtDescripcion = document.getElementById("txtDetalleDescripcion");
+    const txtComentarios = document.getElementById("txtDetalleComentarios");
+    const txtSolucion = document.getElementById("txtDetalleSolucion");
+    const btnGuardar = document.getElementById("btnGuardarCambios");
+
+    if (txtDescripcion) txtDescripcion.value = descripcion || "";
+    if (txtComentarios) txtComentarios.value = comentarios || "";
+    if (txtSolucion) txtSolucion.value = solucion || "";
+
+    // Permisos según Rol y Estado del Ticket
+    const esAdmin = (typeof rolUsuario !== 'undefined' && rolUsuario === "Administrador");
+    const esMio = (typeof usuarioSesion !== 'undefined' && ejecutivo === usuarioSesion);
+    const estaAbierto = (estatus !== "Cerrado");
+
+    if (esAdmin || (estaAbierto && esMio)) {
+        if (txtDescripcion) txtDescripcion.removeAttribute("readonly");
+        if (txtComentarios) txtComentarios.removeAttribute("readonly");
+        if (txtSolucion) txtSolucion.removeAttribute("readonly");
+        if (btnGuardar) btnGuardar.classList.remove("d-none");
+    } else {
+        if (txtDescripcion) txtDescripcion.setAttribute("readonly", true);
+        if (txtComentarios) txtComentarios.setAttribute("readonly", true);
+        if (txtSolucion) txtSolucion.setAttribute("readonly", true);
+        if (btnGuardar) btnGuardar.classList.add("d-none");
+    }
+
+    // Inicializar y abrir el modal con Bootstrap
+    const modalElem = document.getElementById("modalDetalleTicket");
+    if (modalElem) {
+        const modal = new bootstrap.Modal(modalElem);
+        modal.show();
     }
 }

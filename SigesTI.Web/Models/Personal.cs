@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 
 namespace SigesTI.Web.Models
 {
@@ -19,7 +22,7 @@ namespace SigesTI.Web.Models
 
         public bool Activo { get; set; } = true;
 
-        // 🆕 NUEVOS CAMPOS AGREGADOS CON ÉXITO
+        // NUEVOS CAMPOS AGREGADOS CON ÉXITO
         [Required(ErrorMessage = "El puesto es obligatorio")]
         public string Puesto { get; set; } = string.Empty;
 

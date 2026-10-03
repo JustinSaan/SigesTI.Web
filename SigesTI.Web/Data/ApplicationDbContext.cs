@@ -12,9 +12,12 @@ namespace SigesTI.Web.Data
 
         public DbSet<UsuarioSistema> UsuariosSistema { get; set; }
         public DbSet<BitacoraUsuario> BitacoraUsuarios { get; set; }
-
-        public DbSet<SigesTI.Web.Models.Personal> Personal { get; set; }
         public DbSet<Solicitud> Solicitudes { get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<SigesTI.Web.Models.Personal> Personal { get; set; }
+        public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<ContactoCliente> ContactosCliente { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

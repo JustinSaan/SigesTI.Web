@@ -4,28 +4,37 @@
     ViewData["Title"] = "Plan de Respaldos";
 }
 
-<div class="container-fluid px-4 mt-3">
+<link rel="stylesheet" href="~/css/actividades.css" asp-append-version="true" />
+
+<div class="actividades-container px-4 py-3">
+    <!-- Encabezado y Acciones -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3 class="fw-bold text-white mb-1"><i class="bi bi-hdd-network me-2"></i>Plan de Respaldos</h3>
+            <h3 class="fw-bold text-white mb-1">
+                <i class="bi bi-hdd-network me-2 text-info"></i>Plan de Respaldos
+            </h3>
             <p class="text-muted small mb-0">Control de fechas programadas y estatus de ejecución de respaldos.</p>
         </div>
-        <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoRespaldo">
+        <button class="btn btn-primary-sigest shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#modalNuevoRespaldo">
             <i class="bi bi-plus-lg me-1"></i> Agregar Equipo / Respaldo
         </button>
     </div>
 
     <!-- Tabla Matriz Plan de Respaldos -->
-    <div class="card bg-dark border-secondary shadow-sm">
-        <div class="card-body p-0 table-responsive">
-            <table class="table table-dark table-bordered align-middle text-center mb-0 small">
+    <div class="glass-panel mb-4 overflow-hidden">
+        <div class="glass-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-calendar3 me-2"></i>Cronograma de Respaldos Trimestrales</span>
+            <span class="badge bg-primary px-3 py-2 rounded-pill">Equipos Registrados: 1</span>
+        </div>
+        <div class="p-0 table-responsive">
+            <table class="tabla-sigest align-middle text-center text-nowrap mb-0 small">
                 <thead>
-                    <tr class="table-active border-bottom border-light">
-                        <th colspan="3" class="bg-success bg-opacity-20">Información del Equipo</th>
-                        <th colspan="6" class="bg-primary bg-opacity-20">Fechas Programadas</th>
-                        <th class="bg-info bg-opacity-20">Responsables y Estatus</th>
+                    <tr>
+                        <th colspan="3" class="bg-success bg-opacity-20 text-success fw-bold">Información del Equipo</th>
+                        <th colspan="6" class="bg-primary bg-opacity-20 text-info fw-bold">Fechas Programadas</th>
+                        <th class="bg-info bg-opacity-20 text-white fw-bold">Responsables y Estatus</th>
                     </tr>
-                    <tr class="table-secondary text-dark fw-bold">
+                    <tr>
                         <th>Área</th>
                         <th>Ejecutivo</th>
                         <th>Equipo / IP</th>
@@ -40,19 +49,19 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="fw-bold text-warning align-middle">Dirección General</td>
+                        <td class="fw-bold text-warning text-start ps-3">Dirección General</td>
                         <td>Lic. Adriana Rocha</td>
-                        <td><code>DIRECCION (192.168.2.38)</code></td>
+                        <td><code class="text-info bg-dark px-2 py-1 rounded">DIRECCION (192.168.2.38)</code></td>
                         <td>13/07/2026</td>
                         <td>02/10/2026</td>
                         <td>04/01/2027</td>
                         <td>02/04/2027</td>
                         <td>02/07/2027</td>
                         <td>01/10/2027</td>
-                        <td class="align-middle">
+                        <td>
                             <div class="d-flex align-items-center gap-2 justify-content-center">
-                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Realizado</span>
-                                <select class="form-select form-select-sm bg-dark text-white border-secondary w-auto">
+                                <span class="badge bg-success px-2 py-1"><i class="bi bi-check-circle me-1"></i>Realizado</span>
+                                <select class="form-select form-select-sm w-auto">
                                     <option value="Realizado" selected>Realizado</option>
                                     <option value="No realizado">No realizado</option>
                                 </select>
