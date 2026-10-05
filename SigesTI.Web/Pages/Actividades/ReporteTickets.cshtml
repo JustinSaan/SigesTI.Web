@@ -8,7 +8,6 @@
 
 <div class="actividades-container px-4 py-3">
 
-    <!-- Inputs invisibles para capturar TempData y ser leídos por alertas.js -->
     <input type="hidden" id="mensajeExito" value="@TempData["MensajeExito"]" />
     <input type="hidden" id="mensajeError" value="@TempData["MensajeError"]" />
 
@@ -19,13 +18,13 @@
             <p class="text-muted small mb-0">Gestión de atención diaria y generación de reportes consolidados.</p>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-outline-success btn-secondary-sigest shadow-sm" id="btnExportarExcel">
+            <button class="btn btn-outline-success btn-secondary-sigest shadow-sm" id="btnExportarExcel" type="button">
                 <i class="bi bi-file-earmark-excel me-1 text-success"></i> Exportar Excel
             </button>
-            <button class="btn btn-danger shadow-sm fw-bold" id="btnExportarPdf" style="border-radius: 12px;">
-                <i class="bi bi-file-earmark-pdf me-1"></i> Exportar PDF
+            <button class="btn btn-primary-sigest shadow-sm px-3 fw-bold" id="btnGenerarReporte" type="button">
+                <i class="bi bi-printer me-1"></i> Generar Reporte
             </button>
-            <button class="btn btn-primary-sigest shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#modalNuevoTicket">
+            <button class="btn btn-sm btn-outline-info shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#modalNuevoTicket">
                 <i class="bi bi-plus-lg me-1"></i> Nuevo Ticket
             </button>
         </div>
@@ -36,7 +35,7 @@
         <form method="get" class="row g-2 align-items-center">
             <div class="col-md-3">
                 <label class="form-label small text-muted mb-1">Fecha de Consulta</label>
-                <input type="date" class="form-control form-control-sm" name="fechaReporte" value="@(Model.FechaReporte?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))" />
+                <input type="date" id="fechaReporteConsulta" class="form-control form-control-sm" name="fechaReporte" value="@(Model.FechaReporte?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))" />
             </div>
             <div class="col-md-3">
                 <label class="form-label small text-muted mb-1">Sistema</label>
@@ -70,7 +69,7 @@
             <i class="bi bi-bar-chart-steps me-2"></i>Indicadores de Atención del Día
         </div>
         <div class="p-0 table-responsive">
-            <table class="tabla-sigest text-center align-middle mb-0 small">
+            <table class="tabla-sigest text-center align-middle mb-0 small" id="tablaIndicadores">
                 <thead>
                     <tr>
                         <th rowspan="2" class="align-middle bg-primary bg-opacity-20">Tickets</th>
@@ -107,53 +106,82 @@
                 </thead>
                 <tbody>
                     <tr>
+                        <td class="fw-bold text-warning">Seguimiento</td>
+                        <td class="fw-bold">@Model.IndicadoresSeguimiento.Total</td>
+                        <td>@Model.IndicadoresSeguimiento.Servicio</td>
+                        <td>@Model.IndicadoresSeguimiento.Incidencia</td>
+                        <td>@Model.IndicadoresSeguimiento.Ajuste</td>
+                        <td>@Model.IndicadoresSeguimiento.Mejora</td>
+                        <td>@Model.IndicadoresSeguimiento.DIA</td>
+                        <td>@Model.IndicadoresSeguimiento.DIAWEB</td>
+                        <td>@Model.IndicadoresSeguimiento.MED</td>
+                        <td>@Model.IndicadoresSeguimiento.SITA</td>
+                        <td>@Model.IndicadoresSeguimiento.VUCEM</td>
+                        <td>@Model.IndicadoresSeguimiento.DIAENLINEA</td>
+                        <td>@Model.IndicadoresSeguimiento.COA</td>
+                        <td>@Model.IndicadoresSeguimiento.ADMIN</td>
+                        <td>@Model.IndicadoresSeguimiento.Llamada</td>
+                        <td>@Model.IndicadoresSeguimiento.Correo</td>
+                        <td>@Model.IndicadoresSeguimiento.EscaladoDesarrollo</td>
+                        <td>@Model.IndicadoresSeguimiento.EscaladoConsultoria</td>
+                        <td>@Model.IndicadoresSeguimiento.EscaladoVentas</td>
+                        <td>@Model.IndicadoresSeguimiento.EscaladoCobranza</td>
+                        <td><span class="badge bg-success">@Model.IndicadoresSeguimiento.Cerrado</span></td>
+                        <td><span class="badge bg-warning text-dark">@Model.IndicadoresSeguimiento.EnCurso</span></td>
+                    </tr>
+                    <tr>
                         <td class="fw-bold text-info">Resumen del Día</td>
-                        <td class="fw-bold">@Model.Indicadores.Total</td>
-                        <td>@Model.Indicadores.Servicio</td>
-                        <td>@Model.Indicadores.Incidencia</td>
-                        <td>@Model.Indicadores.Ajuste</td>
-                        <td>@Model.Indicadores.Mejora</td>
-                        <td>@Model.Indicadores.DIA</td>
-                        <td>@Model.Indicadores.DIAWEB</td>
-                        <td>@Model.Indicadores.MED</td>
-                        <td>@Model.Indicadores.SITA</td>
-                        <td>@Model.Indicadores.VUCEM</td>
-                        <td>@Model.Indicadores.DIAENLINEA</td>
-                        <td>@Model.Indicadores.COA</td>
-                        <td>@Model.Indicadores.ADMIN</td>
-                        <td>@Model.Indicadores.Llamada</td>
-                        <td>@Model.Indicadores.Correo</td>
-                        <td>@Model.Indicadores.EscaladoDesarrollo</td>
-                        <td>@Model.Indicadores.EscaladoConsultoria</td>
-                        <td>@Model.Indicadores.EscaladoVentas</td>
-                        <td>@Model.Indicadores.EscaladoCobranza</td>
-                        <td><span class="badge bg-success">@Model.Indicadores.Cerrado</span></td>
-                        <td><span class="badge bg-warning text-dark">@Model.Indicadores.EnCurso</span></td>
+                        <td class="fw-bold">@Model.IndicadoresDia.Total</td>
+                        <td>@Model.IndicadoresDia.Servicio</td>
+                        <td>@Model.IndicadoresDia.Incidencia</td>
+                        <td>@Model.IndicadoresDia.Ajuste</td>
+                        <td>@Model.IndicadoresDia.Mejora</td>
+                        <td>@Model.IndicadoresDia.DIA</td>
+                        <td>@Model.IndicadoresDia.DIAWEB</td>
+                        <td>@Model.IndicadoresDia.MED</td>
+                        <td>@Model.IndicadoresDia.SITA</td>
+                        <td>@Model.IndicadoresDia.VUCEM</td>
+                        <td>@Model.IndicadoresDia.DIAENLINEA</td>
+                        <td>@Model.IndicadoresDia.COA</td>
+                        <td>@Model.IndicadoresDia.ADMIN</td>
+                        <td>@Model.IndicadoresDia.Llamada</td>
+                        <td>@Model.IndicadoresDia.Correo</td>
+                        <td>@Model.IndicadoresDia.EscaladoDesarrollo</td>
+                        <td>@Model.IndicadoresDia.EscaladoConsultoria</td>
+                        <td>@Model.IndicadoresDia.EscaladoVentas</td>
+                        <td>@Model.IndicadoresDia.EscaladoCobranza</td>
+                        <td><span class="badge bg-success">@Model.IndicadoresDia.Cerrado</span></td>
+                        <td><span class="badge bg-warning text-dark">@Model.IndicadoresDia.EnCurso</span></td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Sección de Redacción para el Reporte -->
+    <!-- Sección de Redacción -->
     <div class="row g-3 mb-4">
         <div class="col-md-6">
             <div class="glass-panel h-100 overflow-hidden">
                 <div class="glass-header">
-                    <i class="bi bi-card-text me-2"></i>Puntos Relevantes del Día (Redacción para Reporte)
+                    <i class="bi bi-card-text me-2"></i>Puntos Relevantes del Día
                 </div>
                 <div class="p-3">
-                    <textarea class="form-control" rows="5" placeholder="Escribe aquí los puntos más relevantes de los tickets atendidos hoy..."></textarea>
+                    <textarea id="txtPuntosRelevantes" class="form-control" rows="5" placeholder="Escribe un breve resumen de cada uno de los tickets atendidos hoy..."></textarea>
                 </div>
             </div>
         </div>
+
         <div class="col-md-6">
             <div class="glass-panel h-100 overflow-hidden">
-                <div class="glass-header">
-                    <i class="bi bi-person-workspace me-2"></i>Soportes Internos / Actividades Adicionales
+                <div class="glass-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-person-workspace me-2"></i>Soportes Internos / Actividades Adicionales</span>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="chkActividades">
+                        <label class="form-check-label text-white small" for="chkActividades">Indicar actividades adicionales</label>
+                    </div>
                 </div>
-                <div class="p-3">
-                    <textarea class="form-control" rows="5" placeholder="Escribe aquí el soporte brindado a compañeros sin folio de ticket formal..."></textarea>
+                <div class="p-3 d-none" id="boxActividades">
+                    <textarea id="txtSoportesInternos" class="form-control" rows="4" placeholder="Escribe aquí el soporte brindado a compañeros o actividades adicionales..." disabled></textarea>
                 </div>
             </div>
         </div>
@@ -166,7 +194,7 @@
             <span class="badge bg-primary px-3 py-2 rounded-pill">Registros: @Model.ListaTickets.Count</span>
         </div>
         <div class="p-0 table-responsive">
-            <table class="tabla-sigest text-nowrap small">
+            <table class="tabla-sigest text-nowrap small" id="tablaDetalleTickets">
                 <thead>
                     <tr>
                         <th>Fecha Entrada</th>
@@ -189,64 +217,70 @@
                 </thead>
                 <tbody>
                     @if (Model.ListaTickets != null && Model.ListaTickets.Any())
-{
-    @foreach (var item in Model.ListaTickets)
-    {
-        <tr style="cursor: pointer;" 
-            data-id="@item.Id"
-            data-numticket="@item.NumeroTicket"
-            data-cliente="@item.Cliente"
-            data-reporto="@item.Reporto"
-            data-ejecutivo="@item.Ejecutivo"
-            data-estatus="@item.Estatus"
-            data-descripcion="@item.Descripcion"
-            data-comentarios="@item.Comentarios"
-            data-solucion="@item.Solucion"
-            ondblclick="abrirModalDetalleDesdeFila(this)">
-            
-            <td>@item.FechaEntrada.ToString("dd/MM/yyyy")</td>
-            <td>@(item.FechaUltimaModificacion.HasValue ? item.FechaUltimaModificacion.Value.ToString("dd/MM/yyyy") : "-")</td>
-            <td>@item.Hora</td>
-            <td><span class="badge bg-info text-dark fw-bold">@item.NumeroTicket</span></td>
-            <td class="text-start">@item.Cliente</td>
-            <td>@item.Ejecutivo</td>
-            <td>@item.Reporto</td>
-            <td>
-                @if (item.Estatus == "Cerrado")
-                {
-                    <span class="badge bg-success">Cerrado</span>
-                }
-                else
-                {
-                    <span class="badge bg-warning text-dark">En curso</span>
-                }
-            </td>
-            <td><span class="fw-bold text-info">@item.Sistema</span></td>
-            <td>@item.Tipo</td>
-            <td class="text-start text-truncate" style="max-width: 180px;" title="@item.Descripcion">
-                @(string.IsNullOrEmpty(item.Descripcion) ? "-" : item.Descripcion)
-            </td>
-            <td class="text-start text-truncate" style="max-width: 180px;" title="@item.Comentarios">
-                @(string.IsNullOrEmpty(item.Comentarios) ? "-" : item.Comentarios)
-            </td>
-            <td class="text-start text-truncate" style="max-width: 200px;" title="@item.Solucion">
-                @(string.IsNullOrEmpty(item.Solucion) ? "-" : item.Solucion)
-            </td>
-            <td>
-                @if (item.Escalado)
-                {
-                    <span class="badge bg-danger">SI</span>
-                }
-                else
-                {
-                    <span class="badge bg-secondary">NO</span>
-                }
-            </td>
-            <td>@(string.IsNullOrEmpty(item.AreaEscalada) ? "-" : item.AreaEscalada)</td>
-            <td>@(item.FechaSolucion.HasValue ? item.FechaSolucion.Value.ToString("dd/MM/yyyy") : "-")</td>
-        </tr>
-    }
-}
+                    {
+                        @foreach (var item in Model.ListaTickets)
+                        {
+                            <tr style="cursor: pointer;"
+                                data-id="@item.Id"
+                                data-fechaentrada="@item.FechaEntrada.ToString("yyyy-MM-dd")"
+                                data-numticket="@item.NumeroTicket"
+                                data-cliente="@item.Cliente"
+                                data-reporto="@item.Reporto"
+                                data-ejecutivo="@item.Ejecutivo"
+                                data-sistema="@item.Sistema"
+                                data-tipo="@item.Tipo"
+                                data-estatus="@item.Estatus"
+                                data-escalado="@item.Escalado.ToString().ToLower()"
+                                data-areaescalada="@item.AreaEscalada"
+                                data-fechasolucion="@(item.FechaSolucion.HasValue ? item.FechaSolucion.Value.ToString("yyyy-MM-dd") : "")"
+                                data-descripcion="@item.Descripcion"
+                                data-comentarios="@item.Comentarios"
+                                data-solucion="@item.Solucion"
+                                ondblclick="abrirModalDetalleDesdeFila(this)">
+
+                                <td>@item.FechaEntrada.ToString("dd/MM/yyyy")</td>
+                                <td>@(item.FechaUltimaModificacion.HasValue ? item.FechaUltimaModificacion.Value.ToString("dd/MM/yyyy") : "-")</td>
+                                <td>@item.Hora</td>
+                                <td><span class="badge bg-info text-dark fw-bold">@item.NumeroTicket</span></td>
+                                <td class="text-start">@item.Cliente</td>
+                                <td>@item.Ejecutivo</td>
+                                <td>@item.Reporto</td>
+                                <td>
+                                    @if (item.Estatus == "Cerrado")
+                                    {
+                                        <span class="badge bg-success">Cerrado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">En curso</span>
+                                    }
+                                </td>
+                                <td><span class="fw-bold text-info">@item.Sistema</span></td>
+                                <td>@item.Tipo</td>
+                                <td class="text-start text-truncate" style="max-width: 180px;" title="@item.Descripcion">
+                                    @(string.IsNullOrEmpty(item.Descripcion) ? "-" : item.Descripcion)
+                                </td>
+                                <td class="text-start text-truncate" style="max-width: 180px;" title="@item.Comentarios">
+                                    @(string.IsNullOrEmpty(item.Comentarios) ? "-" : item.Comentarios)
+                                </td>
+                                <td class="text-start text-truncate" style="max-width: 200px;" title="@item.Solucion">
+                                    @(string.IsNullOrEmpty(item.Solucion) ? "-" : item.Solucion)
+                                </td>
+                                <td>
+                                    @if (item.Escalado)
+                                    {
+                                        <span class="badge bg-danger">SI</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">NO</span>
+                                    }
+                                </td>
+                                <td>@(string.IsNullOrEmpty(item.AreaEscalada) ? "-" : item.AreaEscalada)</td>
+                                <td>@(item.FechaSolucion.HasValue ? item.FechaSolucion.Value.ToString("dd/MM/yyyy") : "-")</td>
+                            </tr>
+                        }
+                    }
                     else
                     {
                         <tr>
@@ -262,9 +296,7 @@
     </div>
 </div>
 
-<!-- ==========================================================================
-     MODAL 1: NUEVO TICKET
-     ========================================================================== -->
+<!-- Modal 1: Nuevo Ticket -->
 <div class="modal fade" id="modalNuevoTicket" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content glass-panel border-0 text-white">
@@ -276,15 +308,19 @@
                 @Html.AntiForgeryToken()
                 <div class="modal-body p-4">
                     <div class="row g-3">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">Fecha Entrada</label>
+                            <input type="date" name="FechaEntrada" class="form-control form-control-sm" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label small text-muted">No. Ticket / Folio</label>
                             <input type="text" name="NumeroTicket" class="form-control form-control-sm" required placeholder="Ej: 7016" />
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label small text-muted">Hora de Atención</label>
                             <input type="text" name="Hora" class="form-control form-control-sm" value="@DateTime.Now.ToString("hh:mm tt")" required />
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label small text-muted">Origen del Ticket</label>
                             <select name="Origen" class="form-select form-select-sm" required>
                                 <option value="Llamada">Llamada</option>
@@ -367,20 +403,25 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small text-muted">Estatus Inicial</label>
-                            <select name="Estatus" class="form-select form-select-sm" required>
+                            <select name="Estatus" class="form-select form-select-sm" onchange="evaluarFechaSolucionNuevo(this.value)" required>
                                 <option value="En curso">En curso</option>
                                 <option value="Cerrado">Cerrado</option>
                             </select>
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Fecha de Solución</label>
+                            <input type="date" id="regFechaSolucion" name="FechaSolucion" class="form-control form-control-sm" disabled />
+                        </div>
+
+                        <div class="col-md-3">
                             <label class="form-label small text-muted">¿Se escala?</label>
-                            <select name="Escalado" class="form-select form-select-sm" onchange="cambiarEscalado(this)">
+                            <select id="ddlEscalado" name="Escalado" class="form-select form-select-sm" onchange="cambiarEscalado(this)">
                                 <option value="false">NO</option>
                                 <option value="true">SI</option>
                             </select>
                         </div>
-                        <div class="col-md-8 d-none" id="boxAreaEscalada">
+                        <div class="col-md-3 d-none" id="boxAreaEscalada">
                             <label class="form-label small text-muted">Área Escalada</label>
                             <select name="AreaEscalada" class="form-select form-select-sm">
                                 <option value="">-- Selecciona Área --</option>
@@ -393,7 +434,7 @@
 
                         <div class="col-md-12">
                             <label class="form-label small text-muted">Descripción del Ticket</label>
-                            <input type="text" name="Descripcion" class="form-control form-control-sm" placeholder="Resumen o asunto del problema..." required><textarea/>
+                            <textarea name="Descripcion" class="form-control form-control-sm" rows="4" placeholder="Escribe aquí la bitácora o historial..." required></textarea>
                         </div>
                         <div class="col-md-12">
                             <label class="form-label small text-muted">Comentarios / Falla Reportada</label>
@@ -414,69 +455,228 @@
     </div>
 </div>
 
-<!-- ==========================================================================
-     MODAL 2: DETALLE / EDICIÓN VISTA PREVIA (DOBLE CLIC)
-     ========================================================================== -->
+<!-- Modal 2: Detalle / Edición -->
 <div class="modal fade" id="modalDetalleTicket" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content glass-panel border-0 text-white">
             <div class="modal-header glass-header border-0 d-flex justify-content-between align-items-center">
-                <h5 class="modal-title fw-bold"><i class="bi bi-eye me-2 text-info"></i>Detalle del Ticket <span id="lblNumTicket" class="text-info"></span></h5>
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-pencil-square me-2 text-info"></i>Detalle del Ticket <span id="lblNumTicket" class="text-info"></span>
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" asp-page-handler="ActualizarTicket">
                 @Html.AntiForgeryToken()
                 <input type="hidden" id="editTicketId" name="TicketId" />
+
                 <div class="modal-body p-4">
                     <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Fecha Entrada</label>
+                            <input type="date" id="editFechaEntrada" name="FechaEntrada" class="form-control form-control-sm" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Cliente (Empresa)</label>
+                            <input type="text" id="editCliente" name="Cliente" class="form-control form-control-sm" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Persona que Reportó</label>
+                            <input type="text" id="editReporto" name="Reporto" class="form-control form-control-sm" required />
+                        </div>
+
                         <div class="col-md-6">
-                            <strong>Cliente:</strong> <span id="lblCliente" class="text-light"></span>
+                            <label class="form-label small text-muted">Ejecutivo de Soporte</label>
+                            <select id="editEjecutivo" name="Ejecutivo" class="form-select form-select-sm" required>
+                                <option value="">-- Selecciona Ejecutivo --</option>
+                                @foreach (var pers in Model.ListaEjecutivosSoporte)
+                                {
+                                    <option value="@pers.Nombre">@pers.Nombre</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">Sistema</label>
+                            <select id="editSistema" name="Sistema" class="form-select form-select-sm" required>
+                                <option value="SITA">SITA</option>
+                                <option value="DIAWEB">DIAWEB</option>
+                                <option value="MED">MED</option>
+                                <option value="COA">COA</option>
+                                <option value="ADMIN">ADMIN</option>
+                                <option value="VUCEM">VUCEM</option>
+                                <option value="DIAENLINEA">DIAENLINEA</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">Tipo</label>
+                            <select id="editTipo" name="Tipo" class="form-select form-select-sm" required>
+                                <option value="Servicio">Servicio</option>
+                                <option value="Incidencia">Incidencia</option>
+                                <option value="Ajuste">Ajuste</option>
+                                <option value="Mejora">Mejora</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Estatus</label>
+                            <select id="editEstatus" name="Estatus" class="form-select form-select-sm" onchange="evaluarFechaSolucion(this.value)" required>
+                                <option value="En curso">En curso</option>
+                                <option value="Cerrado">Cerrado</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
-                            <strong>Reportó:</strong> <span id="lblReporto" class="text-light"></span>
+                            <label class="form-label small text-muted">Fecha de Solución</label>
+                            <input type="date" id="editFechaSolucion" name="FechaSolucion" class="form-control form-control-sm" disabled />
                         </div>
+
                         <div class="col-md-6">
-                            <strong>Ejecutivo:</strong> <span id="lblEjecutivo" class="text-light"></span>
+                            <label class="form-label small text-muted">¿Se escala?</label>
+                            <select id="editEscalado" name="Escalado" class="form-select form-select-sm" onchange="evaluarAreaEscaladaEdit(this.value)">
+                                <option value="false">NO</option>
+                                <option value="true">SI</option>
+                            </select>
                         </div>
-                        <div class="col-md-6">
-                            <strong>Estatus:</strong> <span id="lblEstatus" class="badge bg-warning text-dark"></span>
+                        <div class="col-md-6 d-none" id="boxEditAreaEscalada">
+                            <label class="form-label small text-muted">Área Escalada</label>
+                            <select id="editAreaEscalada" name="AreaEscalada" class="form-select form-select-sm">
+                                <option value="">-- Selecciona Área --</option>
+                                <option value="Desarrollo">Desarrollo</option>
+                                <option value="Consultoría">Consultoría</option>
+                                <option value="Ventas">Ventas</option>
+                                <option value="Cobranza">Cobranza</option>
+                            </select>
                         </div>
-                        <div class="col-12"><hr class="border-secondary my-1"></div>
 
                         <div class="col-12">
-                            <label class="form-label small text-muted">Descripción del Ticket</label>
-                            <textarea id="txtDetalleDescripcion" name="Descripcion" class="form-control" rows="5" readonly></textarea>
+                            <label class="form-label small text-muted">Descripción / Bitácora del Ticket</label>
+                            <textarea id="txtDetalleDescripcion" name="Descripcion" class="form-control" rows="4"></textarea>
                         </div>
                         <div class="col-12">
                             <label class="form-label small text-muted">Comentarios / Falla Reportada</label>
-                            <textarea id="txtDetalleComentarios" name="Comentarios" class="form-control" rows="4" readonly></textarea>
+                            <textarea id="txtDetalleComentarios" name="Comentarios" class="form-control" rows="3"></textarea>
                         </div>
                         <div class="col-12">
-                            <label class="form-label small text-muted">Solución</label>
-                            <textarea id="txtDetalleSolucion" name="Solucion" class="form-control" rows="4" readonly></textarea>
+                            <label class="form-label small text-muted">Solución Técnica</label>
+                            <textarea id="txtDetalleSolucion" name="Solucion" class="form-control" rows="3"></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
                     <button type="button" class="btn btn-sm btn-secondary-sigest px-3" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="submit" id="btnGuardarCambios" class="btn btn-sm btn-primary-sigest px-3 d-none"><i class="bi bi-save me-1"></i> Guardar Cambios</button>
+                    <button type="submit" id="btnGuardarCambios" class="btn btn-sm btn-primary-sigest px-3 d-none">
+                        <i class="bi bi-save me-1"></i> Guardar Cambios
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<!-- Modal 3: Vista Previa y PDF del Reporte -->
+<div class="modal fade" id="modalVistaPreviaReporte" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
+        <div class="modal-content glass-panel border-0 text-white">
+            <div class="modal-header glass-header border-0">
+                <h5 class="modal-title fw-bold text-white">
+                    <i class="bi bi-file-earmark-pdf me-2 text-info"></i>Vista Previa del Reporte Diario
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Único contenedor de Impresión -->
+            <div class="modal-body p-4 text-dark bg-white" id="seccionImpresion">
+
+                <!-- ENCABEZADO ÚNICO -->
+                <div class="text-center mb-3">
+                    <h2 class="fw-bold mb-1 text-uppercase text-dark" style="font-size: 18pt;">
+                        Reporte de tickets diario @(Model.FechaReporte?.ToString("dd/MM/yyyy"))
+                    </h2>
+                    <p class="text-muted small mb-2" style="font-size: 9.5pt;">SDI Cointer - Departamento de Soporte Técnico</p>
+                    <hr class="text-dark border-secondary opacity-100 my-2" />
+                </div>
+
+                <!-- 1. RESUMEN DE INDICADORES -->
+                <h6 class="fw-bold text-dark mb-2" style="font-size: 10.5pt;">1. Resumen de Indicadores</h6>
+                <div id="contenedorIndicadoresPrint" class="mb-3"></div>
+
+                <!-- 2. PUNTOS RELEVANTES DEL DÍA -->
+                <h6 class="fw-bold text-dark mb-2" style="font-size: 10.5pt;">2. Puntos Relevantes del Día</h6>
+                <div class="p-3 bg-light border border-secondary rounded text-dark mb-3" style="white-space: pre-wrap; font-size: 9.5pt;" id="printPuntosRelevantes"></div>
+
+                <!-- 3. SOPORTES INTERNOS / ACTIVIDADES ADICIONALES (SI APLICA) -->
+                <div id="contenedorActividadesPrint" class="d-none mb-3">
+                    <h6 class="fw-bold text-dark mb-2" style="font-size: 10.5pt;">3. Soportes Internos / Actividades Adicionales</h6>
+                    <div class="p-3 bg-light border border-secondary rounded text-dark" style="white-space: pre-wrap; font-size: 9.5pt;" id="printSoportesInternos"></div>
+                </div>
+
+                <!-- DETALLE COMPLETO DE TICKETS -->
+                <div class="mt-3">
+                    <h6 class="fw-bold text-dark mb-2" style="font-size: 10.5pt;">Detalle Completo de Tickets</h6>
+                    <table class="tabla-print-detalle">
+                        <thead>
+                            <tr>
+                                <th style="width: 7%;">Fecha Entrada</th>
+                                <th style="width: 5%;">Hora</th>
+                                <th style="width: 6%;">No. Ticket</th>
+                                <th style="width: 10%;">Cliente</th>
+                                <th style="width: 8%;">Ejecutivo</th>
+                                <th style="width: 8%;">Reportó</th>
+                                <th style="width: 6%;">Estatus</th>
+                                <th style="width: 6%;">Sistema</th>
+                                <th style="width: 6%;">Tipo</th>
+                                <th style="width: 20%;">Descripción / Bitácora Completa</th>
+                                <th style="width: 9%;">Comentarios / Falla</th>
+                                <th style="width: 9%;">Solución Técnica</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.ListaTickets != null && Model.ListaTickets.Any())
+                            {
+                                @foreach (var item in Model.ListaTickets)
+                                {
+                                    <tr>
+                                        <td class="text-center">@item.FechaEntrada.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-center">@item.Hora</td>
+                                        <td class="text-center"><b>@item.NumeroTicket</b></td>
+                                        <td>@item.Cliente</td>
+                                        <td>@item.Ejecutivo</td>
+                                        <td>@item.Reporto</td>
+                                        <td class="text-center">@item.Estatus</td>
+                                        <td class="text-center">@item.Sistema</td>
+                                        <td class="text-center">@item.Tipo</td>
+                                        <td style="white-space: pre-wrap;">@item.Descripcion</td>
+                                        <td style="white-space: pre-wrap;">@item.Comentarios</td>
+                                        <td style="white-space: pre-wrap;">@item.Solucion</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="12" class="text-center py-2">No hay tickets registrados en esta fecha.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <div class="modal-footer border-top bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary fw-bold" onclick="imprimirContenidoLimpio()">
+                    <i class="bi bi-printer me-1"></i> Imprimir / Guardar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
         const rolUsuario = "@(HttpContext.Session.GetString("Rol") ?? "")";
         const usuarioSesion = "@(HttpContext.Session.GetString("Usuario") ?? "")";
-
-        document.addEventListener("DOMContentLoaded", function () {
-            if (typeof mostrarMensajesServidor === "function") {
-                mostrarMensajesServidor();
-            }
-        });
+        const fechaReporteActual = "@(Model.FechaReporte?.ToString("dd-MM-yyyy"))";
     </script>
     <script src="~/js/modales.js" asp-append-version="true"></script>
-    <script src="~/js/alertas.js" asp-append-version="true"></script>
 }

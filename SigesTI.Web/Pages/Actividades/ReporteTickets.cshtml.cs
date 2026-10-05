@@ -21,13 +21,12 @@ namespace SigesTI.Web.Pages.Actividades
             _context = context;
         }
 
-        // Listas para la vista y modales
         public IList<Ticket> ListaTickets { get; set; } = new List<Ticket>();
         public IList<Cliente> ListaClientes { get; set; } = new List<Cliente>();
         public IList<PersonalModel> ListaEjecutivosSoporte { get; set; } = new List<PersonalModel>();
 
-        // DTO de métricas consolidadas
-        public IndicadoresTicketsDto Indicadores { get; set; } = new IndicadoresTicketsDto();
+        public IndicadoresTicketsDto IndicadoresDia { get; set; } = new IndicadoresTicketsDto();
+        public IndicadoresTicketsDto IndicadoresSeguimiento { get; set; } = new IndicadoresTicketsDto();
 
         [BindProperty(SupportsGet = true)]
         public DateTime? FechaReporte { get; set; }
@@ -42,15 +41,20 @@ namespace SigesTI.Web.Pages.Actividades
         {
             FechaReporte ??= DateTime.Today;
 
-            // 1. Cargar datos para los combos del Modal de Nuevo Ticket
             ListaClientes = await _context.Clientes.Where(c => c.Activo).ToListAsync();
             ListaEjecutivosSoporte = await _context.Personal
                 .Where(p => p.Activo && p.Area == "Soporte Técnico")
                 .ToListAsync();
 
-            // 2. Consulta de Tickets filtrados por fecha y criterios
+            var inicioDia = FechaReporte.Value.Date;
+            var finDia = inicioDia.AddDays(1);
+
             var query = _context.Tickets
-                .Where(t => t.Activo && t.FechaEntrada.Date == FechaReporte.Value.Date);
+                .Where(t => t.Activo && (
+                    (t.FechaEntrada >= inicioDia && t.FechaEntrada < finDia) ||
+                    (t.FechaSolucion.HasValue && t.FechaSolucion.Value >= inicioDia && t.FechaSolucion.Value < finDia) ||
+                    t.Estatus == "En curso"
+                ));
 
             if (!string.IsNullOrEmpty(FiltroSistema))
             {
@@ -62,48 +66,51 @@ namespace SigesTI.Web.Pages.Actividades
                 query = query.Where(t => t.Origen == FiltroOrigen);
             }
 
-            ListaTickets = await query.OrderByDescending(t => t.FechaEntrada).ToListAsync();
+            ListaTickets = await query
+                .OrderByDescending(t => t.Estatus == "En curso")
+                .ThenByDescending(t => t.FechaEntrada)
+                .ToListAsync();
 
-            // 3. Cálculo de Indicadores en C#
-            Indicadores = new IndicadoresTicketsDto
+            var ticketsDelDia = ListaTickets
+                .Where(t => t.FechaEntrada >= inicioDia && t.FechaEntrada < finDia)
+                .ToList();
+
+            var ticketsSeguimiento = ListaTickets
+                .Where(t => t.FechaEntrada < inicioDia)
+                .ToList();
+
+            IndicadoresDia = CalcularMetricas(ticketsDelDia);
+            IndicadoresSeguimiento = CalcularMetricas(ticketsSeguimiento);
+        }
+
+        private IndicadoresTicketsDto CalcularMetricas(List<Ticket> tickets)
+        {
+            return new IndicadoresTicketsDto
             {
-                Total = ListaTickets.Count,
-
-                // Tipos
-                Servicio = ListaTickets.Count(t => t.Tipo == "Servicio"),
-                Incidencia = ListaTickets.Count(t => t.Tipo == "Incidencia"),
-                Ajuste = ListaTickets.Count(t => t.Tipo == "Ajuste"),
-                Mejora = ListaTickets.Count(t => t.Tipo == "Mejora"),
-
-                // Sistemas Externos
-                DIA = ListaTickets.Count(t => t.Sistema == "DIA"),
-                DIAWEB = ListaTickets.Count(t => t.Sistema == "DIAWEB"),
-                MED = ListaTickets.Count(t => t.Sistema == "MED"),
-                SITA = ListaTickets.Count(t => t.Sistema == "SITA"),
-                VUCEM = ListaTickets.Count(t => t.Sistema == "VUCEM"),
-                DIAENLINEA = ListaTickets.Count(t => t.Sistema == "DIAENLINEA"),
-                COA = ListaTickets.Count(t => t.Sistema == "COA"),
-
-                // Sistema Interno
-                ADMIN = ListaTickets.Count(t => t.Sistema == "ADMIN"),
-
-                // Origen
-                Llamada = ListaTickets.Count(t => t.Origen == "Llamada"),
-                Correo = ListaTickets.Count(t => t.Origen == "Correo"),
-
-                // Escalados
-                EscaladoDesarrollo = ListaTickets.Count(t => t.Escalado && t.AreaEscalada == "Desarrollo"),
-                EscaladoConsultoria = ListaTickets.Count(t => t.Escalado && t.AreaEscalada == "Consultoría"),
-                EscaladoVentas = ListaTickets.Count(t => t.Escalado && t.AreaEscalada == "Ventas"),
-                EscaladoCobranza = ListaTickets.Count(t => t.Escalado && t.AreaEscalada == "Cobranza"),
-
-                // Estatus
-                Cerrado = ListaTickets.Count(t => t.Estatus == "Cerrado"),
-                EnCurso = ListaTickets.Count(t => t.Estatus == "En curso")
+                Total = tickets.Count,
+                Servicio = tickets.Count(t => t.Tipo == "Servicio"),
+                Incidencia = tickets.Count(t => t.Tipo == "Incidencia"),
+                Ajuste = tickets.Count(t => t.Tipo == "Ajuste"),
+                Mejora = tickets.Count(t => t.Tipo == "Mejora"),
+                DIA = tickets.Count(t => t.Sistema == "DIA"),
+                DIAWEB = tickets.Count(t => t.Sistema == "DIAWEB"),
+                MED = tickets.Count(t => t.Sistema == "MED"),
+                SITA = tickets.Count(t => t.Sistema == "SITA"),
+                VUCEM = tickets.Count(t => t.Sistema == "VUCEM"),
+                DIAENLINEA = tickets.Count(t => t.Sistema == "DIAENLINEA"),
+                COA = tickets.Count(t => t.Sistema == "COA"),
+                ADMIN = tickets.Count(t => t.Sistema == "ADMIN"),
+                Llamada = tickets.Count(t => t.Origen == "Llamada"),
+                Correo = tickets.Count(t => t.Origen == "Correo"),
+                EscaladoDesarrollo = tickets.Count(t => t.Escalado && t.AreaEscalada == "Desarrollo"),
+                EscaladoConsultoria = tickets.Count(t => t.Escalado && t.AreaEscalada == "Consultoría"),
+                EscaladoVentas = tickets.Count(t => t.Escalado && t.AreaEscalada == "Ventas"),
+                EscaladoCobranza = tickets.Count(t => t.Escalado && t.AreaEscalada == "Cobranza"),
+                Cerrado = tickets.Count(t => t.Estatus == "Cerrado"),
+                EnCurso = tickets.Count(t => t.Estatus == "En curso")
             };
         }
 
-        // Handler AJAX para cargar contactos asociados al seleccionar un Cliente
         public async Task<JsonResult> OnGetContactosPorClienteAsync(int clienteId)
         {
             var contactos = await _context.ContactosCliente
@@ -114,14 +121,13 @@ namespace SigesTI.Web.Pages.Actividades
             return new JsonResult(contactos);
         }
 
-        // Handler POST para Guardar Nuevo Ticket
         public async Task<IActionResult> OnPostCrearTicketAsync(
-            string NumeroTicket, string Hora, string Origen,
+            string NumeroTicket, DateTime? FechaEntrada, string Hora, string Origen,
             string ClienteId, string? NuevaClaveCliente, string? NuevoNombreCliente,
             string? Reporto, string? ReportoManual, string? CorreoReporto,
             string Ejecutivo, string Sistema, string Tipo, string Estatus,
             string? Escalado, string? AreaEscalada, string? Descripcion,
-            string? Comentarios, string? Solucion)
+            string? Comentarios, string? Solucion, DateTime? FechaSolucion)
         {
             try
             {
@@ -129,7 +135,6 @@ namespace SigesTI.Web.Pages.Actividades
                 string personaReportoFinal = "";
                 bool seEscala = Escalado == "true" || Escalado == "1";
 
-                // 1. Gestión de Cliente y Contacto
                 if (ClienteId == "OTRO" && !string.IsNullOrEmpty(NuevoNombreCliente))
                 {
                     var nuevoCliente = new Cliente
@@ -140,7 +145,6 @@ namespace SigesTI.Web.Pages.Actividades
                     };
                     _context.Clientes.Add(nuevoCliente);
                     await _context.SaveChangesAsync();
-
                     nombreClienteFinal = nuevoCliente.Nombre;
 
                     if (!string.IsNullOrEmpty(ReportoManual))
@@ -162,7 +166,6 @@ namespace SigesTI.Web.Pages.Actividades
                     if (clienteExistente != null)
                     {
                         nombreClienteFinal = clienteExistente.Nombre;
-
                         if (Reporto == "OTRO" && !string.IsNullOrEmpty(ReportoManual))
                         {
                             _context.ContactosCliente.Add(new ContactoCliente
@@ -182,10 +185,9 @@ namespace SigesTI.Web.Pages.Actividades
                     }
                 }
 
-                // 2. Insertar Ticket
                 var nuevoTicket = new Ticket
                 {
-                    FechaEntrada = DateTime.Now,
+                    FechaEntrada = FechaEntrada ?? DateTime.Now,
                     Hora = string.IsNullOrEmpty(Hora) ? DateTime.Now.ToString("hh:mm tt") : Hora,
                     NumeroTicket = NumeroTicket,
                     Cliente = nombreClienteFinal,
@@ -200,14 +202,13 @@ namespace SigesTI.Web.Pages.Actividades
                     Solucion = Solucion,
                     Escalado = seEscala,
                     AreaEscalada = seEscala ? AreaEscalada : null,
-                    FechaSolucion = (Estatus == "Cerrado") ? DateTime.Now : null,
+                    FechaSolucion = (Estatus == "Cerrado") ? (FechaSolucion ?? DateTime.Now) : null,
                     Activo = true
                 };
 
                 _context.Tickets.Add(nuevoTicket);
                 await _context.SaveChangesAsync();
 
-                // TempData para activar SweetAlert tras redirección
                 TempData["MensajeExito"] = "El ticket fue registrado correctamente.";
                 return RedirectToPage();
             }
@@ -218,28 +219,50 @@ namespace SigesTI.Web.Pages.Actividades
             }
         }
 
-        // Handler POST para Actualizar Ticket desde la Vista Previa (Doble Clic)
-        public async Task<IActionResult> OnPostActualizarTicketAsync(int TicketId, string? Descripcion, string? Comentarios, string? Solucion, string? Estatus)
+        public async Task<IActionResult> OnPostActualizarTicketAsync(
+            int TicketId, DateTime? FechaEntrada, string Cliente, string Reporto, string Ejecutivo,
+            string Sistema, string Tipo, string Estatus, string Escalado,
+            string? AreaEscalada, DateTime? FechaSolucion, string? Descripcion,
+            string? Comentarios, string? Solucion)
         {
-            var ticket = await _context.Tickets.FindAsync(TicketId);
-            if (ticket != null)
+            try
             {
-                ticket.Descripcion = Descripcion;
-                ticket.Comentarios = Comentarios;
-                ticket.Solucion = Solucion;
-                ticket.FechaUltimaModificacion = DateTime.Now;
-
-                if (!string.IsNullOrEmpty(Estatus))
+                var ticket = await _context.Tickets.FindAsync(TicketId);
+                if (ticket != null)
                 {
-                    ticket.Estatus = Estatus;
-                    if (Estatus == "Cerrado" && !ticket.FechaSolucion.HasValue)
-                    {
-                        ticket.FechaSolucion = DateTime.Now;
-                    }
-                }
+                    bool seEscala = Escalado == "true" || Escalado == "1";
 
-                await _context.SaveChangesAsync();
-                TempData["MensajeExito"] = "El ticket se actualizó correctamente.";
+                    if (FechaEntrada.HasValue) ticket.FechaEntrada = FechaEntrada.Value;
+                    ticket.Cliente = Cliente;
+                    ticket.Reporto = Reporto;
+                    ticket.Ejecutivo = Ejecutivo;
+                    ticket.Sistema = Sistema;
+                    ticket.Tipo = Tipo;
+                    ticket.Estatus = Estatus;
+                    ticket.Escalado = seEscala;
+                    ticket.AreaEscalada = seEscala ? AreaEscalada : null;
+
+                    if (Estatus == "Cerrado")
+                    {
+                        ticket.FechaSolucion = FechaSolucion ?? DateTime.Now;
+                    }
+                    else
+                    {
+                        ticket.FechaSolucion = null;
+                    }
+
+                    ticket.Descripcion = Descripcion;
+                    ticket.Comentarios = Comentarios;
+                    ticket.Solucion = Solucion;
+                    ticket.FechaUltimaModificacion = DateTime.Now;
+
+                    await _context.SaveChangesAsync();
+                    TempData["MensajeExito"] = "El ticket se actualizó correctamente.";
+                }
+            }
+            catch (Exception)
+            {
+                TempData["MensajeError"] = "Ocurrió un problema al actualizar el ticket.";
             }
 
             return RedirectToPage();
