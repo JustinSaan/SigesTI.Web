@@ -9,7 +9,17 @@
     padding: 24px;
     background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.25), transparent 40%), radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.15), transparent 35%), #0b132b !important;
     min-height: calc(100vh - 120px);
+    color: #e2e8f0;
 }
+
+    .actividades-container * {
+        text-shadow: none !important;
+    }
+
+    .actividades-container ::selection {
+        background-color: rgba(56, 189, 248, 0.3) !important;
+        color: #ffffff !important;
+    }
 
 /* Paneles y Tarjetas estilo Glassmorphism con relieve definido */
 .glass-panel {
@@ -18,6 +28,16 @@
     border-radius: 16px !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
+
+    .glass-panel h1,
+    .glass-panel h2,
+    .glass-panel h3,
+    .glass-panel h4,
+    .glass-panel span,
+    .glass-panel p,
+    .glass-panel label {
+        background-color: transparent !important;
+    }
 
 /* Encabezados de Paneles / Tarjetas */
 .glass-header {
@@ -28,6 +48,26 @@
     font-weight: 700;
     font-size: 0.95rem;
     letter-spacing: 0.3px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.actividades-container .text-muted,
+.actividades-container .text-secondary {
+    color: #94a3b8 !important;
+}
+
+/* Containers de Gráficas */
+.chart-container-box {
+    position: relative;
+    height: 280px;
+    width: 100%;
+}
+
+.actividades-container canvas {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.35));
 }
 
 /* --------------------------------------------------------------------------
@@ -39,45 +79,112 @@
     border-spacing: 0 !important;
 }
 
-    /* Encabezados de Tablas: Fondo sobrio y texto blanco puro de alto contraste */
     .tabla-sigest th {
-        padding: 10px 8px !important;
-        color: #ffffff !important;
+        padding: 12px 10px !important;
+        color: #38bdf8 !important;
         font-size: 0.75rem !important;
         font-weight: 700 !important;
         text-align: center !important;
         text-transform: uppercase !important;
         letter-spacing: 0.5px !important;
-        background: #1e293b !important;
-        border: 1px solid rgba(148, 163, 184, 0.35) !important;
+        background: #0f172a !important;
+        border: 1px solid rgba(148, 163, 184, 0.2) !important;
+        border-bottom: 2px solid rgba(56, 189, 248, 0.3) !important;
     }
 
-    /* Celdas de Datos */
     .tabla-sigest td {
-        padding: 10px 8px !important;
+        padding: 10px 12px !important;
         color: #f1f5f9 !important;
         font-size: 0.85rem !important;
         vertical-align: middle !important;
-        border: 1px solid rgba(148, 163, 184, 0.25) !important;
-        background: rgba(15, 23, 42, 0.5) !important;
+        border: 1px solid rgba(148, 163, 184, 0.15) !important;
+        background: rgba(15, 23, 42, 0.6) !important;
     }
 
-    /* Efecto Hover en Filas de Tabla */
     .tabla-sigest tbody tr {
         transition: background-color 0.15s ease, transform 0.15s ease;
     }
 
         .tabla-sigest tbody tr:hover {
             cursor: pointer !important;
-            background: rgba(56, 189, 248, 0.18) !important;
+            background: rgba(56, 189, 248, 0.15) !important;
         }
 
             .tabla-sigest tbody tr:hover td {
                 color: #ffffff !important;
             }
 
+    /* RESTAURACIÓN DE SOMBREADOS / INSIGNIAS / HIGHLIGHTS EN TABLAS */
+    .actividades-container .badge,
+    .tabla-sigest .badge,
+    .modal-content .badge {
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.4px !important;
+        border-radius: 6px !important;
+        padding: 6px 12px !important;
+        display: inline-block !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+    }
+
+        .actividades-container .badge.bg-primary,
+        .tabla-sigest .badge.bg-primary {
+            background-color: #0284c7 !important;
+            color: #ffffff !important;
+            border: 1px solid #38bdf8 !important;
+        }
+
+        .actividades-container .badge.bg-success,
+        .tabla-sigest .badge.bg-success {
+            background-color: #15803d !important;
+            color: #ffffff !important;
+            border: 1px solid #4ade80 !important;
+        }
+
+        .actividades-container .badge.bg-warning,
+        .tabla-sigest .badge.bg-warning {
+            background-color: #d97706 !important;
+            color: #ffffff !important;
+            border: 1px solid #fbbf24 !important;
+        }
+
+        .actividades-container .badge.bg-danger,
+        .tabla-sigest .badge.bg-danger {
+            background-color: #b91c1c !important;
+            color: #ffffff !important;
+            border: 1px solid #f87171 !important;
+        }
+
+        .actividades-container .badge.bg-info,
+        .tabla-sigest .badge.bg-info {
+            background-color: #0369a1 !important;
+            color: #ffffff !important;
+            border: 1px solid #38bdf8 !important;
+        }
+
+        .actividades-container .badge.bg-secondary,
+        .tabla-sigest .badge.bg-secondary {
+            background-color: #475569 !important;
+            color: #f8fafc !important;
+            border: 1px solid #94a3b8 !important;
+        }
+
+    /* Sombreado de Folios y Datos de No. Ticket / Escalado */
+    .actividades-container .text-highlight,
+    .tabla-sigest .ticket-number,
+    .tabla-sigest .badge-escalado {
+        color: #38bdf8 !important;
+        font-weight: 700 !important;
+        background-color: rgba(56, 189, 248, 0.15) !important;
+        padding: 4px 10px !important;
+        border-radius: 6px !important;
+        border: 1px solid rgba(56, 189, 248, 0.35) !important;
+        display: inline-block !important;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+    }
+
 /* --------------------------------------------------------------------------
-   3. INPUTS, SELECTS Y TEXTAREAS DEL MÓDULO PRINCIPAL
+   3. INPUTS, SELECTS Y BARRAS DE PROGRESO
    -------------------------------------------------------------------------- */
 .actividades-container label {
     color: #cbd5e1 !important;
@@ -100,14 +207,17 @@
     color-scheme: dark !important;
 }
 
-    /* Placeholders visibles */
+    .actividades-container select option {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+    }
+
     .actividades-container input::placeholder,
     .actividades-container textarea::placeholder {
         color: #94a3b8 !important;
         opacity: 1 !important;
     }
 
-    /* Foco activo en inputs */
     .actividades-container input:focus,
     .actividades-container select:focus,
     .actividades-container textarea:focus {
@@ -115,6 +225,32 @@
         background-color: #1e293b !important;
         box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
     }
+
+.actividades-container .form-switch .form-check-input {
+    background-color: #334155 !important;
+    border-color: #475569 !important;
+    width: 2.5em !important;
+    height: 1.25em !important;
+    cursor: pointer !important;
+}
+
+    .actividades-container .form-switch .form-check-input:checked {
+        background-color: #38bdf8 !important;
+        border-color: #38bdf8 !important;
+    }
+
+.actividades-container .progress {
+    background-color: #0f172a !important;
+    border: 1px solid #1e293b !important;
+    border-radius: 6px !important;
+    overflow: hidden;
+}
+
+.actividades-container .list-group-item {
+    background-color: transparent !important;
+    border-color: rgba(148, 163, 184, 0.15) !important;
+    color: #f1f5f9 !important;
+}
 
 /* --------------------------------------------------------------------------
    4. BOTONES Y ACCIONES
@@ -153,14 +289,12 @@
 /* --------------------------------------------------------------------------
    5. VENTANAS MODALES (NUEVO TICKET Y EDITAR TICKET)
    -------------------------------------------------------------------------- */
-/* Fondo general de la ventana modal */
 .modal-content {
     background-color: #0b132b !important;
     border: 1px solid rgba(56, 189, 248, 0.3) !important;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
 }
 
-/* Encabezado del Modal */
 .modal-header {
     background: #0f172a !important;
     border-bottom: 1px solid rgba(56, 189, 248, 0.25) !important;
@@ -172,7 +306,6 @@
     font-weight: 700 !important;
 }
 
-/* Etiquetas del Formulario Modal (Labels) */
 .modal-body label,
 .modal-content label {
     color: #cbd5e1 !important;
@@ -182,7 +315,6 @@
     display: inline-block !important;
 }
 
-/* Inputs, Selects y Textareas dentro de Modales */
 .modal-content .form-control,
 .modal-content .form-select,
 .modal-content input,
@@ -196,20 +328,17 @@
     color-scheme: dark !important;
 }
 
-    /* Opciones dentro de los menús desplegables */
     .modal-content select option {
         background-color: #0f172a !important;
         color: #ffffff !important;
     }
 
-    /* Placeholders del Modal */
     .modal-content input::placeholder,
     .modal-content textarea::placeholder {
         color: #94a3b8 !important;
         opacity: 1 !important;
     }
 
-    /* Foco activo en el Modal */
     .modal-content .form-control:focus,
     .modal-content .form-select:focus,
     .modal-content input:focus,
@@ -221,14 +350,13 @@
         color: #ffffff !important;
     }
 
-/* Pie del Modal */
 .modal-footer {
     border-top: 1px solid rgba(148, 163, 184, 0.18) !important;
     background-color: #0f172a !important;
 }
 
 /* --------------------------------------------------------------------------
-   6. ESTILOS DE IMPRESIÓN Y PDF (HORIZONTAL)
+   6. IMPRESIÓN Y GUARDADO PDF (PAGINACIÓN LIMPIA DE GRÁFICAS)
    -------------------------------------------------------------------------- */
 @media print {
     @page {
@@ -243,8 +371,6 @@
     #seccionImpresion,
     #seccionImpresion * {
         visibility: visible !important;
-        color: #000000 !important;
-        background: transparent !important;
     }
 
     #seccionImpresion {
@@ -254,8 +380,17 @@
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
+        background: transparent !important;
     }
 
+    /* Salto de Página forzado para el segundo bloque de gráficas en Indicadores */
+    .salto-pagina-print {
+        page-break-before: always !important;
+        break-before: page !important;
+        margin-top: 15px !important;
+    }
+
+    /* Tablas de impresión del Reporte Diario */
     .tabla-print-indicadores {
         width: 100% !important;
         border-collapse: collapse !important;
@@ -269,6 +404,7 @@
             padding: 4px 2px !important;
             text-align: center !important;
             color: #000000 !important;
+            background: #ffffff !important;
         }
 
         .tabla-print-indicadores th {
@@ -289,6 +425,7 @@
             text-align: left !important;
             vertical-align: top !important;
             color: #000000 !important;
+            background: #ffffff !important;
             word-break: break-word !important;
             white-space: pre-wrap !important;
         }
@@ -298,4 +435,19 @@
             font-weight: bold !important;
             text-align: center !important;
         }
+
+    .d-print-none {
+        display: none !important;
+    }
+
+    #txtObservaciones {
+        display: none !important;
+    }
+
+    #printObservacionesText {
+        display: block !important;
+        border: 1px dashed rgba(56, 189, 248, 0.4);
+        border-radius: 6px;
+        color: #ffffff !important;
+    }
 }
