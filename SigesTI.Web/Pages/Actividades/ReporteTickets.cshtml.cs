@@ -49,11 +49,21 @@ namespace SigesTI.Web.Pages.Actividades
             var inicioDia = FechaReporte.Value.Date;
             var finDia = inicioDia.AddDays(1);
 
+            // LÓGICA DE VISIBILIDAD DE TICKETS SEGÚN LA FECHA CONSULTADA (inicioDia)
             var query = _context.Tickets
                 .Where(t => t.Activo && (
+                    // 1. Tickets creados/abiertos en la fecha consultada
                     (t.FechaEntrada >= inicioDia && t.FechaEntrada < finDia) ||
+
+                    // 2. Tickets cuya FECHA DE SOLUCIÓN sea la fecha consultada (sin importar cuándo se abrieron)
                     (t.FechaSolucion.HasValue && t.FechaSolucion.Value >= inicioDia && t.FechaSolucion.Value < finDia) ||
-                    t.Estatus == "En curso"
+
+                    // 3. Tickets que se abrieron ANTES del día consultado y que en ese día AÚN SEGUÍAN "En curso"
+                    // (Si ya se cerraron, solo aplican si su FechaSolucion fue posterior al día consultado)
+                    (t.FechaEntrada < inicioDia && (
+                        t.Estatus == "En curso" ||
+                        (t.FechaSolucion.HasValue && t.FechaSolucion.Value >= finDia)
+                    ))
                 ));
 
             if (!string.IsNullOrEmpty(FiltroSistema))
@@ -71,6 +81,7 @@ namespace SigesTI.Web.Pages.Actividades
                 .ThenByDescending(t => t.FechaEntrada)
                 .ToListAsync();
 
+            // Separación para los indicadores del panel superior
             var ticketsDelDia = ListaTickets
                 .Where(t => t.FechaEntrada >= inicioDia && t.FechaEntrada < finDia)
                 .ToList();
@@ -82,7 +93,6 @@ namespace SigesTI.Web.Pages.Actividades
             IndicadoresDia = CalcularMetricas(ticketsDelDia);
             IndicadoresSeguimiento = CalcularMetricas(ticketsSeguimiento);
         }
-
         private IndicadoresTicketsDto CalcularMetricas(List<Ticket> tickets)
         {
             return new IndicadoresTicketsDto
@@ -94,7 +104,7 @@ namespace SigesTI.Web.Pages.Actividades
                 Mejora = tickets.Count(t => t.Tipo == "Mejora"),
                 DIA = tickets.Count(t => t.Sistema == "DIA"),
                 DIAWEB = tickets.Count(t => t.Sistema == "DIAWEB"),
-                MED = tickets.Count(t => t.Sistema == "MED"),
+                ConectorDiawebZoe = tickets.Count(t => t.Sistema == "CONECTORDIAWEBZOE"),
                 SITA = tickets.Count(t => t.Sistema == "SITA"),
                 VUCEM = tickets.Count(t => t.Sistema == "VUCEM"),
                 DIAENLINEA = tickets.Count(t => t.Sistema == "DIAENLINEA"),
@@ -185,9 +195,11 @@ namespace SigesTI.Web.Pages.Actividades
                     }
                 }
 
+                DateTime fechaEntradaFinal = FechaEntrada?.Date ?? DateTime.Today;
+
                 var nuevoTicket = new Ticket
                 {
-                    FechaEntrada = FechaEntrada ?? DateTime.Now,
+                    FechaEntrada = fechaEntradaFinal,
                     Hora = string.IsNullOrEmpty(Hora) ? DateTime.Now.ToString("hh:mm tt") : Hora,
                     NumeroTicket = NumeroTicket,
                     Cliente = nombreClienteFinal,
@@ -202,7 +214,8 @@ namespace SigesTI.Web.Pages.Actividades
                     Solucion = Solucion,
                     Escalado = seEscala,
                     AreaEscalada = seEscala ? AreaEscalada : null,
-                    FechaSolucion = (Estatus == "Cerrado") ? (FechaSolucion ?? DateTime.Now) : null,
+                    FechaSolucion = (Estatus == "Cerrado") ? (FechaSolucion?.Date ?? DateTime.Today) : null,
+                    FechaUltimaModificacion = DateTime.Now,
                     Activo = true
                 };
 
@@ -210,21 +223,23 @@ namespace SigesTI.Web.Pages.Actividades
                 await _context.SaveChangesAsync();
 
                 TempData["MensajeExito"] = "El ticket fue registrado correctamente.";
-                return RedirectToPage();
+                return RedirectToPage(new { fechaReporte = fechaEntradaFinal.ToString("yyyy-MM-dd") });
             }
             catch (Exception)
             {
                 TempData["MensajeError"] = "Ocurrió un error al intentar guardar el ticket.";
-                return RedirectToPage();
+                return RedirectToPage(new { fechaReporte = FechaReporte?.ToString("yyyy-MM-dd") });
             }
         }
 
         public async Task<IActionResult> OnPostActualizarTicketAsync(
-            int TicketId, DateTime? FechaEntrada, string Cliente, string Reporto, string Ejecutivo,
+            int TicketId, DateTime? FechaEntrada, string? Hora, string Cliente, string Reporto, string Ejecutivo,
             string Sistema, string Tipo, string Estatus, string Escalado,
             string? AreaEscalada, DateTime? FechaSolucion, string? Descripcion,
             string? Comentarios, string? Solucion)
         {
+            DateTime fechaRedireccion = FechaReporte ?? DateTime.Today;
+
             try
             {
                 var ticket = await _context.Tickets.FindAsync(TicketId);
@@ -232,7 +247,14 @@ namespace SigesTI.Web.Pages.Actividades
                 {
                     bool seEscala = Escalado == "true" || Escalado == "1";
 
-                    if (FechaEntrada.HasValue) ticket.FechaEntrada = FechaEntrada.Value;
+                    if (FechaEntrada.HasValue)
+                    {
+                        ticket.FechaEntrada = FechaEntrada.Value.Date;
+                        fechaRedireccion = FechaEntrada.Value.Date;
+                    }
+
+                    if (!string.IsNullOrEmpty(Hora)) ticket.Hora = Hora;
+
                     ticket.Cliente = Cliente;
                     ticket.Reporto = Reporto;
                     ticket.Ejecutivo = Ejecutivo;
@@ -244,7 +266,9 @@ namespace SigesTI.Web.Pages.Actividades
 
                     if (Estatus == "Cerrado")
                     {
-                        ticket.FechaSolucion = FechaSolucion ?? DateTime.Now;
+                        // Si la fecha enviada viene nula (por estar el input disabled en HTML),
+                        // toma la FechaSolucion existente o asigna la fecha actual
+                        ticket.FechaSolucion = FechaSolucion?.Date ?? ticket.FechaSolucion?.Date ?? DateTime.Today;
                     }
                     else
                     {
@@ -265,7 +289,7 @@ namespace SigesTI.Web.Pages.Actividades
                 TempData["MensajeError"] = "Ocurrió un problema al actualizar el ticket.";
             }
 
-            return RedirectToPage();
+            return RedirectToPage(new { fechaReporte = fechaRedireccion.ToString("yyyy-MM-dd") });
         }
 
         public class IndicadoresTicketsDto
@@ -277,7 +301,7 @@ namespace SigesTI.Web.Pages.Actividades
             public int Mejora { get; set; }
             public int DIA { get; set; }
             public int DIAWEB { get; set; }
-            public int MED { get; set; }
+            public int ConectorDiawebZoe { get; set; }
             public int SITA { get; set; }
             public int VUCEM { get; set; }
             public int DIAENLINEA { get; set; }

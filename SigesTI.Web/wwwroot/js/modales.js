@@ -12,6 +12,51 @@ if (typeof window.paginaBitacora === "undefined") {
 }
 
 /* ==========================================================================
+   HELPERS DE CONVERSIÓN DE HORA (12H <-> 24H)
+   ========================================================================== */
+
+function convertir12a24(hora12Str) {
+    if (!hora12Str) return "";
+    
+    if (/^([01]\d|2[0-3]):[0-5]\d$/.test(hora12Str.trim())) {
+        return hora12Str.trim();
+    }
+
+    const match = hora12Str.match(/(\d{1,2}):(\d{2})\s*(a\.?\s*m\.?|p\.?\s*m\.?|AM|PM)?/i);
+    if (!match) return "";
+
+    let horas = parseInt(match[1], 10);
+    const minutos = match[2];
+    const meridiano = match[3] ? match[3].toLowerCase() : "";
+
+    if ((meridiano.includes("p") || meridiano.includes("pm")) && horas < 12) {
+        horas += 12;
+    } else if ((meridiano.includes("a") || meridiano.includes("am")) && horas === 12) {
+        horas = 0;
+    }
+
+    const hh = String(horas).padStart(2, "0");
+    return `${hh}:${minutos}`;
+}
+
+function convertir24a12(hora24Str) {
+    if (!hora24Str) return "";
+
+    const partes = hora24Str.split(":");
+    if (partes.length < 2) return hora24Str;
+
+    let horas = parseInt(partes[0], 10);
+    const minutos = partes[1];
+    const meridiano = horas >= 12 ? "p. m." : "a. m.";
+
+    horas = horas % 12;
+    horas = horas ? horas : 12;
+
+    const hh = String(horas).padStart(2, "0");
+    return `${hh}:${minutos} ${meridiano}`;
+}
+
+/* ==========================================================================
    MODALES GENERALES DEL SISTEMA
    ========================================================================== */
 
@@ -28,6 +73,43 @@ function cerrarModal(idModal) {
         modal.classList.remove("show");
     }
 }
+
+// Función para cambiar dinámicamente el color del cuadro principal del select
+function aplicarColorSelectSistema(selectElement) {
+    if (!selectElement) return;
+
+    // Remover clases dinámicas de sistema previas
+    selectElement.classList.remove(
+        'badge-sistema-dia',
+        'badge-sistema-diaweb',
+        'badge-sistema-med',
+        'badge-sistema-sita',
+        'badge-sistema-vucem',
+        'badge-sistema-diaenlinea',
+        'badge-sistema-coa',
+        'badge-sistema-admin'
+    );
+
+    const valUpper = (selectElement.value || '').toUpperCase().trim();
+
+    if (valUpper.includes('DIAWEB')) selectElement.classList.add('badge-sistema-diaweb');
+    else if (valUpper.includes('DIAENLINEA')) selectElement.classList.add('badge-sistema-diaenlinea');
+    else if (valUpper === 'DIA') selectElement.classList.add('badge-sistema-dia');
+    else if (valUpper === 'MED') selectElement.classList.add('badge-sistema-med');
+    else if (valUpper === 'SITA') selectElement.classList.add('badge-sistema-sita');
+    else if (valUpper === 'VUCEM') selectElement.classList.add('badge-sistema-vucem');
+    else if (valUpper === 'COA') selectElement.classList.add('badge-sistema-coa');
+    else if (valUpper === 'ADMIN') selectElement.classList.add('badge-sistema-admin');
+}
+
+// Inicialización de colores para selects al cargar la página
+document.addEventListener('DOMContentLoaded', function () {
+    const regSistema = document.getElementById('regSistema');
+    if (regSistema) aplicarColorSelectSistema(regSistema);
+
+    const editSistema = document.getElementById('editSistema');
+    if (editSistema) aplicarColorSelectSistema(editSistema);
+});
 
 /* ==========================================================================
    MÓDULO CUENTA
@@ -177,7 +259,7 @@ function abrirModalDesdeServidor() {
 }
 
 /* ==========================================================================
-   TABLAS DEL MÓDULO CUENTA Y BITÁCORA (CORREGIDAS VARIABLES GLOBALES)
+   TABLAS DEL MÓDULO CUENTA Y BITÁCORA
    ========================================================================== */
 
 function normalizarTexto(texto) {
@@ -319,176 +401,6 @@ function limpiarFiltrosBitacora() {
 }
 
 /* ==========================================================================
-   EVENTOS GENERALES
-   ========================================================================== */
-
-document.addEventListener("DOMContentLoaded", function () {
-    const btnNuevo = document.getElementById("btnNuevoUsuario");
-    const buscador = document.getElementById("buscarUsuario");
-    const formNuevo = document.getElementById("formNuevoUsuario");
-    const formReporteBitacora = document.getElementById("formReporteBitacora");
-    const cantidadUsuarios = document.getElementById("cantidadUsuarios");
-
-    if (buscador) {
-        buscador.addEventListener("input", function () {
-            window.paginaUsuarios = 1;
-            actualizarTablaUsuarios();
-        });
-    }
-
-    if (cantidadUsuarios) {
-        cantidadUsuarios.addEventListener("change", function () {
-            window.paginaUsuarios = 1;
-            actualizarTablaUsuarios();
-        });
-    }
-
-    ["filtroNombre", "filtroModulo", "filtroAccion", "filtroFechaInicio", "filtroFechaFin"].forEach(id => {
-        const campo = document.getElementById(id);
-        if (campo) {
-            campo.addEventListener("change", function () {
-                window.paginaBitacora = 1;
-                actualizarTablaBitacora();
-            });
-        }
-    });
-
-    const cantidadBitacora = document.getElementById("cantidadBitacora");
-    if (cantidadBitacora) {
-        cantidadBitacora.addEventListener("change", function () {
-            window.paginaBitacora = 1;
-            actualizarTablaBitacora();
-        });
-    }
-
-    const btnLimpiarFiltros = document.getElementById("btnLimpiarFiltrosBitacora");
-    if (btnLimpiarFiltros) {
-        btnLimpiarFiltros.addEventListener("click", limpiarFiltrosBitacora);
-    }
-
-    actualizarTablaUsuarios();
-    actualizarTablaBitacora();
-
-    if (formReporteBitacora) {
-        formReporteBitacora.addEventListener("submit", abrirVistaPreviaReporte);
-    }
-
-    if (btnNuevo) {
-        btnNuevo.addEventListener("click", abrirModalNuevoUsuario);
-    }
-
-    if (buscador) {
-        buscador.addEventListener("input", filtrarUsuarios);
-    }
-
-    if (formNuevo) {
-        formNuevo.addEventListener("submit", validarPasswordTemporal);
-    }
-
-    document.querySelectorAll(".js-cerrar-nuevo").forEach(boton => {
-        boton.addEventListener("click", cerrarModalNuevoUsuario);
-    });
-
-    document.querySelectorAll(".js-cerrar-editar").forEach(boton => {
-        boton.addEventListener("click", cerrarModalEditarUsuario);
-    });
-
-    document.querySelectorAll(".js-toggle-password").forEach(boton => {
-        boton.addEventListener("click", function () {
-            cambiarVisibilidadPassword(boton);
-        });
-    });
-
-    document.querySelectorAll(".js-editar-usuario").forEach(boton => {
-        boton.addEventListener("click", function () {
-            abrirModalEditarUsuario(boton);
-        });
-    });
-
-    document.querySelectorAll(".js-restablecer-password").forEach(boton => {
-        boton.addEventListener("click", function () {
-            confirmarRestablecerPassword(boton);
-        });
-    });
-
-    document.querySelectorAll(".js-eliminar-usuario").forEach(boton => {
-        boton.addEventListener("click", function () {
-            confirmarEliminarUsuario(boton);
-        });
-    });
-
-    abrirModalDesdeServidor();
-    if (typeof mostrarMensajesServidor === "function") {
-        mostrarMensajesServidor();
-    }
-
-    /* --- PERSISTENCIA Y EVENTOS MÓDULO TICKETS --- */
-    const inputFecha = document.getElementById("fechaReporteConsulta");
-    const txtPuntos = document.getElementById("txtPuntosRelevantes");
-    const chkActividades = document.getElementById("chkActividades");
-    const boxActividades = document.getElementById("boxActividades");
-    const txtActividades = document.getElementById("txtSoportesInternos");
-    const btnGenerar = document.getElementById("btnGenerarReporte");
-    const btnExcel = document.getElementById("btnExportarExcel");
-
-    if (inputFecha && txtPuntos) {
-        const fechaActual = inputFecha.value;
-        const keyPuntos = `sigesti_puntos_${fechaActual}`;
-        const keyActividades = `sigesti_actividades_${fechaActual}`;
-        const keyChkActividades = `sigesti_chk_actividades_${fechaActual}`;
-
-        txtPuntos.value = localStorage.getItem(keyPuntos) || "";
-        if (txtActividades) {
-            txtActividades.value = localStorage.getItem(keyActividades) || "";
-        }
-
-        const chkGuardado = localStorage.getItem(keyChkActividades) === "true";
-        if (chkActividades) {
-            chkActividades.checked = chkGuardado;
-            evaluarEstadoActividades(chkGuardado);
-
-            chkActividades.addEventListener("change", function () {
-                evaluarEstadoActividades(this.checked);
-                localStorage.setItem(keyChkActividades, this.checked);
-                if (!this.checked && txtActividades) {
-                    txtActividades.value = "";
-                    localStorage.removeItem(keyActividades);
-                }
-            });
-        }
-
-        txtPuntos.addEventListener("input", function () {
-            localStorage.setItem(keyPuntos, this.value);
-        });
-
-        if (txtActividades) {
-            txtActividades.addEventListener("input", function () {
-                localStorage.setItem(keyActividades, this.value);
-            });
-        }
-
-        function evaluarEstadoActividades(habilitado) {
-            if (!boxActividades || !txtActividades) return;
-            if (habilitado) {
-                boxActividades.classList.remove("d-none");
-                txtActividades.removeAttribute("disabled");
-            } else {
-                boxActividades.classList.add("d-none");
-                txtActividades.setAttribute("disabled", "true");
-            }
-        }
-    }
-
-    if (btnGenerar) {
-        btnGenerar.addEventListener("click", abrirVistaPreviaImpresion);
-    }
-
-    if (btnExcel) {
-        btnExcel.addEventListener("click", exportarExcelLocal);
-    }
-});
-
-/* ==========================================================================
    VISTA PREVIA DEL REPORTE DE BITÁCORA
    ========================================================================== */
 
@@ -530,8 +442,39 @@ function imprimirReporteBitacora() {
 }
 
 /* ==========================================================================
-   MÓDULO REPORTE DE TICKETS - IMPRESIÓN Y EXPORTACIÓN EXCEL
+   MÓDULO REPORTE DE TICKETS - IMPRESIÓN Y EXPORTACIÓN EXCEL ESTILIZADA
    ========================================================================== */
+
+/* Helper que convierte la gráfica del sistema a imagen sobre fondo blanco e invierte textos a negro al vuelo */
+function exportarChartCanvasBlanco(chartInstance) {
+    if (!chartInstance || !chartInstance.canvas) return '';
+
+    try {
+        const canvasOriginal = chartInstance.canvas;
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvasOriginal.width;
+        tempCanvas.height = canvasOriginal.height;
+        const ctx = tempCanvas.getContext('2d');
+
+        // 1. Pintar fondo blanco sólido
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+        // 2. Aplicar filtro de inversión de color (Blanco -> Negro) preservando los tonos de color
+        ctx.filter = 'invert(1) hue-rotate(180deg)';
+
+        // 3. Dibujar el canvas original con el filtro aplicado
+        ctx.drawImage(canvasOriginal, 0, 0);
+
+        // 4. Limpiar filtro por seguridad
+        ctx.filter = 'none';
+
+        return tempCanvas.toDataURL('image/png', 1.0);
+    } catch (err) {
+        console.error("Error al exportar imagen adaptada del gráfico:", err);
+        return chartInstance.toBase64Image ? chartInstance.toBase64Image() : '';
+    }
+}
 
 function abrirVistaPreviaImpresion() {
     const txtPuntos = document.getElementById("txtPuntosRelevantes")?.value;
@@ -550,6 +493,19 @@ function abrirVistaPreviaImpresion() {
         clonTabla.className = "tabla-print-indicadores";
         clonTabla.removeAttribute("id");
         printInd.innerHTML = clonTabla.outerHTML;
+    }
+
+    // Exportar directamente las imágenes adaptadas a blanco/negro de las gráficas activas
+    const imgSistemas = document.getElementById("imgChartSistemasPrint");
+    const imgEstatus = document.getElementById("imgChartEstatusPrint");
+
+    if (window.chartSistemasInstance && imgSistemas) {
+        const dataUrlSistemas = exportarChartCanvasBlanco(window.chartSistemasInstance);
+        if (dataUrlSistemas) imgSistemas.src = dataUrlSistemas;
+    }
+    if (window.chartEstatusInstance && imgEstatus) {
+        const dataUrlEstatus = exportarChartCanvasBlanco(window.chartEstatusInstance);
+        if (dataUrlEstatus) imgEstatus.src = dataUrlEstatus;
     }
 
     const printAct = document.getElementById("contenedorActividadesPrint");
@@ -571,7 +527,6 @@ function abrirVistaPreviaImpresion() {
     }
 }
 
-// Función que extrae el nodo fuera del modal antes de imprimir para evitar hojas en blanco
 function imprimirContenidoLimpio() {
     const seccion = document.getElementById("seccionImpresion");
     if (!seccion) {
@@ -579,14 +534,11 @@ function imprimirContenidoLimpio() {
         return;
     }
 
-    // Mueve temporalmente el área de impresión al body principal
     const padreOriginal = seccion.parentNode;
     document.body.appendChild(seccion);
 
-    // Lanza la impresión
     window.print();
 
-    // Restaura la estructura original al cerrar la ventana de impresión
     setTimeout(function () {
         padreOriginal.appendChild(seccion);
     }, 500);
@@ -594,65 +546,252 @@ function imprimirContenidoLimpio() {
 
 function exportarExcelLocal() {
     if (typeof XLSX === "undefined") {
-        console.error("La librería XLSX (SheetJS) no está cargada.");
+        console.error("La librería XLSX (xlsx-js-style) no está cargada.");
         return;
     }
 
-    const fecha = typeof fechaReporteActual !== 'undefined' ? fechaReporteActual : "Reporte";
-    const wb = XLSX.utils.book_new();
+    try {
+        const fecha = typeof fechaReporteActual !== 'undefined' ? fechaReporteActual : "Reporte";
+        const wb = XLSX.utils.book_new();
 
-    const dataHoja = [];
+        // Estilos Reutilizables
+        const borderNegro = {
+            top: { style: 'thin', color: { rgb: '000000' } },
+            bottom: { style: 'thin', color: { rgb: '000000' } },
+            left: { style: 'thin', color: { rgb: '000000' } },
+            right: { style: 'thin', color: { rgb: '000000' } }
+        };
 
-    dataHoja.push([`REPORTE DE TICKETS DIARIO ${fecha}`]);
-    dataHoja.push(["SDI Cointer - Departamento de Soporte Técnico"]);
-    dataHoja.push([]);
+        const fontGeneral = { name: 'Segoe UI', sz: 9 };
+        const fontHeader = { name: 'Segoe UI', sz: 9, bold: true, color: { rgb: 'FFFFFF' } };
+        const fontBlackBold = { name: 'Segoe UI', sz: 8.5, bold: true, color: { rgb: '000000' } };
+        const alignCenter = { vertical: 'center', horizontal: 'center' };
+        const alignLeft = { vertical: 'top', horizontal: 'left', wrapText: true };
 
-    dataHoja.push(["1. RESUMEN DE INDICADORES"]);
-    const tablaInd = document.getElementById("tablaIndicadores");
-    if (tablaInd) {
-        const wsInd = XLSX.utils.table_to_sheet(tablaInd);
-        const jsonInd = XLSX.utils.sheet_to_json(wsInd, { header: 1 });
-        jsonInd.forEach(row => dataHoja.push(row));
-    }
-    dataHoja.push([]);
+        // Color de encabezado ajustado a Azul Slate (#1E293B)
+        const colorHeaderExcel = '2563eb';
 
-    dataHoja.push(["2. PUNTOS RELEVANTES DEL DÍA"]);
-    const txtPuntos = document.getElementById("txtPuntosRelevantes")?.value || "Sin observaciones.";
-    dataHoja.push([txtPuntos]);
-    dataHoja.push([]);
+        let rows = [];
 
-    const chkActividades = document.getElementById("chkActividades")?.checked;
-    const txtActividades = document.getElementById("txtSoportesInternos")?.value;
-    if (chkActividades && txtActividades) {
-        dataHoja.push(["3. SOPORTES INTERNOS / ACTIVIDADES ADICIONALES"]);
-        dataHoja.push([txtActividades]);
-        dataHoja.push([]);
-    }
+        // ENCABEZADOS DEL DOCUMENTO
+        rows.push([{ v: 'REPORTE DIARIO DE TICKETS - ' + fecha, s: { font: { name: 'Segoe UI', sz: 14, bold: true, color: { rgb: '0F172A' } } } }]);
+        rows.push([{ v: 'SDI Cointer — Departamento de Soporte Técnico', s: { font: { name: 'Segoe UI', sz: 10, italic: true, color: { rgb: '475569' } } } }]);
+        rows.push([]);
 
-    dataHoja.push(["DETALLE COMPLETO DE TICKETS"]);
-    const tablaDet = document.getElementById("tablaDetalleTickets");
-    if (tablaDet) {
-        const clonTabla = tablaDet.cloneNode(true);
-        clonTabla.querySelectorAll("td").forEach(td => {
-            td.style.maxWidth = "none";
-            td.style.whiteSpace = "pre-wrap";
-            td.classList.remove("text-truncate");
+        // SECCIÓN 1: INDICADORES
+        rows.push([{ v: '1. RESUMEN DE INDICADORES', s: { font: { name: 'Segoe UI', sz: 10, bold: true, color: { rgb: '0F172A' } } } }]);
+
+        const headerInd1 = [
+            { v: 'Tickets', s: { fill: { fgColor: { rgb: '8EA9DB' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
+            { v: 'Total', s: { fill: { fgColor: { rgb: '8EA9DB' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
+            { v: 'Tipo', s: { fill: { fgColor: { rgb: 'DB6E6E' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'DB6E6E' } }, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'DB6E6E' } }, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'DB6E6E' } }, border: borderNegro } },
+            { v: 'Sistemas Externos', s: { fill: { fgColor: { rgb: 'A9D18E' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'A9D18E' } }, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'A9D18E' } }, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'A9D18E' } }, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'A9D18E' } }, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'A9D18E' } }, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'A9D18E' } }, border: borderNegro } },
+            { v: 'Sistema Int.', s: { fill: { fgColor: { rgb: 'FFD966' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
+            { v: 'Origen del Ticket', s: { fill: { fgColor: { rgb: 'FCE4D6' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'FCE4D6' } }, border: borderNegro } },
+            { v: 'Escalados', s: { fill: { fgColor: { rgb: 'B4A7D6' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'B4A7D6' } }, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'B4A7D6' } }, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'B4A7D6' } }, border: borderNegro } },
+            { v: 'Estatus', s: { fill: { fgColor: { rgb: 'FFF2CC' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: 'FFF2CC' } }, border: borderNegro } }
+        ];
+        rows.push(headerInd1);
+
+        const subHeaders = ['Servicio', 'Incidencia', 'Ajuste', 'Mejora', 'DIA', 'DIAWEB', 'MED', 'SITA', 'VUCEM', 'DIAENLINEA', 'COA', 'ADMIN', 'Llamada', 'Correo', 'Desarrollo', 'Consultoría', 'Ventas', 'Cobranza', 'Cerrado', 'En Curso'];
+        const colorsSubHeaders = ['DB6E6E', 'DB6E6E', 'DB6E6E', 'DB6E6E', 'A9D18E', 'A9D18E', 'A9D18E', 'A9D18E', 'A9D18E', 'A9D18E', 'A9D18E', 'FFD966', 'FCE4D6', 'FCE4D6', 'B4A7D6', 'B4A7D6', 'B4A7D6', 'B4A7D6', 'FFF2CC', 'FFF2CC'];
+
+        let headerInd2 = [
+            { v: '', s: { fill: { fgColor: { rgb: '8EA9DB' } }, border: borderNegro } },
+            { v: '', s: { fill: { fgColor: { rgb: '8EA9DB' } }, border: borderNegro } }
+        ];
+
+        subHeaders.forEach((sh, idx) => {
+            headerInd2.push({ v: sh, s: { fill: { fgColor: { rgb: colorsSubHeaders[idx] } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } });
         });
-        const wsDet = XLSX.utils.table_to_sheet(clonTabla);
-        const jsonDet = XLSX.utils.sheet_to_json(wsDet, { header: 1 });
-        jsonDet.forEach(row => dataHoja.push(row));
+        rows.push(headerInd2);
+
+        const tablaIndHTML = document.getElementById('tablaIndicadores');
+        if (tablaIndHTML) {
+            const bodyRows = tablaIndHTML.querySelectorAll('tbody tr');
+            bodyRows.forEach(tr => {
+                let rowData = [];
+                tr.querySelectorAll('td').forEach((td, idx) => {
+                    const textVal = td.innerText.trim();
+                    const numVal = !isNaN(textVal) && textVal !== '' ? Number(textVal) : textVal;
+                    const isLabelCol = idx < 2;
+                    rowData.push({
+                        v: numVal,
+                        s: {
+                            fill: { fgColor: { rgb: isLabelCol ? 'D9E1F2' : 'FFFFFF' } },
+                            font: isLabelCol ? fontBlackBold : fontGeneral,
+                            alignment: alignCenter,
+                            border: borderNegro
+                        }
+                    });
+                });
+                rows.push(rowData);
+            });
+        }
+
+        rows.push([]);
+
+        // SECCIÓN 2: PUNTOS RELEVANTES
+        const txtPuntos = document.getElementById('txtPuntosRelevantes')?.value || 'Sin observaciones registradas.';
+        rows.push([{ v: '2. PUNTOS RELEVANTES DEL DÍA', s: { font: { name: 'Segoe UI', sz: 10, bold: true, color: { rgb: '0F172A' } } } }]);
+        rows.push([{ v: txtPuntos, s: { font: fontGeneral, alignment: { wrapText: true, vertical: 'top' }, fill: { fgColor: { rgb: 'F1F5F9' } }, border: borderNegro } }]);
+        rows.push([]);
+
+        // SECCIÓN 3: ACTIVIDADES ADICIONALES
+        const chkActividades = document.getElementById("chkActividades")?.checked;
+        const txtActividades = document.getElementById("txtSoportesInternos")?.value;
+        if (chkActividades && txtActividades) {
+            rows.push([{ v: '3. SOPORTES INTERNOS / ACTIVIDADES ADICIONALES', s: { font: { name: 'Segoe UI', sz: 10, bold: true, color: { rgb: '0F172A' } } } }]);
+            rows.push([{ v: txtActividades, s: { font: fontGeneral, alignment: { wrapText: true, vertical: 'top' }, fill: { fgColor: { rgb: 'F1F5F9' } }, border: borderNegro } }]);
+            rows.push([]);
+        }
+
+        // SECCIÓN 4: DETALLE COMPLETO DE TICKETS
+        rows.push([{ v: 'DETALLE COMPLETO DE TICKETS', s: { font: { name: 'Segoe UI', sz: 10, bold: true, color: { rgb: '0F172A' } } } }]);
+
+        const headersDetalle = ['Fecha Entrada', 'Hora', 'No. Ticket', 'Cliente', 'Ejecutivo', 'Reportó', 'Estatus', 'Sistema', 'Tipo', 'Descripción', 'Comentarios', 'Solución'];
+        let rowHeadersDetalle = [];
+        headersDetalle.forEach(h => {
+            rowHeadersDetalle.push({
+                v: h,
+                s: { fill: { fgColor: { rgb: colorHeaderExcel } }, font: fontHeader, alignment: alignCenter, border: borderNegro }
+            });
+        });
+        rows.push(rowHeadersDetalle);
+
+        const tablaDetalleHTML = document.getElementById('tablaDetalleTickets');
+        if (tablaDetalleHTML) {
+            const trs = tablaDetalleHTML.querySelectorAll('tbody tr');
+            trs.forEach((tr, rowIdx) => {
+                if (tr.cells.length < 10) return;
+
+                const bgRow = rowIdx % 2 === 0 ? 'FFFFFF' : 'F8FAFC';
+
+                const fechaEntrada = tr.cells[0]?.innerText.trim() || '';
+                const hora = tr.cells[2]?.innerText.trim() || '';
+                const numTicket = tr.getAttribute('data-numticket') || tr.cells[3]?.innerText.trim() || '';
+                const cliente = tr.getAttribute('data-cliente') || tr.cells[4]?.innerText.trim() || '';
+                const ejecutivo = tr.getAttribute('data-ejecutivo') || tr.cells[5]?.innerText.trim() || '';
+                const reporto = tr.getAttribute('data-reporto') || tr.cells[6]?.innerText.trim() || '';
+                const estatus = tr.getAttribute('data-estatus') || tr.cells[7]?.innerText.trim() || '';
+                const sistema = tr.getAttribute('data-sistema') || tr.cells[8]?.innerText.trim() || '';
+                const tipo = tr.getAttribute('data-tipo') || tr.cells[9]?.innerText.trim() || '';
+                const descripcion = tr.getAttribute('data-descripcion') || '';
+                const comentarios = tr.getAttribute('data-comentarios') || '';
+                const solucion = tr.getAttribute('data-solucion') || '';
+
+                const rowDetalle = [
+                    { v: fechaEntrada, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } },
+                    { v: hora, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } },
+                    { v: numTicket, s: { fill: { fgColor: { rgb: bgRow } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
+                    { v: cliente, s: { fill: { fgColor: { rgb: bgRow } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } }, // Centrado
+                    { v: ejecutivo, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } }, // Centrado
+                    { v: reporto, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } }, // Centrado
+                    {
+                        v: estatus,
+                        s: {
+                            fill: { fgColor: { rgb: estatus === 'Cerrado' ? 'DCFCE7' : 'FEF9C3' } },
+                            font: { name: 'Segoe UI', sz: 8.5, bold: true, color: { rgb: estatus === 'Cerrado' ? '166534' : '854D0E' } },
+                            alignment: alignCenter,
+                            border: borderNegro
+                        }
+                    },
+                    { v: sistema, s: { fill: { fgColor: { rgb: bgRow } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
+                    { v: tipo, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } },
+                    { v: descripcion, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignLeft, border: borderNegro } },
+                    { v: comentarios, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignLeft, border: borderNegro } },
+                    { v: solucion, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignLeft, border: borderNegro } }
+                ];
+
+                rows.push(rowDetalle);
+            });
+        }
+
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+
+        ws['!merges'] = [
+            { s: { r: 3, c: 0 }, e: { r: 3, c: 21 } },
+            { s: { r: 4, c: 0 }, e: { r: 5, c: 0 } },
+            { s: { r: 4, c: 1 }, e: { r: 5, c: 1 } },
+            { s: { r: 4, c: 2 }, e: { r: 4, c: 5 } },
+            { s: { r: 4, c: 6 }, e: { r: 4, c: 12 } },
+            { s: { r: 4, c: 14 }, e: { r: 4, c: 15 } },
+            { s: { r: 4, c: 16 }, e: { r: 4, c: 19 } },
+            { s: { r: 4, c: 20 }, e: { r: 4, c: 21 } },
+            { s: { r: 9, c: 0 }, e: { r: 9, c: 11 } },
+            { s: { r: 10, c: 0 }, e: { r: 10, c: 11 } }
+        ];
+
+        ws['!cols'] = [
+            { wch: 14 }, // Fecha Entrada
+            { wch: 10 }, // Hora
+            { wch: 12 }, // No. Ticket
+            { wch: 28 }, // Cliente (Ancho suficiente para "KENWORTH MEXICANA")
+            { wch: 22 }, // Ejecutivo
+            { wch: 22 }, // Reportó
+            { wch: 12 }, // Estatus
+            { wch: 12 }, // Sistema
+            { wch: 12 }, // Tipo
+            { wch: 45 }, // Descripción
+            { wch: 45 }, // Comentarios
+            { wch: 45 }  // Solución
+        ];
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Reporte Diario');
+
+        /* HOJA 2: CONCENTRADO POR SISTEMA */
+        const ws2_rows = [];
+        ws2_rows.push([{ v: 'CONCENTRADO DE TICKETS POR SISTEMA - ' + fecha, s: { font: { name: 'Segoe UI', sz: 12, bold: true, color: { rgb: '0F172A' } } } }]);
+        ws2_rows.push([]);
+
+        const headersWs2 = ['Sistema', 'Total Tickets', 'Incidencias', 'Servicios', 'Por Teléfono', 'Por Correo', 'Atendidos (Tiempo y Forma)', 'En Curso (Seguimiento)'];
+        let rowHeader2 = [];
+        headersWs2.forEach(h => {
+            rowHeader2.push({ v: h, s: { fill: { fgColor: { rgb: colorHeaderExcel } }, font: fontHeader, alignment: alignCenter, border: borderNegro } });
+        });
+        ws2_rows.push(rowHeader2);
+
+        const tablaConcentradoHTML = document.getElementById('tablaConcentradoSistema');
+        if (tablaConcentradoHTML) {
+            const trs = tablaConcentradoHTML.querySelectorAll('tbody tr');
+            trs.forEach((tr, rowIdx) => {
+                let rData = [];
+                const bgRow = rowIdx % 2 === 0 ? 'FFFFFF' : 'F8FAFC';
+                tr.querySelectorAll('td').forEach(td => {
+                    const txt = td.innerText.trim();
+                    const num = !isNaN(txt) && txt !== '' ? Number(txt) : txt;
+                    rData.push({ v: num, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } });
+                });
+                ws2_rows.push(rData);
+            });
+        }
+
+        const wsConcentrado = XLSX.utils.aoa_to_sheet(ws2_rows);
+        wsConcentrado['!cols'] = [{ wch: 18 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 28 }, { wch: 26 }];
+
+        XLSX.utils.book_append_sheet(wb, wsConcentrado, 'Concentrado por Sistema');
+
+        const nombreArchivo = `Reporte_Tickets_${fecha}.xlsx`;
+        XLSX.writeFile(wb, nombreArchivo);
+
+    } catch (err) {
+        console.error('Error al exportar Excel estilizado:', err);
+        alert('Ocurrió un error al generar la exportación a Excel.');
     }
-
-    const wsCompleta = XLSX.utils.aoa_to_sheet(dataHoja);
-
-    wsCompleta['!cols'] = [
-        { wch: 14 }, { wch: 10 }, { wch: 12 }, { wch: 25 },
-        { wch: 20 }, { wch: 20 }, { wch: 12 }, { wch: 12 },
-        { wch: 12 }, { wch: 55 }, { wch: 35 }, { wch: 45 }
-    ];
-
-    XLSX.utils.book_append_sheet(wb, wsCompleta, "Reporte Diario");
-    XLSX.writeFile(wb, `Reporte_Tickets_${fecha}.xlsx`);
 }
 
 /* ==========================================================================
@@ -766,6 +905,7 @@ function evaluarAreaEscaladaEdit(valorEscalado) {
 function abrirModalDetalleDesdeFila(filaElem) {
     const id = filaElem.dataset.id;
     const fechaEntrada = filaElem.dataset.fechaentrada;
+    const hora = filaElem.dataset.hora;
     const numTicket = filaElem.dataset.numticket;
     const cliente = filaElem.dataset.cliente;
     const reporto = filaElem.dataset.reporto;
@@ -783,10 +923,23 @@ function abrirModalDetalleDesdeFila(filaElem) {
     document.getElementById("editTicketId").value = id;
     document.getElementById("lblNumTicket").textContent = "#" + numTicket;
     document.getElementById("editFechaEntrada").value = fechaEntrada || "";
+
+    const inputHora = document.getElementById("editHora");
+    if (inputHora) {
+        inputHora.value = convertir12a24(hora);
+    }
+
     document.getElementById("editCliente").value = cliente || "";
     document.getElementById("editReporto").value = reporto || "";
     document.getElementById("editEjecutivo").value = ejecutivo || "";
-    document.getElementById("editSistema").value = sistema || "SITA";
+    
+    // Asignación de Sistema y actualización de color
+    const selectEditSistema = document.getElementById("editSistema");
+    if (selectEditSistema) {
+        selectEditSistema.value = sistema || "SITA";
+        aplicarColorSelectSistema(selectEditSistema);
+    }
+
     document.getElementById("editTipo").value = tipo || "Servicio";
     document.getElementById("editEstatus").value = estatus || "En curso";
 
@@ -808,7 +961,7 @@ function abrirModalDetalleDesdeFila(filaElem) {
     const estaAbierto = (estatus !== "Cerrado");
 
     const campos = [
-        "editFechaEntrada", "editCliente", "editReporto", "editEjecutivo", "editSistema",
+        "editFechaEntrada", "editHora", "editCliente", "editReporto", "editEjecutivo", "editSistema",
         "editTipo", "editEstatus", "editEscalado", "editAreaEscalada",
         "txtDetalleDescripcion", "txtDetalleComentarios", "txtDetalleSolucion"
     ];
@@ -1006,3 +1159,187 @@ async function guardarRegistro() {
         });
     }
 }
+
+/* ==========================================================================
+   EVENTOS GENERALES
+   ========================================================================== */
+
+document.addEventListener("DOMContentLoaded", function () {
+    const btnNuevo = document.getElementById("btnNuevoUsuario");
+    const buscador = document.getElementById("buscarUsuario");
+    const formNuevo = document.getElementById("formNuevoUsuario");
+    const formReporteBitacora = document.getElementById("formReporteBitacora");
+    const cantidadUsuarios = document.getElementById("cantidadUsuarios");
+
+    if (buscador) {
+        buscador.addEventListener("input", function () {
+            window.paginaUsuarios = 1;
+            actualizarTablaUsuarios();
+        });
+    }
+
+    if (cantidadUsuarios) {
+        cantidadUsuarios.addEventListener("change", function () {
+            window.paginaUsuarios = 1;
+            actualizarTablaUsuarios();
+        });
+    }
+
+    ["filtroNombre", "filtroModulo", "filtroAccion", "filtroFechaInicio", "filtroFechaFin"].forEach(id => {
+        const campo = document.getElementById(id);
+        if (campo) {
+            campo.addEventListener("change", function () {
+                window.paginaBitacora = 1;
+                actualizarTablaBitacora();
+            });
+        }
+    });
+
+    const cantidadBitacora = document.getElementById("cantidadBitacora");
+    if (cantidadBitacora) {
+        cantidadBitacora.addEventListener("change", function () {
+            window.paginaBitacora = 1;
+            actualizarTablaBitacora();
+        });
+    }
+
+    const btnLimpiarFiltros = document.getElementById("btnLimpiarFiltrosBitacora");
+    if (btnLimpiarFiltros) {
+        btnLimpiarFiltros.addEventListener("click", limpiarFiltrosBitacora);
+    }
+
+    actualizarTablaUsuarios();
+    actualizarTablaBitacora();
+
+    if (formReporteBitacora) {
+        formReporteBitacora.addEventListener("submit", abrirVistaPreviaReporte);
+    }
+
+    if (btnNuevo) {
+        btnNuevo.addEventListener("click", abrirModalNuevoUsuario);
+    }
+
+    if (buscador) {
+        buscador.addEventListener("input", filtrarUsuarios);
+    }
+
+    if (formNuevo) {
+        formNuevo.addEventListener("submit", validarPasswordTemporal);
+    }
+
+    document.querySelectorAll(".js-cerrar-nuevo").forEach(boton => {
+        boton.addEventListener("click", cerrarModalNuevoUsuario);
+    });
+
+    document.querySelectorAll(".js-cerrar-editar").forEach(boton => {
+        boton.addEventListener("click", cerrarModalEditarUsuario);
+    });
+
+    document.querySelectorAll(".js-toggle-password").forEach(boton => {
+        boton.addEventListener("click", function () {
+            cambiarVisibilidadPassword(boton);
+        });
+    });
+
+    document.querySelectorAll(".js-editar-usuario").forEach(boton => {
+        boton.addEventListener("click", function () {
+            abrirModalEditarUsuario(boton);
+        });
+    });
+
+    document.querySelectorAll(".js-restablecer-password").forEach(boton => {
+        boton.addEventListener("click", function () {
+            confirmarRestablecerPassword(boton);
+        });
+    });
+
+    document.querySelectorAll(".js-eliminar-usuario").forEach(boton => {
+        boton.addEventListener("click", function () {
+            confirmarEliminarUsuario(boton);
+        });
+    });
+
+    abrirModalDesdeServidor();
+    if (typeof mostrarMensajesServidor === "function") {
+        mostrarMensajesServidor();
+    }
+
+    /* --- PERSISTENCIA Y EVENTOS MÓDULO TICKETS --- */
+    const inputFecha = document.getElementById("fechaReporteConsulta");
+    const txtPuntos = document.getElementById("txtPuntosRelevantes");
+    const chkActividades = document.getElementById("chkActividades");
+    const boxActividades = document.getElementById("boxActividades");
+    const txtActividades = document.getElementById("txtSoportesInternos");
+    const btnGenerar = document.getElementById("btnGenerarReporte");
+    const btnExcel = document.getElementById("btnExportarExcel");
+
+    if (inputFecha && txtPuntos) {
+        const fechaActual = inputFecha.value;
+        const keyPuntos = `sigesti_puntos_${fechaActual}`;
+        const keyActividades = `sigesti_actividades_${fechaActual}`;
+        const keyChkActividades = `sigesti_chk_actividades_${fechaActual}`;
+
+        txtPuntos.value = localStorage.getItem(keyPuntos) || "";
+        if (txtActividades) {
+            txtActividades.value = localStorage.getItem(keyActividades) || "";
+        }
+
+        const chkGuardado = localStorage.getItem(keyChkActividades) === "true";
+        if (chkActividades) {
+            chkActividades.checked = chkGuardado;
+            evaluarEstadoActividades(chkGuardado);
+
+            chkActividades.addEventListener("change", function () {
+                evaluarEstadoActividades(this.checked);
+                localStorage.setItem(keyChkActividades, this.checked);
+                if (!this.checked && txtActividades) {
+                    txtActividades.value = "";
+                    localStorage.removeItem(keyActividades);
+                }
+            });
+        }
+
+        txtPuntos.addEventListener("input", function () {
+            localStorage.setItem(keyPuntos, this.value);
+        });
+
+        if (txtActividades) {
+            txtActividades.addEventListener("input", function () {
+                localStorage.setItem(keyActividades, this.value);
+            });
+        }
+
+        function evaluarEstadoActividades(habilitado) {
+            if (!boxActividades || !txtActividades) return;
+            if (habilitado) {
+                boxActividades.classList.remove("d-none");
+                txtActividades.removeAttribute("disabled");
+            } else {
+                boxActividades.classList.add("d-none");
+                txtActividades.setAttribute("disabled", "true");
+            }
+        }
+    }
+
+    if (btnGenerar) {
+        btnGenerar.addEventListener("click", abrirVistaPreviaImpresion);
+    }
+
+    if (btnExcel) {
+        btnExcel.addEventListener("click", exportarExcelLocal);
+    }
+
+    // Inicializar hora actual por defecto en modal nuevo ticket si el input está vacío
+    const modalNuevoElem = document.getElementById("modalNuevoTicket");
+    if (modalNuevoElem) {
+        modalNuevoElem.addEventListener("show.bs.modal", function () {
+            const regHoraInput = document.getElementById("regHora");
+            if (regHoraInput && !regHoraInput.value) {
+                const ahora = new Date();
+                const hh = String(ahora.getHours()).padStart(2, "0");
+                const mm = String(ahora.getMinutes()).padStart(2, "0");
+                regHoraInput.value = `${hh}:${mm}`;
+            }
+        });
+    }
+});

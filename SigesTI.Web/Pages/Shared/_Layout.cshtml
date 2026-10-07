@@ -4,10 +4,8 @@
     string nombreUsuario = Context.Session.GetString("Usuario") ?? "Usuario";
     string rolUsuario = Context.Session.GetString("Rol") ?? "Sin rol";
 }
-
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -21,7 +19,6 @@
 
     @await RenderSectionAsync("Styles", required: false)
 </head>
-
 <body class="layout-body">
 
     <header class="layout-header">
@@ -30,7 +27,7 @@
 
                 <!-- Logo izquierdo -->
                 <a class="layout-brand" asp-area="" asp-page="/Index">
-                    <img src="~/SigesST.png" alt="Logo" width="200" height="55">
+                    <img src="~/SigesST.png" alt="Logo" width="190" height="52">
                 </a>
 
                 <!-- Menú centrado -->
@@ -45,24 +42,24 @@
                            data-bs-toggle="dropdown" 
                            aria-expanded="false">
                             <i class="bi bi-clipboard2-fill"></i>
-                            Requerimientos
+                            <span>Requerimientos</span>
                         </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarUserDropdown">
+                        <ul class="dropdown-menu custom-dropdown-menu shadow-lg border-0" aria-labelledby="navbarUserDropdown">
                             <li>
-                                <a class="dropdown-item py-2" asp-page="/Solicitudes/Generar">
-                                    <i class="bi bi-plus-square me-2 text-secondary"></i>Generar Solicitud
+                                <a class="dropdown-item item-emerald py-2" asp-page="/Solicitudes/Generar">
+                                    <i class="bi bi-plus-square me-2"></i>Generar Solicitud
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item py-2" asp-page="/Solicitudes/Consultar">
-                                    <i class="bi bi-search me-2 text-secondary"></i>Consultar Solicitudes
+                                <a class="dropdown-item item-cyan py-2" asp-page="/Solicitudes/Consultar">
+                                    <i class="bi bi-search me-2"></i>Consultar Solicitudes
                                 </a>
                             </li>
                         </ul>
                     </div>
 
-                    <!-- Dropdown: Actividades (Estructura original ajustada) -->
+                    <!-- Dropdown: Actividades -->
                     <div class="dropdown d-inline-block">
                         <a class="layout-link dropdown-toggle" 
                            href="#" 
@@ -71,29 +68,29 @@
                            data-bs-toggle="dropdown" 
                            aria-expanded="false">
                             <i class="bi bi-file-earmark-text"></i>
-                            Actividades
+                            <span>Actividades</span>
                         </a>
 
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdownActividades">
+                        <ul class="dropdown-menu custom-dropdown-menu shadow-lg border-0" aria-labelledby="navbarDropdownActividades">
                             <li>
-                                <a class="dropdown-item py-2" asp-page="/Actividades/ReporteTickets">
-                                    <i class="bi bi-journal-check me-2 text-secondary"></i>Reporte de Tickets
+                                <a class="dropdown-item item-cyan py-2" asp-page="/Actividades/ReporteTickets">
+                                    <i class="bi bi-journal-check me-2"></i>Reporte de Tickets
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item py-2" asp-page="/Actividades/PlanRespaldos">
-                                    <i class="bi bi-hdd-network me-2 text-secondary"></i>Plan de Respaldos
+                                <a class="dropdown-item item-purple py-2" asp-page="/Actividades/PlanRespaldos">
+                                    <i class="bi bi-hdd-network me-2"></i>Plan de Respaldos
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item py-2" asp-page="/Actividades/TareasProgramadas">
-                                    <i class="bi bi-list-task me-2 text-secondary"></i>Tareas Programadas Generales
+                                <a class="dropdown-item item-amber py-2" asp-page="/Actividades/TareasProgramadas">
+                                    <i class="bi bi-list-task me-2"></i>Tareas Programadas Generales
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item py-2" asp-page="/Actividades/Indicadores">
-                                    <i class="bi bi-bar-chart-line me-2 text-secondary"></i>Indicadores y Métricas
+                                <a class="dropdown-item item-emerald py-2" asp-page="/Actividades/Indicadores">
+                                    <i class="bi bi-bar-chart-line me-2"></i>Indicadores y Métricas
                                 </a>
                             </li>
                         </ul>
@@ -104,7 +101,7 @@
                        asp-area=""
                        asp-page="/Personal/AdministracionPersonal">
                         <i class="bi bi-people-fill"></i>
-                        Personal
+                        <span>Personal</span>
                     </a>
 
                     <!-- Enlace: Cuenta -->
@@ -112,7 +109,7 @@
                        asp-area=""
                        asp-page="/Cuenta/AdminVista">
                         <i class="bi bi-person-badge-fill"></i>
-                        Cuenta
+                        <span>Cuenta</span>
                     </a>
 
                 </div>
@@ -144,7 +141,7 @@
 
                     </button>
 
-                    <ul class="dropdown-menu dropdown-menu-end layout-user-menu"
+                    <ul class="dropdown-menu dropdown-menu-end layout-user-menu custom-dropdown-menu shadow-lg border-0"
                         aria-labelledby="menuUsuario">
 
                         <li class="layout-user-menu-header">
@@ -166,7 +163,7 @@
                                   id="formCerrarSesion">
                                 <button type="submit"
                                         class="dropdown-item layout-logout">
-                                    <i class="bi bi-box-arrow-right"></i>
+                                    <i class="bi bi-box-arrow-right me-2"></i>
                                     Cerrar sesión
                                 </button>
                             </form>
@@ -203,21 +200,11 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
-    <!-- Librería SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <!-- Alertas globales -->
     <script src="~/js/alertas.js" asp-append-version="true"></script>
-
-    <!-- Modales globales -->
     <script src="~/js/modales.js" asp-append-version="true"></script>
-
-    <!-- Logout -->
     <script src="~/js/logout.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
-
 </body>
-
 </html>
