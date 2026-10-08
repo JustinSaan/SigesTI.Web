@@ -1,58 +1,198 @@
-﻿.dashboard-card {
-    background: rgba(30, 41, 59, 0.65);
+﻿/* Encabezado Principal */
+.dashboard-header-card {
+    background: rgba(30, 41, 59, 0.75);
     backdrop-filter: blur(14px);
     border: 1px solid #334155;
     border-radius: 18px;
     color: #f8fafc;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
 }
 
-.dashboard-user-role {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 6px 12px;
-    border: 1px solid rgba(56, 189, 248, 0.30);
-    border-radius: 999px;
-    color: #7dd3fc;
-    font-size: 0.82rem;
-    font-weight: 700;
-    background: rgba(56, 189, 248, 0.10);
+.system-clock-badge {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(56, 189, 248, 0.3);
 }
 
-.stat-card {
+/* Base de Tarjetas de Actividades Grid */
+.activity-card {
     border-radius: 18px;
-    border: none;
-    color: white;
-    transition: .25s;
+    backdrop-filter: blur(12px);
+    transition: all 0.25s ease-in-out;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
-    .stat-card:hover {
-        transform: translateY(-5px);
+    .activity-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 14px 28px rgba(0, 0, 0, 0.5);
     }
 
-.total-card {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+/* ==========================================
+   ESTILOS DIVERSIFICADOS Y DEGRADADOS POR MÓDULO
+   ========================================== */
+
+/* 1. Ticket Activo (Azul brillante) */
+.card-ticket {
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.65), rgba(15, 23, 42, 0.85));
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    border-left: 5px solid #3b82f6;
 }
 
-.pendiente-card {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
+    .card-ticket .activity-type-badge,
+    .card-ticket .activity-header-icon {
+        color: #60a5fa;
+    }
+
+    .card-ticket .btn-activity-action {
+        background: rgba(59, 130, 246, 0.2);
+        color: #93c5fd;
+        border: 1px solid rgba(59, 130, 246, 0.5);
+    }
+
+        .card-ticket .btn-activity-action:hover {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+/* 2. Pendiente Acumulado (Naranja / Ámbar) */
+.card-pendiente {
+    background: linear-gradient(135deg, rgba(120, 53, 15, 0.65), rgba(15, 23, 42, 0.85));
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-left: 5px solid #f59e0b;
 }
 
-.resuelto-card {
-    background: linear-gradient(135deg, #10b981, #059669);
+    .card-pendiente .activity-type-badge,
+    .card-pendiente .activity-header-icon {
+        color: #fbbf24;
+    }
+
+    .card-pendiente .btn-activity-action {
+        background: rgba(245, 158, 11, 0.2);
+        color: #fde68a;
+        border: 1px solid rgba(245, 158, 11, 0.5);
+    }
+
+        .card-pendiente .btn-activity-action:hover {
+            background: #d97706;
+            color: #ffffff;
+        }
+
+/* 3. Ticket / Solicitud Resuelta (Verde Esmeralda) */
+.card-resuelto {
+    background: linear-gradient(135deg, rgba(6, 78, 59, 0.65), rgba(15, 23, 42, 0.85));
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    border-left: 5px solid #10b981;
 }
 
-.personal-card {
-    background: linear-gradient(135deg, #0891b2, #0e7490);
+    .card-resuelto .activity-type-badge,
+    .card-resuelto .activity-header-icon {
+        color: #34d399;
+    }
+
+    .card-resuelto .btn-activity-action {
+        background: rgba(16, 185, 129, 0.2);
+        color: #a7f3d0;
+        border: 1px solid rgba(16, 185, 129, 0.5);
+    }
+
+        .card-resuelto .btn-activity-action:hover {
+            background: #059669;
+            color: #ffffff;
+        }
+
+/* 4. Seguridad & Cuentas (Rojo Alerta) */
+.card-seguridad {
+    background: linear-gradient(135deg, rgba(127, 29, 29, 0.65), rgba(15, 23, 42, 0.85));
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-left: 5px solid #ef4444;
 }
 
-.stat-card h1 {
-    font-size: 3rem;
+    .card-seguridad .activity-type-badge,
+    .card-seguridad .activity-header-icon {
+        color: #f87171;
+    }
+
+    .card-seguridad .btn-activity-action {
+        background: rgba(239, 68, 68, 0.2);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.5);
+    }
+
+        .card-seguridad .btn-activity-action:hover {
+            background: #dc2626;
+            color: #ffffff;
+        }
+
+/* 5. Plan de Respaldos (Cian / Púrpura) */
+.card-respaldo {
+    background: linear-gradient(135deg, rgba(88, 28, 135, 0.65), rgba(15, 23, 42, 0.85));
+    border: 1px solid rgba(168, 85, 247, 0.4);
+    border-left: 5px solid #a855f7;
+}
+
+    .card-respaldo .activity-type-badge,
+    .card-respaldo .activity-header-icon {
+        color: #c084fc;
+    }
+
+    .card-respaldo .btn-activity-action {
+        background: rgba(168, 85, 247, 0.2);
+        color: #e9d5ff;
+        border: 1px solid rgba(168, 85, 247, 0.5);
+    }
+
+        .card-respaldo .btn-activity-action:hover {
+            background: #9333ea;
+            color: #ffffff;
+        }
+
+/* Detalles Generales de Tarjetas */
+.activity-type-badge {
+    font-size: 0.75rem;
     font-weight: 800;
-    margin-top: 10px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
 }
 
-.stat-card h5 {
-    opacity: .95;
+.btn-activity-action {
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+/* Botón Flotante de Información del Sistema (i) */
+.btn-info-system {
+    color: #94a3b8;
+    border: 1px solid #334155;
+    background: rgba(15, 23, 42, 0.7);
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+    .btn-info-system:hover {
+        color: #38bdf8;
+        border-color: #38bdf8;
+        background: rgba(56, 189, 248, 0.15);
+        transform: scale(1.08);
+    }
+
+/* Modal de Información */
+.info-modal-content {
+    background: rgba(15, 23, 42, 0.96);
+    backdrop-filter: blur(20px);
+    border: 1px solid #334155;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+}
+
+.fs-7 {
+    font-size: 0.825rem;
+}
+
+.tracking-wide {
+    letter-spacing: 1px;
 }

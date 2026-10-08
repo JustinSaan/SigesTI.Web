@@ -93,6 +93,7 @@ namespace SigesTI.Web.Pages.Actividades
             IndicadoresDia = CalcularMetricas(ticketsDelDia);
             IndicadoresSeguimiento = CalcularMetricas(ticketsSeguimiento);
         }
+
         private IndicadoresTicketsDto CalcularMetricas(List<Ticket> tickets)
         {
             return new IndicadoresTicketsDto
@@ -102,14 +103,17 @@ namespace SigesTI.Web.Pages.Actividades
                 Incidencia = tickets.Count(t => t.Tipo == "Incidencia"),
                 Ajuste = tickets.Count(t => t.Tipo == "Ajuste"),
                 Mejora = tickets.Count(t => t.Tipo == "Mejora"),
-                DIA = tickets.Count(t => t.Sistema == "DIA"),
-                DIAWEB = tickets.Count(t => t.Sistema == "DIAWEB"),
-                ConectorDiawebZoe = tickets.Count(t => t.Sistema == "CONECTORDIAWEBZOE"),
-                SITA = tickets.Count(t => t.Sistema == "SITA"),
-                VUCEM = tickets.Count(t => t.Sistema == "VUCEM"),
-                DIAENLINEA = tickets.Count(t => t.Sistema == "DIAENLINEA"),
-                COA = tickets.Count(t => t.Sistema == "COA"),
-                ADMIN = tickets.Count(t => t.Sistema == "ADMIN"),
+
+                // Normalización de búsqueda por Sistema para evitar discrepancias por espacios o sufijos
+                DIA = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.Trim().Equals("DIA", StringComparison.OrdinalIgnoreCase)),
+                DIAWEB = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.Trim().Equals("DIAWEB", StringComparison.OrdinalIgnoreCase)),
+                ConectorDiawebZoe = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.ToUpper().Contains("CONECTOR")),
+                SITA = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.Trim().Equals("SITA", StringComparison.OrdinalIgnoreCase)),
+                VUCEM = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.Trim().Equals("VUCEM", StringComparison.OrdinalIgnoreCase)),
+                DIAENLINEA = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.ToUpper().Contains("DIAENLINEA")),
+                COA = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.Trim().Equals("COA", StringComparison.OrdinalIgnoreCase)),
+                ADMIN = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.Trim().Equals("ADMIN", StringComparison.OrdinalIgnoreCase)),
+
                 Llamada = tickets.Count(t => t.Origen == "Llamada"),
                 Correo = tickets.Count(t => t.Origen == "Correo"),
                 EscaladoDesarrollo = tickets.Count(t => t.Escalado && t.AreaEscalada == "Desarrollo"),
@@ -266,8 +270,6 @@ namespace SigesTI.Web.Pages.Actividades
 
                     if (Estatus == "Cerrado")
                     {
-                        // Si la fecha enviada viene nula (por estar el input disabled en HTML),
-                        // toma la FechaSolucion existente o asigna la fecha actual
                         ticket.FechaSolucion = FechaSolucion?.Date ?? ticket.FechaSolucion?.Date ?? DateTime.Today;
                     }
                     else

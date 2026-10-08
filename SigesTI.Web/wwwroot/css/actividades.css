@@ -81,7 +81,7 @@
     table-layout: auto !important;
 }
 
-    /* Encabezados del módulo interactivo (Originales del sistema) */
+    /* Encabezados del módulo interactivo */
     .tabla-sigest thead th,
     .tabla-sigest th {
         padding: 12px 10px !important;
@@ -91,7 +91,7 @@
         text-align: center !important;
         text-transform: uppercase !important;
         letter-spacing: 0.5px !important;
-        background: #0f172a !important; /* Regresa al fondo azul oscuro nativo */
+        background: #0f172a !important;
         border: 1px solid rgba(148, 163, 184, 0.2) !important;
         border-bottom: 2px solid rgba(56, 189, 248, 0.3) !important;
         white-space: nowrap !important;
@@ -116,63 +116,13 @@
         color: #ffffff !important;
     }
 
-    /* Columnas extensas alineadas a la izquierda */
-    .tabla-sigest tbody td.col-descripcion,
-    .tabla-sigest tbody td.col-comentarios,
-    .tabla-sigest tbody td.col-solucion,
-    .tabla-sigest tbody td.col-texto-largo {
+    /* Recorte de celdas cortas para módulo en pantalla */
+    .tabla-sigest tbody td.col-corta {
+        max-width: 150px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
         text-align: left !important;
-        vertical-align: top !important;
-        white-space: pre-wrap !important;
-    }
-
-    /* Anchos mínimos específicos para evitar empaquetado en pantalla */
-    .tabla-sigest th.col-fecha {
-        min-width: 90px;
-    }
-
-    .tabla-sigest th.col-hora {
-        min-width: 65px;
-    }
-
-    .tabla-sigest th.col-ticket {
-        min-width: 75px;
-    }
-
-    .tabla-sigest th.col-cliente {
-        min-width: 170px !important;
-    }
-
-    .tabla-sigest th.col-ejecutivo {
-        min-width: 130px;
-    }
-
-    .tabla-sigest th.col-reporto {
-        min-width: 130px;
-    }
-
-    .tabla-sigest th.col-estatus {
-        min-width: 90px;
-    }
-
-    .tabla-sigest th.col-sistema {
-        min-width: 85px;
-    }
-
-    .tabla-sigest th.col-tipo {
-        min-width: 90px;
-    }
-
-    .tabla-sigest th.col-descripcion {
-        min-width: 280px;
-    }
-
-    .tabla-sigest th.col-comentarios {
-        min-width: 220px;
-    }
-
-    .tabla-sigest th.col-solucion {
-        min-width: 220px;
     }
 
     /* RESTAURACIÓN DE SOMBREADOS / INSIGNIAS EN TABLAS DE PANTALLA */
@@ -230,7 +180,6 @@
             border: 1px solid #94a3b8 !important;
         }
 
-    /* Sombreado de Folios y Datos de No. Ticket / Escalado */
     .actividades-container .text-highlight,
     .tabla-sigest .ticket-number,
     .tabla-sigest .badge-escalado {
@@ -244,8 +193,8 @@
         box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
     }
 
-    /* ==========================================================================
-   INSIGNIAS / HIGHLIGHTS POR SISTEMA (PANTALLA Y SELECTS)
+   /* ==========================================================================
+   INSIGNIAS / HIGHLIGHTS POR SISTEMA
    ========================================================================== */
 
     .actividades-container .badge-sistema-dia,
@@ -264,12 +213,13 @@
         border: 1px solid #38bdf8 !important;
     }
 
+    /* CONECTOR DIAWEB-ZOÉ (Púrpura/Violeta elegante) */
     .actividades-container .badge-sistema-med,
     .tabla-sigest .badge-sistema-med,
     select.badge-sistema-med {
-        background-color: #475569 !important;
-        color: #f8fafc !important;
-        border: 1px solid #94a3b8 !important;
+        background-color: #704332 !important;
+        color: #ffffff !important;
+        border: 1px solid #9a5e47 !important;
     }
 
     .actividades-container .badge-sistema-sita,
@@ -280,12 +230,13 @@
         border: 1px solid #fb923c !important;
     }
 
+    /* VUCEM (Azul Rey / Marino) */
     .actividades-container .badge-sistema-vucem,
     .tabla-sigest .badge-sistema-vucem,
     select.badge-sistema-vucem {
-        background-color: #1e3a8a !important;
+        background-color: #1d4ed8 !important;
         color: #ffffff !important;
-        border: 1px solid #3b82f6 !important;
+        border: 1px solid #60a5fa !important;
     }
 
     .actividades-container .badge-sistema-diaenlinea,
@@ -329,9 +280,9 @@ select.form-select.badge-sistema-diaweb {
 }
 
 select.form-select.badge-sistema-med {
-    background-color: #475569 !important;
+    background-color: #704332 !important;
     color: #ffffff !important;
-    border-color: #94a3b8 !important;
+    border-color: #9a5e47 !important;
 }
 
 select.form-select.badge-sistema-sita {
@@ -341,9 +292,9 @@ select.form-select.badge-sistema-sita {
 }
 
 select.form-select.badge-sistema-vucem {
-    background-color: #1e3a8a !important;
+    background-color: #1d4ed8 !important;
     color: #ffffff !important;
-    border-color: #3b82f6 !important;
+    border-color: #60a5fa !important;
 }
 
 select.form-select.badge-sistema-diaenlinea {
@@ -364,13 +315,12 @@ select.form-select.badge-sistema-admin {
     border-color: rgba(56, 189, 248, 0.5) !important;
 }
 
-/* Mantener las opciones desplegables legibles */
 select.form-select option {
     background-color: #0f172a !important;
     color: #ffffff !important;
 }
 
-/* --- ENCABEZADOS COLOREADOS PARA LA TABLA DE INDICADORES EN PANTALLA --- */
+/* ENCABEZADOS COLOREADOS TABLA INDICADORES PANTALLA */
 #tablaIndicadores th.th-tickets,
 #tablaIndicadores th.th-total {
     background: linear-gradient(180deg, rgba(14, 165, 233, 0.35), rgba(15, 23, 42, 0.95)) !important;
@@ -587,10 +537,9 @@ select.form-select option {
 }
 
 /* ==========================================================================
-   6. IMPRESIÓN Y VISTA PREVIA PDF (EXCLUSIVO PARA EL MODAL Y GENERACIÓN DE PDF)
+   6. IMPRESIÓN Y VISTA PREVIA PDF (AJUSTE Y SALTO DE LÍNEA CORREGIDO)
    ========================================================================== */
 
-/* Corregir badges en vista previa de reporte */
 #contenedorIndicadoresPrint .badge,
 #seccionImpresion .badge {
     color: #000000 !important;
@@ -625,6 +574,8 @@ select.form-select option {
         text-align: center !important;
         color: #000000 !important;
         font-size: 7pt !important;
+        white-space: normal !important;
+        word-wrap: break-word !important;
     }
 
         .tabla-print-indicadores th.th-tickets,
@@ -677,43 +628,45 @@ select.form-select option {
         font-weight: bold !important;
     }
 
-/* TABLA PRINCIPAL DE DETALLE DE TICKETS (EXCLUSIVA PARA PRINT Y VISTA PREVIA) */
+/* TABLA PRINCIPAL DE DETALLE DE TICKETS PARA IMPRESIÓN */
 .tabla-print-detalle {
     width: 100% !important;
     border-collapse: collapse !important;
-    table-layout: fixed !important; /* Fuerza respeto estricto de porcentajes */
+    table-layout: fixed !important;
     font-size: 7pt !important;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
     margin-top: 8px !important;
 }
 
-    /* Encabezados exclusivos de la vista previa y el PDF en Azul Cobalto (#2563eb) */
+    /* Ajuste perfecto para evitar traslape en encabezados */
     .tabla-print-detalle th {
         background-color: #022778 !important;
         color: #ffffff !important;
         font-weight: bold !important;
         text-transform: uppercase !important;
-        font-size: 6.8pt !important;
-        letter-spacing: 0.3px !important;
-        padding: 6px 3px !important;
+        font-size: 6.5pt !important;
+        letter-spacing: 0.2px !important;
+        padding: 5px 2px !important;
         border: 1px solid #1d4ed8 !important;
         text-align: center !important;
         vertical-align: middle !important;
-        white-space: nowrap !important;
+        white-space: normal !important; /* Permite saltos de línea sin amontonarse */
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
     }
 
     .tabla-print-detalle td {
         border: 1px solid #cbd5e1 !important;
-        padding: 4px 4px !important;
+        padding: 4px 3px !important;
         color: #1e293b !important;
         vertical-align: top !important;
         font-size: 7pt !important;
-        word-break: keep-all !important;
+        word-wrap: break-word !important;
         overflow-wrap: break-word !important;
         text-align: center !important;
+        white-space: normal !important;
     }
 
-        /* Alineación a la izquierda para texto largo en vista previa/PDF */
         .tabla-print-detalle td.col-texto-largo,
         .tabla-print-detalle td.col-descripcion,
         .tabla-print-detalle td.col-comentarios,
@@ -722,9 +675,9 @@ select.form-select option {
             white-space: pre-wrap !important;
         }
 
-    /* DISTRIBUCIÓN EXACTA DE PORCENTAJES EN VISTA PREVIA Y PDF (SUMA TOTAL = 100%) */
+    /* DISTRIBUCIÓN DE ANCHOS PROPORCIONALES (SUMA = 100%) */
     .tabla-print-detalle th.col-fecha {
-        width: 6% !important;
+        width: 6.5% !important;
     }
 
     .tabla-print-detalle th.col-hora {
@@ -732,7 +685,7 @@ select.form-select option {
     }
 
     .tabla-print-detalle th.col-ticket {
-        width: 4.5% !important;
+        width: 5% !important;
     }
 
     .tabla-print-detalle th.col-cliente {
@@ -748,11 +701,11 @@ select.form-select option {
     }
 
     .tabla-print-detalle th.col-estatus {
-        width: 4.5% !important;
+        width: 5.5% !important;
     }
 
     .tabla-print-detalle th.col-sistema {
-        width: 4.5% !important;
+        width: 5.5% !important;
     }
 
     .tabla-print-detalle th.col-tipo {
@@ -760,21 +713,32 @@ select.form-select option {
     }
 
     .tabla-print-detalle th.col-descripcion {
-        width: 22% !important;
+        width: 19% !important;
     }
 
     .tabla-print-detalle th.col-comentarios {
-        width: 22% !important;
+        width: 14% !important;
     }
 
     .tabla-print-detalle th.col-solucion {
-        width: 22% !important;
+        width: 14% !important;
     }
 
 .badge-print-cerrado {
     background-color: #dcfce7 !important;
     color: #166534 !important;
     border: 1px solid #bbf7d0 !important;
+    padding: 1px 4px !important;
+    border-radius: 3px !important;
+    font-weight: bold !important;
+    font-size: 6.5pt !important;
+    display: inline-block !important;
+}
+
+.badge-print-atrasado {
+    background-color: #dbeafe !important;
+    color: #1e40af !important;
+    border: 1px solid #bfdbfe !important;
     padding: 1px 4px !important;
     border-radius: 3px !important;
     font-weight: bold !important;
@@ -804,7 +768,6 @@ select.form-select option {
     font-size: 7.5pt !important;
 }
 
-/* REGLAS DIRECTAS PARA LA IMPRESIÓN Y GENERACIÓN DE PDF */
 @media print {
     @page {
         size: landscape;
@@ -846,7 +809,6 @@ select.form-select option {
         display: none !important;
     }
 
-    /* Forzar anchos en la impresión del PDF */
     .tabla-print-detalle {
         table-layout: fixed !important;
         width: 100% !important;

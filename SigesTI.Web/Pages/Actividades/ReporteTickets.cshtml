@@ -2,6 +2,7 @@
 @model SigesTI.Web.Pages.Actividades.ReporteTicketsModel
 @{
     ViewData["Title"] = "Reporte Diario de Tickets";
+    var fechaConsultaDate = Model.FechaReporte?.Date ?? DateTime.Today;
 }
 
 <link rel="stylesheet" href="~/css/actividades.css" asp-append-version="true" />
@@ -17,15 +18,23 @@
             <h3 class="fw-bold text-white mb-1"><i class="bi bi-journal-check me-2 text-info"></i>Reporte Diario de Tickets</h3>
             <p class="text-muted small mb-0">Gestión de atención diaria y generación de reportes consolidados.</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 align-items-center">
             <button class="btn btn-outline-success btn-secondary-sigest shadow-sm" id="btnExportarExcel" type="button">
                 <i class="bi bi-file-earmark-excel me-1 text-success"></i> Exportar Excel
             </button>
             <button class="btn btn-primary-sigest shadow-sm px-3 fw-bold" id="btnGenerarReporte" type="button">
                 <i class="bi bi-printer me-1"></i> Generar Reporte
             </button>
-            <button class="btn btn-sm btn-outline-info shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#modalNuevoTicket">
-                <i class="bi bi-plus-lg me-1"></i> Nuevo Ticket
+            <!-- BOTÓN NUEVO TICKET -->
+            <button type="button" 
+                    class="btn shadow-sm d-flex align-items-center gap-2 px-3 py-2 ms-1" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#modalNuevoTicket"
+                    style="background: linear-gradient(135deg, #0284c7, #2563eb); color: #ffffff; border: 1px solid #38bdf8; border-radius: 10px; font-weight: 700; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4); transition: all 0.2s ease;"
+                    onmouseover="this.style.background='linear-gradient(135deg, #0369a1, #1d4ed8)'; this.style.transform='translateY(-1px)';"
+                    onmouseout="this.style.background='linear-gradient(135deg, #0284c7, #2563eb)'; this.style.transform='translateY(0)';">
+                <i class="bi bi-plus-circle-fill fs-6 text-cyan"></i>
+                <span>Nuevo Ticket</span>
             </button>
         </div>
     </div>
@@ -43,9 +52,9 @@
                     <option value="">-- Todos los Sistemas --</option>
                     <option value="DIA" style="background-color: #0f172a; color: #60a5fa;">DIA</option>
                     <option value="DIAWEB" style="background-color: #0f172a; color: #38bdf8;">DIAWEB</option>
-                    <option value="CONECTOR DIAWEBZOE" style="background-color: #0f172a; color: #cbd5e1;">CONECTOR DIAWEB-ZOÉ</option>
+                    <option value="ConectorDiawebZoe" style="background-color: #704332; color: #ffffff;">CONECTOR DIAWEB-ZOÉ</option>
                     <option value="SITA" style="background-color: #0f172a; color: #fb923c;">SITA</option>
-                    <option value="VUCEM" style="background-color: #0f172a; color: #60a5fa;">VUCEM</option>
+                    <option value="VUCEM" style="background-color: #1d4ed8; color: #ffffff;">VUCEM</option>
                     <option value="DIAENLINEA PREMIUM" style="background-color: #0f172a; color: #4ade80;">DIAENLINEA PREMIUM</option>
                     <option value="COA" style="background-color: #0f172a; color: #22c55e;">COA</option>
                     <option value="ADMIN" style="background-color: #0f172a; color: #ffffff;">ADMIN</option>
@@ -176,8 +185,9 @@
                     Servicios = g.Count(x => x.Tipo == "Servicio"),
                     Telefono = g.Count(x => x.Origen == "Llamada"),
                     Correo = g.Count(x => x.Origen == "Correo"),
-                    TiempoForma = g.Count(x => x.Estatus == "Cerrado"),
-                    EnCurso = g.Count(x => x.Estatus == "En curso")
+                    TiempoForma = g.Count(x => (x.Estatus == "Cerrado" || x.Estatus == "Resuelto") && x.FechaEntrada.Date == fechaConsultaDate),
+                    CerradosAtrasados = g.Count(x => (x.Estatus == "Cerrado" || x.Estatus == "Resuelto") && x.FechaEntrada.Date < fechaConsultaDate),
+                    EnCurso = g.Count(x => x.Estatus == "En curso" || x.Estatus == "Pendiente")
                 }).OrderByDescending(x => x.Total).ToList();
         }
     }
@@ -189,7 +199,7 @@
         </div>
         
         <div class="row g-3">
-            <!-- Gráfica 1: Distribución por Sistema -->
+            <!-- Gráfica 1 -->
             <div class="col-md-5">
                 <div class="bg-dark bg-opacity-50 p-3 rounded border border-secondary text-center h-100 d-flex flex-column justify-content-center align-items-center">
                     <span class="small fw-bold text-info mb-2">Distribución de Tickets por Sistema</span>
@@ -199,10 +209,10 @@
                 </div>
             </div>
 
-            <!-- Gráfica 2: Atendidos en Tiempo y Forma vs En Curso -->
+            <!-- Gráfica 2 -->
             <div class="col-md-7">
                 <div class="bg-dark bg-opacity-50 p-3 rounded border border-secondary text-center h-100 d-flex flex-column justify-content-center align-items-center">
-                    <span class="small fw-bold text-info mb-2">Atendidos en Tiempo y Forma vs En Curso</span>
+                    <span class="small fw-bold text-info mb-2">Tiempo y Forma vs Cerrados (Atrasados) vs En Curso</span>
                     <div style="position: relative; height: 210px; width: 100%;">
                         <canvas id="chartEstatusSistema"></canvas>
                     </div>
@@ -215,13 +225,14 @@
             <table class="tabla-sigest text-center align-middle mb-0 small" id="tablaConcentradoSistema">
                 <thead>
                     <tr>
-                        <th class="text-center">Sistema</th>
+                        <th class="text-center col-sistema">Sistema</th>
                         <th class="text-center">Total Tickets</th>
                         <th class="text-center">Incidencias</th>
                         <th class="text-center">Servicios</th>
                         <th class="text-center">Por Teléfono</th>
                         <th class="text-center">Por Correo</th>
                         <th class="text-center">Atendidos (Tiempo y Forma)</th>
+                        <th class="text-center">Cerrados (Atrasados)</th>
                         <th class="text-center">En Curso (Seguimiento)</th>
                     </tr>
                 </thead>
@@ -232,19 +243,29 @@
                         {
                             string sisUpper = (s.Sistema ?? "").ToString().ToUpper().Trim();
                             string claseSistema = "badge-sistema-med";
+                            bool esConector = sisUpper.Contains("CONECTOR") || sisUpper.Contains("ZOE");
 
-                            if (sisUpper.Contains("DIAWEB")) claseSistema = "badge-sistema-diaweb";
+                            if (esConector) claseSistema = "badge-sistema-med";
+                            else if (sisUpper.Contains("DIAWEB")) claseSistema = "badge-sistema-diaweb";
                             else if (sisUpper.Contains("DIAENLINEA")) claseSistema = "badge-sistema-diaenlinea";
                             else if (sisUpper == "DIA") claseSistema = "badge-sistema-dia";
-                            else if (sisUpper == "ConectorDiawebZoe") claseSistema = "badge-sistema-med";
                             else if (sisUpper == "SITA") claseSistema = "badge-sistema-sita";
                             else if (sisUpper == "VUCEM") claseSistema = "badge-sistema-vucem";
                             else if (sisUpper == "COA") claseSistema = "badge-sistema-coa";
                             else if (sisUpper == "ADMIN") claseSistema = "badge-sistema-admin";
 
                             <tr>
-                                <td class="text-center">
-                                    <span class="badge @claseSistema">@s.Sistema</span>
+                                <td class="text-center align-middle col-sistema">
+                                    <span class="badge @claseSistema text-wrap" style="line-height: 1.2;">
+                                        @if (esConector)
+                                        {
+                                            @:CONECTOR<br />DIAWEB-ZOÉ
+                                        }
+                                        else
+                                        {
+                                            @s.Sistema
+                                        }
+                                    </span>
                                 </td>
                                 <td class="fw-bold text-center">@s.Total</td>
                                 <td class="text-center">@s.Incidencias</td>
@@ -252,6 +273,7 @@
                                 <td class="text-center">@s.Telefono</td>
                                 <td class="text-center">@s.Correo</td>
                                 <td class="text-center"><span class="badge bg-success">@s.TiempoForma</span></td>
+                                <td class="text-center"><span class="badge bg-info">@s.CerradosAtrasados</span></td>
                                 <td class="text-center"><span class="badge bg-warning text-dark">@s.EnCurso</span></td>
                             </tr>
                         }
@@ -259,7 +281,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="8" class="text-center py-3 text-muted">No hay datos agrupados para mostrar.</td>
+                            <td colspan="9" class="text-center py-3 text-muted">No hay datos agrupados para mostrar.</td>
                         </tr>
                     }
                 </tbody>
@@ -296,7 +318,7 @@
         </div>
     </div>
 
-    <!-- Tabla 2: Matriz Detallada -->
+    <!-- Tabla 2: Matriz Detallada Módulo Pantalla -->
     <div class="glass-panel mb-4 overflow-hidden">
         <div class="glass-header d-flex justify-content-between align-items-center">
             <span><i class="bi bi-table me-2"></i>Detalle Completo de Tickets</span>
@@ -314,8 +336,8 @@
                         <th class="text-center">Ejecutivo</th>
                         <th class="text-center">Reportó</th>
                         <th class="text-center">Estatus</th>
-                        <th class="text-center">Sistema</th>
-                        <th class="text-center">Tipo</th>
+                        <th class="text-center col-sistema">Sistema</th>
+                        <th class="text-center col-tipo">Tipo</th>
                         <th class="text-center">Descripción</th>
                         <th class="text-center">Comentarios</th>
                         <th class="text-center">Solución</th>
@@ -365,30 +387,40 @@
                                         <span class="badge bg-warning text-dark">En curso</span>
                                     }
                                 </td>
-                                <td class="text-center align-middle">
+                                <td class="text-center align-middle col-sistema">
                                     @{
                                         string sistemaUpper = (item.Sistema ?? "").ToUpper().Trim();
                                         string claseSistema = "badge-sistema-med";
+                                        bool esConectorItem = sistemaUpper.Contains("CONECTOR") || sistemaUpper.Contains("ZOE");
 
-                                        if (sistemaUpper.Contains("DIAWEB")) claseSistema = "badge-sistema-diaweb";
+                                        if (esConectorItem) claseSistema = "badge-sistema-med";
+                                        else if (sistemaUpper.Contains("DIAWEB")) claseSistema = "badge-sistema-diaweb";
                                         else if (sistemaUpper.Contains("DIAENLINEA")) claseSistema = "badge-sistema-diaenlinea";
                                         else if (sistemaUpper == "DIA") claseSistema = "badge-sistema-dia";
-                                        else if (sistemaUpper == "ConectorDiawebZoe") claseSistema = "badge-sistema-med";
                                         else if (sistemaUpper == "SITA") claseSistema = "badge-sistema-sita";
                                         else if (sistemaUpper == "VUCEM") claseSistema = "badge-sistema-vucem";
                                         else if (sistemaUpper == "COA") claseSistema = "badge-sistema-coa";
                                         else if (sistemaUpper == "ADMIN") claseSistema = "badge-sistema-admin";
                                     }
-                                    <span class="badge @claseSistema">@item.Sistema</span>
+                                    <span class="badge @claseSistema text-wrap" style="line-height: 1.2;">
+                                        @if (esConectorItem)
+                                        {
+                                            @:CONECTOR<br />DIAWEB-ZOÉ
+                                        }
+                                        else
+                                        {
+                                            @item.Sistema
+                                        }
+                                    </span>
                                 </td>
-                                <td class="text-center">@item.Tipo</td>
-                                <td class="col-texto-largo text-truncate" style="max-width: 180px;" title="@item.Descripcion">
+                                <td class="text-center col-tipo">@item.Tipo</td>
+                                <td class="col-corta text-truncate" style="max-width: 150px;" title="@item.Descripcion">
                                     @(string.IsNullOrEmpty(item.Descripcion) ? "-" : item.Descripcion)
                                 </td>
-                                <td class="col-texto-largo text-truncate" style="max-width: 180px;" title="@item.Comentarios">
+                                <td class="col-corta text-truncate" style="max-width: 150px;" title="@item.Comentarios">
                                     @(string.IsNullOrEmpty(item.Comentarios) ? "-" : item.Comentarios)
                                 </td>
-                                <td class="col-texto-largo text-truncate" style="max-width: 200px;" title="@item.Solucion">
+                                <td class="col-corta text-truncate" style="max-width: 150px;" title="@item.Solucion">
                                     @(string.IsNullOrEmpty(item.Solucion) ? "-" : item.Solucion)
                                 </td>
                                 <td class="text-center">
@@ -513,15 +545,15 @@
                         <div class="col-md-4">
                             <label class="form-label small text-muted">Sistema</label>
                             <select id="regSistema" name="Sistema" class="form-select form-select-sm" onchange="aplicarColorSelectSistema(this)" required>
-                                <option value="DIA" style="background-color: #2563eb; color: #ffffff;">DIA</option>
-                                <option value="DIAWEB" style="background-color: #0284c7; color: #ffffff;">DIAWEB</option>
-                                <option value="ConectorDiawebZoe" style="background-color: #475569; color: #ffffff;">CONECTOR DIAWEB-ZOÉ</option>
-                                <option value="SITA" style="background-color: #ea580c; color: #ffffff;">SITA</option>
-                                <option value="VUCEM" style="background-color: #1e3a8a; color: #ffffff;">VUCEM</option>
-                                <option value="DIAENLINEA PREMIUM" style="background-color: #16a34a; color: #ffffff;">DIAENLINEA PREMIUM</option>
-                                <option value="COA" style="background-color: #15803d; color: #ffffff;">COA</option>
-                                <option value="ADMIN" style="background-color: #0f172a; color: #ffffff;">ADMIN</option>
-                            </select>
+    <option value="DIA" style="background-color: #2563eb; color: #ffffff;">DIA</option>
+    <option value="DIAWEB" style="background-color: #0284c7; color: #ffffff;">DIAWEB</option>
+    <option value="CONECTOR DIAWEB-ZOÉ" style="background-color: #704332; color: #ffffff;">CONECTOR DIAWEB-ZOÉ</option>
+    <option value="SITA" style="background-color: #ea580c; color: #ffffff;">SITA</option>
+    <option value="VUCEM" style="background-color: #1d4ed8; color: #ffffff;">VUCEM</option>
+    <option value="DIAENLINEA PREMIUM" style="background-color: #16a34a; color: #ffffff;">DIAENLINEA PREMIUM</option>
+    <option value="COA" style="background-color: #15803d; color: #ffffff;">COA</option>
+    <option value="ADMIN" style="background-color: #0f172a; color: #ffffff;">ADMIN</option>
+</select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small text-muted">Tipo Requerimiento</label>
@@ -636,12 +668,12 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small text-muted">Sistema</label>
-                            <select id="editSistema" name="Sistema" class="form-select form-select-sm" onchange="aplicarColorSelectSistema(this)" required>
+                            <select id="editSistema" name="Sistema" class="form-select form-select-sm badge-sistema-dia" onchange="aplicarColorSelectSistema(this)" required>
                                 <option value="DIA" style="background-color: #2563eb; color: #ffffff;">DIA</option>
                                 <option value="DIAWEB" style="background-color: #0284c7; color: #ffffff;">DIAWEB</option>
-                                <option value="ConectorDiawebZoe" style="background-color: #475569; color: #ffffff;">CONECTOR DIAWEB-ZOÉ</option>
+                                <option value="ConectorDiawebZoe" style="background-color: #704332; color: #ffffff;">CONECTOR DIAWEB-ZOÉ</option>
                                 <option value="SITA" style="background-color: #ea580c; color: #ffffff;">SITA</option>
-                                <option value="VUCEM" style="background-color: #1e3a8a; color: #ffffff;">VUCEM</option>
+                                <option value="VUCEM" style="background-color: #1d4ed8; color: #ffffff;">VUCEM</option>
                                 <option value="DIAENLINEA PREMIUM" style="background-color: #16a34a; color: #ffffff;">DIAENLINEA PREMIUM</option>
                                 <option value="COA" style="background-color: #15803d; color: #ffffff;">COA</option>
                                 <option value="ADMIN" style="background-color: #0f172a; color: #ffffff;">ADMIN</option>
@@ -723,10 +755,10 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <!-- Único contenedor de Impresión -->
+            <!-- Contenedor de Impresión -->
             <div class="modal-body p-4 text-dark bg-white" id="seccionImpresion">
 
-                <!-- ENCABEZADO CON BARRA DE COLOR -->
+                <!-- ENCABEZADO -->
                 <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-2 border-primary">
                     <div>
                         <h2 class="fw-bold mb-0 text-uppercase text-dark" style="font-size: 16pt; color: #0f172a !important;">
@@ -747,18 +779,20 @@
                 </h6>
                 <div id="contenedorIndicadoresPrint" class="mb-3"></div>
 
-                <!-- CONCENTRADO Y GRÁFICAS POR SISTEMA EN IMPRESIÓN (PDF) -->
+                <!-- CONCENTRADO Y GRÁFICAS POR SISTEMA EN IMPRESIÓN -->
                 <h6 class="fw-bold text-dark mb-2" style="font-size: 10pt; color: #0f172a !important;">
                     <i class="bi bi-pie-chart-fill me-1 text-primary"></i> Concentrado del Día por Sistema
                 </h6>
 
-                <!-- Contenedor dinámico de gráficas en alta definición -->
+                <!-- Contenedor dinámico de gráficas -->
                 <div class="row g-2 mb-3" id="contenedorGraficasPrint">
                     <div class="col-6 text-center">
-                        <img id="imgChartSistemasPrint" style="max-width: 100%; height: auto; max-height: 190px;" />
+                        <div class="fw-bold text-dark small mb-1" style="font-size: 8.5pt;">Distribución de Tickets por Sistema</div>
+                        <img id="imgChartSistemasPrint" style="max-width: 100%; height: auto; max-height: 180px;" />
                     </div>
                     <div class="col-6 text-center">
-                        <img id="imgChartEstatusPrint" style="max-width: 100%; height: auto; max-height: 190px;" />
+                        <div class="fw-bold text-dark small mb-1" style="font-size: 8.5pt;">Tiempo y Forma vs Cerrados (Atrasados) vs En Curso</div>
+                        <img id="imgChartEstatusPrint" style="max-width: 100%; height: auto; max-height: 180px;" />
                     </div>
                 </div>
 
@@ -767,13 +801,14 @@
                     <table class="tabla-print-detalle">
                         <thead>
                             <tr style="background-color: #2563eb; color: #ffffff;">
-                                <th class="text-center">SISTEMA</th>
+                                <th class="text-center col-sistema">SISTEMA</th>
                                 <th class="text-center">TOTAL TICKETS</th>
                                 <th class="text-center">INCIDENCIAS</th>
                                 <th class="text-center">SERVICIOS</th>
                                 <th class="text-center">POR TELÉFONO</th>
                                 <th class="text-center">POR CORREO</th>
                                 <th class="text-center">ATENDIDOS (TIEMPO Y FORMA)</th>
+                                <th class="text-center">CERRADOS (ATRASADOS)</th>
                                 <th class="text-center">EN CURSO (SEGUIMIENTO)</th>
                             </tr>
                         </thead>
@@ -782,14 +817,27 @@
                             {
                                 @foreach (var s in concentradoSistemas)
                                 {
+                                    string sisPrintCheck = (s.Sistema ?? "").ToString().ToUpper().Trim();
+                                    bool esConectorPrint = sisPrintCheck.Contains("CONECTOR") || sisPrintCheck.Contains("ZOE");
+
                                     <tr>
-                                        <td class="text-center fw-bold text-dark">@s.Sistema</td>
+                                        <td class="text-center fw-bold text-dark col-sistema" style="line-height: 1.2;">
+                                            @if (esConectorPrint)
+                                            {
+                                                @:CONECTOR<br />DIAWEB-ZOÉ
+                                            }
+                                            else
+                                            {
+                                                @s.Sistema
+                                            }
+                                        </td>
                                         <td class="text-center fw-bold">@s.Total</td>
                                         <td class="text-center">@s.Incidencias</td>
                                         <td class="text-center">@s.Servicios</td>
                                         <td class="text-center">@s.Telefono</td>
                                         <td class="text-center">@s.Correo</td>
                                         <td class="text-center"><span class="badge-print-cerrado">@s.TiempoForma</span></td>
+                                        <td class="text-center"><span class="badge-print-atrasado">@s.CerradosAtrasados</span></td>
                                         <td class="text-center"><span class="badge-print-encurso">@s.EnCurso</span></td>
                                     </tr>
                                 }
@@ -797,7 +845,7 @@
                             else
                             {
                                 <tr>
-                                    <td colspan="8" class="text-center py-2 text-muted">No hay datos de concentrado para mostrar.</td>
+                                    <td colspan="9" class="text-center py-2 text-muted">No hay datos de concentrado para mostrar.</td>
                                 </tr>
                             }
                         </tbody>
@@ -862,26 +910,41 @@
                                                 <span class="badge-print-encurso">En curso</span>
                                             }
                                         </td>
-                                        <td class="text-center align-middle">
+                                        <td class="text-center align-middle col-sistema" style="padding: 2px !important;">
                                             @{
                                                 string sisPrintUpper = (item.Sistema ?? "").ToUpper().Trim();
                                                 string clasePrintSistema = "badge-sistema-med";
+                                                bool esConectorItemPrint = sisPrintUpper.Contains("CONECTOR") || sisPrintUpper.Contains("ZOE");
 
-                                                if (sisPrintUpper.Contains("DIAWEB")) clasePrintSistema = "badge-sistema-diaweb";
+                                                if (esConectorItemPrint)
+                                                {
+                                                    clasePrintSistema = "badge-sistema-med";
+                                                }
+                                                else if (sisPrintUpper.Contains("DIAWEB")) clasePrintSistema = "badge-sistema-diaweb";
                                                 else if (sisPrintUpper.Contains("DIAENLINEA")) clasePrintSistema = "badge-sistema-diaenlinea";
                                                 else if (sisPrintUpper == "DIA") clasePrintSistema = "badge-sistema-dia";
-                                                else if (sisPrintUpper == "ConectorDiawebZoe") clasePrintSistema = "badge-sistema-med";
                                                 else if (sisPrintUpper == "SITA") clasePrintSistema = "badge-sistema-sita";
                                                 else if (sisPrintUpper == "VUCEM") clasePrintSistema = "badge-sistema-vucem";
                                                 else if (sisPrintUpper == "COA") clasePrintSistema = "badge-sistema-coa";
                                                 else if (sisPrintUpper == "ADMIN") clasePrintSistema = "badge-sistema-admin";
                                             }
-                                            <span class="badge @clasePrintSistema">@item.Sistema</span>
+                                            <span class="badge @clasePrintSistema" style="white-space: pre-line !important; font-size: 6.5pt !important; display: inline-block; width: 100%; word-break: break-word !important; line-height: 1.1; padding: 3px 2px !important;">
+                                                @if (esConectorItemPrint)
+                                                {
+                                                    @:CONECTOR<br />DIAWEB-ZOÉ
+                                                }
+                                                else
+                                                {
+                                                    @item.Sistema
+                                                }
+                                            </span>
                                         </td>
-                                        <td class="text-center">@item.Tipo</td>
-                                        <td class="col-texto-largo">@item.Descripcion</td>
-                                        <td class="col-texto-largo">@item.Comentarios</td>
-                                        <td class="col-texto-largo">@item.Solucion</td>
+                                        <td class="text-center align-middle col-tipo">
+                                            @item.Tipo
+                                        </td>
+                                        <td class="col-texto-largo col-descripcion">@item.Descripcion</td>
+                                        <td class="col-texto-largo col-comentarios">@item.Comentarios</td>
+                                        <td class="col-texto-largo col-solucion">@item.Solucion</td>
                                     </tr>
                                 }
                             }
@@ -910,16 +973,63 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
     <script>
         const rolUsuario = "@(HttpContext.Session.GetString("Rol") ?? "")";
         const usuarioSesion = "@(HttpContext.Session.GetString("Usuario") ?? "")";
         const fechaReporteActual = "@(Model.FechaReporte?.ToString("dd-MM-yyyy"))";
 
-        // Instancias globales para captura de gráficos
+        // Función para cambiar dinámicamente la clase/color del <select> de Sistema
+        function aplicarColorSelectSistema(selectElement) {
+            if (!selectElement) return;
+            const val = (selectElement.value || '').toUpperCase().trim();
+            
+            // Remover todas las clases de sistemas previas
+            selectElement.classList.remove(
+                'badge-sistema-dia', 
+                'badge-sistema-diaweb', 
+                'badge-sistema-med', 
+                'badge-sistema-sita', 
+                'badge-sistema-vucem', 
+                'badge-sistema-diaenlinea', 
+                'badge-sistema-coa', 
+                'badge-sistema-admin'
+            );
+
+            if (val.includes('CONECTOR') || val.includes('ZOE')) {
+                selectElement.classList.add('badge-sistema-med');
+            } else if (val.includes('DIAWEB')) {
+                selectElement.classList.add('badge-sistema-diaweb');
+            } else if (val.includes('DIAENLINEA')) {
+                selectElement.classList.add('badge-sistema-diaenlinea');
+            } else if (val === 'DIA') {
+                selectElement.classList.add('badge-sistema-dia');
+            } else if (val === 'SITA') {
+                selectElement.classList.add('badge-sistema-sita');
+            } else if (val === 'VUCEM') {
+                selectElement.classList.add('badge-sistema-vucem');
+            } else if (val === 'COA') {
+                selectElement.classList.add('badge-sistema-coa');
+            } else if (val === 'ADMIN') {
+                selectElement.classList.add('badge-sistema-admin');
+            } else {
+                selectElement.classList.add('badge-sistema-dia');
+            }
+        }
+
+        Chart.register(ChartDataLabels);
+
         window.chartSistemasInstance = null;
         window.chartEstatusInstance = null;
 
         document.addEventListener('DOMContentLoaded', function () {
+            // Inicializar color del select al cargar
+            const regSys = document.getElementById('regSistema');
+            const editSys = document.getElementById('editSistema');
+            if (regSys) aplicarColorSelectSistema(regSys);
+            if (editSys) aplicarColorSelectSistema(editSys);
+
             const labelsSistemas = [
                 @Html.Raw(string.Join(",", concentradoSistemas.Select(s => $"'{s.Sistema}'")))
             ];
@@ -929,26 +1039,31 @@
             const dataTiempoForma = [
                 @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.TiempoForma)))
             ];
+            const dataCerradosAtrasados = [
+                @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.CerradosAtrasados)))
+            ];
             const dataEnCurso = [
                 @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.EnCurso)))
             ];
 
             const obtenerColorSistema = (sistema) => {
                 const sysUpper = (sistema || '').toUpperCase().trim();
+                
+                if (sysUpper.includes('CONECTOR') || sysUpper.includes('ZOE')) return '#704332';
                 if (sysUpper.includes('DIAWEB')) return '#0284c7';
                 if (sysUpper.includes('DIAENLINEA')) return '#16a34a';
                 if (sysUpper === 'DIA') return '#2563eb';
-                if (sysUpper === 'ConectorDiawebZoe') return '#64748b';
                 if (sysUpper === 'SITA') return '#ea580c';
-                if (sysUpper === 'VUCEM') return '#1e3a8a';
+                if (sysUpper === 'VUCEM') return '#1d4ed8';
                 if (sysUpper === 'COA') return '#15803d';
                 if (sysUpper === 'ADMIN') return '#0f172a';
+                
                 return '#38bdf8';
             };
 
             const coloresDona = labelsSistemas.map(sys => obtenerColorSistema(sys));
 
-            // 1. Gráfica de Dona (Distribución por Sistema)
+            // 1. Gráfica de Dona
             const ctx1 = document.getElementById('chartSistemas');
             if (ctx1 && labelsSistemas.length > 0) {
                 window.chartSistemasInstance = new Chart(ctx1, {
@@ -967,16 +1082,29 @@
                         maintainAspectRatio: false,
                         animation: false,
                         plugins: {
+                            title: { display: false },
                             legend: {
                                 position: 'right',
-                                labels: { color: '#ffffff', font: { size: 11, weight: 'bold' } }
+                                labels: { color: '#ffffff', font: { size: 10, weight: 'bold' } }
+                            },
+                            datalabels: {
+                                color: '#ffffff',
+                                font: { weight: 'bold', size: 11 },
+                                formatter: (value, ctx) => {
+                                    if (!value || value === 0) return '';
+                                    let sum = 0;
+                                    let dataArr = ctx.chart.data.datasets[0].data;
+                                    dataArr.map(data => { sum += data; });
+                                    let percentage = (value * 100 / sum).toFixed(1) + "%";
+                                    return percentage;
+                                }
                             }
                         }
                     }
                 });
             }
 
-            // 2. Gráfica de Barras (Atendidos vs En Curso por Sistema)
+            // 2. Gráfica de Barras
             const ctx2 = document.getElementById('chartEstatusSistema');
             if (ctx2 && labelsSistemas.length > 0) {
                 window.chartEstatusInstance = new Chart(ctx2, {
@@ -985,12 +1113,17 @@
                         labels: labelsSistemas,
                         datasets: [
                             {
-                                label: 'En Tiempo y Forma (Cerrados)',
+                                label: 'Tiempo y Forma',
                                 data: dataTiempoForma,
                                 backgroundColor: '#22c55e'
                             },
                             {
-                                label: 'En Curso (Seguimiento)',
+                                label: 'Cerrado (Atrasados)',
+                                data: dataCerradosAtrasados,
+                                backgroundColor: '#3b82f6'
+                            },
+                            {
+                                label: 'En Curso',
                                 data: dataEnCurso,
                                 backgroundColor: '#eab308'
                             }
@@ -1002,7 +1135,7 @@
                         animation: false,
                         scales: {
                             x: {
-                                ticks: { color: '#ffffff', font: { size: 10, weight: 'bold' } },
+                                ticks: { color: '#ffffff', font: { size: 9, weight: 'bold' } },
                                 grid: { display: false }
                             },
                             y: {
@@ -1011,9 +1144,19 @@
                             }
                         },
                         plugins: {
+                            title: { display: false },
                             legend: {
                                 position: 'top',
-                                labels: { color: '#ffffff', font: { size: 10, weight: 'bold' } }
+                                labels: { color: '#ffffff', font: { size: 9, weight: 'bold' } }
+                            },
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'start',
+                                color: '#ffffff',
+                                font: { weight: 'bold', size: 10 },
+                                formatter: (value) => {
+                                    return value > 0 ? value : '';
+                                }
                             }
                         }
                     }

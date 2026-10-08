@@ -77,29 +77,40 @@ function cerrarModal(idModal) {
 // Función para cambiar dinámicamente el color del cuadro principal del select
 function aplicarColorSelectSistema(selectElement) {
     if (!selectElement) return;
-
-    // Remover clases dinámicas de sistema previas
+    const val = (selectElement.value || '').toUpperCase().trim();
+    
+    // Limpiar todas las clases de color previas
     selectElement.classList.remove(
-        'badge-sistema-dia',
-        'badge-sistema-diaweb',
-        'badge-sistema-med',
-        'badge-sistema-sita',
-        'badge-sistema-vucem',
-        'badge-sistema-diaenlinea',
-        'badge-sistema-coa',
+        'badge-sistema-dia', 
+        'badge-sistema-diaweb', 
+        'badge-sistema-med', 
+        'badge-sistema-sita', 
+        'badge-sistema-vucem', 
+        'badge-sistema-diaenlinea', 
+        'badge-sistema-coa', 
         'badge-sistema-admin'
     );
 
-    const valUpper = (selectElement.value || '').toUpperCase().trim();
-
-    if (valUpper.includes('DIAWEB')) selectElement.classList.add('badge-sistema-diaweb');
-    else if (valUpper.includes('DIAENLINEA')) selectElement.classList.add('badge-sistema-diaenlinea');
-    else if (valUpper === 'DIA') selectElement.classList.add('badge-sistema-dia');
-    else if (valUpper === 'MED') selectElement.classList.add('badge-sistema-med');
-    else if (valUpper === 'SITA') selectElement.classList.add('badge-sistema-sita');
-    else if (valUpper === 'VUCEM') selectElement.classList.add('badge-sistema-vucem');
-    else if (valUpper === 'COA') selectElement.classList.add('badge-sistema-coa');
-    else if (valUpper === 'ADMIN') selectElement.classList.add('badge-sistema-admin');
+    // Evaluar en orden estricto (Conector tiene prioridad antes de DIAWEB)
+    if (val.includes('CONECTOR') || val.includes('ZOE')) {
+        selectElement.classList.add('badge-sistema-med');
+    } else if (val.includes('DIAWEB')) {
+        selectElement.classList.add('badge-sistema-diaweb');
+    } else if (val.includes('DIAENLINEA')) {
+        selectElement.classList.add('badge-sistema-diaenlinea');
+    } else if (val === 'DIA') {
+        selectElement.classList.add('badge-sistema-dia');
+    } else if (val === 'SITA') {
+        selectElement.classList.add('badge-sistema-sita');
+    } else if (val === 'VUCEM') {
+        selectElement.classList.add('badge-sistema-vucem');
+    } else if (val === 'COA') {
+        selectElement.classList.add('badge-sistema-coa');
+    } else if (val === 'ADMIN') {
+        selectElement.classList.add('badge-sistema-admin');
+    } else {
+        selectElement.classList.add('badge-sistema-med');
+    }
 }
 
 // Inicialización de colores para selects al cargar la página
@@ -568,7 +579,7 @@ function exportarExcelLocal() {
         const alignCenter = { vertical: 'center', horizontal: 'center' };
         const alignLeft = { vertical: 'top', horizontal: 'left', wrapText: true };
 
-        // Color de encabezado ajustado a Azul Slate (#1E293B)
+        // Color de encabezado ajustado a Azul Cobalto
         const colorHeaderExcel = '2563eb';
 
         let rows = [];
@@ -698,9 +709,9 @@ function exportarExcelLocal() {
                     { v: fechaEntrada, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } },
                     { v: hora, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } },
                     { v: numTicket, s: { fill: { fgColor: { rgb: bgRow } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
-                    { v: cliente, s: { fill: { fgColor: { rgb: bgRow } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } }, // Centrado
-                    { v: ejecutivo, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } }, // Centrado
-                    { v: reporto, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } }, // Centrado
+                    { v: cliente, s: { fill: { fgColor: { rgb: bgRow } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
+                    { v: ejecutivo, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } },
+                    { v: reporto, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } },
                     {
                         v: estatus,
                         s: {
@@ -740,7 +751,7 @@ function exportarExcelLocal() {
             { wch: 14 }, // Fecha Entrada
             { wch: 10 }, // Hora
             { wch: 12 }, // No. Ticket
-            { wch: 28 }, // Cliente (Ancho suficiente para "KENWORTH MEXICANA")
+            { wch: 28 }, // Cliente
             { wch: 22 }, // Ejecutivo
             { wch: 22 }, // Reportó
             { wch: 12 }, // Estatus
@@ -753,12 +764,22 @@ function exportarExcelLocal() {
 
         XLSX.utils.book_append_sheet(wb, ws, 'Reporte Diario');
 
-        /* HOJA 2: CONCENTRADO POR SISTEMA */
+        /* HOJA 2: CONCENTRADO POR SISTEMA (ACTUALIZADA A 3 CATEGORÍAS DE ESTATUS) */
         const ws2_rows = [];
         ws2_rows.push([{ v: 'CONCENTRADO DE TICKETS POR SISTEMA - ' + fecha, s: { font: { name: 'Segoe UI', sz: 12, bold: true, color: { rgb: '0F172A' } } } }]);
         ws2_rows.push([]);
 
-        const headersWs2 = ['Sistema', 'Total Tickets', 'Incidencias', 'Servicios', 'Por Teléfono', 'Por Correo', 'Atendidos (Tiempo y Forma)', 'En Curso (Seguimiento)'];
+        const headersWs2 = [
+            'Sistema', 
+            'Total Tickets', 
+            'Incidencias', 
+            'Servicios', 
+            'Por Teléfono', 
+            'Por Correo', 
+            'Atendidos (Tiempo y Forma)', 
+            'Cerrados (Atrasados)', 
+            'En Curso (Seguimiento)'
+        ];
         let rowHeader2 = [];
         headersWs2.forEach(h => {
             rowHeader2.push({ v: h, s: { fill: { fgColor: { rgb: colorHeaderExcel } }, font: fontHeader, alignment: alignCenter, border: borderNegro } });
@@ -781,7 +802,17 @@ function exportarExcelLocal() {
         }
 
         const wsConcentrado = XLSX.utils.aoa_to_sheet(ws2_rows);
-        wsConcentrado['!cols'] = [{ wch: 18 }, { wch: 14 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 28 }, { wch: 26 }];
+        wsConcentrado['!cols'] = [
+            { wch: 18 }, // Sistema
+            { wch: 14 }, // Total Tickets
+            { wch: 14 }, // Incidencias
+            { wch: 12 }, // Servicios
+            { wch: 14 }, // Por Teléfono
+            { wch: 14 }, // Por Correo
+            { wch: 28 }, // Atendidos (Tiempo y Forma)
+            { wch: 24 }, // Cerrados (Atrasados)
+            { wch: 26 }  // En Curso (Seguimiento)
+        ];
 
         XLSX.utils.book_append_sheet(wb, wsConcentrado, 'Concentrado por Sistema');
 

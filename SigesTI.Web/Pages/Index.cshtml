@@ -5,83 +5,119 @@
     ViewData["Title"] = "SigesST | Sistema de Gestión de Soporte Técnico";
 }
 
-<div class="container-fluid py-4">
+<div class="container-fluid py-3">
 
-    <!-- Bienvenida -->
-    <div class="card dashboard-card mb-4">
-        <div class="card-body">
-            <h2 class="fw-bold mb-2">
-                Bienvenido(a), @Model.NombreUsuarioActual
-            </h2>
-
-            <p class="mb-0 text-light opacity-75">
-                Sistema de Gestión de Solicitudes del Área de Soporte Técnico.
-            </p>
+    <!-- Encabezado de Bienvenida y Reloj -->
+    <div class="card dashboard-header-card mb-4">
+        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 py-3 px-4">
+            <div>
+                <h3 class="fw-bold mb-1 text-white">
+                    Bienvenido(a), @Model.NombreUsuarioActual
+                </h3>
+                <p class="mb-0 text-info opacity-75 fs-6">
+                    <i class="bi bi-shield-check me-1"></i> Sistema de Gestión de Solicitudes del Área de Soporte Técnico.
+                </p>
+            </div>
+            <div class="text-md-end system-clock-badge px-3 py-2 rounded-3">
+                <div class="fw-semibold text-info"><i class="bi bi-calendar3 me-2"></i>@Model.FechaActualTexto</div>
+                <div class="fs-5 fw-bold text-white"><i class="bi bi-clock me-2"></i>@Model.HoraActualTexto</div>
+            </div>
         </div>
     </div>
 
-    <!-- Tarjetas -->
-    <div class="row g-4">
-
-        <div class="col-md-6 col-xl-3">
-            <div class="card stat-card total-card h-100">
-                <div class="card-body text-center">
-                    <h5>Total Solicitudes</h5>
-                    <h1>@Model.TotalSolicitudes</h1>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-xl-3">
-            <div class="card stat-card pendiente-card h-100">
-                <div class="card-body text-center">
-                    <h5>Pendientes</h5>
-                    <h1>@Model.SolicitudesPendientes</h1>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-xl-3">
-            <div class="card stat-card resuelto-card h-100">
-                <div class="card-body text-center">
-                    <h5>Resueltas</h5>
-                    <h1>@Model.SolicitudesResueltas</h1>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-xl-3">
-            <div class="card stat-card personal-card h-100">
-                <div class="card-body text-center">
-                    <h5>Personal Registrado</h5>
-                    <h1>@Model.TotalPersonal</h1>
-                </div>
-            </div>
-        </div>
-
+    <!-- Título de Sección -->
+    <div class="d-flex align-items-center justify-content-between mb-3 px-1">
+        <h5 class="fw-bold text-white mb-0">
+            <i class="bi bi-grid-1x2-fill me-2 text-warning"></i>Recientes / Prioritarios
+        </h5>
+        <span class="badge bg-secondary bg-opacity-50 text-light border border-secondary px-3 py-1 rounded-pill fs-7">
+            Actividad del Día
+        </span>
     </div>
 
-    <!-- Información -->
-    <div class="card dashboard-card mt-5">
-        <div class="card-body text-center">
+    <!-- Grid de Tarjetas Operativas -->
+    <div class="row row-cols-1 row-cols-md-2 g-3 mb-4">
+        @if (Model.ListaActividades != null && Model.ListaActividades.Any())
+        {
+            @foreach (var item in Model.ListaActividades)
+            {
+                <div class="col">
+                    <div class="card activity-card @item.BadgeClass h-100 p-3 rounded-4 d-flex flex-column justify-content-between">
+                        
+                        <div>
+                            <!-- Header de Tarjeta -->
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="activity-type-badge">
+                                    <i class="bi @item.Icono me-1"></i> @item.Tipo
+                                </span>
+                                <i class="bi @item.Icono fs-4 activity-header-icon"></i>
+                            </div>
 
-            <h5 class="mb-3">Información del Sistema</h5>
+                            <!-- Título y Descripción -->
+                            <h6 class="fw-bold text-white mb-2">@item.Titulo</h6>
+                            <p class="text-light opacity-75 fs-7 mb-3">@item.Descripcion</p>
+                        </div>
 
-            <p class="mb-1">
-                <strong>Versión:</strong> 1.0.0
-            </p>
+                        <!-- Botón Ver Detalles -->
+                        <div class="text-end border-top border-white border-opacity-10 pt-2">
+                            <a href="@item.UrlDetalle" class="btn btn-sm btn-activity-action rounded-pill px-3">
+                                Ver detalles <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
 
-            <p class="mb-1">
-                <strong>Desarrollado por:</strong>
-                Ing. Justin Sánchez
-            </p>
-
-            <p class="mb-0">
-                <strong>Fecha:</strong>
-                Junio 2026
-            </p>
-
-        </div>
+                    </div>
+                </div>
+            }
+        }
     </div>
 
+    <!-- Botón Ícono de Información del Sistema (i) -->
+    <div class="d-flex justify-content-end align-items-center mt-2">
+        <button type="button" class="btn btn-sm btn-info-system rounded-circle" data-bs-toggle="modal" data-bs-target="#infoSistemaModal" title="Información del Sistema">
+            <i class="bi bi-info-circle-fill fs-5"></i>
+        </button>
+    </div>
+
+</div>
+
+<!-- Modal: Información del Sistema -->
+<div class="modal fade" id="infoSistemaModal" tabindex="-1" aria-labelledby="infoSistemaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content info-modal-content text-light">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h6 class="modal-title text-info font-monospace" id="infoSistemaModalLabel">
+                    <i class="bi bi-info-circle-fill me-2"></i>ACERCA DEL SISTEMA
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body text-center px-4 py-3">
+                <div class="mb-3">
+                    <h2 class="fw-bold text-white mb-1 tracking-wide">SigesST</h2>
+                    <p class="text-info opacity-75 fs-7 mb-0">Sistema de Gestión de Soporte Técnico</p>
+                </div>
+
+                <hr class="border-secondary opacity-25 my-3" />
+
+                <div class="px-2 text-start fs-6">
+                    <div class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-25">
+                        <span class="text-light opacity-75">Versión actual:</span>
+                        <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-25 px-2 py-1 fs-7">v1.0.0</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-25">
+                        <span class="text-light opacity-75">Desarrollado por:</span>
+                        <span class="fw-semibold text-white">Ing. Justin Sánchez</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2">
+                        <span class="text-light opacity-75">Fecha de versión:</span>
+                        <span class="text-white fw-medium">Junio 2026</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-outline-info btn-sm px-4 rounded-pill" data-bs-dismiss="modal">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
