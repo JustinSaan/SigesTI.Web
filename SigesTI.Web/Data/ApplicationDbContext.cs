@@ -17,6 +17,8 @@ namespace SigesTI.Web.Data
         public DbSet<SigesTI.Web.Models.Personal> Personal { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<ContactoCliente> ContactosCliente { get; set; }
+        public DbSet<TareaProgramada> TareasProgramadas { get; set; }
+        public DbSet<TipoTareaProgramada> TiposTareaProgramada { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

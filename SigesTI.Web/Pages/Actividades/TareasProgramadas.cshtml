@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Tareas Programadas Generales";
 }
-
 <link rel="stylesheet" href="~/css/actividades.css" asp-append-version="true" />
 
 <div class="actividades-container px-4 py-3">
@@ -15,55 +14,188 @@
             </h3>
             <p class="text-muted small mb-0">Programa de mantenimientos, renovaciones y actividades pendientes del área.</p>
         </div>
-        <button class="btn btn-primary-sigest shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#modalNuevaTarea">
+        <button class="btn btn-primary-sigest shadow-sm px-3" id="btnNuevaTarea">
             <i class="bi bi-plus-lg me-1"></i> Nueva Tarea Programada
         </button>
     </div>
 
-    <!-- Tabla de Tareas (Glass Panel & Tabla SigesST) -->
+    <!-- Panel: Soportes Internos / Actividades Adicionales del Día -->
+<div class="glass-panel mb-4 p-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="fw-bold text-info fs-6">
+            <i class="bi bi-display me-2"></i>Soportes Internos / Actividades Adicionales
+        </div>
+        <div class="form-check form-switch d-flex align-items-center gap-2">
+            <input class="form-check-input mt-0" type="checkbox" role="switch" id="switchActividadesAdicionales" style="cursor: pointer;">
+            <label class="form-check-label text-white small" for="switchActividadesAdicionales" style="cursor: pointer;">
+                Indicar actividades adicionales
+            </label>
+        </div>
+    </div>
+
+    <div id="panelActividadesAdicionales" class="collapse">
+        <textarea id="txtSoportesInternos" 
+                  class="form-control bg-transparent text-white border-secondary small" 
+                  rows="4" 
+                  placeholder="Escribe aquí el soporte brindado a compañeros o actividades adicionales..." 
+                  style="border-radius: 8px; resize: vertical;"></textarea>
+        <div class="d-flex justify-content-end mt-1">
+            <small id="lblEstadoGuardado" class="text-muted fst-italic" style="font-size: 0.75rem; transition: color 0.3s ease;"></small>
+        </div>
+    </div>
+</div>
+
+    <!-- Tabla de Tareas -->
     <div class="glass-panel mb-4 overflow-hidden">
         <div class="glass-header d-flex justify-content-between align-items-center">
             <span><i class="bi bi-calendar-check me-2"></i>Programa de Actividades</span>
-            <span class="badge bg-primary px-3 py-2 rounded-pill">Pendientes: 1</span>
+            <span class="badge bg-primary px-3 py-2 rounded-pill">
+                Pendientes: @Model.ListaTareas.Count(t => t.Estatus == "Pendiente")
+            </span>
         </div>
         <div class="p-0 table-responsive">
             <table class="tabla-sigest align-middle text-nowrap mb-0 small">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th class="text-center">#</th>
                         <th>Tarea / Pendiente</th>
-                        <th>Tipo</th>
-                        <th>Origen</th>
+                        <th class="text-center">Tipo</th>
                         <th>Persona Asignada</th>
-                        <th>Fecha Compromiso</th>
-                        <th>Fecha Realización</th>
-                        <th>Estatus</th>
+                        <th class="text-center">Fecha Máx. Realización</th>
+                        <th class="text-center">Fecha Realización</th>
+                        <th>Observaciones</th>
+                        <th class="text-center">Estatus</th>
                         <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="text-center">1</td>
-                        <td class="fw-bold text-white">Renovación de Licencias ESET Antivirus</td>
-                        <td class="text-center">Licenciamiento</td>
-                        <td class="text-center"><span class="badge bg-secondary px-2 py-1">Interno</span></td>
-                        <td>Ing. Justin Sánchez</td>
-                        <td class="text-center">05/10/2026</td>
-                        <td class="text-center"><span class="text-muted">-</span></td>
-                        <td class="text-center"><span class="badge bg-warning text-dark px-2 py-1">Pendiente</span></td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-success shadow-sm fw-bold px-2 py-1" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#modalResolverTarea">
-                                <i class="bi bi-check-lg me-1"></i> Marcar Resuelta
-                            </button>
-                        </td>
-                    </tr>
+                    @if (!Model.ListaTareas.Any())
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-4">No hay tareas programadas registradas.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        int index = 1;
+                        foreach (var item in Model.ListaTareas)
+                        {
+                            <tr class="fila-tarea" data-id="@item.Id" style="cursor: pointer;">
+                                <td class="text-center fw-bold">@(index++)</td>
+                                <td class="fw-bold text-white">@item.Tarea</td>
+                                <td class="text-center">
+                                    <span class="badge bg-secondary px-2 py-1">@(item.TipoTarea?.Nombre ?? "General")</span>
+                                </td>
+                                <td>
+                                    @(item.PersonaAsignada?.NombreCompleto ?? item.PersonaAsignada?.NombreUsuario ?? "Sin Asignar")
+                                </td>
+                                <td class="text-center">@item.FechaMaximaRealizacion.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center">
+                                    @(item.FechaRealizacion.HasValue ? item.FechaRealizacion.Value.ToString("dd/MM/yyyy") : "-")
+                                </td>
+                                <td class="text-truncate" style="max-width: 200px;" title="@item.Observaciones">
+                                    <small class="text-muted">@(string.IsNullOrWhiteSpace(item.Observaciones) ? "-" : item.Observaciones)</small>
+                                </td>
+                                <td class="text-center">
+                                    @if (item.Estatus == "Resuelta")
+                                    {
+                                        <span class="badge bg-success px-2 py-1">Resuelta</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark px-2 py-1">Pendiente</span>
+                                    }
+                                </td>
+                                <td class="text-center" onclick="event.stopPropagation();">
+                                    @if (item.Estatus != "Resuelta")
+                                    {
+                                        <button class="btn btn-sm btn-success shadow-sm fw-bold px-2 py-1 btn-resolver" style="border-radius: 8px;" data-id="@item.Id">
+                                            <i class="bi bi-check-lg me-1"></i> Marcar Resuelta
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
-<!-- Modal para Capturar Fecha de Solución (Glassmorphism Style) -->
+<!-- Modal Principal para Crear/Editar Tarea -->
+<div class="modal fade" id="modalTarea" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content glass-panel text-white border-0">
+            <div class="modal-header glass-header border-0">
+                <h5 class="modal-title fs-6 fw-bold text-white" id="modalTareaTitulo">
+                    <i class="bi bi-pencil-square me-2 text-info"></i>Tarea Programada
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formTarea">
+                @Html.AntiForgeryToken()
+                <div class="modal-body p-4">
+                    <input type="hidden" id="tareaId" name="TareaInput.Id" value="0" />
+                    
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label small text-muted">Tarea / Pendiente</label>
+                            <input type="text" id="txtTarea" name="TareaInput.Tarea" class="form-control form-control-sm" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Tipo de Tarea</label>
+                            <select id="ddlTipo" name="TareaInput.TipoTareaId" class="form-select form-select-sm" required>
+                                <option value="">-- Seleccione --</option>
+                                @foreach (SelectListItem item in Model.SelectTipos)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                                <option value="-1" class="fw-bold text-info">+ Agregar tipo...</option>
+                            </select>
+                            <div id="divNuevoTipo" class="mt-2 d-none">
+                                <input type="text" id="txtNuevoTipo" name="TareaInput.NuevoTipo" class="form-control form-control-sm" placeholder="Escriba el nuevo tipo de tarea" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Persona Asignada (Usuarios del Sistema)</label>
+                            <select id="ddlUsuario" name="TareaInput.PersonaAsignadaId" class="form-select form-select-sm" required>
+                                <option value="">-- Seleccione Usuario --</option>
+                                @foreach (SelectListItem user in Model.SelectUsuarios)
+                                {
+                                    <option value="@user.Value">@user.Text</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Fecha Máxima para Realizarla</label>
+                            <input type="date" id="txtFechaMaxima" name="TareaInput.FechaMaximaRealizacion" class="form-control form-control-sm" required />
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label small text-muted">Objetivo</label>
+                            <textarea id="txtObjetivo" name="TareaInput.Objetivo" class="form-control form-control-sm" rows="3" placeholder="Detalle qué se espera realizar con esta tarea..."></textarea>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label small text-muted">Observaciones / Comentarios</label>
+                            <textarea id="txtObservaciones" name="TareaInput.Observaciones" class="form-control form-control-sm" rows="3" placeholder="Agregar notas u observaciones..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-transparent pt-0">
+                    <button type="button" class="btn btn-sm btn-secondary-sigest px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-sm btn-primary-sigest px-3">Guardar Tarea</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Marcar Resuelta -->
 <div class="modal fade" id="modalResolverTarea" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content glass-panel text-white border-0">
@@ -74,20 +206,24 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-                <p class="small text-muted mb-3">Ingresa la fecha exacta en la que se concluyó la actividad:</p>
+                <input type="hidden" id="resolverTareaId" />
                 <div class="mb-3">
                     <label class="form-label small text-muted">Fecha Real de Solución</label>
-                    <input type="date" class="form-control form-control-sm" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    <input type="date" id="txtFechaRealizacion" class="form-control form-control-sm" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label small text-muted">Observaciones / Comentarios</label>
-                    <textarea class="form-control" rows="3" placeholder="Detalles de la conclusión..."></textarea>
+                    <label class="form-label small text-muted">Observaciones / Comentarios de Cierre</label>
+                    <textarea id="txtObservacionesResolver" class="form-control form-control-sm" rows="3" placeholder="Detalles de la conclusión..."></textarea>
                 </div>
             </div>
             <div class="modal-footer border-0 bg-transparent pt-0">
                 <button type="button" class="btn btn-sm btn-secondary-sigest px-3" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-sm btn-primary-sigest px-3">Guardar y Marcar Resuelta</button>
+                <button type="button" class="btn btn-sm btn-success px-3" id="btnConfirmarResolver">Guardar y Marcar Resuelta</button>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/tareasprogramadas.js" asp-append-version="true"></script>
+}
