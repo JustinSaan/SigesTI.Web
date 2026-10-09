@@ -75,17 +75,12 @@ body {
    Estas clases se utilizan en todos los módulos del sistema.
    ========================================================================== */
 
-/*
-   Fondo exterior de SweetAlert.
-   También garantiza que la alerta aparezca encima de cualquier modal.
-*/
 .swal2-container {
     z-index: 99999 !important;
     background: rgba(2, 6, 23, 0.48) !important;
     backdrop-filter: blur(3px);
 }
 
-/* Ventana principal de SweetAlert */
 .swal2-popup.swal-dark-blue,
 .swal2-popup.swal-dark {
     color: #f8fafc !important;
@@ -95,10 +90,6 @@ body {
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65), 0 0 32px rgba(37, 99, 235, 0.14) !important;
 }
 
-/*
-   Este selector aplica también el diseño Dark Blue cuando alguna alerta
-   no haya recibido la clase personalizada swal-dark-blue.
-*/
 .swal2-popup {
     color: #f8fafc;
     background: linear-gradient( 145deg, rgba(30, 41, 59, 0.99), rgba(15, 23, 42, 0.99) );
@@ -107,18 +98,15 @@ body {
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65), 0 0 32px rgba(37, 99, 235, 0.14);
 }
 
-/* Título */
 .swal2-title {
     color: #38bdf8 !important;
     font-weight: 800 !important;
 }
 
-/* Texto o contenido HTML */
 .swal2-html-container {
     color: #cbd5e1 !important;
 }
 
-/* Mensajes de validación */
 .swal2-validation-message {
     color: #fecaca !important;
     background: rgba(239, 68, 68, 0.12) !important;
@@ -126,7 +114,6 @@ body {
     border-radius: 10px !important;
 }
 
-/* Botón para cerrar la alerta */
 .swal2-close {
     color: #94a3b8 !important;
 }
@@ -135,12 +122,10 @@ body {
         color: #ffffff !important;
     }
 
-/* Contenedor de acciones */
 .swal2-actions {
     gap: 10px !important;
 }
 
-/* Estilo general de botones */
 .swal-btn-confirm,
 .swal-btn-danger,
 .swal-btn-cancel {
@@ -157,28 +142,24 @@ body {
     transition: all 0.20s ease !important;
 }
 
-/* Botón de aceptar, guardar o continuar */
 .swal-btn-confirm {
     color: #ffffff !important;
     background: linear-gradient( 135deg, #2563eb, #38bdf8 ) !important;
     box-shadow: 0 0 18px rgba(56, 189, 248, 0.22) !important;
 }
 
-/* Botón para confirmar eliminación */
 .swal-btn-danger {
     color: #ffffff !important;
     background: linear-gradient( 135deg, #ef4444, #dc2626 ) !important;
     box-shadow: 0 0 18px rgba(239, 68, 68, 0.22) !important;
 }
 
-/* Botón cancelar */
 .swal-btn-cancel {
     color: #e2e8f0 !important;
     background: rgba(100, 116, 139, 0.35) !important;
     border: 1px solid rgba(148, 163, 184, 0.25) !important;
 }
 
-    /* Efecto al pasar el cursor */
     .swal-btn-confirm:hover,
     .swal-btn-danger:hover,
     .swal-btn-cancel:hover {
@@ -186,10 +167,6 @@ body {
         transform: translateY(-2px) !important;
     }
 
-/*
-   Respaldo para alertas que utilicen los botones predeterminados
-   de SweetAlert y no las clases personalizadas.
-*/
 .swal2-confirm {
     color: #ffffff !important;
     background: linear-gradient( 135deg, #2563eb, #38bdf8 ) !important;
@@ -205,7 +182,6 @@ body {
     border-radius: 10px !important;
 }
 
-/* Campo de texto dentro de SweetAlert */
 .swal2-input,
 .swal2-textarea,
 .swal2-select {
@@ -223,7 +199,6 @@ body {
         box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12) !important;
     }
 
-/* Caja donde se muestra una contraseña temporal */
 .swal-password-box {
     margin-top: 14px;
     padding: 14px;
@@ -461,8 +436,6 @@ body.layout-body {
 
 /* ==========================================================================
    MODAL NUEVO USUARIO
-   Se conserva temporalmente aquí para evitar cambios de diseño.
-   Después puede retirarse porque también está en AdminVista.cshtml.css.
    ========================================================================== */
 
 #modalNuevoUsuario .modal-cuenta {
@@ -598,12 +571,6 @@ body.layout-body {
     }
 }
 
-/* ==========================================================================
-   CONTROLES DEL MÓDULO CUENTA
-   Se dejan globales porque algunos controles generados con asp-for
-   no están tomando correctamente el CSS aislado de AdminVista.
-   ========================================================================== */
-
 
 /* ==========================================================================
    BUSCADOR DE USUARIOS
@@ -670,8 +637,6 @@ body.layout-body {
     margin-bottom: 16px !important;
 }
 
-
-    /* Selects de los filtros */
     .cuenta-admin .bitacora-preview .filtros-bitacora select {
         display: block !important;
         width: 100% !important;
@@ -688,19 +653,12 @@ body.layout-body {
         color-scheme: dark !important;
     }
 
-
-        /* Opciones de los combos */
         .cuenta-admin .bitacora-preview .filtros-bitacora select option {
             color: #f8fafc !important;
             background-color: #0f172a !important;
         }
 
-
-    /* Inputs de fecha */
-    .cuenta-admin
-    .bitacora-preview
-    .filtros-bitacora
-    input[type="date"] {
+    .cuenta-admin .bitacora-preview .filtros-bitacora input[type="date"] {
         display: block !important;
         width: 100% !important;
         height: 42px !important;
@@ -716,13 +674,8 @@ body.layout-body {
         color-scheme: dark !important;
     }
 
-
-        /* Enfoque de combos y fechas */
         .cuenta-admin .bitacora-preview .filtros-bitacora select:focus,
-        .cuenta-admin
-        .bitacora-preview
-        .filtros-bitacora
-        input[type="date"]:focus {
+        .cuenta-admin .bitacora-preview .filtros-bitacora input[type="date"]:focus {
             color: #f8fafc !important;
             background-color: rgba(15, 23, 42, .95) !important;
             border-color: #38bdf8 !important;
@@ -752,8 +705,6 @@ body.layout-body {
     transition: .18s ease !important;
 }
 
-
-/* Botón Buscar */
 .cuenta-admin .btn-buscar {
     color: #ffffff !important;
     background: linear-gradient( 135deg, #2563eb, #38bdf8 ) !important;
@@ -761,16 +712,12 @@ body.layout-body {
     box-shadow: 0 0 18px rgba(56, 189, 248, .16) !important;
 }
 
-
-/* Botón Limpiar */
 .cuenta-admin .btn-limpiar {
     color: #e2e8f0 !important;
     background-color: rgba(100, 116, 139, .26) !important;
     border: 1px solid rgba(148, 163, 184, .22) !important;
 }
 
-
-    /* Efecto de los botones */
     .cuenta-admin .btn-buscar:hover,
     .cuenta-admin .btn-limpiar:hover {
         color: #ffffff !important;
@@ -782,7 +729,6 @@ body.layout-body {
 
 /* ==========================================================================
    CORRECCIÓN PARA BOOTSTRAP
-   Evita que los controles vuelvan a tener fondo blanco.
    ========================================================================== */
 
 .cuenta-admin input.form-control,
@@ -794,43 +740,7 @@ body.layout-body {
 
 
 /* ==========================================================================
-   RESPONSIVE
-   ========================================================================== */
-
-@media (max-width: 1200px) {
-    .cuenta-admin .bitacora-preview .filtros-bitacora {
-        grid-template-columns: repeat(2, 1fr) !important;
-    }
-}
-
-@media (max-width: 760px) {
-    .cuenta-admin .usuarios-header .usuarios-tools {
-        width: 100% !important;
-        flex-direction: column !important;
-        align-items: stretch !important;
-    }
-
-    .cuenta-admin .usuarios-header .search-box,
-    .cuenta-admin .usuarios-header .search-box input,
-    .cuenta-admin .usuarios-header .btn-buscar,
-    .cuenta-admin .usuarios-header .btn-limpiar {
-        width: 100% !important;
-    }
-
-    .cuenta-admin .bitacora-preview .filtros-bitacora {
-        grid-template-columns: 1fr !important;
-    }
-
-    .cuenta-admin .bitacora-preview .btn-buscar,
-    .cuenta-admin .bitacora-preview .btn-limpiar {
-        width: 100% !important;
-    }
-}
-
-/* ==========================================================================
    PAGINACIÓN GLOBAL DEL MÓDULO CUENTA
-   Los botones se generan dinámicamente desde JavaScript, por eso este bloque
-   debe permanecer en site.css y no en AdminVista.cshtml.css.
    ========================================================================== */
 
 .cuenta-admin .paginacion-tabla {
@@ -840,7 +750,6 @@ body.layout-body {
     gap: 7px !important;
 }
 
-    /* Botones de página, anterior y siguiente */
     .cuenta-admin .paginacion-tabla button {
         display: inline-flex !important;
         align-items: center !important;
@@ -864,7 +773,6 @@ body.layout-body {
         transition: .18s ease !important;
     }
 
-        /* Página seleccionada */
         .cuenta-admin .paginacion-tabla button.active {
             color: #ffffff !important;
             background: #2563eb !important;
@@ -872,17 +780,13 @@ body.layout-body {
             box-shadow: 0 0 14px rgba(56, 189, 248, .20) !important;
         }
 
-        /* Botones al pasar el cursor */
-        .cuenta-admin
-        .paginacion-tabla
-        button:hover:not(:disabled):not(.active) {
+        .cuenta-admin .paginacion-tabla button:hover:not(:disabled):not(.active) {
             color: #ffffff !important;
             background: rgba(56, 189, 248, .16) !important;
             border-color: rgba(56, 189, 248, .55) !important;
             transform: translateY(-1px) !important;
         }
 
-        /* Flechas deshabilitadas */
         .cuenta-admin .paginacion-tabla button:disabled {
             color: #64748b !important;
             background: rgba(30, 41, 59, .55) !important;
@@ -892,7 +796,6 @@ body.layout-body {
             transform: none !important;
         }
 
-        /* Evitar borde blanco al seleccionar */
         .cuenta-admin .paginacion-tabla button:focus,
         .cuenta-admin .paginacion-tabla button:active {
             color: #ffffff !important;
@@ -900,8 +803,9 @@ body.layout-body {
             box-shadow: none !important;
         }
 
+
 /* ==========================================================================
-   CORRECCIÓN GLOBAL DE MENÚS DESPLEGABLES (ELIMINA RECUADRO BLANCO)
+   CORRECCIÓN GLOBAL DE MENÚS DESPLEGABLES
    ========================================================================== */
 
 .custom-dropdown-menu {
@@ -916,11 +820,10 @@ body.layout-body {
     min-width: 240px;
 }
 
-    /* Estado normal/reposo: Forzar texto blanco e ícono cian siempre */
     .custom-dropdown-menu .dropdown-item,
     .custom-dropdown-menu a.dropdown-item,
     .custom-dropdown-menu button.dropdown-item {
-        color: #ffffff !important; /* Texto totalmente blanco siempre */
+        color: #ffffff !important;
         font-weight: 600 !important;
         font-size: 0.9rem !important;
         padding: 10px 14px !important;
@@ -934,12 +837,11 @@ body.layout-body {
 
         .custom-dropdown-menu .dropdown-item i,
         .custom-dropdown-menu a.dropdown-item i {
-            color: #38bdf8 !important; /* Ícono cian base */
+            color: #38bdf8 !important;
             font-size: 1.1rem !important;
             transition: all 0.22s ease !important;
         }
 
-        /* Anular hover blanco nativo de Bootstrap */
         .custom-dropdown-menu .dropdown-item:hover,
         .custom-dropdown-menu .dropdown-item:focus,
         .custom-dropdown-menu .dropdown-item:active,
@@ -952,11 +854,6 @@ body.layout-body {
             transform: translateX(4px);
         }
 
-        /* ==========================================================================
-   SOMBREADO E ÍCONO DISTINTO POR SECCIÓN (HOVER)
-   ========================================================================== */
-
-        /* 1. Azul Cian (Consultar Solicitudes / Reporte de Tickets) */
         .custom-dropdown-menu .dropdown-item.item-cyan:hover,
         .custom-dropdown-menu .dropdown-item.item-cyan:focus,
         .custom-dropdown-menu a.dropdown-item.item-cyan:hover,
@@ -975,7 +872,6 @@ body.layout-body {
                 text-shadow: 0 0 8px rgba(56, 189, 248, 0.8) !important;
             }
 
-        /* 2. Verde Esmeralda (Generar Solicitud / Indicadores y Métricas) */
         .custom-dropdown-menu .dropdown-item.item-emerald:hover,
         .custom-dropdown-menu .dropdown-item.item-emerald:focus,
         .custom-dropdown-menu a.dropdown-item.item-emerald:hover,
@@ -994,7 +890,6 @@ body.layout-body {
                 text-shadow: 0 0 8px rgba(52, 211, 153, 0.8) !important;
             }
 
-        /* 3. Violeta / Púrpura (Plan de Respaldos) */
         .custom-dropdown-menu .dropdown-item.item-purple:hover,
         .custom-dropdown-menu .dropdown-item.item-purple:focus,
         .custom-dropdown-menu a.dropdown-item.item-purple:hover,
@@ -1013,7 +908,6 @@ body.layout-body {
                 text-shadow: 0 0 8px rgba(192, 132, 252, 0.8) !important;
             }
 
-        /* 4. Ámbar / Naranja (Tareas Programadas Generales) */
         .custom-dropdown-menu .dropdown-item.item-amber:hover,
         .custom-dropdown-menu .dropdown-item.item-amber:focus,
         .custom-dropdown-menu a.dropdown-item.item-amber:hover,
@@ -1032,15 +926,11 @@ body.layout-body {
                 text-shadow: 0 0 8px rgba(251, 191, 36, 0.8) !important;
             }
 
-    /* Divisor horizontal */
     .custom-dropdown-menu .dropdown-divider {
         border-color: rgba(148, 163, 184, 0.18) !important;
         margin: 6px 0 !important;
     }
 
-    /* ==========================================================================
-   BOTÓN CERRAR SESIÓN (ROJO / RED GLOW)
-   ========================================================================== */
     .custom-dropdown-menu .dropdown-item.layout-logout,
     .custom-dropdown-menu a.dropdown-item.layout-logout,
     .custom-dropdown-menu button.dropdown-item.layout-logout {
@@ -1075,29 +965,30 @@ body.layout-body {
             }
 
 
-/* Color de encabezado más claro (Azul cobalto/slate en lugar de azul muy oscuro) */
+/* ==========================================================================
+   ESTILOS DE TABLAS DE TICKETS
+   ========================================================================== */
+
 .tabla-tickets thead th,
 .tabla-concentrado thead th {
-    background-color: #1e293b !important; /* Azul slate medio elegante y profesional */
+    background-color: #1e293b !important;
     color: #ffffff !important;
     text-align: center !important;
     vertical-align: middle !important;
-    font-size: 0.8rem !important; /* Tamaño de letra ligeramente reducido */
+    font-size: 0.8rem !important;
     padding: 10px 6px !important;
-    white-space: nowrap; /* Mantiene los títulos en una línea */
+    white-space: nowrap;
 }
 
-/* Alineación general del contenido de las celdas al centro con tamaño de fuente adecuado */
 .tabla-tickets tbody td {
     vertical-align: middle !important;
     text-align: center !important;
     font-size: 0.82rem !important;
     padding: 8px 6px !important;
-    word-break: keep-all !important; /* Evita romper palabras por la mitad (ej. KENWOR-TH) */
-    overflow-wrap: break-word !important; /* Permite saltos de línea solo entre palabras completas */
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
 }
 
-    /* Alineación a la izquierda para campos extensos */
     .tabla-tickets tbody td.col-descripcion,
     .tabla-tickets tbody td.col-comentarios,
     .tabla-tickets tbody td.col-solucion {
@@ -1106,7 +997,6 @@ body.layout-body {
         font-size: 0.82rem !important;
     }
 
-/* Anchos proporcionales optimizados */
 .tabla-tickets th.col-fecha {
     width: 7%;
 }
@@ -1123,7 +1013,7 @@ body.layout-body {
     width: 13%;
     min-width: 140px;
 }
-/* Ancho amplio para nombres corporativos */
+
 .tabla-tickets th.col-ejecutivo {
     width: 10%;
 }
@@ -1144,7 +1034,6 @@ body.layout-body {
     width: 6%;
 }
 
-/* Columnas extensas con mayor espacio relativo */
 .tabla-tickets th.col-descripcion {
     width: 23%;
 }
@@ -1156,3 +1045,128 @@ body.layout-body {
 .tabla-tickets th.col-solucion {
     width: 18%;
 }
+
+
+/* ==========================================================================
+   ESTILOS EXCLUSIVOS PARA MODALES OSCUROS (MODAL-DARK)
+   RESTRINGIDO ÚNICAMENTE A LOS MODALES DE PERSONAL (#modalRegistrar y #modalEditar)
+   ========================================================================== */
+
+#modalRegistrar.modal-dark .modal-content,
+#modalEditar.modal-dark .modal-content,
+.modal.modal-dark#modalRegistrar .modal-content,
+.modal.modal-dark#modalEditar .modal-content,
+#modalRegistrar .modal-content,
+#modalEditar .modal-content {
+    background-color: #0c1425 !important;
+    border: 1px solid #24344d !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+#modalRegistrar .modal-header,
+#modalEditar .modal-header {
+    background-color: #1a263d !important;
+    border-bottom: 1px solid #24344d !important;
+    padding: 16px 24px !important;
+}
+
+#modalRegistrar .modal-title,
+#modalEditar .modal-title {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+#modalRegistrar .modal-body,
+#modalEditar .modal-body {
+    background-color: #0c1425 !important;
+    padding: 24px !important;
+}
+
+#modalRegistrar .modal-footer,
+#modalEditar .modal-footer {
+    background-color: #0c1425 !important;
+    border-top: 1px solid #24344d !important;
+    padding: 16px 24px !important;
+}
+
+#modalRegistrar .form-label,
+#modalRegistrar .form-check-label,
+#modalEditar .form-label,
+#modalEditar .form-check-label {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 0.88rem !important;
+    opacity: 1 !important;
+}
+
+/* INPUTS Y SELECTS ÚNICAMENTE PARA LOS MODALES DE PERSONAL */
+#modalRegistrar input.form-control,
+#modalRegistrar select.form-select,
+#modalRegistrar .form-control,
+#modalRegistrar .form-select,
+#modalEditar input.form-control,
+#modalEditar select.form-select,
+#modalEditar .form-control,
+#modalEditar .form-select {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    font-size: 0.9rem !important;
+}
+
+    /* Placeholders legibles */
+    #modalRegistrar input.form-control::placeholder,
+    #modalRegistrar .form-control::placeholder,
+    #modalEditar input.form-control::placeholder,
+    #modalEditar .form-control::placeholder {
+        color: #94a3b8 !important;
+        opacity: 1 !important;
+    }
+
+    /* Estado Focus con borde Cian Brillante */
+    #modalRegistrar input.form-control:focus,
+    #modalRegistrar select.form-select:focus,
+    #modalRegistrar .form-control:focus,
+    #modalRegistrar .form-select:focus,
+    #modalEditar input.form-control:focus,
+    #modalEditar select.form-select:focus,
+    #modalEditar .form-control:focus,
+    #modalEditar .form-select:focus {
+        background-color: #26334d !important;
+        color: #ffffff !important;
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25) !important;
+    }
+
+    /* Opciones del selector desplegable */
+    #modalRegistrar select.form-select option,
+    #modalRegistrar .form-select option,
+    #modalEditar select.form-select option,
+    #modalEditar .form-select option {
+        background-color: #0c1425 !important;
+        color: #ffffff !important;
+    }
+
+/* CHECKBOXES CON BORDE CIAN */
+#modalRegistrar input.form-check-input,
+#modalRegistrar .custom-checkbox,
+#modalRegistrar .form-check-input,
+#modalEditar input.form-check-input,
+#modalEditar .custom-checkbox,
+#modalEditar .form-check-input {
+    background-color: #1e293b !important;
+    border: 1px solid #38bdf8 !important;
+    width: 1.15em !important;
+    height: 1.15em !important;
+}
+
+    #modalRegistrar input.form-check-input:checked,
+    #modalRegistrar .form-check-input:checked,
+    #modalEditar input.form-check-input:checked,
+    #modalEditar .form-check-input:checked {
+        background-color: #38bdf8 !important;
+        border-color: #38bdf8 !important;
+    }

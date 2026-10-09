@@ -21,6 +21,14 @@ namespace SigesTI.Web.Pages.Personal
 
         public List<Models.Personal> ListaPersonal { get; set; } = new();
 
+        public async Task OnGetAsync()
+        {
+            // Trae todo el personal de la tabla ordenado por la propiedad 'Orden'
+            ListaPersonal = await _context.Personal
+                .OrderBy(p => p.Orden)
+                .ToListAsync();
+        }
+
         public async Task<IActionResult> OnPostRegistrarEmpleadoAsync([FromBody] EmpleadoEditarDTO dto)
         {
             if (dto == null || string.IsNullOrWhiteSpace(dto.Nombre))
@@ -40,15 +48,19 @@ namespace SigesTI.Web.Pages.Personal
                 }
             }
 
+            int maxOrden = await _context.Personal.AnyAsync()
+                ? await _context.Personal.MaxAsync(p => p.Orden)
+                : 0;
+
             var empleado = new SigesTI.Web.Models.Personal
             {
                 Nombre = dto.Nombre,
                 Area = dto.Area,
                 Puesto = dto.Puesto,
                 Correo = dto.Correo,
-                UnidadesRed = dto.UnidadesRed,
                 Activo = dto.Activo,
-                EsResponsable = dto.EsResponsable
+                EsResponsable = dto.EsResponsable,
+                Orden = maxOrden + 1
             };
 
             _context.Personal.Add(empleado);
@@ -57,30 +69,24 @@ namespace SigesTI.Web.Pages.Personal
             return new JsonResult(new { success = true });
         }
 
-        public async Task OnGetAsync()
-        {
-            // Trae todo el personal de la tabla real
-            ListaPersonal = await _context.Personal.ToListAsync();
-        }
-
         // Handler AJAX para obtener los detalles del empleado a editar
         public async Task<IActionResult> OnGetDetalleEmpleadoAsync(int id)
         {
+            // Si tu modelo usa 'Id' o 'IdEmpleado', asegúrate de usar el campo correcto aquí:
             var empleado = await _context.Personal.FirstOrDefaultAsync(p => p.Id == id);
             if (empleado == null)
             {
                 return NotFound();
             }
 
-            // Retornamos un objeto plano seguro para JSON
+            // Retornar JSON limpio sin UnidadesRed
             return new JsonResult(new
             {
                 id = empleado.Id,
-                nombre = empleado.Nombre,
+                nombre = empleado.Nombre, // o empleado.NombreCompleto si así se llama en tu modelo
                 area = empleado.Area,
                 puesto = empleado.Puesto,
-                correo = empleado.Correo,
-                unidadesRed = empleado.UnidadesRed,
+                correo = empleado.Correo, // o empleado.CorreoElectronico
                 activo = empleado.Activo,
                 esResponsable = empleado.EsResponsable
             });
@@ -100,7 +106,6 @@ namespace SigesTI.Web.Pages.Personal
                 return new JsonResult(new { success = false, message = "El empleado ya no existe." });
             }
 
-            // Si este empleado se marca como responsable del área, desmarcamos temporalmente al anterior de esa misma área
             if (dto.EsResponsable)
             {
                 var jefesAnteriores = await _context.Personal
@@ -112,31 +117,38 @@ namespace SigesTI.Web.Pages.Personal
                 }
             }
 
-            // Mapeo y actualización de campos
             empleado.Nombre = dto.Nombre;
             empleado.Area = dto.Area;
             empleado.Puesto = dto.Puesto;
             empleado.Correo = dto.Correo;
             empleado.EsResponsable = dto.EsResponsable;
-            empleado.UnidadesRed = dto.UnidadesRed;
             empleado.Activo = dto.Activo;
 
             await _context.SaveChangesAsync();
             return new JsonResult(new { success = true });
         }
 
-        // Handler AJAX para la eliminación segura de un registro
-        public async Task<IActionResult> OnPostEliminarEmpleadoAsync(int id)
+        // Handler AJAX para reordenar las filas mediante Drag and Drop
+        public async Task<IActionResult> OnPostGuardarOrdenAsync([FromBody] List<int> idsOrdenados)
         {
-            var empleado = await _context.Personal.FirstOrDefaultAsync(p => p.Id == id);
-            if (empleado == null)
+            if (idsOrdenados == null || idsOrdenados.Count == 0)
             {
-                return new JsonResult(new { success = false, message = "El registro ya no existe en SQL Server." });
+                return new JsonResult(new { success = false, message = "Lista de IDs vacía." });
             }
 
-            _context.Personal.Remove(empleado);
-            await _context.SaveChangesAsync();
+            var empleados = await _context.Personal.ToListAsync();
 
+            for (int i = 0; i < idsOrdenados.Count; i++)
+            {
+                int id = idsOrdenados[i];
+                var emp = empleados.FirstOrDefault(p => p.Id == id);
+                if (emp != null)
+                {
+                    emp.Orden = i + 1;
+                }
+            }
+
+            await _context.SaveChangesAsync();
             return new JsonResult(new { success = true });
         }
     }

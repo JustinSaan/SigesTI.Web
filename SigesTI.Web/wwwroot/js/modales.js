@@ -1031,51 +1031,132 @@ function abrirModalDetalleDesdeFila(filaElem) {
    MODALES DE PERSONAL
    ========================================================================== */
 
+// 1. ABRIR MODAL REGISTRAR
 function abrirModalRegistrar() {
-    document.getElementById("regNombre").value = "";
-    document.getElementById("regArea").value = "";
-    document.getElementById("regPuesto").value = "";
-    document.getElementById("regCorreo").value = "";
-    document.getElementById("regUnidadesRed").value = "";
-    document.getElementById("regActivo").checked = true;
-    document.getElementById("regResponsable").checked = false;
+    var setVal = function(id, val) {
+        var el = document.getElementById(id);
+        if (el) el.value = val;
+    };
+    var setCheck = function(id, checked) {
+        var el = document.getElementById(id);
+        if (el) el.checked = Boolean(checked);
+    };
 
-    new bootstrap.Modal(document.getElementById("modalRegistrar")).show();
+    setVal("regNombre", "");
+    setVal("regArea", "");
+    setVal("regPuesto", "");
+    setVal("regCorreo", "");
+
+    setCheck("regActivo", true);
+    setCheck("regResponsable", false);
+
+    var modalEl = document.getElementById("modalRegistrar");
+    if (modalEl) {
+        var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+    }
 }
 
 async function editarEmpleado(id) {
-    const response = await fetch(`?handler=DetalleEmpleado&id=${id}`);
-    const data = await response.json();
+    try {
+        var response = await fetch('?handler=DetalleEmpleado&id=' + id);
+        if (!response.ok) {
+            console.error("Error al obtener detalles del empleado");
+            return;
+        }
 
-    document.getElementById("editId").value = data.id;
-    document.getElementById("editNombre").value = data.nombre;
-    document.getElementById("editArea").value = data.area;
-    document.getElementById("editPuesto").value = data.puesto;
-    document.getElementById("editCorreo").value = data.correo;
-    document.getElementById("editUnidadesRed").value = data.unidadesRed;
-    document.getElementById("editActivo").checked = data.activo;
-    document.getElementById("editResponsable").checked = data.esResponsable;
+        var data = await response.json();
 
-    new bootstrap.Modal(document.getElementById("modalEditar")).show();
+        var setVal = function(id, val) {
+            var el = document.getElementById(id);
+            if (el) el.value = (val !== null && val !== undefined) ? val : "";
+        };
+        var setCheck = function(id, checked) {
+            var el = document.getElementById(id);
+            if (el) el.checked = Boolean(checked);
+        };
+
+        setVal("editId", data.id);
+        setVal("editNombre", data.nombre);
+        setVal("editArea", data.area);
+        setVal("editPuesto", data.puesto);
+        setVal("editCorreo", data.correo);
+
+        setCheck("editActivo", data.activo);
+        setCheck("editResponsable", data.esResponsable);
+
+        var modalEl = document.getElementById("modalEditar");
+        if (modalEl) {
+            var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+    } catch (error) {
+        console.error("Error al cargar datos del empleado:", error);
+    }
+}
+
+async function guardarRegistro() {
+    const datos = {
+        nombre: document.getElementById("regNombre")?.value || "",
+        area: document.getElementById("regArea")?.value || "",
+        puesto: document.getElementById("regPuesto")?.value || "",
+        correo: document.getElementById("regCorreo")?.value || "",
+        activo: document.getElementById("regActivo")?.checked || false,
+        esResponsable: document.getElementById("regResponsable")?.checked || false
+    };
+
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || "";
+
+    const response = await fetch('?handler=RegistrarEmpleado', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': token
+        },
+        body: JSON.stringify(datos)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Personal registrado',
+            text: 'Se ha guardado con éxito el personal agregado.',
+            confirmButtonText: 'Aceptar',
+            customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
+            buttonsStyling: false
+        }).then(() => { location.reload(); });
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: result.message || 'No se pudo guardar.',
+            confirmButtonText: 'Aceptar',
+            customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
+            buttonsStyling: false
+        });
+    }
 }
 
 async function guardarCambios() {
     const datos = {
-        id: document.getElementById("editId").value,
-        nombre: document.getElementById("editNombre").value,
-        area: document.getElementById("editArea").value,
-        puesto: document.getElementById("editPuesto").value,
-        correo: document.getElementById("editCorreo").value,
-        unidadesRed: document.getElementById("editUnidadesRed").value,
-        activo: document.getElementById("editActivo").checked,
-        esResponsable: document.getElementById("editResponsable").checked
+        id: parseInt(document.getElementById("editId")?.value || "0"),
+        nombre: document.getElementById("editNombre")?.value || "",
+        area: document.getElementById("editArea")?.value || "",
+        puesto: document.getElementById("editPuesto")?.value || "",
+        correo: document.getElementById("editCorreo")?.value || "",
+        activo: document.getElementById("editActivo")?.checked || false,
+        esResponsable: document.getElementById("editResponsable")?.checked || false
     };
+
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || "";
 
     const response = await fetch('?handler=GuardarCambios', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            'RequestVerificationToken': token
         },
         body: JSON.stringify(datos)
     });
@@ -1095,7 +1176,7 @@ async function guardarCambios() {
         Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: result.message,
+            text: result.message || 'No se pudieron guardar los cambios.',
             confirmButtonText: 'Aceptar',
             customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
             buttonsStyling: false

@@ -4,8 +4,8 @@
     ViewData["Title"] = "Lista de Personal";
 }
 
-<div class="container-fluid px-4 mt-4 mb-5">
-    <div class="header-modulo d-flex justify-content-between align-items-center mb-4">
+<div class="container-fluid px-4 mt-2 mb-4">
+    <div class="header-modulo d-flex justify-content-between align-items-center mb-3">
         <div>
             <h2 class="titulo-modulo m-0">Administración de Personal</h2>
             <small class="text-muted-custom">Gestión y control de usuarios del sistema</small>
@@ -23,20 +23,19 @@
             <table class="table tabla-sigesti m-0">
                 <thead>
                     <tr>
+                        <th class="text-center" style="width: 40px;"></th>
                         <th class="text-center">Nombre</th>
                         <th class="text-center">Área</th>
                         <th class="text-center">Puesto</th>
                         <th class="text-center">Correo Electrónico</th>
-                        <th class="text-center">Unidades de Red</th>
-                        <th class="text-center">Estado</th>
                         <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model.ListaPersonal.Count == 0)
+                    @if (Model.ListaPersonal == null || Model.ListaPersonal.Count == 0)
                     {
                         <tr>
-                            <td colspan="7" class="text-center py-5 text-muted-custom">
+                            <td colspan="6" class="text-center py-5 text-muted-custom">
                                 <i class="bi bi-people text-muted d-block mb-2 fs-3"></i>
                                 No hay personal registrado todavía en la base de datos.
                             </td>
@@ -46,35 +45,25 @@
                     {
                         @foreach (var persona in Model.ListaPersonal)
                         {
-                            <tr>
-                                <td class="fw-semibold text-bright font-accent">@persona.Nombre</td>
+                            var claseArea = persona.Area?.ToLower()
+                                .Replace(" ", "-")
+                                .Replace("é", "e")
+                                .Replace("í", "i")
+                                .Replace("ó", "o") ?? "";
+
+                            <tr data-id="@persona.Id">
+                                <td class="text-center drag-handle" title="Arrastrar para reordenar">
+                                    <i class="bi bi-grip-vertical text-muted"></i>
+                                </td>
+                                <td class="text-center fw-bold text-bright font-accent">@persona.Nombre</td>
                                 <td class="text-center">
-                                    <span class="badge-area @persona.Area.ToLower().Replace(" ", "-")">
+                                    <span class="badge-area @claseArea">
                                         @persona.Area
                                     </span>
                                 </td>
-                                <td>@persona.Puesto</td>
-                                <td class="text-lowercase text-muted-custom">@persona.Correo</td>
-                                <td>
-                                    @if (string.IsNullOrEmpty(persona.UnidadesRed))
-                                    {
-                                        <span class="text-muted-dim fs-7">Ninguna</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-unidades">@persona.UnidadesRed</span>
-                                    }
-                                </td>
-                                <td class="text-center">
-                                    @if (persona.Activo)
-                                    {
-                                        <span class="badge-estatus activo">Activo</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge-estatus inactivo">Inactivo</span>
-                                    }
-                                </td>
+                                <td class="text-center">@persona.Puesto</td>
+                                <td class="text-center text-lowercase text-muted-custom">@persona.Correo</td>
+
                                 <td class="text-center">
                                     <div class="acciones-personal">
                                         <button type="button"
@@ -87,7 +76,7 @@
                                         <button type="button"
                                                 class="btn-accion-tabla btn-eliminar"
                                                 title="Eliminar"
-                                                onclick="eliminarEmpleado(@persona.Id, `@persona.Nombre`)">
+                                                onclick="eliminarEmpleado(@persona.Id, '@persona.Nombre')">
                                             <i class="bi bi-trash-fill"></i>
                                         </button>
                                     </div>
@@ -103,141 +92,25 @@
 
 @Html.AntiForgeryToken()
 
-<div class="modal fade" id="modalEditar" tabindex="-1">
+<!-- Modal Registrar Personal -->
+<div class="modal fade" id="modalRegistrar" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content modal-dark">
-
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="bi bi-pencil-square me-2"></i>
-                    Editar Personal
-                </h5>
-
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal">
-                </button>
-            </div>
-
-<div class="modal-body">
-
-    <input type="hidden" id="editId" />
-
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            <label>Nombre Completo</label>
-            <input id="editNombre" class="form-control" />
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <label>Área</label>
-            <select id="editArea" class="form-select">
-                            <option value="">-- Selecciona un Área --</option>
-                            <option value="Dirección General">Dirección General</option>
-                            <option value="Sistemas">Sistemas</option>
-                            <option value="Desarrollo">Desarrollo</option>
-                            <option value="Ventas">Ventas</option>
-                            <option value="Administración">Administración</option>
-                            <option value="Soporte Técnico">Soporte Técnico</option>
-                            <option value="Consultoría">Consultoría</option>
-                            <option value="Cobranza">Cobranza</option>
-            </select>
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <label>Puesto</label>
-            <input id="editPuesto" class="form-control" />
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <label>Correo</label>
-            <input id="editCorreo" class="form-control" />
-        </div>
-
-        <div class="col-md-12 mb-3">
-            <label>Unidades de Red</label>
-            <input id="editUnidadesRed" class="form-control" />
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            <div class="check-panel h-100">
-                <div class="form-check">
-                    <input id="editActivo"
-                           class="form-check-input"
-                           type="checkbox">
-                    <label class="form-check-label">
-                        Personal Activo
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <div class="check-panel responsable h-100">
-                <div class="form-check">
-                    <input id="editResponsable"
-                           class="form-check-input"
-                           type="checkbox">
-                    <label class="form-check-label fw-bold">
-                        Responsable del Área
-                    </label>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-            <div class="modal-footer">
-                <button type="button"
-                        class="btn-cancelar-modal"
-                        data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>
-                    Cancelar
-                </button>
-
-                <button type="button"
-                        class="btn-guardar-modal"
-                        onclick="guardarCambios()">
-                    <i class="bi bi-check-circle-fill me-1"></i>
-                    Guardar Cambios
-                </button>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modalRegistrar" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content modal-dark">
-
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-person-plus-fill me-2"></i>
+                    <i class="bi bi-person-plus-fill me-2 text-info"></i>
                     Registrar Nuevo Personal
                 </h5>
-
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal">
-                </button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-
-
-            @* Modal de registro *@
             <div class="modal-body">
-
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label>Nombre Completo</label>
+                        <label class="form-label text-white fw-bold">Nombre Completo</label>
                         <input id="regNombre" class="form-control" placeholder="Ej. Juan Pérez" />
                     </div>
-
                     <div class="col-md-6 mb-3">
-                        <label>Área</label>
+                        <label class="form-label text-white fw-bold">Área</label>
                         <select id="regArea" class="form-select">
                             <option value="">-- Selecciona un Área --</option>
                             <option value="Dirección General">Dirección General</option>
@@ -250,65 +123,104 @@
                             <option value="Cobranza">Cobranza</option>
                         </select>
                     </div>
-
                     <div class="col-md-6 mb-3">
-                        <label>Puesto</label>
+                        <label class="form-label text-white fw-bold">Puesto</label>
                         <input id="regPuesto" class="form-control" placeholder="Ej. Gerente, Auxiliar, Coordinador" />
                     </div>
-
                     <div class="col-md-6 mb-3">
-                        <label>Correo</label>
+                        <label class="form-label text-white fw-bold">Correo Electrónico</label>
                         <input id="regCorreo" type="email" class="form-control" placeholder="ejemplo@sigesti.com" />
                     </div>
-
-                    <div class="col-md-12 mb-3">
-                        <label>Unidades de Red</label>
-                        <input id="regUnidadesRed" class="form-control" placeholder="Compartida, Ventas..." />
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check pt-1">
+                            <input id="regActivo" class="form-check-input custom-checkbox" type="checkbox" checked />
+                            <label class="form-check-label text-white ms-1" for="regActivo">Personal Activo</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check pt-1">
+                            <input id="regResponsable" class="form-check-input custom-checkbox" type="checkbox" />
+                            <label class="form-check-label text-white fw-bold ms-1" for="regResponsable">Responsable del Área</label>
+                        </div>
                     </div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar-modal" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                </button>
+                <button type="button" class="btn-guardar-modal" onclick="guardarRegistro()">
+                    <i class="bi bi-check-circle-fill me-1"></i> Guardar Registro
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Modal Editar Personal -->
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content modal-dark">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-pencil-square me-2 text-info"></i>
+                    Editar Personal
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editId" />
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <div class="check-panel h-100">
-                            <div class="form-check">
-                                <input id="regActivo"
-                                       type="checkbox"
-                                       class="form-check-input"
-                                       checked />
-                                <label class="form-check-label">Personal Activo</label>
-                            </div>
+                        <label class="form-label text-white fw-bold">Nombre Completo</label>
+                        <input id="editNombre" class="form-control" placeholder="Ej. Juan Pérez" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-white fw-bold">Área</label>
+                        <select id="editArea" class="form-select">
+                            <option value="">-- Selecciona un Área --</option>
+                            <option value="Dirección General">Dirección General</option>
+                            <option value="Sistemas">Sistemas</option>
+                            <option value="Desarrollo">Desarrollo</option>
+                            <option value="Ventas">Ventas</option>
+                            <option value="Administración">Administración</option>
+                            <option value="Soporte Técnico">Soporte Técnico</option>
+                            <option value="Consultoría">Consultoría</option>
+                            <option value="Cobranza">Cobranza</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-white fw-bold">Puesto</label>
+                        <input id="editPuesto" class="form-control" placeholder="Ej. Gerente, Auxiliar, Coordinador" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-white fw-bold">Correo Electrónico</label>
+                        <input id="editCorreo" type="email" class="form-control" placeholder="ejemplo@sigesti.com" />
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check pt-1">
+                            <input id="editActivo" class="form-check-input custom-checkbox" type="checkbox" />
+                            <label class="form-check-label text-white ms-1" for="editActivo">Personal Activo</label>
                         </div>
                     </div>
-
                     <div class="col-md-6 mb-3">
-                        <div class="check-panel responsable h-100">
-                            <div class="form-check">
-                                <input id="regResponsable"
-                                       type="checkbox"
-                                       class="form-check-input" />
-                                <label class="form-check-label fw-bold">
-                                    Responsable del Área
-                                </label>
-                            </div>
+                        <div class="form-check pt-1">
+                            <input id="editResponsable" class="form-check-input custom-checkbox" type="checkbox" />
+                            <label class="form-check-label text-white fw-bold ms-1" for="editResponsable">Responsable del Área</label>
                         </div>
                     </div>
                 </div>
-
             </div>
-
             <div class="modal-footer">
-                <button type="button"
-                        class="btn-cancelar-modal"
-                        data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>
-                    Cancelar
+                <button type="button" class="btn-cancelar-modal" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Cancelar
                 </button>
-
-                <button type="button"
-                        class="btn-guardar-modal"
-                        onclick="guardarRegistro()">
-                    <i class="bi bi-check-circle-fill me-1"></i>
-                    Guardar Registro
+                <button type="button" class="btn-guardar-modal" onclick="guardarCambios()">
+                    <i class="bi bi-check-circle-fill me-1"></i> Guardar Cambios
                 </button>
             </div>
         </div>
@@ -316,7 +228,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
- <!-- Logout -->
-    <script src="~/js/modales.js"
-            asp-append-version="true"></script>
+<script src="~/js/modales.js" asp-append-version="true"></script>
+<script src="~/js/personal-dragdrop.js" asp-append-version="true"></script>

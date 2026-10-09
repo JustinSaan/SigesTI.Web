@@ -29,5 +29,8 @@ namespace SigesTI.Web.Models
         public bool EsResponsable { get; set; } = false;
 
         public string? UnidadesRed { get; set; }
+
+        public int Orden { get; set; } 
+       
     }
 }
