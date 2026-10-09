@@ -1,0 +1,44 @@
+﻿/* Estados de fila */
+.fila-inactiva {
+    opacity: 0.45;
+    background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Badges de fechas y estatus */
+.badge-atrasado {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.badge-realizado {
+    background-color: #198754;
+    color: #fff;
+}
+
+.badge-encurso {
+    background-color: #fd7e14;
+    color: #fff;
+}
+
+.badge-pendiente {
+    background-color: #495057;
+    color: #fff;
+}
+
+/* Utilidades de cursor y Drag & Drop */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.drag-handle {
+    cursor: grab;
+}
+
+    .drag-handle:active {
+        cursor: grabbing;
+    }
+
+.sortable-ghost {
+    opacity: 0.3;
+    background-color: rgba(13, 202, 240, 0.2) !important;
+}

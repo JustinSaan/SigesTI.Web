@@ -20,6 +20,9 @@ namespace SigesTI.Web.Data
         public DbSet<TareaProgramada> TareasProgramadas { get; set; }
         public DbSet<TipoTareaProgramada> TiposTareaProgramada { get; set; }
 
+        public DbSet<EquipoRespaldo> EquiposRespaldo { get; set; }
+        public DbSet<ProgramacionRespaldo> ProgramacionRespaldos { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
