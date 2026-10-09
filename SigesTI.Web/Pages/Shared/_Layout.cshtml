@@ -35,11 +35,11 @@
 
                     <!-- Dropdown: Requerimientos -->
                     <div class="dropdown d-inline-block">
-                        <a class="layout-link dropdown-toggle" 
-                           href="#" 
-                           id="navbarUserDropdown" 
-                           role="button" 
-                           data-bs-toggle="dropdown" 
+                        <a class="layout-link dropdown-toggle"
+                           href="#"
+                           id="navbarUserDropdown"
+                           role="button"
+                           data-bs-toggle="dropdown"
                            aria-expanded="false">
                             <i class="bi bi-clipboard2-fill"></i>
                             <span>Requerimientos</span>
@@ -61,11 +61,11 @@
 
                     <!-- Dropdown: Actividades -->
                     <div class="dropdown d-inline-block">
-                        <a class="layout-link dropdown-toggle" 
-                           href="#" 
-                           id="navbarDropdownActividades" 
-                           role="button" 
-                           data-bs-toggle="dropdown" 
+                        <a class="layout-link dropdown-toggle"
+                           href="#"
+                           id="navbarDropdownActividades"
+                           role="button"
+                           data-bs-toggle="dropdown"
                            aria-expanded="false">
                             <i class="bi bi-file-earmark-text"></i>
                             <span>Actividades</span>
@@ -96,21 +96,31 @@
                         </ul>
                     </div>
 
-                    <!-- Enlace: Personal -->
-                    <a class="layout-link"
-                       asp-area=""
-                       asp-page="/Personal/AdministracionPersonal">
-                        <i class="bi bi-people-fill"></i>
-                        <span>Personal</span>
-                    </a>
+                    <!-- Dropdown: Cuenta -->
+                    <div class="dropdown d-inline-block">
+                        <a class="layout-link dropdown-toggle"
+                           href="#"
+                           id="navbarDropdownCuenta"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            <i class="bi bi-person-badge-fill"></i>
+                            <span>Cuenta</span>
+                        </a>
 
-                    <!-- Enlace: Cuenta -->
-                    <a class="layout-link"
-                       asp-area=""
-                       asp-page="/Cuenta/AdminVista">
-                        <i class="bi bi-person-badge-fill"></i>
-                        <span>Cuenta</span>
-                    </a>
+                        <ul class="dropdown-menu custom-dropdown-menu shadow-lg border-0" aria-labelledby="navbarDropdownCuenta">
+                            <li>
+                                <a class="dropdown-item item-cyan py-2" asp-page="/Cuenta/AdminVista">
+                                    <i class="bi bi-person-gear me-2"></i>Administrar Cuenta
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item item-purple py-2" asp-page="/Personal/AdministracionPersonal">
+                                    <i class="bi bi-people-fill me-2"></i>Administrar Personal
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
 
                 </div>
 
@@ -205,6 +215,5 @@
     <script src="~/js/modales.js" asp-append-version="true"></script>
     <script src="~/js/logout.js" asp-append-version="true"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+    @await RenderSectionAsync("Scripts", required: false)</body>
 </html>

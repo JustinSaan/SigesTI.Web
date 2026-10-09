@@ -120,7 +120,7 @@ html, body {
     /* 1. ESTADO BASE / REPOSO: Forzar texto blanco en todos los enlaces del menú */
     .custom-dropdown-menu .dropdown-item,
     .custom-dropdown-menu a.dropdown-item {
-        color: #ffffff !important; /* Texto totalmente blanco visible siempre */
+        color: #ffffff !important;
         font-weight: 600;
         font-size: 0.9rem;
         padding: 10px 14px;
@@ -133,7 +133,7 @@ html, body {
     }
 
         .custom-dropdown-menu .dropdown-item i {
-            color: #38bdf8 !important; /* Ícono cian base */
+            color: #38bdf8 !important;
             font-size: 1.1rem;
             transition: all 0.22s ease;
         }
@@ -143,8 +143,8 @@ html, body {
         .custom-dropdown-menu .dropdown-item:focus,
         .custom-dropdown-menu .dropdown-item:active,
         .custom-dropdown-menu .dropdown-item.active {
-            color: #ffffff !important; /* Mantiene texto blanco */
-            background: rgba(56, 189, 248, 0.18) !important; /* Fondo cian traslúcido genérico */
+            color: #ffffff !important;
+            background: rgba(56, 189, 248, 0.18) !important;
             border-color: rgba(56, 189, 248, 0.35) !important;
             transform: translateX(4px);
         }
@@ -229,6 +229,7 @@ html, body {
     align-items: center;
     gap: 10px;
     width: auto;
+    min-width: 190px;
     padding: 8px 14px;
     border-radius: 16px;
     color: #cbd5e1;
@@ -271,7 +272,7 @@ html, body {
 
 .layout-user strong {
     display: block;
-    max-width: 130px;
+    max-width: 160px;
     overflow: hidden;
     color: #ffffff;
     font-size: 0.85rem;
@@ -303,7 +304,8 @@ html, body {
 .layout-user-menu-header {
     display: flex;
     flex-direction: column;
-    padding: 6px 10px;
+    padding: 10px 10px;
+    width: 300000px;
 }
 
     .layout-user-menu-header span {
@@ -322,7 +324,7 @@ html, body {
 
 /* Cerrar sesión en rojo */
 .custom-dropdown-menu .dropdown-item.layout-logout {
-    color: #fca5a5 !important; /* Texto rojo/rosado suave en reposo */
+    color: #fca5a5 !important;
     background: rgba(225, 29, 72, 0.08) !important;
     border: 1px solid rgba(225, 29, 72, 0.25) !important;
     border-radius: 10px;
@@ -332,18 +334,17 @@ html, body {
 }
 
     .custom-dropdown-menu .dropdown-item.layout-logout i {
-        color: #fb7185 !important; /* Ícono rojo brillante */
+        color: #fb7185 !important;
         transition: all 0.25s ease;
     }
 
-    /* Hover y Focus específicos para Cerrar Sesión */
     .custom-dropdown-menu .dropdown-item.layout-logout:hover,
     .custom-dropdown-menu .dropdown-item.layout-logout:focus,
     .custom-dropdown-menu .dropdown-item.layout-logout:active {
-        color: #ffffff !important; /* Texto blanco en hover */
-        background: rgba(225, 29, 72, 0.28) !important; /* Sombreado rojo intenso */
+        color: #ffffff !important;
+        background: rgba(225, 29, 72, 0.28) !important;
         border-color: rgba(244, 63, 94, 0.6) !important;
-        box-shadow: 0 0 16px rgba(225, 29, 72, 0.35) !important; /* Resplandor rojo */
+        box-shadow: 0 0 16px rgba(225, 29, 72, 0.35) !important;
         transform: translateY(-1px);
     }
 
@@ -353,16 +354,6 @@ html, body {
             text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
         }
 
-/* Hover en PC */
-@media (hover: hover) and (pointer: fine) {
-    .layout-user-dropdown:hover > .dropdown-menu {
-        display: block;
-    }
-
-    .layout-user-dropdown:hover .layout-user-arrow {
-        transform: rotate(180deg);
-    }
-}
 
 /* Contenido Principal */
 .layout-main {
