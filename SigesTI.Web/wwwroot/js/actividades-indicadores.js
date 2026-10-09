@@ -1,7 +1,6 @@
 ﻿/**
  * Lógica del Tablero de Indicadores y Métricas - SigesTI
  */
-
 let chartSistemas, chartRequerimientos, chartEscalaciones, chartCanalEntrada;
 
 function toggleObservaciones() {
@@ -29,7 +28,7 @@ function imprimirReporte() {
 }
 
 // --------------------------------------------------------------------------
-// CAMBIO DINÁMICO DE COLORES PARA IMPRESIÓN SINO AFECTAR PANTALLA
+// CAMBIO DINÁMICO DE COLORES PARA IMPRESIÓN SIN AFECTAR PANTALLA
 // --------------------------------------------------------------------------
 function aplicarColoresEspeciales(modoImpresion) {
     const colorTextoLeyenda = modoImpresion ? '#0f172a' : '#ffffff';
@@ -65,10 +64,8 @@ function aplicarColoresEspeciales(modoImpresion) {
     }
 }
 
-// Eventos nativos del navegador al mandar a imprimir o cancelar
 window.addEventListener('beforeprint', () => aplicarColoresEspeciales(true));
 window.addEventListener('afterprint', () => aplicarColoresEspeciales(false));
-
 
 document.addEventListener("DOMContentLoaded", function () {
     if (typeof ChartDataLabels !== 'undefined') {
@@ -77,15 +74,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
     Chart.defaults.font.family = 'Segoe UI, sans-serif';
 
-    // 1. Gráfica de Sistemas (Pantalla: Texto Blanco Bright)
+    // Obtener datos globales pasados desde C# (o valores por defecto)
+    const datosSistemasObj = window.dataSistemasServer || { 'DIA': 5, 'DIAWEB': 6, 'CONECTOR DIAWEB-ZOÉ': 4, 'SITA': 10, 'VUCEM': 0, 'PREMIUM': 0, 'COA': 0, 'ADMIN': 4 };
+    const datosReqObj = window.dataRequerimientosServer || { 'Servicios': 12, 'Incidencias': 6, 'Mejoras': 4, 'Ajustes': 2 };
+    const datosEscObj = window.dataEscalacionesServer || { 'Sin Escalación': 16, 'Desarrollo': 4, 'Consultoría': 2, 'Cobranza': 1, 'Ventas': 1 };
+    const llamadasCount = window.totalLlamadasServer !== undefined ? window.totalLlamadasServer : 14;
+    const correosCount = window.totalCorreosServer !== undefined ? window.totalCorreosServer : 10;
+
+    // 1. Gráfica de Sistemas
     const elSistemas = document.getElementById('chartSistemas');
     if (elSistemas) {
         chartSistemas = new Chart(elSistemas.getContext('2d'), {
             type: 'doughnut',
             data: {
-                labels: ['DIA', 'DIAWEB', 'MED', 'SITA', 'VUCEM', 'PREMIUM', 'COA', 'ADMIN'],
+                labels: Object.keys(datosSistemasObj),
                 datasets: [{
-                    data: [5, 6, 4, 10, 0, 0, 0, 4],
+                    data: Object.values(datosSistemasObj),
                     backgroundColor: ['#2563eb', '#38bdf8', '#64748b', '#f97316', '#1e3a8a', '#4ade80', '#16a34a', '#eab308'],
                     borderColor: '#0f172a',
                     borderWidth: 2
@@ -99,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     legend: { 
                         position: 'right', 
                         labels: { 
-                            color: '#ffffff', // Blanco puro para pantalla
+                            color: '#ffffff',
                             padding: 6, 
                             font: { size: 10, weight: 'bold' } 
                         } 
@@ -108,9 +112,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         color: '#ffffff',
                         font: { weight: 'bold', size: 10 },
                         formatter: (value, ctx) => {
-                            if (value === 0) return null;
+                            if (!value || value === 0) return null;
                             let sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                            return ((value * 100) / sum).toFixed(1) + "%";
+                            return sum > 0 ? ((value * 100) / sum).toFixed(1) + "%" : null;
                         }
                     }
                 },
@@ -122,12 +126,13 @@ document.addEventListener("DOMContentLoaded", function () {
     // 2. Gráfica Tipo de Requerimiento
     const elReq = document.getElementById('chartRequerimientos');
     if (elReq) {
+        const totalReq = Object.values(datosReqObj).reduce((a, b) => a + b, 0) || 1;
         chartRequerimientos = new Chart(elReq.getContext('2d'), {
             type: 'bar',
             data: {
-                labels: ['Servicios', 'Incidencias', 'Mejoras', 'Ajustes'],
+                labels: Object.keys(datosReqObj),
                 datasets: [{
-                    data: [12, 6, 4, 2],
+                    data: Object.values(datosReqObj),
                     backgroundColor: ['rgba(59, 130, 246, 0.85)', 'rgba(239, 68, 68, 0.85)', 'rgba(16, 185, 129, 0.85)', 'rgba(245, 158, 11, 0.85)'],
                     borderColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b'],
                     borderWidth: 1,
@@ -146,14 +151,14 @@ document.addEventListener("DOMContentLoaded", function () {
                         align: 'end', 
                         color: '#38bdf8', 
                         font: { weight: 'bold', size: 10 },
-                        formatter: (value) => `${value} (${((value / 24) * 100).toFixed(1)}%)`
+                        formatter: (value) => `${value} (${((value / totalReq) * 100).toFixed(1)}%)`
                     }
                 },
                 scales: {
                     x: { 
                         grid: { color: 'rgba(148, 163, 184, 0.15)' }, 
                         ticks: { color: '#94a3b8', font: { weight: 'bold' } }, 
-                        suggestedMax: 15 
+                        suggestedMax: Math.max(...Object.values(datosReqObj), 10) + 3 
                     },
                     y: { 
                         grid: { display: false }, 
@@ -170,9 +175,9 @@ document.addEventListener("DOMContentLoaded", function () {
         chartEscalaciones = new Chart(elEsc.getContext('2d'), {
             type: 'doughnut',
             data: {
-                labels: ['Sin Escalación', 'Desarrollo', 'Consultoría', 'Cobranza', 'Ventas'],
+                labels: Object.keys(datosEscObj),
                 datasets: [{
-                    data: [16, 4, 2, 1, 1],
+                    data: Object.values(datosEscObj),
                     backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'],
                     borderColor: '#0f172a',
                     borderWidth: 2
@@ -191,9 +196,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         color: '#ffffff', 
                         font: { weight: 'bold', size: 10 },
                         formatter: (value, ctx) => {
-                            if (value === 0) return null;
+                            if (!value || value === 0) return null;
                             let sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                            return ((value * 100) / sum).toFixed(1) + "%";
+                            return sum > 0 ? ((value * 100) / sum).toFixed(1) + "%" : null;
                         }
                     }
                 },
@@ -205,12 +210,13 @@ document.addEventListener("DOMContentLoaded", function () {
     // 4. Gráfica Canal de Entrada
     const elCanal = document.getElementById('chartCanalEntrada');
     if (elCanal) {
+        const totalCanal = (llamadasCount + correosCount) || 1;
         chartCanalEntrada = new Chart(elCanal.getContext('2d'), {
             type: 'bar',
             data: {
                 labels: ['Llamada Telefónica', 'Correo Electrónico'],
                 datasets: [{
-                    data: [14, 10],
+                    data: [llamadasCount, correosCount],
                     backgroundColor: ['rgba(2, 132, 199, 0.85)', 'rgba(16, 185, 129, 0.85)'],
                     borderColor: ['#38bdf8', '#4ade80'],
                     borderWidth: 1,
@@ -228,12 +234,12 @@ document.addEventListener("DOMContentLoaded", function () {
                         align: 'center', 
                         color: '#ffffff', 
                         font: { weight: 'bold', size: 11 },
-                        formatter: (value) => `${value} (${((value / 24) * 100).toFixed(1)}%)`
+                        formatter: (value) => `${value} (${((value / totalCanal) * 100).toFixed(1)}%)`
                     }
                 },
                 scales: {
                     x: { grid: { display: false }, ticks: { color: '#ffffff', font: { weight: 'bold', size: 10 } } },
-                    y: { grid: { color: 'rgba(148, 163, 184, 0.15)' }, ticks: { color: '#94a3b8' }, suggestedMax: 16 }
+                    y: { grid: { color: 'rgba(148, 163, 184, 0.15)' }, ticks: { color: '#94a3b8' }, suggestedMax: Math.max(llamadasCount, correosCount) + 4 }
                 }
             }
         });

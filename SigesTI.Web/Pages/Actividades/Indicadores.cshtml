@@ -14,7 +14,7 @@
                 <i class="bi bi-bar-chart-line-fill me-2 text-info d-print-none"></i>Indicadores y Métricas del Área de Soporte Técnico
             </h3>
             <p class="text-muted small mb-0 fs-6">
-                <strong class="text-info">Período de Evaluación:</strong> 28/09/2026 - 08/11/2026
+                <strong class="text-info">Período de Evaluación:</strong> @Model.FechaInicio?.ToString("dd/MM/yyyy") - @Model.FechaFin?.ToString("dd/MM/yyyy")
             </p>
         </div>
         <div class="d-print-none">
@@ -29,15 +29,15 @@
         <form method="get" class="row g-2 align-items-center">
             <div class="col-md-3">
                 <label class="form-label small text-muted mb-1">Fecha Inicio</label>
-                <input type="date" class="form-control form-control-sm" name="fechaInicio" value="2026-09-28" />
+                <input type="date" class="form-control form-control-sm" name="FechaInicio" value="@Model.FechaInicio?.ToString("yyyy-MM-dd")" />
             </div>
             <div class="col-md-3">
                 <label class="form-label small text-muted mb-1">Fecha Fin</label>
-                <input type="date" class="form-control form-control-sm" name="fechaFin" value="2026-11-08" />
+                <input type="date" class="form-control form-control-sm" name="FechaFin" value="@Model.FechaFin?.ToString("yyyy-MM-dd")" />
             </div>
             <div class="col-md-3">
                 <label class="form-label small text-muted mb-1">Origen Servicio</label>
-                <select class="form-select form-select-sm" name="filtroOrigen">
+                <select class="form-select form-select-sm" name="FiltroOrigen" asp-for="FiltroOrigen">
                     <option value="">-- Todos --</option>
                     <option value="Llamada">Llamada Telefónica</option>
                     <option value="Correo">Correo Electrónico</option>
@@ -58,7 +58,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <span class="text-muted small d-block mb-1">Total Atendidos</span>
-                        <h2 class="fw-bold mb-0 text-info">24</h2>
+                        <h2 class="fw-bold mb-0 text-info">@Model.Indicadores.TotalAtendidos</h2>
                         <span class="text-success small"><i class="bi bi-arrow-up-right me-1"></i>En el período</span>
                     </div>
                     <div class="fs-1 text-info bg-info bg-opacity-10 p-3 rounded-3 d-print-none">
@@ -73,8 +73,8 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <span class="text-muted small d-block mb-1">% Eficiencia Resolución</span>
-                        <h2 class="fw-bold mb-0 text-success">91.6%</h2>
-                        <span class="text-muted small">22 Cerrados / 2 En curso</span>
+                        <h2 class="fw-bold mb-0 text-success">@Model.Indicadores.PorcentajeEficiencia%</h2>
+                        <span class="text-muted small">@Model.Indicadores.TotalCerrados Cerrados / @Model.Indicadores.TotalEnCurso En curso</span>
                     </div>
                     <div class="fs-1 text-success bg-success bg-opacity-10 p-3 rounded-3 d-print-none">
                         <i class="bi bi-check-circle-fill"></i>
@@ -88,8 +88,8 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <span class="text-muted small d-block mb-1">Llamada / Correo</span>
-                        <h2 class="fw-bold mb-0 text-primary">60% / 40%</h2>
-                        <span class="text-muted small">14 Llamadas / 10 Correos</span>
+                        <h2 class="fw-bold mb-0 text-primary">@Model.Indicadores.PorcentajeLlamadas% / @Model.Indicadores.PorcentajeCorreos%</h2>
+                        <span class="text-muted small">@Model.Indicadores.TotalLlamadas Llamadas / @Model.Indicadores.TotalCorreos Correos</span>
                     </div>
                     <div class="fs-1 text-primary bg-primary bg-opacity-10 p-3 rounded-3 d-print-none">
                         <i class="bi bi-telephone-inbound-fill"></i>
@@ -103,7 +103,7 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <span class="text-muted small d-block mb-1">Tareas Programadas</span>
-                        <h2 class="fw-bold mb-0 text-warning">85%</h2>
+                        <h2 class="fw-bold mb-0 text-warning">@Model.Indicadores.PorcentajeAvancePrograma%</h2>
                         <span class="text-muted small">Avance del programa</span>
                     </div>
                     <div class="fs-1 text-warning bg-warning bg-opacity-10 p-3 rounded-3 d-print-none">
@@ -180,24 +180,33 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="fw-bold text-white">Renovación de Licencias ESET Antivirus</td>
-                        <td>Licenciamiento</td>
-                        <td class="text-center">05/10/2026</td>
-                        <td class="text-center"><span class="badge bg-warning text-dark px-2 py-1">En Proceso</span></td>
-                    </tr>
-                    <tr>
-                        <td class="fw-bold text-white">Respaldo Trimestral Servidor SITA / Base de Datos</td>
-                        <td>Respaldo</td>
-                        <td class="text-center">02/10/2026</td>
-                        <td class="text-center"><span class="badge bg-success px-2 py-1">Realizado</span></td>
-                    </tr>
-                    <tr>
-                        <td class="fw-bold text-white">Mantenimiento Preventivo Equipos Dirección General</td>
-                        <td>Mantenimiento</td>
-                        <td class="text-center">12/10/2026</td>
-                        <td class="text-center"><span class="badge bg-secondary px-2 py-1">Pendiente</span></td>
-                    </tr>
+                    @if (Model.TablaProgramas != null && Model.TablaProgramas.Any())
+                    {
+                        @foreach (var item in Model.TablaProgramas)
+                        {
+                            var badgeClass = item.Estatus switch
+                            {
+                                "Realizado" or "Completado" => "bg-success",
+                                "En Proceso" => "bg-warning text-dark",
+                                "Pendiente" => "bg-secondary",
+                                "Cancelado" => "bg-danger",
+                                _ => "bg-info"
+                            };
+
+                            <tr>
+                                <td class="fw-bold text-white">@item.Nombre</td>
+                                <td>@item.Tipo</td>
+                                <td class="text-center">@item.FechaProgramada</td>
+                                <td class="text-center"><span class="badge @badgeClass px-2 py-1">@item.Estatus</span></td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-3">No hay actividades ni mantenimientos registrados en este período.</td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
@@ -222,5 +231,15 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    
+    <script>
+        // Puente de datos entre C# y Javascript
+        window.dataSistemasServer = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Indicadores.TicketsPorSistema));
+        window.dataRequerimientosServer = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Indicadores.TicketsPorTipoRequerimiento));
+        window.dataEscalacionesServer = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Indicadores.TicketsEscaladosPorArea));
+        window.totalLlamadasServer = @Model.Indicadores.TotalLlamadas;
+        window.totalCorreosServer = @Model.Indicadores.TotalCorreos;
+    </script>
+
     <script src="~/js/actividades-indicadores.js" asp-append-version="true"></script>
 }
