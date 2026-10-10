@@ -14,38 +14,43 @@
             </h3>
             <p class="text-muted small mb-0">Programa de mantenimientos, renovaciones y actividades pendientes del área.</p>
         </div>
-        <button class="btn btn-primary-sigest shadow-sm px-3" id="btnNuevaTarea">
-            <i class="bi bi-plus-lg me-1"></i> Nueva Tarea Programada
-        </button>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-info shadow-sm px-3 fw-bold" id="btnImprimirReporte">
+                <i class="bi bi-printer me-1"></i> Imprimir Reporte
+            </button>
+            <button class="btn btn-primary-sigest shadow-sm px-3" id="btnNuevaTarea">
+                <i class="bi bi-plus-lg me-1"></i> Nueva Tarea Programada
+            </button>
+        </div>
     </div>
 
     <!-- Panel: Soportes Internos / Actividades Adicionales del Día -->
-<div class="glass-panel mb-4 p-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="fw-bold text-info fs-6">
-            <i class="bi bi-display me-2"></i>Soportes Internos / Actividades Adicionales
+    <div class="glass-panel mb-4 p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="fw-bold text-info fs-6">
+                <i class="bi bi-display me-2"></i>Soportes Internos / Actividades Adicionales
+            </div>
+            <div class="form-check form-switch d-flex align-items-center gap-2">
+                <input class="form-check-input mt-0" type="checkbox" role="switch" id="switchActividadesAdicionales" style="cursor: pointer;">
+                <label class="form-check-label text-white small" for="switchActividadesAdicionales" style="cursor: pointer;">
+                    Indicar actividades adicionales
+                </label>
+            </div>
         </div>
-        <div class="form-check form-switch d-flex align-items-center gap-2">
-            <input class="form-check-input mt-0" type="checkbox" role="switch" id="switchActividadesAdicionales" style="cursor: pointer;">
-            <label class="form-check-label text-white small" for="switchActividadesAdicionales" style="cursor: pointer;">
-                Indicar actividades adicionales
-            </label>
+
+        <div id="panelActividadesAdicionales" class="d-none">
+            <textarea id="txtSoportesInternos" 
+                      class="form-control bg-transparent text-white border-secondary small" 
+                      rows="4" 
+                      placeholder="Escribe aquí el soporte brindado a compañeros o actividades adicionales..." 
+                      style="border-radius: 8px; resize: vertical;"></textarea>
+            <div class="d-flex justify-content-end mt-1">
+                <small id="lblEstadoGuardado" class="text-muted fst-italic" style="font-size: 0.75rem; transition: color 0.3s ease;"></small>
+            </div>
         </div>
     </div>
 
-    <div id="panelActividadesAdicionales" class="collapse">
-        <textarea id="txtSoportesInternos" 
-                  class="form-control bg-transparent text-white border-secondary small" 
-                  rows="4" 
-                  placeholder="Escribe aquí el soporte brindado a compañeros o actividades adicionales..." 
-                  style="border-radius: 8px; resize: vertical;"></textarea>
-        <div class="d-flex justify-content-end mt-1">
-            <small id="lblEstadoGuardado" class="text-muted fst-italic" style="font-size: 0.75rem; transition: color 0.3s ease;"></small>
-        </div>
-    </div>
-</div>
-
-    <!-- Tabla de Tareas -->
+    <!-- Tabla de Tareas (Glass Panel) -->
     <div class="glass-panel mb-4 overflow-hidden">
         <div class="glass-header d-flex justify-content-between align-items-center">
             <span><i class="bi bi-calendar-check me-2"></i>Programa de Actividades</span>
@@ -54,7 +59,7 @@
             </span>
         </div>
         <div class="p-0 table-responsive">
-            <table class="tabla-sigest align-middle text-nowrap mb-0 small">
+            <table class="tabla-sigest align-middle text-nowrap mb-0 small" id="tablaTareasOriginal">
                 <thead>
                     <tr>
                         <th class="text-center">#</th>
@@ -71,7 +76,7 @@
                 <tbody>
                     @if (!Model.ListaTareas.Any())
                     {
-                        <tr>
+                        <tr id="rowSinTareas">
                             <td colspan="9" class="text-center text-muted py-4">No hay tareas programadas registradas.</td>
                         </tr>
                     }
@@ -81,22 +86,22 @@
                         foreach (var item in Model.ListaTareas)
                         {
                             <tr class="fila-tarea" data-id="@item.Id" style="cursor: pointer;">
-                                <td class="text-center fw-bold">@(index++)</td>
-                                <td class="fw-bold text-white">@item.Tarea</td>
-                                <td class="text-center">
+                                <td class="text-center fw-bold text-index">@(index++)</td>
+                                <td class="fw-bold text-white text-start text-tarea">@item.Tarea</td>
+                                <td class="text-center text-tipo">
                                     <span class="badge bg-secondary px-2 py-1">@(item.TipoTarea?.Nombre ?? "General")</span>
                                 </td>
-                                <td>
+                                <td class="text-start text-asignado">
                                     @(item.PersonaAsignada?.NombreCompleto ?? item.PersonaAsignada?.NombreUsuario ?? "Sin Asignar")
                                 </td>
-                                <td class="text-center">@item.FechaMaximaRealizacion.ToString("dd/MM/yyyy")</td>
-                                <td class="text-center">
+                                <td class="text-center text-fechamax">@item.FechaMaximaRealizacion.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center text-fechareal">
                                     @(item.FechaRealizacion.HasValue ? item.FechaRealizacion.Value.ToString("dd/MM/yyyy") : "-")
                                 </td>
-                                <td class="text-truncate" style="max-width: 200px;" title="@item.Observaciones">
+                                <td class="text-truncate text-start text-obs" style="max-width: 200px;" title="@item.Observaciones">
                                     <small class="text-muted">@(string.IsNullOrWhiteSpace(item.Observaciones) ? "-" : item.Observaciones)</small>
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center text-estatus">
                                     @if (item.Estatus == "Resuelta")
                                     {
                                         <span class="badge bg-success px-2 py-1">Resuelta</span>
@@ -119,6 +124,70 @@
                     }
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL VISTA PREVIA IMPRESIÓN REPORTE -->
+<div class="modal fade" id="modalVistaPreviaReporte" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content glass-panel text-white border-0">
+            <div class="modal-header glass-header border-0">
+                <h5 class="modal-title fs-6 fw-bold text-white">
+                    <i class="bi bi-printer me-2 text-info"></i>Vista Previa de Impresión del Reporte
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-white text-dark" id="contenedorVistaPreviaPDF">
+                <!-- SECCIÓN IMPRESIÓN -->
+                <div id="seccionImpresion">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                        <div>
+                            <h4 class="fw-bold mb-1" style="color: #0F172A; font-family: 'Segoe UI', sans-serif;">REPORTE DE TAREAS PROGRAMADAS GENERALES</h4>
+                            <p class="text-muted small mb-0">Área de Soporte Técnico</p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-dark fs-6 px-3 py-2" style="color: #ffffff !important; background-color: #0f172a !important;">@DateTime.Now.ToString("dd/MM/yyyy")</span>
+                        </div>
+                    </div>
+
+                    <!-- Soportes Internos -->
+                    <div id="printSoportesContainer" class="box-print-resumen mb-3 d-none">
+                        <div class="fw-bold text-uppercase mb-1" style="color: #0284c7; font-size: 8pt;">
+                            <i class="bi bi-display me-1"></i> Soportes Internos / Actividades Adicionales del Día:
+                        </div>
+                        <div id="printSoportesTexto" class="small text-dark" style="white-space: pre-wrap; font-size: 7.5pt;"></div>
+                    </div>
+
+                    <!-- Tabla Impresión -->
+                    <div class="fw-bold text-uppercase mb-2" style="color: #0F172A; font-size: 8pt;">
+                        <i class="bi bi-list-check me-1"></i> Programa General de Actividades:
+                    </div>
+                    <table class="tabla-print-detalle">
+                        <thead>
+                            <tr>
+                                <th style="width: 4%;">#</th>
+                                <th style="width: 22%;">Tarea / Pendiente</th>
+                                <th style="width: 10%;">Tipo</th>
+                                <th style="width: 14%;">Persona Asignada</th>
+                                <th style="width: 10%;">Fecha Máx. Realización</th>
+                                <th style="width: 10%;">Fecha Realización</th>
+                                <th style="width: 20%;">Observaciones</th>
+                                <th style="width: 10%;">Estatus</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyTareasPrint">
+                            <!-- Se puebla vía JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-transparent">
+                <button type="button" class="btn btn-sm btn-secondary-sigest px-3" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-sm btn-info px-4 fw-bold" id="btnConfirmarImpresion">
+                    <i class="bi bi-printer me-1"></i> Imprimir / Guardar PDF
+                </button>
+            </div>
         </div>
     </div>
 </div>

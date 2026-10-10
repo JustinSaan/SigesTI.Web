@@ -54,14 +54,13 @@ namespace SigesTI.Web.Pages.Actividades
         {
             ListaTareas = await _context.TareasProgramadas
                 .Include(t => t.TipoTarea)
-                .Include(t => t.PersonaAsignada)
+                .Include(t => t.PersonaAsignada) // <--- Importante para la impresión
                 .OrderByDescending(t => t.FechaCreacion)
                 .ToListAsync();
 
             var tipos = await _context.TiposTareaProgramada.OrderBy(t => t.Nombre).ToListAsync();
             SelectTipos = new SelectList(tipos, "Id", "Nombre");
 
-            // Cargar usuarios activos de la tabla UsuariosSistema
             var usuarios = await _context.UsuariosSistema
                 .Where(u => u.Activo == true)
                 .Select(u => new { u.IdUsuario, Nombre = u.NombreCompleto ?? u.NombreUsuario })
