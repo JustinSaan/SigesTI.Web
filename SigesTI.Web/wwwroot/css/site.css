@@ -1170,3 +1170,18 @@ body.layout-body {
         background-color: #38bdf8 !important;
         border-color: #38bdf8 !important;
     }
+
+/* Override rosa para Campaña de Renovación */
+.custom-dropdown-menu a.dropdown-item.item-rose:hover,
+.custom-dropdown-menu .dropdown-item.item-rose:hover {
+    color: #ffffff !important;
+    background-color: rgba(244, 63, 94, 0.25) !important;
+    border-color: rgba(244, 63, 94, 0.6) !important;
+    box-shadow: 0 0 16px rgba(244, 63, 94, 0.35) !important;
+}
+
+    .custom-dropdown-menu a.dropdown-item.item-rose:hover i,
+    .custom-dropdown-menu .dropdown-item.item-rose:hover i {
+        color: #fb7185 !important;
+        text-shadow: 0 0 10px rgba(251, 113, 133, 0.9) !important;
+    }

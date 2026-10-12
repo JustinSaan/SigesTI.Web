@@ -1,0 +1,534 @@
+﻿/* ==========================================
+   ESTILOS PRINCIPALES - CAMPAÑA DE RENOVACIÓN
+   ========================================== */
+
+/* Contenedor Principal Glassmorphism */
+.campana-card {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 20px;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    padding: 24px;
+    margin-top: 10px;
+}
+
+/* Filtros, Buscador y Selects */
+.campana-filter-input,
+.campana-filter-select {
+    background: rgba(30, 41, 59, 0.85) !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    border-radius: 12px !important;
+}
+
+    .campana-filter-input:focus,
+    .campana-filter-select:focus {
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 14px rgba(56, 189, 248, 0.4) !important;
+    }
+
+    .campana-filter-select option {
+        background-color: #0f172a;
+        color: #ffffff;
+    }
+
+/* Botón Principal Cargar Archivo */
+.btn-cargar-excel {
+    background: linear-gradient(135deg, #0284c7, #2563eb);
+    border: 1px solid rgba(56, 189, 248, 0.6);
+    color: #ffffff;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 10px 22px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 18px rgba(37, 99, 235, 0.4);
+}
+
+    .btn-cargar-excel:hover {
+        background: linear-gradient(135deg, #0369a1, #1d4ed8);
+        box-shadow: 0 0 22px rgba(56, 189, 248, 0.6);
+        transform: translateY(-2px);
+        color: #ffffff;
+    }
+
+/* ==========================================
+   TABLA DE ALTO CONTRASTE Y ALINEACIÓN
+   ========================================== */
+.table-campana {
+    color: #f8fafc !important;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+    /* 1. Encabezados y Celdas Centrados por Defecto */
+    .table-campana thead th {
+        background: #1e293b !important;
+        color: #38bdf8 !important;
+        border-bottom: 2px solid rgba(56, 189, 248, 0.5) !important;
+        border-right: 1px solid rgba(148, 163, 184, 0.12);
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        padding: 16px 12px;
+        text-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+        .table-campana thead th:last-child {
+            border-right: none;
+        }
+
+    .table-campana tbody td {
+        background: rgba(15, 23, 42, 0.65);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+        border-right: 1px solid rgba(148, 163, 184, 0.08);
+        color: #f1f5f9;
+        vertical-align: middle !important;
+        text-align: center !important;
+        font-size: 0.88rem;
+        padding: 14px 12px;
+        transition: background 0.2s ease;
+    }
+
+        .table-campana tbody td:last-child {
+            border-right: none;
+        }
+
+    /* Iluminación de Fila al Pasar el Cursor */
+    .table-campana tbody tr:hover td {
+        background: rgba(56, 189, 248, 0.14) !important;
+    }
+
+    /* 2. Excepción: Celda de Comentarios Alineada a la Izquierda */
+    .table-campana tbody td.col-comentarios {
+        min-width: 280px;
+        white-space: pre-line;
+        color: #cbd5e1;
+        font-size: 0.85rem;
+        text-align: left !important;
+    }
+
+    /* 3. Fijación de Celda Tipo Cliente VIP (Permanece Fija en Hover) */
+    .table-campana tbody tr td.vip-cell,
+    .table-campana tbody tr:hover td.vip-cell {
+        background: linear-gradient(135deg, #d97706, #b45309) !important;
+        color: #ffffff !important;
+        font-weight: 800;
+        text-align: center !important;
+        border-radius: 6px;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+        box-shadow: 0 0 10px rgba(217, 119, 6, 0.4);
+    }
+
+    /* 4. Estilo de Alto Contraste para Cliente Normal */
+    .table-campana tbody td.text-secondary,
+    .table-campana tbody tr:hover td.text-secondary {
+        color: #cbd5e1 !important;
+        font-weight: 600;
+        text-align: center !important;
+    }
+
+/* ==========================================
+   BADGES DE SISTEMAS (COLORES Y NEÓN)
+   ========================================== */
+.sys-dia8 {
+    background-color: #0284c7;
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(2, 132, 199, 0.4);
+}
+
+.sys-sita {
+    background-color: #ea580c;
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(234, 88, 12, 0.4);
+}
+
+.sys-vucem {
+    background-color: #0284c7;
+    border: 1px solid #38bdf8;
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+}
+
+.sys-coa {
+    background-color: #16a34a;
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(22, 163, 74, 0.4);
+}
+
+.sys-diaenlinea {
+    background-color: #4ade80;
+    color: #052e16;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-weight: 800;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
+}
+
+.sys-diaweb {
+    background-color: #38bdf8;
+    color: #0c4a6e;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-weight: 800;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+}
+
+.sys-enlace {
+    background-color: #b45309;
+    border: 1px solid #d97706;
+    color: #ffffff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-weight: 800;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(217, 119, 6, 0.4);
+}
+
+/* ==========================================
+   BADGES DE ESTATUS
+   ========================================== */
+.badge-cerrado {
+    background-color: rgba(34, 197, 94, 0.25);
+    border: 1px solid #22c55e;
+    color: #4ade80;
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-weight: 800;
+    display: inline-block;
+}
+
+.badge-encurso {
+    background-color: rgba(234, 179, 8, 0.25);
+    border: 1px solid #eab308;
+    color: #fde047;
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-weight: 800;
+    display: inline-block;
+}
+
+.badge-pendiente {
+    background-color: rgba(239, 68, 68, 0.25);
+    border: 1px solid #ef4444;
+    color: #fca5a5;
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-weight: 800;
+    display: inline-block;
+}
+
+/* Estado Vacío de Tabla */
+.empty-state {
+    padding: 56px 24px;
+    text-align: center;
+    color: #94a3b8;
+}
+
+    .empty-state i {
+        font-size: 3.5rem;
+        color: #38bdf8;
+        margin-bottom: 14px;
+        display: block;
+    }
+
+/* ==========================================
+   ESTILOS Y MODALES DARK GLASSMORPHISM
+   ========================================== */
+.modal-content-glass {
+    background: #0f172a !important;
+    border: 1px solid rgba(56, 189, 248, 0.4) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(56, 189, 248, 0.2) !important;
+}
+
+.modal-header-glass {
+    border-bottom: 1px solid rgba(56, 189, 248, 0.25) !important;
+    padding: 18px 24px !important;
+}
+
+.modal-body-glass {
+    padding: 24px !important;
+}
+
+/* Textareas compactos que ajustan su altura dinámicamente */
+.textarea-auto-expand {
+    min-height: 40px !important;
+    height: 40px;
+    resize: vertical;
+    overflow-y: auto;
+    line-height: 1.4;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Selector de Estatus Dinámico con Colores */
+.estatus-select-modal {
+    font-weight: 800 !important;
+    border-radius: 10px !important;
+    transition: all 0.25s ease !important;
+}
+
+    .estatus-select-modal.st-pendiente {
+        background-color: rgba(239, 68, 68, 0.25) !important;
+        border: 1px solid #ef4444 !important;
+        color: #fca5a5 !important;
+    }
+
+    .estatus-select-modal.st-encurso {
+        background-color: rgba(234, 179, 8, 0.25) !important;
+        border: 1px solid #eab308 !important;
+        color: #fde047 !important;
+    }
+
+    .estatus-select-modal.st-cerrado {
+        background-color: rgba(34, 197, 94, 0.25) !important;
+        border: 1px solid #22c55e !important;
+        color: #4ade80 !important;
+    }
+
+/* Colores dinámicos para el SELECT de Sistemas dentro del Modal */
+.select-sistema-modal {
+    font-weight: 700 !important;
+    transition: all 0.25s ease !important;
+}
+
+    .select-sistema-modal.sys-dia8 {
+        background-color: #0284c7 !important;
+        color: #ffffff !important;
+    }
+
+    .select-sistema-modal.sys-sita {
+        background-color: #ea580c !important;
+        color: #ffffff !important;
+    }
+
+    .select-sistema-modal.sys-vucem {
+        background-color: #0284c7 !important;
+        border-color: #38bdf8 !important;
+        color: #ffffff !important;
+    }
+
+    .select-sistema-modal.sys-coa {
+        background-color: #16a34a !important;
+        color: #ffffff !important;
+    }
+
+    .select-sistema-modal.sys-diaenlinea {
+        background-color: #4ade80 !important;
+        color: #052e16 !important;
+    }
+
+    .select-sistema-modal.sys-diaweb {
+        background-color: #38bdf8 !important;
+        color: #0c4a6e !important;
+    }
+
+    .select-sistema-modal.sys-enlace {
+        background-color: #b45309 !important;
+        border-color: #d97706 !important;
+        color: #ffffff !important;
+    }
+
+/* Contenedor dinámico de Sistemas y Series */
+.sistema-serie-row {
+    background: rgba(30, 41, 59, 0.5);
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    margin-bottom: 8px;
+}
+
+/* Botón "+ Añadir Sistema" Rediseñado */
+.btn-anadir-sistema {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(2, 132, 199, 0.3));
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 6px 14px;
+    transition: all 0.25s ease;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+    .btn-anadir-sistema:hover {
+        background: linear-gradient(135deg, #0284c7, #38bdf8);
+        color: #ffffff;
+        box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+        transform: translateY(-1px);
+    }
+
+/* Botones Principales del Footer en Modal */
+.btn-modal-cancelar {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    color: #94a3b8;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 8px 18px;
+    transition: all 0.2s ease;
+}
+
+    .btn-modal-cancelar:hover {
+        background: rgba(51, 65, 85, 0.9);
+        color: #f1f5f9;
+        border-color: rgba(148, 163, 184, 0.5);
+    }
+
+.btn-modal-guardar {
+    background: linear-gradient(135deg, #0284c7, #2563eb);
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    color: #ffffff;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 8px 22px;
+    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+    transition: all 0.25s ease;
+}
+
+    .btn-modal-guardar:hover {
+        background: linear-gradient(135deg, #0369a1, #1d4ed8);
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+        transform: translateY(-1px);
+        color: #ffffff;
+    }
+
+/* Historial de Comentarios y Etiqueta Encuesta Atendida */
+.historial-box {
+    max-height: 250px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-size: 0.88rem;
+    background-color: #090d16 !important;
+    border: 1px solid rgba(56, 189, 248, 0.2) !important;
+    color: #f1f5f9 !important;
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.atendida-tag {
+    color: #4ade80;
+    font-weight: 800;
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid #22c55e;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+/* Botón Exportar Archivo Excel */
+.btn-exportar-excel {
+    background: linear-gradient(135deg, #16a34a, #059669);
+    border: 1px solid rgba(74, 222, 128, 0.5);
+    color: #ffffff;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 10px 22px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 18px rgba(22, 163, 74, 0.35);
+}
+
+    .btn-exportar-excel:hover {
+        background: linear-gradient(135deg, #15803d, #047857);
+        box-shadow: 0 0 22px rgba(74, 222, 128, 0.5);
+        transform: translateY(-2px);
+        color: #ffffff;
+    }
+
+/* ==========================================
+   SCROLLBAR HORIZONTAL SUPERIOR E INFERIOR
+   ========================================== */
+.double-scroll-wrapper {
+    width: 100%;
+}
+
+.top-scroll-container {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 14px;
+    margin-bottom: 4px;
+}
+
+.top-scroll-dummy {
+    height: 1px;
+}
+
+/* Personalización del estilo del Scrollbar en Chrome/Edge/Safari */
+.top-scroll-container::-webkit-scrollbar,
+#mainTableContainer::-webkit-scrollbar {
+    height: 10px;
+}
+
+.top-scroll-container::-webkit-scrollbar-track,
+#mainTableContainer::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 8px;
+}
+
+.top-scroll-container::-webkit-scrollbar-thumb,
+#mainTableContainer::-webkit-scrollbar-thumb {
+    background: #0284c7;
+    border-radius: 8px;
+    border: 2px solid #0f172a;
+}
+
+    .top-scroll-container::-webkit-scrollbar-thumb:hover,
+    #mainTableContainer::-webkit-scrollbar-thumb:hover {
+        background: #38bdf8;
+    }
+
+/* ==========================================
+   BOTÓN VISUALIZAR AVANCES (ESTILO MEJORADO)
+   ========================================== */
+.btn-avances-custom {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    border: 1px solid #38bdf8;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+    transition: all 0.25s ease-in-out;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);
+}
+
+    .btn-avances-custom:hover {
+        background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+        color: #ffffff;
+        border-color: #7dd3fc;
+        box-shadow: 0 4px 14px rgba(56, 189, 248, 0.4);
+        transform: translateY(-1px);
+    }
+
+    .btn-avances-custom:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 4px rgba(2, 132, 199, 0.2);
+    }

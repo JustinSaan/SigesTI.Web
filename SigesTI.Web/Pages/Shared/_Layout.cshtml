@@ -3,10 +3,7 @@
 @{
     string nombreUsuario = Context.Session.GetString("Usuario") ?? "Usuario";
     string rolUsuario = Context.Session.GetString("Rol") ?? "Sin rol";
-}
-<!DOCTYPE html>
-<html lang="es">
-<head>
+}<!DOCTYPE html><html lang="es"><head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
@@ -17,9 +14,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SigesTI.Web.styles.css" asp-append-version="true" />
 
-    @await RenderSectionAsync("Styles", required: false)
-</head>
-<body class="layout-body">
+    @await RenderSectionAsync("Styles", required: false)</head><body class="layout-body">
 
     <header class="layout-header">
         <nav class="layout-navbar">
@@ -85,6 +80,11 @@
                             <li>
                                 <a class="dropdown-item item-amber py-2" asp-page="/Actividades/TareasProgramadas">
                                     <i class="bi bi-list-task me-2"></i>Tareas Programadas Generales
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item item-rose py-2" asp-page="/Actividades/CampañaR">
+                                    <i class="bi bi-arrow-repeat me-2"></i>Campaña de Renovación
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
@@ -215,5 +215,4 @@
     <script src="~/js/modales.js" asp-append-version="true"></script>
     <script src="~/js/logout.js" asp-append-version="true"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)</body>
-</html>
+    @await RenderSectionAsync("Scripts", required: false)</body></html>

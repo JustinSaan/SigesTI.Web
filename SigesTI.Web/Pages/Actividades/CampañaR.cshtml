@@ -1,0 +1,439 @@
+﻿@page
+@model SigesTI.Web.Pages.CampañaRModel
+@using System.Text.Encodings.Web
+@{
+    ViewData["Title"] = "Campaña de Renovación";
+}
+
+<link rel="stylesheet" href="~/css/campañaR.css" asp-append-version="true" />
+
+@Html.AntiForgeryToken()
+
+<div class="container-fluid px-2">
+    
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-3">
+        <div>
+            <h2 class="fw-bold text-white mb-1">
+                <i class="bi bi-arrow-repeat text-info me-2"></i>Campaña de Renovación
+            </h2>
+            <p class="text-secondary small mb-0">Gestión y seguimiento de licencias y pólizas por periodo anual.</p>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <button class="btn btn-cargar-excel" data-bs-toggle="modal" data-bs-target="#modalCargarExcel">
+                <i class="bi bi-file-earmark-arrow-up me-2"></i>Cargar archivo Excel
+            </button>
+            <button class="btn btn-exportar-excel" onclick="exportarExcelCampana()">
+                <i class="bi bi-file-earmark-arrow-down me-2"></i>Exportar archivo
+            </button>
+        </div>
+    </div>
+
+    <!-- Contenedor Glassmorphism -->
+    <div class="campana-card">
+        
+        <!-- Barra de Filtros y Botón de Avances Mejorada -->
+<div class="row g-3 align-items-end mb-4">
+    <div class="col-md-2">
+        <label class="form-label text-secondary small fw-bold mb-1">Filtrar por Mes</label>
+        <select id="filtroMes" class="form-select campana-filter-select" onchange="cambiarPeriodo()">
+            @for (int m = 1; m <= 12; m++)
+            {
+                string nombreMes = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m);
+                string mesCap = char.ToUpper(nombreMes[0]) + nombreMes.Substring(1);
+                if (m == Model.MesSeleccionado)
+                {
+                    <option value="@m" selected="selected">@mesCap</option>
+                }
+                else
+                {
+                    <option value="@m">@mesCap</option>
+                }
+            }
+        </select>
+    </div>
+    
+    <div class="col-md-2">
+        <label class="form-label text-secondary small fw-bold mb-1">Año</label>
+        <select id="filtroAnio" class="form-select campana-filter-select" onchange="cambiarPeriodo()">
+            @foreach (var a in new[] { 2026, 2027, 2028 })
+            {
+                if (a == Model.AnioSeleccionado)
+                {
+                    <option value="@a" selected="selected">@a</option>
+                }
+                else
+                {
+                    <option value="@a">@a</option>
+                }
+            }
+        </select>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="col-md-5">
+        <label class="form-label text-secondary small fw-bold mb-1">Buscar Cliente / Empresa</label>
+        <div class="input-group">
+            <span class="input-group-text campana-filter-input border-end-0 text-secondary">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" id="inputBuscador" class="form-control campana-filter-input border-start-0" placeholder="Nombre empresa o no. cliente..." onkeyup="filtrarTablaLocal()" />
+        </div>
+    </div>
+
+    <!-- Botón Visualizar Avances Alinear Perfecto -->
+    <div class="col-md-3">
+        <label class="form-label d-none d-md-block opacity-0 mb-1">Alineador</label>
+        <button type="button" class="btn btn-avances-custom w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#modalAvances">
+            <i class="bi bi-bar-chart-line-fill me-2"></i>Visualizar Avances
+        </button>
+    </div>
+</div>
+
+        <!-- Tabla Estilizada con Doble Scrollbar Horizontal -->
+        <div class="double-scroll-wrapper">
+            <!-- Scrollbar Superior Falso -->
+            <div class="top-scroll-container" id="topScrollContainer">
+                <div class="top-scroll-dummy" id="topScrollDummy"></div>
+            </div>
+
+            <!-- Contenedor Principal de la Tabla -->
+            <div class="table-responsive rounded-3 border border-secondary border-opacity-25" id="mainTableContainer">
+                <table class="table table-campana align-middle" id="tablaCampana">
+                    <thead class="text-center">
+                        <tr>
+                            <th>Tipo Cliente</th>
+                            <th>No. Cliente</th>
+                            <th>Empresa</th>
+                            <th>Nombre del Cliente</th>
+                            <th>Correo Electrónico</th>
+                            <th>Teléfono</th>
+                            <th>Sistema(s)</th>
+                            <th>N. de Serie</th>
+                            <th>Ejecutivo</th>
+                            <th>Comentarios Adicionales</th>
+                            <th>Ticket</th>
+                            <th>Estatus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Detalles != null && Model.Detalles.Any())
+                        {
+                            @foreach (var item in Model.Detalles)
+                            {
+                                <tr class="fila-registro" style="cursor: pointer;" 
+                                    data-id="@item.Id"
+                                    data-tipo="@item.TipoCliente"
+                                    data-nocliente="@item.NoCliente"
+                                    data-empresa="@item.Empresa"
+                                    data-nombre="@item.NombreCliente"
+                                    data-correo="@item.CorreoElectronico"
+                                    data-telefono="@item.Telefono"
+                                    data-sistemas="@item.Sistemas"
+                                    data-noserie="@item.NoSerie"
+                                    data-ejecutivo="@item.EjecutivoAsignado"
+                                    data-ticket="@item.Ticket"
+                                    data-estatus="@item.Estatus"
+                                    onclick="abrirModalEdicionDesdeFila(this)">
+                                    
+                                    <td class="@(item.TipoCliente?.ToUpper() == "VIP" ? "vip-cell" : "text-secondary")">
+                                        @item.TipoCliente
+                                    </td>
+                                    <td class="text-center fw-bold text-info">@item.NoCliente</td>
+                                    <td class="text-uppercase fw-bold text-white">@item.Empresa</td>
+                                    <td style="white-space: pre-line;">@item.NombreCliente</td>
+                                    <td>
+                                        <span class="text-truncate d-inline-block" style="max-width: 180px; white-space: pre-line;">@item.CorreoElectronico</span>
+                                    </td>
+                                    <td class="text-nowrap" style="white-space: pre-line;">@item.Telefono</td>
+                                    
+                                    <!-- Renderizado de Múltiples Sistemas con Badges -->
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrEmpty(item.Sistemas))
+                                        {
+                                            var listaSistemas = item.Sistemas.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                                            foreach (var sysRaw in listaSistemas)
+                                            {
+                                                var sys = sysRaw.ToUpper().Trim();
+                                                string cssClass = "bg-secondary text-white";
+
+                                                if (sys.Contains("DIA 8")) cssClass = "sys-dia8";
+                                                else if (sys.Contains("SITA")) cssClass = "sys-sita";
+                                                else if (sys.Contains("VUCEM")) cssClass = "sys-vucem";
+                                                else if (sys.Contains("COA")) cssClass = "sys-coa";
+                                                else if (sys.Contains("DIAENLINEA") || sys.Contains("DIA EN LINEA")) cssClass = "sys-diaenlinea";
+                                                else if (sys.Contains("DIAWEB") || sys.Contains("DIA WEB")) cssClass = "sys-diaweb";
+                                                else if (sys.Contains("ENLACE") || sys.Contains("MODULO") || sys.Contains("MÓDULO")) cssClass = "sys-enlace";
+
+                                                <div class="mb-1"><span class="@cssClass">@sysRaw</span></div>
+                                            }
+                                        }
+                                    </td>
+
+                                    <!-- Renderizado de Múltiples Series -->
+                                    <td class="text-center font-monospace small" style="white-space: pre-line;">@item.NoSerie</td>
+                                    <td>@item.EjecutivoAsignado</td>
+                                    
+                                    <td class="col-comentarios" 
+                                        ondblclick="abrirModalComentarios(@item.Id, '@JavaScriptEncoder.Default.Encode(item.Empresa ?? "")', '@JavaScriptEncoder.Default.Encode(item.ComentariosAdicionales ?? "")', '@item.Estatus', '@item.Ticket')"
+                                        onclick="event.stopPropagation();"
+                                        title="Haz doble clic para abrir la bitácora de seguimiento">
+                                        <div class="p-1 rounded style-comentario-box">
+                                            @(string.IsNullOrWhiteSpace(item.ComentariosAdicionales) ? "Doble clic para agregar notas..." : item.ComentariosAdicionales)
+                                        </div>
+                                    </td>
+                                    
+                                    <td class="text-center font-monospace fw-bold text-warning">@item.Ticket</td>
+                                    <td class="text-center">
+                                        @{
+                                            var st = item.Estatus?.Trim().ToLower();
+                                            string badgeClass = st == "cerrado" ? "badge-cerrado" : (st == "en curso" ? "badge-encurso" : "badge-pendiente");
+                                        }
+                                        <span class="@badgeClass">@item.Estatus</span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="12" class="empty-state">
+                                    <i class="bi bi-folder-x"></i>
+                                    <h5 class="fw-bold text-white mb-1">Sin registros cargados</h5>
+                                    <p class="small mb-0">No hay información cargada para la campaña seleccionada.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal 1: Visualizar Avances -->
+<div class="modal fade" id="modalAvances" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content modal-content-glass text-white">
+            <div class="modal-header modal-header-glass">
+                <h5 class="modal-title fw-bold text-info"><i class="bi bi-bar-chart-line-fill me-2"></i>Avances de la Campaña</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body modal-body-glass">
+                <div class="table-responsive rounded-3 border border-secondary border-opacity-25">
+                    <table class="table table-campana align-middle text-center mb-0">
+                        <thead>
+                            <tr>
+                                <th>Total de clientes</th>
+                                <th>Encuestas finalizadas</th>
+                                <th>Seguimiento pendiente</th>
+                                <th>Encuestas en Curso</th>
+                                <th>Porcentaje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold fs-5 text-white">@Model.Metricas.TotalClientes</td>
+                                <td class="fw-bold fs-5 text-success">@Model.Metricas.Finalizadas</td>
+                                <td class="fw-bold fs-5 text-danger">@Model.Metricas.Pendientes</td>
+                                <td class="fw-bold fs-5 text-warning">@Model.Metricas.EnCurso</td>
+                                <td class="fw-bold fs-5 text-info">@Convert.ToInt32(Model.Metricas.PorcentajeAvance)%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-modal-cancelar" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 2: Editar Registro Completo -->
+<div class="modal fade" id="modalEdicion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content modal-content-glass text-white">
+            <div class="modal-header modal-header-glass">
+                <h5 class="modal-title fw-bold text-info"><i class="bi bi-pencil-square me-2"></i>Editar Registro de Cliente</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body modal-body-glass">
+                <form id="formEdicion">
+                    <input type="hidden" id="editId" />
+                    
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label text-info small fw-bold">Tipo de Cliente</label>
+                            <select id="editTipoCliente" class="form-select campana-filter-select">
+                                <option value="Normal">Normal</option>
+                                <option value="VIP">VIP</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-info small fw-bold">No. Cliente</label>
+                            <input type="text" id="editNoCliente" class="form-control campana-filter-input" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-info small fw-bold">Estatus</label>
+                            <select id="editEstatus" class="form-select estatus-select-modal" onchange="actualizarColorEstatusModal(this.value)">
+                                <option value="Pendiente" class="bg-dark text-danger">Pendiente</option>
+                                <option value="En curso" class="bg-dark text-warning">En curso</option>
+                                <option value="Cerrado" class="bg-dark text-success">Cerrado</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-info small fw-bold">Empresa</label>
+                            <input type="text" id="editEmpresa" class="form-control campana-filter-input" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-info small fw-bold">Nombre del Cliente (Contacto)</label>
+                            <textarea id="editNombreCliente" class="form-control campana-filter-input textarea-auto-expand" rows="1" oninput="autoAjustarAltura(this)"></textarea>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-info small fw-bold">Correo Electrónico</label>
+                            <textarea id="editCorreo" class="form-control campana-filter-input textarea-auto-expand" rows="1" oninput="autoAjustarAltura(this)"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-info small fw-bold">Teléfono</label>
+                            <textarea id="editTelefono" class="form-control campana-filter-input textarea-auto-expand" rows="1" oninput="autoAjustarAltura(this)"></textarea>
+                        </div>
+
+                        <!-- Sección Dinámica de Sistemas y Series -->
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label text-info small fw-bold mb-0">Sistema(s) y N. de Serie</label>
+                                <button type="button" class="btn btn-anadir-sistema" onclick="agregarFilaSistemaSerie('', '')">
+                                    <i class="bi bi-plus-lg me-1"></i>Añadir Sistema
+                                </button>
+                            </div>
+                            <div id="contenedorSistemasSeries">
+                                <!-- Filas generadas dinámicamente -->
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-info small fw-bold">Ejecutivo Asignado (Soporte Técnico)</label>
+                            <select id="editEjecutivo" class="form-select campana-filter-select">
+                                <option value="">-- Selecciona Ejecutivo --</option>
+                                @foreach (var ejec in Model.EjecutivosSoporte)
+                                {
+                                    <option value="@ejec">@ejec</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-info small fw-bold">No. Ticket</label>
+                            <input type="text" id="editTicket" class="form-control campana-filter-input" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-modal-cancelar" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-modal-guardar" onclick="guardarEdicionRegistro()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 3: Cargar Archivo Excel -->
+<div class="modal fade" id="modalCargarExcel" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-glass text-white">
+            <div class="modal-header modal-header-glass">
+                <h5 class="modal-title fw-bold text-info"><i class="bi bi-file-earmark-excel me-2"></i>Cargar Campaña de Renovación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body modal-body-glass">
+                <div class="mb-3">
+                    <label class="form-label text-info small fw-bold">Mes de la Campaña</label>
+                    <select id="selectMes" class="form-select campana-filter-select">
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-info small fw-bold">Año</label>
+                    <input type="number" id="selectAnio" class="form-control campana-filter-input" value="@DateTime.Now.Year" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-info small fw-bold">Seleccionar Archivo Excel (.xlsx, .xls)</label>
+                    <input type="file" id="archivoExcel" class="form-control campana-filter-input" accept=".xlsx, .xls" />
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-modal-cancelar" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-modal-guardar" onclick="procesarEnvioArchivo(false)">
+                    <i class="bi bi-upload me-1"></i>Procesar Carga
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 4: Bitácora de Comentarios, Ticket y Estatus -->
+<div class="modal fade" id="modalComentarios" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content modal-content-glass text-white">
+            <div class="modal-header modal-header-glass">
+                <h5 class="modal-title fw-bold text-info">
+                    <i class="bi bi-journal-text me-2"></i>Bitácora de Seguimiento - <span id="empresaModalTitle" class="text-white"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body modal-body-glass">
+                <input type="hidden" id="detalleIdModal" />
+                
+                <label class="form-label text-info small fw-bold">Historial de Comentarios</label>
+                <div id="historialText" class="historial-box mb-3"></div>
+
+                <label class="form-label text-info small fw-bold">Agregar Nuevo Comentario</label>
+                <textarea id="nuevoSeguimientoText" class="form-control campana-filter-input textarea-auto-expand" rows="2" placeholder="Escribe las notas de seguimiento..."></textarea>
+            </div>
+            <div class="modal-footer border-secondary justify-content-between">
+                <!-- Controles a la izquierda: Ticket y Estatus -->
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="small fw-bold text-info mb-0">No. Ticket:</label>
+                        <input type="text" id="bitacoraTicketInput" class="form-control campana-filter-input" style="width: 130px;" placeholder="Ej. 12345" />
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="small fw-bold text-info mb-0">Estatus:</label>
+                        <select id="bitacoraEstatusSelect" class="form-select estatus-select-modal" style="width: 150px;" onchange="actualizarColorEstatusModal(this.value)">
+                            <option value="Pendiente" class="bg-dark text-danger">Pendiente</option>
+                            <option value="En curso" class="bg-dark text-warning">En curso</option>
+                            <option value="Cerrado" class="bg-dark text-success">Cerrado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="button" class="btn btn-modal-cancelar me-2" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-modal-guardar" onclick="guardarComentarioModal()">
+                        <i class="bi bi-save me-1"></i>Guardar Entrada
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/campañaR.js" asp-append-version="true"></script>
+}

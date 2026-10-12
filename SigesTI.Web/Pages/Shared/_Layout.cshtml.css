@@ -117,106 +117,150 @@ html, body {
     min-width: 240px;
 }
 
-    /* 1. ESTADO BASE / REPOSO: Forzar texto blanco en todos los enlaces del menú */
+    /* ESTADO BASE / REPOSO */
     .custom-dropdown-menu .dropdown-item,
     .custom-dropdown-menu a.dropdown-item {
         color: #ffffff !important;
-        font-weight: 600;
-        font-size: 0.9rem;
-        padding: 10px 14px;
-        border-radius: 10px;
-        border: 1px solid transparent;
-        transition: all 0.22s ease;
-        display: flex;
-        align-items: center;
-        background: transparent !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        padding: 10px 14px !important;
+        border-radius: 10px !important;
+        border: 1px solid transparent !important;
+        transition: all 0.22s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        background-color: transparent !important;
     }
 
-        .custom-dropdown-menu .dropdown-item i {
+        .custom-dropdown-menu .dropdown-item i,
+        .custom-dropdown-menu a.dropdown-item i {
             color: #38bdf8 !important;
-            font-size: 1.1rem;
-            transition: all 0.22s ease;
+            font-size: 1.1rem !important;
+            transition: all 0.22s ease !important;
         }
 
-        /* 2. OVERRIDE DE HOVER / FOCUS EN BOOTSTRAP (ELIMINA EL FONDO BLANCO) */
-        .custom-dropdown-menu .dropdown-item:hover,
-        .custom-dropdown-menu .dropdown-item:focus,
-        .custom-dropdown-menu .dropdown-item:active,
-        .custom-dropdown-menu .dropdown-item.active {
-            color: #ffffff !important;
-            background: rgba(56, 189, 248, 0.18) !important;
-            border-color: rgba(56, 189, 248, 0.35) !important;
-            transform: translateX(4px);
+/* ==========================================================================
+   MENÚS DESPLEGABLES (DROPDOWNS OSCUROS CON LETRAS BLANCAS)
+   ========================================================================== */
+.custom-dropdown-menu {
+    background: #0f172a !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 15px rgba(56, 189, 248, 0.15) !important;
+    padding: 8px !important;
+    margin-top: 10px !important;
+    min-width: 240px;
+}
+
+    /* ESTADO BASE / REPOSO: Mantiene el ícono azul cian predeterminado */
+    .custom-dropdown-menu .dropdown-item,
+    .custom-dropdown-menu a.dropdown-item {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        padding: 10px 14px !important;
+        border-radius: 10px !important;
+        border: 1px solid transparent !important;
+        transition: all 0.22s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        background-color: transparent !important;
+    }
+
+        .custom-dropdown-menu .dropdown-item i,
+        .custom-dropdown-menu a.dropdown-item i {
+            color: #38bdf8 !important;
+            font-size: 1.1rem !important;
+            transition: all 0.22s ease !important;
         }
 
-        /* ==========================================================================
-   COLORES DE SOMBREADO E ÍCONOS DISTINTOS POR SECCIÓN (HOVER)
+/* ==========================================================================
+   COLORES DE SOMBREADO E ÍCONOS POR SECCIÓN (ALTA ESPECIFICIDAD)
    ========================================================================== */
 
-        /* 1. Azul Cian (Tickets / Consultas) */
-        .custom-dropdown-menu .dropdown-item.item-cyan:hover,
-        .custom-dropdown-menu .dropdown-item.item-cyan:focus {
-            color: #ffffff !important;
-            background: rgba(56, 189, 248, 0.2) !important;
-            border-color: rgba(56, 189, 248, 0.45) !important;
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.25) !important;
-        }
+/* 1. Azul Cian (Tickets / Consultas / Administrar Cuenta) */
+.layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-cyan:hover,
+.layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-cyan:focus {
+    color: #ffffff !important;
+    background-color: rgba(56, 189, 248, 0.22) !important;
+    border-color: rgba(56, 189, 248, 0.5) !important;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.25) !important;
+}
 
-            .custom-dropdown-menu .dropdown-item.item-cyan:hover i,
-            .custom-dropdown-menu .dropdown-item.item-cyan:focus i {
-                color: #38bdf8 !important;
-                text-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
-            }
-
-        /* 2. Verde Esmeralda (Generar Solicitud / Indicadores) */
-        .custom-dropdown-menu .dropdown-item.item-emerald:hover,
-        .custom-dropdown-menu .dropdown-item.item-emerald:focus {
-            color: #ffffff !important;
-            background: rgba(16, 185, 129, 0.2) !important;
-            border-color: rgba(16, 185, 129, 0.45) !important;
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.25) !important;
-        }
-
-            .custom-dropdown-menu .dropdown-item.item-emerald:hover i,
-            .custom-dropdown-menu .dropdown-item.item-emerald:focus i {
-                color: #34d399 !important;
-                text-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
-            }
-
-        /* 3. Violeta / Púrpura (Plan de Respaldos) */
-        .custom-dropdown-menu .dropdown-item.item-purple:hover,
-        .custom-dropdown-menu .dropdown-item.item-purple:focus {
-            color: #ffffff !important;
-            background: rgba(168, 85, 247, 0.2) !important;
-            border-color: rgba(168, 85, 247, 0.45) !important;
-            box-shadow: 0 0 12px rgba(168, 85, 247, 0.25) !important;
-        }
-
-            .custom-dropdown-menu .dropdown-item.item-purple:hover i,
-            .custom-dropdown-menu .dropdown-item.item-purple:focus i {
-                color: #c084fc !important;
-                text-shadow: 0 0 8px rgba(192, 132, 252, 0.6);
-            }
-
-        /* 4. Ámbar / Naranja (Tareas Programadas) */
-        .custom-dropdown-menu .dropdown-item.item-amber:hover,
-        .custom-dropdown-menu .dropdown-item.item-amber:focus {
-            color: #ffffff !important;
-            background: rgba(245, 158, 11, 0.2) !important;
-            border-color: rgba(245, 158, 11, 0.45) !important;
-            box-shadow: 0 0 12px rgba(245, 158, 11, 0.25) !important;
-        }
-
-            .custom-dropdown-menu .dropdown-item.item-amber:hover i,
-            .custom-dropdown-menu .dropdown-item.item-amber:focus i {
-                color: #fbbf24 !important;
-                text-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
-            }
-
-    .custom-dropdown-menu .dropdown-divider {
-        border-color: rgba(148, 163, 184, 0.18) !important;
-        margin: 6px 0;
+    .layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-cyan:hover i,
+    .layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-cyan:focus i {
+        color: #38bdf8 !important;
+        text-shadow: 0 0 8px rgba(56, 189, 248, 0.8) !important;
     }
+
+/* 2. Verde Esmeralda (Generar Solicitud / Indicadores) */
+.layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-emerald:hover,
+.layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-emerald:focus {
+    color: #ffffff !important;
+    background-color: rgba(16, 185, 129, 0.22) !important;
+    border-color: rgba(16, 185, 129, 0.5) !important;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.25) !important;
+}
+
+    .layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-emerald:hover i,
+    .layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-emerald:focus i {
+        color: #34d399 !important;
+        text-shadow: 0 0 8px rgba(52, 211, 153, 0.8) !important;
+    }
+
+/* 3. Violeta / Púrpura (Plan de Respaldos / Administrar Personal) */
+.layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-purple:hover,
+.layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-purple:focus {
+    color: #ffffff !important;
+    background-color: rgba(168, 85, 247, 0.22) !important;
+    border-color: rgba(168, 85, 247, 0.5) !important;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.25) !important;
+}
+
+    .layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-purple:hover i,
+    .layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-purple:focus i {
+        color: #c084fc !important;
+        text-shadow: 0 0 8px rgba(192, 132, 252, 0.8) !important;
+    }
+
+/* 4. Ámbar / Naranja (Tareas Programadas) */
+.layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-amber:hover,
+.layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-amber:focus {
+    color: #ffffff !important;
+    background-color: rgba(245, 158, 11, 0.22) !important;
+    border-color: rgba(245, 158, 11, 0.5) !important;
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.25) !important;
+}
+
+    .layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-amber:hover i,
+    .layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-amber:focus i {
+        color: #fbbf24 !important;
+        text-shadow: 0 0 8px rgba(251, 191, 36, 0.8) !important;
+    }
+
+/* 5. Rosa / Pink (Campaña de Renovación) */
+.layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-rose:hover,
+.layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-rose:focus,
+.layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-rose:active {
+    color: #ffffff !important;
+    background-color: rgba(244, 63, 94, 0.25) !important;
+    border-color: rgba(244, 63, 94, 0.6) !important;
+    box-shadow: 0 0 16px rgba(244, 63, 94, 0.35) !important;
+}
+
+    .layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-rose:hover i,
+    .layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-rose:focus i {
+        color: #fb7185 !important;
+        text-shadow: 0 0 10px rgba(251, 113, 133, 0.9) !important;
+    }
+
+.custom-dropdown-menu .dropdown-divider {
+    border-color: rgba(148, 163, 184, 0.18) !important;
+    margin: 6px 0 !important;
+}
+
 
 /* Usuario derecha */
 .layout-user-dropdown {
@@ -305,7 +349,7 @@ html, body {
     display: flex;
     flex-direction: column;
     padding: 10px 10px;
-    width: 300000px;
+    width: 100%;
 }
 
     .layout-user-menu-header span {
@@ -354,7 +398,6 @@ html, body {
             text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
         }
 
-
 /* Contenido Principal */
 .layout-main {
     flex: 1;
@@ -383,16 +426,49 @@ html, body {
         align-items: center;
     }
 
-/* Responsive */
-@media (max-width: 1200px) {
+/* ==========================================================================
+   RESPONSIVE (PC / IPAD HORIZONTAL Y MÓVIL)
+   ========================================================================== */
+
+/* En PC e iPad en orientación horizontal (>= 992px) */
+@media (min-width: 992px) {
     .layout-navbar-inner {
-        grid-template-columns: 1fr;
-        justify-items: center;
-        padding: 16px;
+        display: grid !important;
+        grid-template-columns: auto 1fr auto !important;
+        align-items: center !important;
+        gap: 16px !important;
     }
 
-    .layout-user-dropdown {
-        justify-self: center;
+    .layout-menu {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 12px !important;
+        flex-wrap: nowrap !important;
+    }
+}
+
+/* Solo se apila en móviles o tablets verticales (< 992px) */
+@media (max-width: 991.98px) {
+    .layout-navbar-inner {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        padding: 16px !important;
+        gap: 14px !important;
+    }
+
+    .layout-menu {
+        width: 100% !important;
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    .layout-user-dropdown,
+    .layout-user {
+        width: 100% !important;
+        justify-content: space-between !important;
     }
 }
 

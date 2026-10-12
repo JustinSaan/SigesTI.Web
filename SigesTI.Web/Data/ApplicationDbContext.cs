@@ -23,6 +23,9 @@ namespace SigesTI.Web.Data
         public DbSet<EquipoRespaldo> EquiposRespaldo { get; set; }
         public DbSet<ProgramacionRespaldo> ProgramacionRespaldos { get; set; }
 
+        public DbSet<CampanaRenovacion> CampanaRenovacion { get; set; }
+        public DbSet<CampanaRenovacionDetalle> CampanaRenovacionDetalle { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
