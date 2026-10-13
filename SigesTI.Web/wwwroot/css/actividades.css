@@ -99,15 +99,13 @@
 
     /* Celdas generales del sistema */
     .tabla-sigest tbody td {
-        padding: 8px 6px !important;
+        padding: 8px 10px !important;
         color: #f1f5f9 !important;
         font-size: 0.82rem !important;
         vertical-align: middle !important;
         text-align: center !important;
         border: 1px solid rgba(148, 163, 184, 0.15) !important;
         background: rgba(15, 23, 42, 0.6) !important;
-        word-break: keep-all !important;
-        overflow-wrap: break-word !important;
     }
 
     /* Hover de filas */
@@ -116,152 +114,167 @@
         color: #ffffff !important;
     }
 
-    /* Recorte de celdas cortas para módulo en pantalla */
-    .tabla-sigest tbody td.col-corta {
-        max-width: 150px !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-        text-align: left !important;
-    }
+/* CONTROL DE COLUMNA OBSERVACIONES RESUMIDA EN PANTALLA */
+.col-observaciones-pantalla {
+    max-width: 220px !important;
+    min-width: 160px !important;
+    text-align: left !important;
+    vertical-align: middle !important;
+}
 
-    /* RESTAURACIÓN DE SOMBREADOS / INSIGNIAS EN TABLAS DE PANTALLA */
-    .actividades-container .badge,
-    .tabla-sigest .badge,
-    .modal-content .badge {
-        font-size: 0.75rem !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.4px !important;
-        border-radius: 6px !important;
-        padding: 6px 12px !important;
-        display: inline-block !important;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
-    }
+.box-observaciones-resumen {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.78rem !important;
+    line-height: 1.35 !important;
+    color: #94a3b8 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+}
 
-        .actividades-container .badge.bg-primary,
-        .tabla-sigest .badge.bg-primary {
-            background-color: #0284c7 !important;
-            color: #ffffff !important;
-            border: 1px solid #38bdf8 !important;
-        }
+/* PROTECCIÓN PARA BANDERAS Y BOTONES EN CELDA */
+.celda-sin-recorte {
+    white-space: nowrap !important;
+}
 
-        .actividades-container .badge.bg-success,
-        .tabla-sigest .badge.bg-success {
-            background-color: #15803d !important;
-            color: #ffffff !important;
-            border: 1px solid #4ade80 !important;
-        }
+/* RESTAURACIÓN DE SOMBREADOS / INSIGNIAS EN TABLAS DE PANTALLA */
+.actividades-container .badge,
+.tabla-sigest .badge,
+.modal-content .badge {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.4px !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    display: inline-block !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
 
-        .actividades-container .badge.bg-warning,
-        .tabla-sigest .badge.bg-warning {
-            background-color: #d97706 !important;
-            color: #ffffff !important;
-            border: 1px solid #fbbf24 !important;
-        }
-
-        .actividades-container .badge.bg-danger,
-        .tabla-sigest .badge.bg-danger {
-            background-color: #b91c1c !important;
-            color: #ffffff !important;
-            border: 1px solid #f87171 !important;
-        }
-
-        .actividades-container .badge.bg-info,
-        .tabla-sigest .badge.bg-info {
-            background-color: #0369a1 !important;
-            color: #ffffff !important;
-            border: 1px solid #38bdf8 !important;
-        }
-
-        .actividades-container .badge.bg-secondary,
-        .tabla-sigest .badge.bg-secondary {
-            background-color: #475569 !important;
-            color: #f8fafc !important;
-            border: 1px solid #94a3b8 !important;
-        }
-
-    .actividades-container .text-highlight,
-    .tabla-sigest .ticket-number,
-    .tabla-sigest .badge-escalado {
-        color: #38bdf8 !important;
-        font-weight: 700 !important;
-        background-color: rgba(56, 189, 248, 0.15) !important;
-        padding: 4px 10px !important;
-        border-radius: 6px !important;
-        border: 1px solid rgba(56, 189, 248, 0.35) !important;
-        display: inline-block !important;
-        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
-    }
-
-   /* ==========================================================================
-   INSIGNIAS / HIGHLIGHTS POR SISTEMA
-   ========================================================================== */
-
-    .actividades-container .badge-sistema-dia,
-    .tabla-sigest .badge-sistema-dia,
-    select.badge-sistema-dia {
-        background-color: #2563eb !important;
-        color: #ffffff !important;
-        border: 1px solid #60a5fa !important;
-    }
-
-    .actividades-container .badge-sistema-diaweb,
-    .tabla-sigest .badge-sistema-diaweb,
-    select.badge-sistema-diaweb {
+    .actividades-container .badge.bg-primary,
+    .tabla-sigest .badge.bg-primary {
         background-color: #0284c7 !important;
         color: #ffffff !important;
         border: 1px solid #38bdf8 !important;
     }
 
-    /* CONECTOR DIAWEB-ZOÉ (Púrpura/Violeta elegante) */
-    .actividades-container .badge-sistema-med,
-    .tabla-sigest .badge-sistema-med,
-    select.badge-sistema-med {
-        background-color: #704332 !important;
-        color: #ffffff !important;
-        border: 1px solid #9a5e47 !important;
-    }
-
-    .actividades-container .badge-sistema-sita,
-    .tabla-sigest .badge-sistema-sita,
-    select.badge-sistema-sita {
-        background-color: #ea580c !important;
-        color: #ffffff !important;
-        border: 1px solid #fb923c !important;
-    }
-
-    /* VUCEM (Azul Rey / Marino) */
-    .actividades-container .badge-sistema-vucem,
-    .tabla-sigest .badge-sistema-vucem,
-    select.badge-sistema-vucem {
-        background-color: #1d4ed8 !important;
-        color: #ffffff !important;
-        border: 1px solid #60a5fa !important;
-    }
-
-    .actividades-container .badge-sistema-diaenlinea,
-    .tabla-sigest .badge-sistema-diaenlinea,
-    select.badge-sistema-diaenlinea {
-        background-color: #16a34a !important;
+    .actividades-container .badge.bg-success,
+    .tabla-sigest .badge.bg-success {
+        background-color: #15803d !important;
         color: #ffffff !important;
         border: 1px solid #4ade80 !important;
     }
 
-    .actividades-container .badge-sistema-coa,
-    .tabla-sigest .badge-sistema-coa,
-    select.badge-sistema-coa {
-        background-color: #15803d !important;
+    .actividades-container .badge.bg-warning,
+    .tabla-sigest .badge.bg-warning {
+        background-color: #d97706 !important;
         color: #ffffff !important;
-        border: 1px solid #22c55e !important;
+        border: 1px solid #fbbf24 !important;
     }
 
-    .actividades-container .badge-sistema-admin,
-    .tabla-sigest .badge-sistema-admin,
-    select.badge-sistema-admin {
-        background-color: #0f172a !important;
-        color: #38bdf8 !important;
-        border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    .actividades-container .badge.bg-danger,
+    .tabla-sigest .badge.bg-danger {
+        background-color: #b91c1c !important;
+        color: #ffffff !important;
+        border: 1px solid #f87171 !important;
     }
+
+    .actividades-container .badge.bg-info,
+    .tabla-sigest .badge.bg-info {
+        background-color: #0369a1 !important;
+        color: #ffffff !important;
+        border: 1px solid #38bdf8 !important;
+    }
+
+    .actividades-container .badge.bg-secondary,
+    .tabla-sigest .badge.bg-secondary {
+        background-color: #475569 !important;
+        color: #f8fafc !important;
+        border: 1px solid #94a3b8 !important;
+    }
+
+.actividades-container .text-highlight,
+.tabla-sigest .ticket-number,
+.tabla-sigest .badge-escalado {
+    color: #38bdf8 !important;
+    font-weight: 700 !important;
+    background-color: rgba(56, 189, 248, 0.15) !important;
+    padding: 4px 10px !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+    display: inline-block !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* ==========================================================================
+   INSIGNIAS / HIGHLIGHTS POR SISTEMA
+   ========================================================================== */
+
+.actividades-container .badge-sistema-dia,
+.tabla-sigest .badge-sistema-dia,
+select.badge-sistema-dia {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    border: 1px solid #60a5fa !important;
+}
+
+.actividades-container .badge-sistema-diaweb,
+.tabla-sigest .badge-sistema-diaweb,
+select.badge-sistema-diaweb {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+    border: 1px solid #38bdf8 !important;
+}
+
+.actividades-container .badge-sistema-med,
+.tabla-sigest .badge-sistema-med,
+select.badge-sistema-med {
+    background-color: #704332 !important;
+    color: #ffffff !important;
+    border: 1px solid #9a5e47 !important;
+}
+
+.actividades-container .badge-sistema-sita,
+.tabla-sigest .badge-sistema-sita,
+select.badge-sistema-sita {
+    background-color: #ea580c !important;
+    color: #ffffff !important;
+    border: 1px solid #fb923c !important;
+}
+
+.actividades-container .badge-sistema-vucem,
+.tabla-sigest .badge-sistema-vucem,
+select.badge-sistema-vucem {
+    background-color: #1d4ed8 !important;
+    color: #ffffff !important;
+    border: 1px solid #60a5fa !important;
+}
+
+.actividades-container .badge-sistema-diaenlinea,
+.tabla-sigest .badge-sistema-diaenlinea,
+select.badge-sistema-diaenlinea {
+    background-color: #16a34a !important;
+    color: #ffffff !important;
+    border: 1px solid #4ade80 !important;
+}
+
+.actividades-container .badge-sistema-coa,
+.tabla-sigest .badge-sistema-coa,
+select.badge-sistema-coa {
+    background-color: #15803d !important;
+    color: #ffffff !important;
+    border: 1px solid #22c55e !important;
+}
+
+.actividades-container .badge-sistema-admin,
+.tabla-sigest .badge-sistema-admin,
+select.badge-sistema-admin {
+    background-color: #0f172a !important;
+    color: #38bdf8 !important;
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
 
 /* ==========================================================================
    COLOR DINÁMICO PARA SELECT DE SISTEMA
@@ -537,7 +550,263 @@ select.form-select option {
 }
 
 /* ==========================================================================
-   6. IMPRESIÓN Y VISTA PREVIA PDF (AJUSTE Y SALTO DE LÍNEA CORREGIDO)
+   6. SECCIÓN TAREAS PROGRAMADAS GENERALES
+   ========================================================================== */
+
+/* Botón de Imprimir Reporte Rediseñado */
+.btn-imprimir-reporte {
+    color: #38bdf8 !important;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid #0284c7 !important;
+    border-radius: 8px !important;
+    font-size: 0.85rem !important;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease-in-out !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2) !important;
+}
+
+    .btn-imprimir-reporte:hover {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+        border-color: #38bdf8 !important;
+        box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4) !important;
+        transform: translateY(-1px);
+    }
+
+/* ComboBox Personalizado para Campaña */
+.select-campana-custom {
+    background-color: #0b132b !important;
+    color: #38bdf8 !important;
+    border: 1px solid rgba(56, 189, 248, 0.4) !important;
+    border-radius: 6px !important;
+    padding: 3px 8px !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    outline: none !important;
+    cursor: pointer;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+}
+
+    .select-campana-custom:focus {
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3) !important;
+    }
+
+/* Tabla de Campaña de Renovación */
+.tabla-campana-renovacion {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    font-size: 0.72rem !important;
+}
+
+    .tabla-campana-renovacion thead th {
+        background-color: #0f172a !important;
+        color: #38bdf8 !important;
+        padding: 6px 4px !important;
+        border: 1px solid rgba(148, 163, 184, 0.2) !important;
+        font-weight: 700 !important;
+    }
+
+    .tabla-campana-renovacion tbody td {
+        background-color: rgba(15, 23, 42, 0.7) !important;
+        color: #f1f5f9 !important;
+        padding: 6px 4px !important;
+        border: 1px solid rgba(148, 163, 184, 0.15) !important;
+    }
+
+/* Select de Estatus en Fila de Tabla */
+.ddl-estatus-tabla {
+    font-size: 0.75rem !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+    width: auto !important;
+    min-width: 105px !important;
+}
+
+    .ddl-estatus-tabla.estatus-pendiente {
+        background-color: #d97706 !important;
+        color: #ffffff !important;
+        border: 1px solid #fbbf24 !important;
+    }
+
+    .ddl-estatus-tabla.estatus-encurso {
+        background-color: #0284c7 !important;
+        color: #ffffff !important;
+        border: 1px solid #38bdf8 !important;
+    }
+
+    .ddl-estatus-tabla.estatus-resuelta {
+        background-color: #15803d !important;
+        color: #ffffff !important;
+        border: 1px solid #4ade80 !important;
+    }
+
+/* Insignias de Tipo de Tarea - Base Genérica */
+.badge-tipo-tabla,
+[class*="badge-tipo-"] {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    display: inline-block !important;
+    text-align: center !important;
+    letter-spacing: 0.3px !important;
+    white-space: nowrap !important;
+    color: #ffffff !important; /* Texto Blanco Puro */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+    /* Insignias de Tipo de Tarea con Colores de Relleno Oscuros por Categoría */
+    .badge-tipo-tabla[data-tipo="Red"],
+    .badge-tipo-red,
+    td[data-tipo="Red"] .badge-tipo-tabla {
+        background-color: #0f3d61 !important;
+        color: #ffffff !important;
+        border: 1px solid #1d6fa5 !important;
+    }
+
+    .badge-tipo-tabla[data-tipo="Interno"],
+    .badge-tipo-interno,
+    td[data-tipo="Interno"] .badge-tipo-tabla {
+        background-color: #3d2b0f !important;
+        color: #ffffff !important;
+        border: 1px solid #855b18 !important;
+    }
+
+    .badge-tipo-tabla[data-tipo="Plan de Respaldos"],
+    .badge-tipo-respaldos,
+    td[data-tipo="Plan de Respaldos"] .badge-tipo-tabla {
+        background-color: #0f4229 !important;
+        color: #ffffff !important;
+        border: 1px solid #1b7a4d !important;
+    }
+
+    .badge-tipo-tabla[data-tipo="Mantenimiento"],
+    .badge-tipo-mantenimiento,
+    td[data-tipo="Mantenimiento"] .badge-tipo-tabla {
+        background-color: #3b1f52 !important;
+        color: #ffffff !important;
+        border: 1px solid #6b3ba4 !important;
+    }
+
+    .badge-tipo-tabla[data-tipo="Licenciamiento"],
+    .badge-tipo-licenciamiento,
+    td[data-tipo="Licenciamiento"] .badge-tipo-tabla {
+        background-color: #521f3a !important;
+        color: #ffffff !important;
+        border: 1px solid #942b65 !important;
+    }
+
+/* Botones de Acción (Editar y Eliminar) - Relleno Sólido como el de Estatus */
+.btn-accion-tabla {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+    /* Botón Editar - Relleno Azul Oscuro Sólido */
+    .btn-accion-tabla.btn-editar {
+        background-color: #0f3d61 !important;
+        color: #ffffff !important;
+        border: 1px solid #1d6fa5 !important;
+    }
+
+        .btn-accion-tabla.btn-editar i {
+            color: #ffffff !important;
+        }
+
+        .btn-accion-tabla.btn-editar:hover {
+            background-color: #0284c7 !important;
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.5) !important;
+            transform: translateY(-1px);
+        }
+
+    /* Botón Eliminar - Relleno Rojo Vinoso Oscuro Sólido */
+    .btn-accion-tabla.btn-eliminar {
+        background-color: #61131b !important;
+        color: #ffffff !important;
+        border: 1px solid #a82431 !important;
+    }
+
+        .btn-accion-tabla.btn-eliminar i {
+            color: #ffffff !important;
+        }
+
+        .btn-accion-tabla.btn-eliminar:hover {
+            background-color: #b91c1c !important;
+            border-color: #f87171 !important;
+            box-shadow: 0 0 8px rgba(248, 113, 113, 0.5) !important;
+            transform: translateY(-1px);
+        }
+
+/* Barras de Desplazamiento Sincronizadas */
+.wrapper-scroll-top {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 12px;
+    background: #0f172a;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    display: none;
+}
+
+.div-scroll-top {
+    height: 12px;
+}
+
+.table-responsive::-webkit-scrollbar,
+.wrapper-scroll-top::-webkit-scrollbar,
+.box-historial-comentarios::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track,
+.wrapper-scroll-top::-webkit-scrollbar-track,
+.box-historial-comentarios::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+.table-responsive::-webkit-scrollbar-thumb,
+.wrapper-scroll-top::-webkit-scrollbar-thumb,
+.box-historial-comentarios::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 4px;
+    border: 1px solid #38bdf8;
+}
+
+    .table-responsive::-webkit-scrollbar-thumb:hover,
+    .wrapper-scroll-top::-webkit-scrollbar-thumb:hover,
+    .box-historial-comentarios::-webkit-scrollbar-thumb:hover {
+        background: #0284c7;
+    }
+
+/* Contenedor del Historial de Observaciones en Modal */
+.box-historial-comentarios {
+    background-color: #090e1a !important;
+    border: 1px solid #1e293b !important;
+    border-radius: 10px !important;
+    padding: 14px 16px !important;
+    max-height: 230px !important;
+    overflow-y: auto !important;
+    color: #e2e8f0 !important;
+    font-size: 0.83rem !important;
+    line-height: 1.5 !important;
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+}
+
+/* ==========================================================================
+   7. IMPRESIÓN Y VISTA PREVIA PDF (AJUSTE OPTIMIZADO DE ANCHOS DE COLUMNA)
    ========================================================================== */
 
 #contenedorIndicadoresPrint .badge,
@@ -628,7 +897,7 @@ select.form-select option {
         font-weight: bold !important;
     }
 
-/* TABLA PRINCIPAL DE DETALLE DE TICKETS PARA IMPRESIÓN */
+/* TABLA PRINCIPAL DE DETALLE PARA IMPRESIÓN */
 .tabla-print-detalle {
     width: 100% !important;
     border-collapse: collapse !important;
@@ -638,7 +907,6 @@ select.form-select option {
     margin-top: 8px !important;
 }
 
-    /* Ajuste perfecto para evitar traslape en encabezados */
     .tabla-print-detalle th {
         background-color: #022778 !important;
         color: #ffffff !important;
@@ -650,7 +918,7 @@ select.form-select option {
         border: 1px solid #1d4ed8 !important;
         text-align: center !important;
         vertical-align: middle !important;
-        white-space: normal !important; /* Permite saltos de línea sin amontonarse */
+        white-space: normal !important;
         word-wrap: break-word !important;
         overflow-wrap: break-word !important;
     }
@@ -659,7 +927,7 @@ select.form-select option {
         border: 1px solid #cbd5e1 !important;
         padding: 4px 3px !important;
         color: #1e293b !important;
-        vertical-align: top !important;
+        vertical-align: middle !important;
         font-size: 7pt !important;
         word-wrap: break-word !important;
         overflow-wrap: break-word !important;
@@ -667,6 +935,9 @@ select.form-select option {
         white-space: normal !important;
     }
 
+        /* Alineación a la izquierda para texto explicativo largo en impresión */
+        .tabla-print-detalle td.col-print-objetivo,
+        .tabla-print-detalle td.col-print-obs,
         .tabla-print-detalle td.col-texto-largo,
         .tabla-print-detalle td.col-descripcion,
         .tabla-print-detalle td.col-comentarios,
@@ -675,53 +946,37 @@ select.form-select option {
             white-space: pre-wrap !important;
         }
 
-    /* DISTRIBUCIÓN DE ANCHOS PROPORCIONALES (SUMA = 100%) */
-    .tabla-print-detalle th.col-fecha {
-        width: 6.5% !important;
+    /* DISTRIBUCIÓN DE ANCHOS PROPORCIONALES PARA IMPRESIÓN */
+    .tabla-print-detalle th.col-print-num {
+        width: 3% !important;
     }
 
-    .tabla-print-detalle th.col-hora {
-        width: 4.5% !important;
+    .tabla-print-detalle th.col-print-tarea {
+        width: 12% !important;
     }
 
-    .tabla-print-detalle th.col-ticket {
-        width: 5% !important;
+    .tabla-print-detalle th.col-print-tipo {
+        width: 7% !important;
     }
 
-    .tabla-print-detalle th.col-cliente {
-        width: 8.5% !important;
+    .tabla-print-detalle th.col-print-asignado {
+        width: 10% !important;
     }
 
-    .tabla-print-detalle th.col-ejecutivo {
-        width: 6.5% !important;
+    .tabla-print-detalle th.col-print-fecha {
+        width: 7% !important;
     }
 
-    .tabla-print-detalle th.col-reporto {
-        width: 6.5% !important;
+    .tabla-print-detalle th.col-print-objetivo {
+        width: 25% !important;
     }
 
-    .tabla-print-detalle th.col-estatus {
-        width: 5.5% !important;
+    .tabla-print-detalle th.col-print-obs {
+        width: 23% !important;
     }
 
-    .tabla-print-detalle th.col-sistema {
-        width: 5.5% !important;
-    }
-
-    .tabla-print-detalle th.col-tipo {
-        width: 4.5% !important;
-    }
-
-    .tabla-print-detalle th.col-descripcion {
-        width: 19% !important;
-    }
-
-    .tabla-print-detalle th.col-comentarios {
-        width: 14% !important;
-    }
-
-    .tabla-print-detalle th.col-solucion {
-        width: 14% !important;
+    .tabla-print-detalle th.col-print-estatus {
+        width: 6% !important;
     }
 
 .badge-print-cerrado {

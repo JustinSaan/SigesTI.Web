@@ -4,53 +4,47 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SigesTI.Web.Models
 {
+    [Table("TareasProgramadas")]
     public class TareaProgramada
     {
         [Key]
         public int Id { get; set; }
 
         [Required]
-        [StringLength(200)]
+        [StringLength(250)]
         public string Tarea { get; set; } = string.Empty;
 
         [Required]
         public int TipoTareaId { get; set; }
+
         [ForeignKey("TipoTareaId")]
         public virtual TipoTareaProgramada? TipoTarea { get; set; }
 
         [Required]
-        public int PersonaAsignadaId { get; set; }
-
-        [ForeignKey("PersonaAsignadaId")]
-        public virtual UsuarioSistema? PersonaAsignada { get; set; } // Cambiado de UsuariosSistema a UsuarioSistema
+        [StringLength(150)]
+        public string PersonaSolicitante { get; set; } = string.Empty;
 
         [Required]
-        public DateTime FechaMaximaRealizacion { get; set; }
+        public int PersonaAsignadaId { get; set; }
+
+        // Mapeo corregido hacia la tabla Personal
+        [ForeignKey("PersonaAsignadaId")]
+        public virtual SigesTI.Web.Models.Personal? PersonaAsignada { get; set; }
+
+        [Required]
+        public DateTime FechaSolicitud { get; set; } = DateTime.Today;
 
         public DateTime? FechaRealizacion { get; set; }
+
+        public string? Objetivo { get; set; }
+        public int CreadoPorId { get; set; }
+
+        public string? Observaciones { get; set; }
 
         [Required]
         [StringLength(50)]
         public string Estatus { get; set; } = "Pendiente";
 
-        public string? Objetivo { get; set; }
-
-        public string? Observaciones { get; set; }
-
         public DateTime FechaCreacion { get; set; } = DateTime.Now;
-        public int CreadoPorId { get; set; }
-
-        public DateTime? FechaUltimaModificacion { get; set; }
-        public string? ModificadoPorNombre { get; set; }
-    }
-
-    public class TipoTareaProgramada
-    {
-        [Key]
-        public int Id { get; set; }
-
-        [Required]
-        [StringLength(100)]
-        public string Nombre { get; set; } = string.Empty;
     }
 }

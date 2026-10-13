@@ -1,4 +1,7 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
+    aplicarColoresTiposTarea();
+    sincronizarScrollbars();
+
     // 1. Botón Nueva Tarea
     const btnNuevaTarea = document.getElementById('btnNuevaTarea');
     if (btnNuevaTarea) {
@@ -7,14 +10,36 @@
         });
     }
 
-    // 2. Switch e Interruptor de Actividades Adicionales
+    // 2. Control dinámico de Fecha de Realización en la Modal
+    const ddlEstatusModal = document.getElementById('ddlEstatusModal');
+    if (ddlEstatusModal) {
+        ddlEstatusModal.addEventListener('change', evaluarEstadoFechaRealizacion);
+    }
+
+    // 3. Switches y ComboBox Campaña
     const switchActividades = document.getElementById('switchActividadesAdicionales');
     if (switchActividades) {
         switchActividades.addEventListener('change', function () {
             const panel = document.getElementById('panelActividadesAdicionales');
             if (panel) {
+                if (this.checked) panel.classList.remove('d-none');
+                else panel.classList.add('d-none');
+            }
+        });
+    }
+
+    const switchCampana = document.getElementById('switchCampanaRenovacion');
+    if (switchCampana) {
+        switchCampana.addEventListener('change', function () {
+            const panel = document.getElementById('panelCampanaRenovacion');
+            if (panel) {
                 if (this.checked) {
                     panel.classList.remove('d-none');
+                    const ddl = document.getElementById('ddlMesAnioCampana');
+                    if (ddl) {
+                        const [mes, anio] = ddl.value.split('-');
+                        cargarAvancesCampana(mes, anio);
+                    }
                 } else {
                     panel.classList.add('d-none');
                 }
@@ -22,62 +47,85 @@
         });
     }
 
-    // 3. Menú Desplegable de Nuevo Tipo
+    const ddlMesAnio = document.getElementById('ddlMesAnioCampana');
+    if (ddlMesAnio) {
+        ddlMesAnio.addEventListener('change', function () {
+            const [mes, anio] = this.value.split('-');
+            cargarAvancesCampana(mes, anio);
+        });
+    }
+
+    // 4. Agregar nuevo tipo de tarea
     const ddlTipo = document.getElementById('ddlTipo');
     if (ddlTipo) {
         ddlTipo.addEventListener('change', function () {
             const divNuevo = document.getElementById('divNuevoTipo');
             if (divNuevo) {
-                if (this.value === "-1") {
-                    divNuevo.classList.remove('d-none');
-                } else {
-                    divNuevo.classList.add('d-none');
-                }
+                if (this.value === "-1") divNuevo.classList.remove('d-none');
+                else divNuevo.classList.add('d-none');
             }
         });
     }
 
-    // 4. Submit de Guardar Tarea
+    // 5. Submit Formulario Modal
     const formTarea = document.getElementById('formTarea');
     if (formTarea) {
         formTarea.addEventListener('submit', guardarTareaHandler);
     }
 
-    // 5. Clics en Filas de la Tabla (Editar Tarea)
+    // 6. Clics en Filas (Editar Tarea)
     document.querySelectorAll('.fila-tarea').forEach(row => {
         row.addEventListener('click', function (e) {
-            // Evitar disparar si se hace clic en el botón resolver interno
-            if (e.target.closest('.btn-resolver')) return;
-
+            if (e.target.closest('select') || e.target.closest('button')) return;
             const id = this.getAttribute('data-id');
             if (id) abrirModalTarea(id);
         });
     });
 
-    // 6. Botón Resolver Tarea
-    document.querySelectorAll('.btn-resolver').forEach(btn => {
+    // 7. Botones Editar y Eliminar
+    document.querySelectorAll('.btn-editar-tarea').forEach(btn => {
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
             const id = this.getAttribute('data-id');
-            if (id) abrirModalResolver(id);
+            if (id) abrirModalTarea(id);
         });
     });
 
-    // 7. Confirmar Resolver Tarea
-    const btnConfirmarResolver = document.getElementById('btnConfirmarResolver');
-    if (btnConfirmarResolver) {
-        btnConfirmarResolver.addEventListener('click', marcarResuelta);
-    }
+    document.querySelectorAll('.btn-eliminar-tarea').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const id = this.getAttribute('data-id');
+            if (id) eliminarTarea(id);
+        });
+    });
 
-    // 8. Cargar Soportes Internos del Día
+    // 8. Cambio de Estatus en la Tabla
+    document.querySelectorAll('.ddl-estatus-tabla').forEach(select => {
+        aplicarEstiloSelectEstatus(select);
+        select.addEventListener('change', function (e) {
+            e.stopPropagation();
+            const id = this.getAttribute('data-id');
+            const nuevoEstatus = this.value;
+            cambiarEstatusTarea(id, nuevoEstatus, this);
+        });
+    });
+
+    // 9. Soportes Internos
     cargarSoportesDelDia();
-
     const txtAreaSoportes = document.getElementById('txtSoportesInternos');
     if (txtAreaSoportes) {
         txtAreaSoportes.addEventListener('blur', guardarSoportesAuto);
     }
 
-    // 9. EVENTOS DE IMPRESIÓN Y VISTA PREVIA REPORTE
+    // 10. Filtros Automáticos
+    document.querySelectorAll('.filtro-auto').forEach(input => {
+        input.addEventListener('change', aplicarFiltrosTabla);
+        input.addEventListener('input', aplicarFiltrosTabla);
+    });
+
+    aplicarFiltrosTabla();
+
+    // 11. Impresión Reporte
     const btnImprimir = document.getElementById('btnImprimirReporte');
     if (btnImprimir) {
         btnImprimir.addEventListener('click', abrirVistaPreviaImpresionTareas);
@@ -87,9 +135,140 @@
     if (btnConfirmarImp) {
         btnConfirmarImp.addEventListener('click', imprimirContenidoLimpioTareas);
     }
+
+    window.addEventListener('resize', sincronizarScrollbars);
 });
 
-// --- FUNCIONES DE GESTIÓN DE TAREAS ---
+function evaluarEstadoFechaRealizacion() {
+    const ddlEstatus = document.getElementById('ddlEstatusModal');
+    const txtFechaReal = document.getElementById('txtFechaRealizacion');
+    if (!ddlEstatus || !txtFechaReal) return;
+
+    if (ddlEstatus.value === 'Resuelta') {
+        txtFechaReal.disabled = false;
+        if (!txtFechaReal.value) {
+            txtFechaReal.value = obtenerFechaHoyISO();
+        }
+    } else {
+        txtFechaReal.disabled = true;
+        txtFechaReal.value = '';
+    }
+}
+
+function obtenerFechaHoyISO() {
+    const hoy = new Date();
+    const year = hoy.getFullYear();
+    const month = String(hoy.getMonth() + 1).padStart(2, '0');
+    const day = String(hoy.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function aplicarFiltrosTabla() {
+    const fSolicitud = (document.getElementById('filtroFechaSolicitud')?.value || '').trim();
+    const fRealizacion = (document.getElementById('filtroFechaRealizacion')?.value || '').trim();
+    const fEstatus = (document.getElementById('filtroEstatus')?.value || '').trim().toLowerCase();
+
+    const hoy = obtenerFechaHoyISO();
+    const hayFiltrosActivos = fSolicitud !== '' || fRealizacion !== '' || fEstatus !== '';
+
+    const filas = document.querySelectorAll('#tablaTareasOriginal tbody tr.fila-tarea');
+
+    filas.forEach(row => {
+        const valSolicitud = row.querySelector('.text-fechasolicitud')?.getAttribute('data-fecha') || '';
+        const valRealizacion = row.querySelector('.text-fechareal')?.getAttribute('data-fecha') || '';
+        const selectEstatus = row.querySelector('.ddl-estatus-tabla');
+        const valEstatus = (selectEstatus ? selectEstatus.value : '').trim().toLowerCase();
+
+        if (!hayFiltrosActivos) {
+            const esResuelta = valEstatus === 'resuelta';
+            if (!esResuelta) {
+                row.classList.remove('d-none');
+            } else {
+                if (valRealizacion === hoy || valRealizacion === '') {
+                    row.classList.remove('d-none');
+                } else {
+                    row.classList.add('d-none');
+                }
+            }
+        } else {
+            let cumpleSolicitud = !fSolicitud || valSolicitud === fSolicitud;
+            let cumpleRealizacion = !fRealizacion || valRealizacion === fRealizacion;
+            let cumpleEstatus = !fEstatus || valEstatus === fEstatus;
+
+            if (cumpleSolicitud && cumpleRealizacion && cumpleEstatus) {
+                row.classList.remove('d-none');
+            } else {
+                row.classList.add('d-none');
+            }
+        }
+    });
+
+    sincronizarScrollbars();
+}
+
+function cambiarEstatusTarea(id, nuevoEstatus, selectElement) {
+    const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('nuevoEstatus', nuevoEstatus);
+
+    fetch('?handler=CambiarEstatus', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'RequestVerificationToken': tokenInput ? tokenInput.value : ''
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            aplicarEstiloSelectEstatus(selectElement);
+
+            const row = selectElement.closest('tr');
+            if (row) {
+                const tdFechaReal = row.querySelector('.text-fechareal');
+                if (tdFechaReal) {
+                    tdFechaReal.innerText = data.fechaRealizacion;
+                    if (data.fechaRealizacion !== '-') {
+                        tdFechaReal.setAttribute('data-fecha', obtenerFechaHoyISO());
+                    } else {
+                        tdFechaReal.setAttribute('data-fecha', '');
+                    }
+                }
+            }
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Estatus Actualizado!',
+                    text: data.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+
+            aplicarFiltrosTabla();
+        } else {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('Error', data.message, 'error');
+            }
+        }
+    });
+}
+
+function aplicarEstiloSelectEstatus(select) {
+    if (!select) return;
+    const val = select.value;
+    select.className = 'form-select form-select-sm ddl-estatus-tabla text-center fw-bold py-1 px-2';
+
+    if (val === 'Resuelta') {
+        select.classList.add('estatus-resuelta');
+    } else if (val === 'En Curso') {
+        select.classList.add('estatus-encurso');
+    } else {
+        select.classList.add('estatus-pendiente');
+    }
+}
 
 function abrirModalTarea(id) {
     const form = document.getElementById('formTarea');
@@ -99,34 +278,79 @@ function abrirModalTarea(id) {
     const divNuevoTipo = document.getElementById('divNuevoTipo');
     if (divNuevoTipo) divNuevoTipo.classList.add('d-none');
 
+    const txtNuevoComentario = document.getElementById('txtNuevoComentario');
+    if (txtNuevoComentario) txtNuevoComentario.value = '';
+
+    const modalElem = document.getElementById('modalTarea');
+
     if (parseInt(id) === 0) {
         document.getElementById('modalTareaTitulo').innerHTML = '<i class="bi bi-plus-circle me-2 text-info"></i>Nueva Tarea Programada';
-        const modalElem = document.getElementById('modalTarea');
+
+        const inputFecha = document.getElementById('txtFechaSolicitud');
+        if (inputFecha) inputFecha.value = obtenerFechaHoyISO();
+
+        const ddlEst = document.getElementById('ddlEstatusModal');
+        if (ddlEst) ddlEst.value = 'Pendiente';
+
+        evaluarEstadoFechaRealizacion();
+
+        const contHistorial = document.getElementById('contenedorHistorialComentarios');
+        if (contHistorial) contHistorial.innerHTML = '<span class="text-muted small fst-italic">No hay observaciones registradas.</span>';
+
         const modal = bootstrap.Modal.getInstance(modalElem) || new bootstrap.Modal(modalElem);
         modal.show();
     } else {
         document.getElementById('modalTareaTitulo').innerHTML = '<i class="bi bi-pencil-square me-2 text-info"></i>Editar Tarea Programada';
+
         fetch(`?handler=ObtenerTarea&id=${id}`)
             .then(res => res.json())
             .then(data => {
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                    return;
+                }
+
                 document.getElementById('tareaId').value = data.id;
                 document.getElementById('txtTarea').value = data.tarea;
                 document.getElementById('ddlTipo').value = data.tipoTareaId;
+                if (document.getElementById('ddlPersonaSolicitante')) {
+                    document.getElementById('ddlPersonaSolicitante').value = data.personaSolicitante || '';
+                }
                 document.getElementById('ddlUsuario').value = data.personaAsignadaId;
-                document.getElementById('txtFechaMaxima').value = data.fechaMaximaRealizacion;
+                if (document.getElementById('txtFechaSolicitud')) {
+                    document.getElementById('txtFechaSolicitud').value = data.fechaSolicitud;
+                }
                 document.getElementById('txtObjetivo').value = data.objetivo || '';
-                document.getElementById('txtObservaciones').value = data.observaciones || '';
 
-                const modalElem = document.getElementById('modalTarea');
+                const ddlEst = document.getElementById('ddlEstatusModal');
+                if (ddlEst) ddlEst.value = data.estatus || 'Pendiente';
+
+                const txtFechaReal = document.getElementById('txtFechaRealizacion');
+                if (txtFechaReal) txtFechaReal.value = data.fechaRealizacion || '';
+
+                evaluarEstadoFechaRealizacion();
+
+                const contHistorial = document.getElementById('contenedorHistorialComentarios');
+                if (contHistorial) {
+                    if (data.observaciones && data.observaciones.trim() !== '') {
+                        contHistorial.innerText = data.observaciones;
+                    } else {
+                        contHistorial.innerHTML = '<span class="text-muted small fst-italic">No hay observaciones registradas.</span>';
+                    }
+                }
+
                 const modal = bootstrap.Modal.getInstance(modalElem) || new bootstrap.Modal(modalElem);
                 modal.show();
-            })
-            .catch(err => console.error("Error al obtener tarea:", err));
+            });
     }
 }
 
 function guardarTareaHandler(e) {
     e.preventDefault();
+
+    const btnSubmit = this.querySelector('button[type="submit"]');
+    if (btnSubmit) btnSubmit.disabled = true;
+
     const formData = new FormData(this);
     const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
 
@@ -137,41 +361,59 @@ function guardarTareaHandler(e) {
             'RequestVerificationToken': tokenInput ? tokenInput.value : ''
         }
     })
-    .then(res => res.json())
-    .then(data => {
+    .then(async res => {
+        const data = await res.json();
+        if (data.redirect) {
+            window.location.href = data.redirect;
+            return;
+        }
+
         if (data.success) {
-            if (typeof mostrarModalExito === 'function') {
-                mostrarModalExito(data.message, () => location.reload());
-            } else if (typeof Swal !== 'undefined') {
-                Swal.fire('¡Éxito!', data.message, 'success').then(() => location.reload());
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Guardado!',
+                    text: data.message,
+                    timer: 1800,
+                    showConfirmButton: false
+                }).then(() => location.reload());
             } else {
-                alert(data.message);
                 location.reload();
             }
+        } else {
+            if (btnSubmit) btnSubmit.disabled = false;
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('Error al Guardar', data.message, 'error');
+            }
         }
-    })
-    .catch(err => console.error("Error al guardar tarea:", err));
+    });
 }
 
-function abrirModalResolver(id) {
-    document.getElementById('resolverTareaId').value = id;
-    const modalElem = document.getElementById('modalResolverTarea');
-    const modal = bootstrap.Modal.getInstance(modalElem) || new bootstrap.Modal(modalElem);
-    modal.show();
+function eliminarTarea(id) {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: '¿Eliminar tarea?',
+            text: 'Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                ejecutarEliminacion(id);
+            }
+        });
+    }
 }
 
-function marcarResuelta() {
-    const id = document.getElementById('resolverTareaId').value;
-    const fecha = document.getElementById('txtFechaRealizacion').value;
-    const obs = document.getElementById('txtObservacionesResolver').value;
+function ejecutarEliminacion(id) {
     const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
-
     const formData = new FormData();
     formData.append('id', id);
-    formData.append('fechaRealizacion', fecha);
-    formData.append('observaciones', obs);
 
-    fetch('?handler=MarcarResuelta', {
+    fetch('?handler=EliminarTarea', {
         method: 'POST',
         body: formData,
         headers: {
@@ -180,32 +422,21 @@ function marcarResuelta() {
     })
     .then(res => res.json())
     .then(data => {
-        if (data.success) {
-            if (typeof mostrarModalExito === 'function') {
-                mostrarModalExito(data.message, () => location.reload());
-            } else if (typeof Swal !== 'undefined') {
-                Swal.fire('¡Resuelta!', data.message, 'success').then(() => location.reload());
-            } else {
-                alert(data.message);
-                location.reload();
-            }
+        if (data.redirect) {
+            window.location.href = data.redirect;
+            return;
         }
-    })
-    .catch(err => console.error("Error al resolver tarea:", err));
-}
 
-// --- SOPORTES INTERNOS DEL DÍA ---
-
-function obtenerFechaHoy() {
-    const hoy = new Date();
-    const year = hoy.getFullYear();
-    const month = String(hoy.getMonth() + 1).padStart(2, '0');
-    const day = String(hoy.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+        if (data.success) {
+            Swal.fire('Eliminado', data.message, 'success').then(() => location.reload());
+        } else {
+            Swal.fire('No permitido', data.message, 'error');
+        }
+    });
 }
 
 function cargarSoportesDelDia() {
-    const fechaHoy = obtenerFechaHoy();
+    const fechaHoy = obtenerFechaHoyISO();
     const fechaGuardada = localStorage.getItem('soportes_fecha');
     const txtArea = document.getElementById('txtSoportesInternos');
     const switchAct = document.getElementById('switchActividadesAdicionales');
@@ -214,7 +445,6 @@ function cargarSoportesDelDia() {
     if (fechaGuardada !== fechaHoy) {
         localStorage.removeItem('soportes_texto');
         localStorage.setItem('soportes_fecha', fechaHoy);
-
         if (txtArea) txtArea.value = '';
         if (switchAct) switchAct.checked = false;
         if (panel) panel.classList.add('d-none');
@@ -224,15 +454,12 @@ function cargarSoportesDelDia() {
             if (txtArea) txtArea.value = textoGuardado;
             if (switchAct) switchAct.checked = true;
             if (panel) panel.classList.remove('d-none');
-        } else {
-            if (switchAct) switchAct.checked = false;
-            if (panel) panel.classList.add('d-none');
         }
     }
 }
 
 function guardarSoportesAuto() {
-    const fechaHoy = obtenerFechaHoy();
+    const fechaHoy = obtenerFechaHoyISO();
     const txtArea = document.getElementById('txtSoportesInternos');
     const lbl = document.getElementById('lblEstadoGuardado');
 
@@ -255,10 +482,78 @@ function guardarSoportesAuto() {
     }
 }
 
-// --- CONSTRUCCIÓN Y MÓDULO DE IMPRESIÓN ---
+function cargarAvancesCampana(mes, anio) {
+    fetch(`?handler=ResumenCampana&mes=${mes}&anio=${anio}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('campTotalClientes').innerText = data.totalClientes;
+            document.getElementById('campEncuestasFin').innerText = data.encuestasFinalizadas;
+            document.getElementById('campSeguimientoPend').innerText = data.seguimientoPendiente;
+            document.getElementById('campEncuestasCurso').innerText = data.encuestasEnCurso;
+            document.getElementById('campPorcentaje').innerText = data.porcentaje + '%';
+            document.getElementById('campContactadosHoy').innerText = data.contactadosHoy;
+
+            document.getElementById('printCampTotal').innerText = data.totalClientes;
+            document.getElementById('printCampFin').innerText = data.encuestasFinalizadas;
+            document.getElementById('printCampPend').innerText = data.seguimientoPendiente;
+            document.getElementById('printCampCurso').innerText = data.encuestasEnCurso;
+            document.getElementById('printCampPorcentaje').innerText = data.porcentaje + '%';
+            document.getElementById('printCampContactados').innerText = data.contactadosHoy;
+        });
+}
+
+function aplicarColoresTiposTarea() {
+    // Paleta con relleno sólido elegante, bordes definidos y texto blanco (#ffffff)
+    const colores = [
+        { bg: '#0f3d61', border: '#1d6fa5', color: '#ffffff' }, // Azul (Red)
+        { bg: '#3d2b0f', border: '#855b18', color: '#ffffff' }, // Ámbar (Interno)
+        { bg: '#0f4229', border: '#1b7a4d', color: '#ffffff' }, // Verde (Plan de Respaldos)
+        { bg: '#3b1f52', border: '#6b3ba4', color: '#ffffff' }, // Morado (Mantenimiento)
+        { bg: '#521f3a', border: '#942b65', color: '#ffffff' }, // Rosa (Licenciamiento)
+        { bg: '#0f4044', border: '#166e75', color: '#ffffff' }  // Cyan
+    ];
+
+    const mapa = {};
+    let colorIndex = 0;
+
+    document.querySelectorAll('.badge-tipo-tabla').forEach(badge => {
+        const nombre = badge.innerText.trim();
+        if (!mapa[nombre]) {
+            mapa[nombre] = colores[colorIndex % colores.length];
+            colorIndex++;
+        }
+        const config = mapa[nombre];
+        badge.style.backgroundColor = config.bg;
+        badge.style.borderColor = config.border;
+        badge.style.color = config.color;
+        badge.style.borderStyle = 'solid';
+        badge.style.borderWidth = '1px';
+    });
+}
+
+function sincronizarScrollbars() {
+    const tableContainer = document.getElementById('scrollTableContainer');
+    const topContainer = document.getElementById('scrollTopContainer');
+    const topDummy = document.getElementById('scrollTopDummy');
+
+    if (!tableContainer || !topContainer || !topDummy) return;
+
+    if (tableContainer.scrollWidth > tableContainer.clientWidth) {
+        topContainer.style.display = 'block';
+        topDummy.style.width = tableContainer.scrollWidth + 'px';
+
+        topContainer.onscroll = function () {
+            tableContainer.scrollLeft = topContainer.scrollLeft;
+        };
+        tableContainer.onscroll = function () {
+            topContainer.scrollLeft = tableContainer.scrollLeft;
+        };
+    } else {
+        topContainer.style.display = 'none';
+    }
+}
 
 function abrirVistaPreviaImpresionTareas() {
-    // 1. Evaluar Soportes Internos
     const switchAct = document.getElementById('switchActividadesAdicionales');
     const txtSoportes = document.getElementById('txtSoportesInternos');
     const printSoportesContainer = document.getElementById('printSoportesContainer');
@@ -271,27 +566,40 @@ function abrirVistaPreviaImpresionTareas() {
         if (printSoportesContainer) printSoportesContainer.classList.add('d-none');
     }
 
-    // 2. Poblar la tabla de vista previa leyendo la tabla interactiva
+    const switchCampana = document.getElementById('switchCampanaRenovacion');
+    const printCampanaContainer = document.getElementById('printCampanaContainer');
+    const ddlMesAnio = document.getElementById('ddlMesAnioCampana');
+
+    if (switchCampana && switchCampana.checked) {
+        const textoMesAnio = ddlMesAnio ? ddlMesAnio.options[ddlMesAnio.selectedIndex].text : '';
+        document.getElementById('printCampanaTitulo').innerText = `Avances Campaña de Renovación - ${textoMesAnio}`;
+        if (printCampanaContainer) printCampanaContainer.classList.remove('d-none');
+    } else {
+        if (printCampanaContainer) printCampanaContainer.classList.add('d-none');
+    }
+
     const tbodyPrint = document.getElementById('tbodyTareasPrint');
-    const filasOriginales = document.querySelectorAll('#tablaTareasOriginal tbody tr.fila-tarea');
+    const filasOriginales = document.querySelectorAll('#tablaTareasOriginal tbody tr.fila-tarea:not(.d-none)');
 
     if (tbodyPrint) {
         tbodyPrint.innerHTML = '';
 
         if (filasOriginales.length === 0) {
-            tbodyPrint.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">No hay tareas para mostrar en el reporte.</td></tr>';
+            tbodyPrint.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-3">No hay tareas para mostrar en el reporte.</td></tr>';
         } else {
             filasOriginales.forEach(tr => {
                 const index = tr.querySelector('.text-index')?.innerText.trim() || '-';
                 const tarea = tr.querySelector('.text-tarea')?.innerText.trim() || '-';
                 const tipo = tr.querySelector('.text-tipo')?.innerText.trim() || '-';
                 const asignado = tr.querySelector('.text-asignado')?.innerText.trim() || '-';
-                const fechaMax = tr.querySelector('.text-fechamax')?.innerText.trim() || '-';
+                const fechaMax = tr.querySelector('.text-fechasolicitud')?.innerText.trim() || '-';
                 const fechaReal = tr.querySelector('.text-fechareal')?.innerText.trim() || '-';
+                const objetivo = tr.querySelector('.text-objetivo')?.innerText.trim() || '-';
                 const obs = tr.querySelector('.text-obs')?.innerText.trim() || '-';
-                const estatusText = tr.querySelector('.text-estatus')?.innerText.trim() || 'Pendiente';
+                const selectEst = tr.querySelector('.ddl-estatus-tabla');
+                const estatusText = selectEst ? selectEst.value : 'Pendiente';
 
-                const badgeClass = estatusText.includes('Resuelta') ? 'badge-print-cerrado' : 'badge-print-encurso';
+                const badgeClass = estatusText === 'Resuelta' ? 'badge-print-cerrado' : 'badge-print-encurso';
 
                 const newTr = document.createElement('tr');
                 newTr.innerHTML = `
@@ -301,6 +609,7 @@ function abrirVistaPreviaImpresionTareas() {
                     <td class="text-start">${asignado}</td>
                     <td class="text-center">${fechaMax}</td>
                     <td class="text-center">${fechaReal}</td>
+                    <td class="text-start col-texto-largo">${objetivo}</td>
                     <td class="col-solucion text-start">${obs}</td>
                     <td class="text-center"><span class="${badgeClass}">${estatusText}</span></td>
                 `;
@@ -309,7 +618,6 @@ function abrirVistaPreviaImpresionTareas() {
         }
     }
 
-    // 3. Desplegar la Modal
     const modalElem = document.getElementById('modalVistaPreviaReporte');
     if (modalElem) {
         const modal = bootstrap.Modal.getInstance(modalElem) || new bootstrap.Modal(modalElem);
@@ -328,7 +636,6 @@ function imprimirContenidoLimpioTareas() {
     const fecha = new Date().toISOString().split('T')[0];
     document.title = `Reporte_TareasProgramadas_${fecha}`;
 
-    // Desplazar la sección fuera del árbol modal para evitar recortes del navegador
     const padreOriginal = seccion.parentNode;
     document.body.appendChild(seccion);
 

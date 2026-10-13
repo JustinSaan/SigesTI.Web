@@ -88,8 +88,8 @@ namespace SigesTI.Web.Pages.Actividades
             var tareas = await _context.TareasProgramadas
                 .Include(t => t.TipoTarea)
                 .AsNoTracking()
-                .Where(a => a.FechaMaximaRealizacion >= FechaInicio && a.FechaMaximaRealizacion <= fechaFinHasta)
-                .OrderBy(a => a.FechaMaximaRealizacion)
+                .Where(a => a.FechaSolicitud >= FechaInicio && a.FechaSolicitud <= fechaFinHasta)
+                .OrderBy(a => a.FechaSolicitud)
                 .ToListAsync();
 
             int totalActividades = tareas.Count;
@@ -103,7 +103,7 @@ namespace SigesTI.Web.Pages.Actividades
             {
                 Nombre = m.Tarea ?? "Sin Título",
                 Tipo = m.TipoTarea?.Nombre ?? "General",
-                FechaProgramada = m.FechaMaximaRealizacion.ToString("dd/MM/yyyy"),
+                FechaProgramada = m.FechaSolicitud.ToString("dd/MM/yyyy"),
                 Estatus = m.Estatus ?? "Pendiente"
             }).ToList();
 
