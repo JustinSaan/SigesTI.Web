@@ -39,7 +39,6 @@ namespace SigesTI.Web.Pages.Actividades
             EquiposMatriz = equipos.Select(e => new EquipoDto
             {
                 Id = e.Id,
-                // Prioriza e.Area ingresada directamente; si viene vacía, usa la del Personal
                 Area = !string.IsNullOrEmpty(e.Area) ? e.Area : (e.Personal?.Area ?? "Sin Área / General"),
                 Ejecutivo = e.Personal?.Nombre ?? "Sin Ejecutivo Asignado",
                 PersonalId = e.PersonalId,
@@ -72,8 +71,7 @@ namespace SigesTI.Web.Pages.Actividades
 
         public async Task<IActionResult> OnPostGuardarEquipoAsync([FromBody] CrearEquipoRequest request)
         {
-            if (request == null)
-                return BadRequest("Petición inválida.");
+            if (request == null) return BadRequest("Petición inválida.");
 
             if (request.Activo && (request.Fechas == null || !request.Fechas.Any()))
                 return BadRequest("Debe proporcionar al menos una fecha de respaldo para equipos activos.");
@@ -160,6 +158,17 @@ namespace SigesTI.Web.Pages.Actividades
             return new JsonResult(new { success = true });
         }
 
+        // Nuevo handler para modificar una fecha individual asignada
+        public async Task<IActionResult> OnPostEditarFechaProgramadaAsync([FromBody] EditarFechaRequest request)
+        {
+            var prog = await _context.ProgramacionRespaldos.FindAsync(request.ProgramacionId);
+            if (prog == null) return NotFound();
+
+            prog.FechaProgramada = request.NuevaFecha;
+            await _context.SaveChangesAsync();
+            return new JsonResult(new { success = true });
+        }
+
         public async Task<IActionResult> OnPostGuardarOrdenAsync([FromBody] List<int> ordenIds)
         {
             if (ordenIds == null || !ordenIds.Any()) return BadRequest();
@@ -224,6 +233,12 @@ namespace SigesTI.Web.Pages.Actividades
             public int ProgramacionId { get; set; }
             public string Estado { get; set; } = string.Empty;
             public string? Observaciones { get; set; }
+        }
+
+        public class EditarFechaRequest
+        {
+            public int ProgramacionId { get; set; }
+            public DateTime NuevaFecha { get; set; }
         }
     }
 }

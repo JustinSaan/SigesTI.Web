@@ -2,11 +2,11 @@
 @model SigesTI.Web.Pages.Actividades.PlanRespaldosModel
 @{
     ViewData["Title"] = "Plan de Respaldos";
+    string[] mesesEs = new string[] { "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" };
 }
 @Html.AntiForgeryToken()
 
 <link rel="stylesheet" href="~/css/actividades.css" asp-append-version="true" />
-<link rel="stylesheet" href="~/css/planRespaldos.css" asp-append-version="true" />
 
 <div class="actividades-container px-4 py-3">
     <!-- Encabezado y Acciones -->
@@ -57,6 +57,7 @@
                     {
                         @foreach (var equipo in Model.EquiposMatriz)
                         {
+                            var esDesarrollo = equipo.Area.ToLower().Contains("desarrollo");
                             <tr class="@(!equipo.Activo ? "fila-inactiva" : "")" 
                                 data-id="@equipo.Id" 
                                 data-area="@equipo.Area"
@@ -68,39 +69,81 @@
                                 data-programaciones='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(equipo.Programaciones))'>
                                 
                                 <td class="drag-handle text-muted"><i class="bi bi-grip-vertical fs-5"></i></td>
-                                <td class="fw-bold text-warning text-start ps-3 cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">@equipo.Area</td>
+                                
+                                <!-- La clase del color se aplica mediante JS -->
+                                <td class="text-start ps-3 cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">
+                                    <span class="badge-area-sigest" data-area="@equipo.Area">
+                                        @equipo.Area
+                                    </span>
+                                </td>
+
                                 <td class="cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">@equipo.Ejecutivo</td>
                                 <td class="cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">
                                     <code class="text-info bg-dark px-2 py-1 rounded">@equipo.Hostname (@equipo.DireccionIP)</code>
                                 </td>
+
+                                <!-- Columna de Fechas Vigentes -->
                                 <td class="cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">
-                                    <div class="d-flex justify-content-center gap-2 flex-wrap">
-                                        @if (!equipo.Programaciones.Any())
+                                    <div class="d-flex justify-content-center gap-2 flex-wrap align-items-center">
+                                        @if (!equipo.Activo)
                                         {
-                                            <span class="text-muted small">Sin fechas pendientes</span>
+                                            <span class="badge-equipo-inactivo">
+                                                <i class="bi bi-slash-circle me-1"></i>Equipo Inactivo
+                                            </span>
+                                        }
+                                        else if (!equipo.Programaciones.Any())
+                                        {
+                                            <span class="badge-proximo-respaldo">
+                                                <i class="bi bi-clock me-1"></i>El siguiente respaldo es en Enero 2027
+                                            </span>
                                         }
                                         else
                                         {
-                                            @foreach (var p in equipo.Programaciones)
-                                            {
-                                                var esAtrasado = p.Estado == "Pendiente" && p.FechaProgramada.Date < DateTime.Today;
-                                                string claseBadge = p.Estado switch
-                                                {
-                                                    "Realizado" => "badge-realizado",
-                                                    "En Curso" => "badge-encurso",
-                                                    _ => esAtrasado ? "badge-atrasado" : "badge-pendiente"
-                                                };
+                                            var fechaHoy = DateTime.Today;
+                                            var programacionesMostradas = equipo.Programaciones
+                                                .Where(p => p.FechaProgramada.Month == fechaHoy.Month && p.FechaProgramada.Year == fechaHoy.Year || esDesarrollo)
+                                                .ToList();
 
-                                                <span class="badge @claseBadge px-2 py-1" title="@(string.IsNullOrEmpty(p.Observaciones) ? p.Estado : $"{p.Estado}: {p.Observaciones}")">
-                                                    @p.FechaProgramada.ToString("dd/MM/yyyy")
-                                                    @if (p.Estado == "Realizado") { <i class="bi bi-check-circle-fill ms-1"></i> }
-                                                    else if (esAtrasado) { <i class="bi bi-exclamation-triangle-fill ms-1"></i> }
-                                                    else if (p.Estado == "En Curso") { <i class="bi bi-clock-history ms-1"></i> }
-                                                </span>
+                                            if (!programacionesMostradas.Any())
+                                            {
+                                                var proxima = equipo.Programaciones.FirstOrDefault(p => p.FechaProgramada >= fechaHoy);
+                                                if (proxima != null)
+                                                {
+                                                    <span class="badge-proximo-respaldo">
+                                                        <i class="bi bi-calendar-event me-1"></i>El siguiente respaldo es en @mesesEs[proxima.FechaProgramada.Month] @proxima.FechaProgramada.Year
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge-proximo-respaldo">
+                                                        <i class="bi bi-clock me-1"></i>El siguiente respaldo es en Enero 2027
+                                                    </span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                @foreach (var p in programacionesMostradas)
+                                                {
+                                                    var esAtrasado = p.Estado == "Pendiente" && p.FechaProgramada.Date < DateTime.Today;
+                                                    string claseBadge = p.Estado switch
+                                                    {
+                                                        "Realizado" => "badge-realizado",
+                                                        "En Curso" => "badge-encurso",
+                                                        _ => esAtrasado ? "badge-atrasado" : "badge-pendiente"
+                                                    };
+
+                                                    <span class="badge @claseBadge px-2 py-1" title="@(string.IsNullOrEmpty(p.Observaciones) ? p.Estado : $"{p.Estado}: {p.Observaciones}")">
+                                                        @p.FechaProgramada.ToString("dd/MM/yyyy")
+                                                        @if (p.Estado == "Realizado") { <i class="bi bi-check-circle-fill ms-1"></i> }
+                                                        else if (esAtrasado) { <i class="bi bi-exclamation-triangle-fill ms-1"></i> }
+                                                        else if (p.Estado == "En Curso") { <i class="bi bi-clock-history ms-1"></i> }
+                                                    </span>
+                                                }
                                             }
                                         }
                                     </div>
                                 </td>
+
                                 <td class="cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">
                                     @if (equipo.Activo)
                                     {
@@ -166,20 +209,20 @@
 
                     <hr class="border-secondary" />
 
-                    <!-- Sección de fechas -->
+                    <!-- Sección de Fechas -->
                     <div class="mb-2" id="contenedorSeccionFechasNuevo">
                         <label class="form-label small fw-bold text-info"><i class="bi bi-calendar-plus me-1"></i>Seleccionar Fechas Programadas</label>
                         <div id="contenedorFechasNuevo">
                             <div class="input-group mb-2">
                                 <input type="date" class="form-control bg-dark text-white border-secondary fecha-input-nuevo" required />
-                                <button type="button" class="btn btn-outline-info" onclick="agregarCampoFechaNuevo()"><i class="bi bi-plus-lg"></i> Añadir otra fecha</button>
+                                <button type="button" class="btn btn-anadir-fecha-sigest" onclick="agregarCampoFechaNuevo()"><i class="bi bi-plus-lg me-1"></i> Añadir otra fecha</button>
                             </div>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer border-secondary">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-cancelar-sigest" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-primary-sigest" onclick="guardarNuevoEquipo()">Guardar Equipo</button>
             </div>
         </div>
@@ -232,8 +275,8 @@
                                 <option value="false">Inactivo</option>
                             </select>
                         </div>
-                        <button type="button" class="btn btn-outline-warning w-100 btn-sm" onclick="guardarEdicionEquipo()">
-                            <i class="bi bi-check2"></i> Actualizar Datos de Equipo
+                        <button type="button" class="btn btn-guardar-edicion-sigest w-100 py-2" onclick="guardarEdicionEquipo()">
+                            <i class="bi bi-check2-circle me-1"></i> Actualizar Datos de Equipo
                         </button>
                     </div>
 
@@ -242,10 +285,19 @@
                         <h6 class="text-info fw-bold mb-3"><i class="bi bi-check-all me-1"></i> Estado de Fechas Programadas</h6>
                         
                         <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Seleccionar Fecha a Actualizar</label>
-                            <select class="form-select bg-dark text-white border-secondary" id="selectFechaProgramacion" onchange="evaluarEstadoProgramacion()">
+                            <label class="form-label small fw-bold text-muted">Seleccionar Fecha a Modificar / Estatus</label>
+                            <select class="form-select bg-dark text-white border-secondary" id="selectFechaProgramacion" onchange="cargarFechaSeleccionadaParaEditar()">
                                 <option value="">Seleccione una fecha...</option>
                             </select>
+                        </div>
+
+                        <!-- Edición directa de la fecha asignada -->
+                        <div class="mb-3 d-none" id="divEditarFechaDirecta">
+                            <label class="form-label small fw-bold text-warning"><i class="bi bi-calendar-event me-1"></i>Corregir / Editar Fecha Seleccionada</label>
+                            <div class="input-group">
+                                <input type="date" class="form-control bg-dark text-white border-secondary" id="txtModificarFechaInput" />
+                                <button type="button" class="btn btn-actualizar-fecha-sigest" onclick="guardarCambioFechaIndividual()">Guardar Fecha</button>
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -257,29 +309,29 @@
                             </select>
                         </div>
 
-                        <!-- Recuadro de Observaciones -->
+                        <!-- Recuadro Observaciones -->
                         <div class="mb-3 d-none" id="divObservaciones">
                             <label class="form-label small fw-bold text-warning"><i class="bi bi-chat-left-text me-1"></i>Observaciones (Requerido para En Curso)</label>
                             <textarea class="form-control bg-dark text-white border-secondary" id="txtObservaciones" rows="3" placeholder="Razón por la que el respaldo está en curso..."></textarea>
                         </div>
 
-                        <button type="button" class="btn btn-success w-100 btn-sm mt-2" onclick="guardarEstatusRespaldo()">
-                            <i class="bi bi-save me-1"></i> Guardar Estatus de Respaldo
+                        <button type="button" class="btn btn-guardar-estatus-sigest w-100 py-2 mt-2" onclick="guardarEstatusRespaldo()">
+                            <i class="bi bi-check-circle me-1"></i> Guardar Estatus de Respaldo
                         </button>
 
                         <hr class="border-secondary my-3" />
 
-                        <!-- Agregar fecha adicional -->
+                        <!-- Añadir nueva fecha adicional -->
                         <label class="form-label small fw-bold text-info"><i class="bi bi-calendar-plus me-1"></i>Añadir Nueva Fecha a este Equipo</label>
                         <div class="input-group">
                             <input type="date" class="form-control bg-dark text-white border-secondary" id="txtNuevaFechaEditar" />
-                            <button type="button" class="btn btn-outline-info" onclick="agregarFechaAEquipoExistente()">Añadir</button>
+                            <button type="button" class="btn btn-anadir-fecha-sigest" onclick="agregarFechaAEquipoExistente()">Añadir</button>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer border-secondary">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-cancelar-sigest" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
