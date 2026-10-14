@@ -146,6 +146,7 @@
                         <th class="text-center">Persona Asignada</th>
                         <th class="text-center celda-sin-recorte">Fecha Solicitud</th>
                         <th class="text-center celda-sin-recorte">Fecha Realización</th>
+                        <th class="d-none">Objetivo</th>
                         <th class="text-center">Observaciones</th>
                         <th class="text-center celda-sin-recorte">Estatus</th>
                         <th class="text-center celda-sin-recorte">Acciones</th>
@@ -155,7 +156,7 @@
                     @if (!Model.ListaTareas.Any())
                     {
                         <tr id="rowSinTareas">
-                            <td colspan="10" class="text-center text-muted py-4">No hay tareas programadas registradas.</td>
+                            <td colspan="11" class="text-center text-muted py-4">No hay tareas programadas registradas.</td>
                         </tr>
                     }
                     else
@@ -163,7 +164,7 @@
                         int index = 1;
                         foreach (var item in Model.ListaTareas)
                         {
-                            <tr class="fila-tarea" data-id="@item.Id" style="cursor: pointer;">
+                            <tr class="fila-tarea" data-id="@item.Id" data-objetivo="@(string.IsNullOrWhiteSpace(item.Objetivo) ? "-" : item.Objetivo)" style="cursor: pointer;">
                                 <td class="text-center fw-bold text-index celda-sin-recorte">@(index++)</td>
                                 <td class="fw-bold text-white text-center text-tarea align-middle">
                                     @item.Tarea
@@ -182,6 +183,9 @@
                                 </td>
                                 <td class="text-center text-fechareal align-middle celda-sin-recorte" data-fecha="@(item.FechaRealizacion.HasValue ? item.FechaRealizacion.Value.ToString("yyyy-MM-dd") : "")">
                                     @(item.FechaRealizacion.HasValue ? item.FechaRealizacion.Value.ToString("dd/MM/yyyy") : "-")
+                                </td>
+                                <td class="text-objetivo d-none">
+                                    @(string.IsNullOrWhiteSpace(item.Objetivo) ? "-" : item.Objetivo)
                                 </td>
                                 <td class="text-obs align-middle col-observaciones-pantalla" title="@item.Observaciones">
                                     <div class="box-observaciones-resumen">
@@ -334,7 +338,7 @@
                             <p class="text-muted small mb-0">Área de Soporte Técnico</p>
                         </div>
                         <div class="text-end">
-                            <span class="badge bg-dark fs-6 px-3 py-2" style="color: #ffffff !important; background-color: #0f172a !important;">@DateTime.Now.ToString("dd/MM/yyyy")</span>
+                            <span class="badge bg-dark fs-6 px-3 py-2" style="color: #ffffff !important; background-color: #0f172a !important;">FECHA: @DateTime.Now.ToString("dd/MM/yyyy")</span>
                         </div>
                     </div>
 

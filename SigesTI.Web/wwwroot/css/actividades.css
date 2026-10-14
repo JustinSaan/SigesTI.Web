@@ -643,7 +643,7 @@ select.form-select option {
         border: 1px solid #4ade80 !important;
     }
 
-/* Insignias de Tipo de Tarea - Base Genérica */
+/* Insignias de Tipo de Tarea - Base Genérica con Texto Blanco Puro */
 .badge-tipo-tabla,
 [class*="badge-tipo-"] {
     font-size: 0.75rem !important;
@@ -806,7 +806,7 @@ select.form-select option {
 }
 
 /* ==========================================================================
-   7. IMPRESIÓN Y VISTA PREVIA PDF (AJUSTE OPTIMIZADO DE ANCHOS DE COLUMNA)
+   7. IMPRESIÓN Y VISTA PREVIA PDF (MÓDULO REPORTE DE TICKETS Y TAREAS)
    ========================================================================== */
 
 #contenedorIndicadoresPrint .badge,
@@ -825,6 +825,28 @@ select.form-select option {
         color: #ffffff !important;
         padding: 4px 8px !important;
         border-radius: 4px !important;
+    }
+
+    /* FORZAR COLOR ESTRUCTURAL DE INSIGNIAS DE SISTEMA EN IMPRESIÓN Y VISTA PREVIA */
+    #seccionImpresion .badge.badge-sistema-med {
+        background-color: #704332 !important;
+        color: #ffffff !important;
+        border: 1px solid #9a5e47 !important;
+        padding: 3px 2px !important;
+    }
+
+    #seccionImpresion .badge.badge-sistema-vucem {
+        background-color: #1d4ed8 !important;
+        color: #ffffff !important;
+        border: 1px solid #60a5fa !important;
+        padding: 3px 2px !important;
+    }
+
+    #seccionImpresion .badge.badge-sistema-diaweb {
+        background-color: #0284c7 !important;
+        color: #ffffff !important;
+        border: 1px solid #38bdf8 !important;
+        padding: 3px 2px !important;
     }
 
 /* TABLA INDICADORES IMPRESIÓN */
@@ -897,7 +919,7 @@ select.form-select option {
         font-weight: bold !important;
     }
 
-/* TABLA PRINCIPAL DE DETALLE PARA IMPRESIÓN */
+/* TABLA PRINCIPAL DE DETALLE PARA IMPRESIÓN (SOPORTA TICKETS Y TAREAS GENERALES) */
 .tabla-print-detalle {
     width: 100% !important;
     border-collapse: collapse !important;
@@ -935,6 +957,7 @@ select.form-select option {
         white-space: normal !important;
     }
 
+        /* RESPETAR Y RENDERIZAR PARÁGRAFOS Y SALTOS DE LÍNEA (\n) EN IMPRESIÓN */
         .tabla-print-detalle td.col-print-objetivo,
         .tabla-print-detalle td.col-print-obs,
         .tabla-print-detalle td.col-texto-largo,
@@ -943,8 +966,59 @@ select.form-select option {
         .tabla-print-detalle td.col-solucion {
             text-align: left !important;
             white-space: pre-wrap !important;
+            word-break: break-word !important;
         }
 
+    /* DISTRIBUCIÓN PROPORCIONAL DE ANCHOS PARA TICKETS (SUMA = 100%) */
+    .tabla-print-detalle th.col-fecha {
+        width: 6.5% !important;
+    }
+
+    .tabla-print-detalle th.col-hora {
+        width: 4.5% !important;
+    }
+
+    .tabla-print-detalle th.col-ticket {
+        width: 5% !important;
+    }
+
+    .tabla-print-detalle th.col-cliente {
+        width: 8.5% !important;
+    }
+
+    .tabla-print-detalle th.col-ejecutivo {
+        width: 6.5% !important;
+    }
+
+    .tabla-print-detalle th.col-reporto {
+        width: 6.5% !important;
+    }
+
+    .tabla-print-detalle th.col-estatus {
+        width: 5.5% !important;
+    }
+
+    .tabla-print-detalle th.col-sistema {
+        width: 6.5% !important;
+    }
+
+    .tabla-print-detalle th.col-tipo {
+        width: 4.5% !important;
+    }
+
+    .tabla-print-detalle th.col-descripcion {
+        width: 18.5% !important;
+    }
+
+    .tabla-print-detalle th.col-comentarios {
+        width: 13.5% !important;
+    }
+
+    .tabla-print-detalle th.col-solucion {
+        width: 13.5% !important;
+    }
+
+    /* DISTRIBUCIÓN PROPORCIONAL PARA TAREAS PROGRAMADAS */
     .tabla-print-detalle th.col-print-num {
         width: 3% !important;
     }

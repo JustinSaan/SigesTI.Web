@@ -178,7 +178,8 @@ namespace SigesTI.Web.Pages.Actividades
                     if (!string.IsNullOrWhiteSpace(TareaInput.NuevoComentario))
                     {
                         var fechaHora = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt");
-                        observacionesIniciales = $"Agregado el: {fechaHora} Por: {usuarioNombre}\n\n{TareaInput.NuevoComentario.Trim()}";
+                        observacionesIniciales = $"Agregado el: {fechaHora} Por: {usuarioNombre}: " +
+                            $"\n\n{TareaInput.NuevoComentario.Trim()}";
                     }
 
                     var nueva = new TareaProgramada
@@ -225,7 +226,8 @@ namespace SigesTI.Web.Pages.Actividades
                         if (!string.IsNullOrWhiteSpace(TareaInput.NuevoComentario))
                         {
                             var fechaHora = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt");
-                            string bloqueComentario = $"Agregado el: {fechaHora} Por: {usuarioNombre}\n\n{TareaInput.NuevoComentario.Trim()}";
+                            string bloqueComentario = $"Agregado el: {fechaHora} Por: {usuarioNombre}: " +
+                                $"\n\n{TareaInput.NuevoComentario.Trim()}";
 
                             if (string.IsNullOrWhiteSpace(existente.Observaciones))
                             {

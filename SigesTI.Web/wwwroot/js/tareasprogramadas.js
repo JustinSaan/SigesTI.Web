@@ -594,8 +594,13 @@ function abrirVistaPreviaImpresionTareas() {
                 const asignado = tr.querySelector('.text-asignado')?.innerText.trim() || '-';
                 const fechaMax = tr.querySelector('.text-fechasolicitud')?.innerText.trim() || '-';
                 const fechaReal = tr.querySelector('.text-fechareal')?.innerText.trim() || '-';
-                const objetivo = tr.querySelector('.text-objetivo')?.innerText.trim() || '-';
-                const obs = tr.querySelector('.text-obs')?.innerText.trim() || '-';
+                
+                // Intenta obtener el objetivo desde el elemento con la clase .text-objetivo o desde el atributo data-objetivo de la fila
+                const elemObjetivo = tr.querySelector('.text-objetivo');
+                const objetivo = elemObjetivo ? elemObjetivo.innerText.trim() : (tr.getAttribute('data-objetivo') || '-');
+
+                const elemObs = tr.querySelector('.text-obs');
+                const obs = elemObs ? (elemObs.title || elemObs.innerText.trim()) : '-';
                 const selectEst = tr.querySelector('.ddl-estatus-tabla');
                 const estatusText = selectEst ? selectEst.value : 'Pendiente';
 
