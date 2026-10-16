@@ -21,40 +21,40 @@
     </div>
 
 <!-- Filtros de Búsqueda -->
-<div class="glass-panel mb-4 p-3">
-    <form method="get" class="row g-2 align-items-end">
-        <!-- Campo 1 -->
-        <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Fecha de Consulta</label>
-            <input type="date" id="fechaReporteConsulta" class="form-control form-control-sm" />
-        </div>
+    <div class="glass-panel mb-4 p-3">
+        <form id="formFiltros" method="get" class="row g-2 align-items-end">
+            <!-- Campo 1 -->
+            <div class="col-md-2">
+                <label class="form-label small text-muted mb-1">Fecha de Consulta</label>
+                <input type="date" id="fechaReporteConsulta" name="FechaReporte" value="@(Model.FechaReporte?.ToString("yyyy-MM-dd"))" class="form-control form-control-sm" />
+            </div>
         
         <!-- Campo 2 -->
-        <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Sistema</label>
-            <select class="form-select form-select-sm" asp-for="FiltroSistema">
-                <option value="">-- Todos --</option>
-                <option value="DIA" style="background-color: #0f172a; color: #60a5fa;">DIA</option>
-                <option value="DIAWEB" style="background-color: #0f172a; color: #38bdf8;">DIAWEB</option>
-                <option value="SITA" style="background-color: #0f172a; color: #fb923c;">SITA</option>
-                <option value="VUCEM" style="background-color: #1d4ed8; color: #ffffff;">VUCEM</option>
-                <option value="DIAENLINEA PREMIUM" style="background-color: #0f172a; color: #4ade80;">DIAENLINEA PREMIUM</option>
-                <option value="COA" style="background-color: #0f172a; color: #22c55e;">COA</option>
-                <option value="ConectorDiawebZoe" style="background-color: #704332; color: #ffffff;">CONECTOR DIAWEB-ZOÉ</option>
-                <option value="ADMIN" style="background-color: #0f172a; color: #ffffff;">ADMIN</option>
-            </select>
-        </div>
+            <div class="col-md-2">
+                <label class="form-label small text-muted mb-1">Sistema</label>
+                <select class="form-select form-select-sm" id="FiltroSistema" asp-for="FiltroSistema">
+                    <option value="">-- Todos --</option>
+                    <option value="DIA" style="background-color: #0f172a; color: #60a5fa;">DIA</option>
+                    <option value="DIAWEB" style="background-color: #0f172a; color: #38bdf8;">DIAWEB</option>
+                    <option value="SITA" style="background-color: #0f172a; color: #fb923c;">SITA</option>
+                    <option value="VUCEM" style="background-color: #1d4ed8; color: #ffffff;">VUCEM</option>
+                    <option value="DIAENLINEA PREMIUM" style="background-color: #0f172a; color: #4ade80;">DIAENLINEA PREMIUM</option>
+                    <option value="COA" style="background-color: #0f172a; color: #22c55e;">COA</option>
+                    <option value="ConectorDiawebZoe" style="background-color: #704332; color: #ffffff;">CONECTOR DIAWEB-ZOÉ</option>
+                    <option value="ADMIN" style="background-color: #0f172a; color: #ffffff;">ADMIN</option>
+                </select>
+            </div>
 
         <!-- Campo 3 -->
-        <div class="col-md-2">
-            <label class="form-label small text-muted mb-1">Origen Servicio</label>
-            <select class="form-select form-select-sm" asp-for="FiltroOrigen">
-                <option value="">-- Todos --</option>
-                <option value="Llamada">Llamada</option>
-                <option value="Correo">Correo</option>
-                <option value="Interno">Interno</option>
-            </select>
-        </div>
+            <div class="col-md-2">
+                <label class="form-label small text-muted mb-1">Origen Servicio</label>
+                <select class="form-select form-select-sm" id="FiltroOrigen" asp-for="FiltroOrigen">
+                    <option value="">-- Todos --</option>
+                    <option value="Llamada">Llamada</option>
+                    <option value="Correo">Correo</option>
+                    <option value="Interno">Interno</option>
+                </select>
+            </div>
 
         <!-- Botones de Acción -->
         <div class="col-md-6 d-flex justify-content-end gap-2 ms-auto">
@@ -944,200 +944,32 @@
     </div>
 </div>
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-    <script>    
+    @section Scripts {
+        <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
-        const rolUsuario = "@(HttpContext.Session.GetString("Rol") ?? "")";
-        const usuarioSesion = "@(HttpContext.Session.GetString("Usuario") ?? "")";
-        const fechaReporteActual = "@(Model.FechaReporte?.ToString("dd-MM-yyyy"))";
+        <!-- Mantenemos SOLO las variables de C# (Razor) aquí, ya que el archivo .js no las reconoce -->
+        <script>
+                const rolUsuario = "@(HttpContext.Session.GetString("Rol") ?? "")";
+                const usuarioSesion = "@(HttpContext.Session.GetString("Usuario") ?? "")";
+                const fechaReporteActual = "@(Model.FechaReporte?.ToString("dd-MM-yyyy"))";
 
-        // Función para cambiar dinámicamente la clase/color del <select> de Sistema
-        function aplicarColorSelectSistema(selectElement) {
-            if (!selectElement) return;
-            const val = (selectElement.value || '').toUpperCase().trim();
-            
-            // Remover todas las clases de sistemas previas
-            selectElement.classList.remove(
-                'badge-sistema-dia', 
-                'badge-sistema-diaweb', 
-                'badge-sistema-med', 
-                'badge-sistema-sita', 
-                'badge-sistema-vucem', 
-                'badge-sistema-diaenlinea', 
-                'badge-sistema-coa', 
-                'badge-sistema-admin'
-            );
-
-            if (val.includes('CONECTOR') || val.includes('ZOE')) {
-                selectElement.classList.add('badge-sistema-med');
-            } else if (val.includes('DIAWEB')) {
-                selectElement.classList.add('badge-sistema-diaweb');
-            } else if (val.includes('DIAENLINEA')) {
-                selectElement.classList.add('badge-sistema-diaenlinea');
-            } else if (val === 'DIA') {
-                selectElement.classList.add('badge-sistema-dia');
-            } else if (val === 'SITA') {
-                selectElement.classList.add('badge-sistema-sita');
-            } else if (val === 'VUCEM') {
-                selectElement.classList.add('badge-sistema-vucem');
-            } else if (val === 'COA') {
-                selectElement.classList.add('badge-sistema-coa');
-            } else if (val === 'ADMIN') {
-                selectElement.classList.add('badge-sistema-admin');
-            } else {
-                selectElement.classList.add('badge-sistema-dia');
-            }
-        }
-
-        Chart.register(ChartDataLabels);
-
-        window.chartSistemasInstance = null;
-        window.chartEstatusInstance = null;
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // Inicializar color del select al cargar
-            const regSys = document.getElementById('regSistema');
-            const editSys = document.getElementById('editSistema');
-            if (regSys) aplicarColorSelectSistema(regSys);
-            if (editSys) aplicarColorSelectSistema(editSys);
-
-            const labelsSistemas = [
-                @Html.Raw(string.Join(",", concentradoSistemas.Select(s => $"'{s.Sistema}'")))
-            ];
-            const dataTotales = [
-                @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.Total)))
-            ];
-            const dataTiempoForma = [
-                @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.TiempoForma)))
-            ];
-            const dataCerradosAtrasados = [
-                @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.CerradosAtrasados)))
-            ];
-            const dataEnCurso = [
-                @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.EnCurso)))
-            ];
-
-            const obtenerColorSistema = (sistema) => {
-                const sysUpper = (sistema || '').toUpperCase().trim();
-                
-                if (sysUpper.includes('CONECTOR') || sysUpper.includes('ZOE')) return '#704332';
-                if (sysUpper.includes('DIAWEB')) return '#0284c7';
-                if (sysUpper.includes('DIAENLINEA')) return '#16a34a';
-                if (sysUpper === 'DIA') return '#2563eb';
-                if (sysUpper === 'SITA') return '#ea580c';
-                if (sysUpper === 'VUCEM') return '#1d4ed8';
-                if (sysUpper === 'COA') return '#15803d';
-                if (sysUpper === 'ADMIN') return '#0f172a';
-                
-                return '#38bdf8';
-            };
-
-            const coloresDona = labelsSistemas.map(sys => obtenerColorSistema(sys));
-
-            // 1. Gráfica de Dona
-            const ctx1 = document.getElementById('chartSistemas');
-            if (ctx1 && labelsSistemas.length > 0) {
-                window.chartSistemasInstance = new Chart(ctx1, {
-                    type: 'doughnut',
-                    data: {
-                        labels: labelsSistemas,
-                        datasets: [{
-                            data: dataTotales,
-                            backgroundColor: coloresDona,
-                            borderWidth: 1,
-                            borderColor: '#0f172a'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: false,
-                        plugins: {
-                            title: { display: false },
-                            legend: {
-                                position: 'right',
-                                labels: { color: '#ffffff', font: { size: 10, weight: 'bold' } }
-                            },
-                            datalabels: {
-                                color: '#ffffff',
-                                font: { weight: 'bold', size: 11 },
-                                formatter: (value, ctx) => {
-                                    if (!value || value === 0) return '';
-                                    let sum = 0;
-                                    let dataArr = ctx.chart.data.datasets[0].data;
-                                    dataArr.map(data => { sum += data; });
-                                    let percentage = (value * 100 / sum).toFixed(1) + "%";
-                                    return percentage;
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-
-            // 2. Gráfica de Barras
-            const ctx2 = document.getElementById('chartEstatusSistema');
-            if (ctx2 && labelsSistemas.length > 0) {
-                window.chartEstatusInstance = new Chart(ctx2, {
-                    type: 'bar',
-                    data: {
-                        labels: labelsSistemas,
-                        datasets: [
-                            {
-                                label: 'Tiempo y Forma',
-                                data: dataTiempoForma,
-                                backgroundColor: '#22c55e'
-                            },
-                            {
-                                label: 'Cerrado (Atrasados)',
-                                data: dataCerradosAtrasados,
-                                backgroundColor: '#3b82f6'
-                            },
-                            {
-                                label: 'En Curso',
-                                data: dataEnCurso,
-                                backgroundColor: '#eab308'
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: false,
-                        scales: {
-                            x: {
-                                ticks: { color: '#ffffff', font: { size: 9, weight: 'bold' } },
-                                grid: { display: false }
-                            },
-                            y: {
-                                ticks: { color: '#ffffff', precision: 0, font: { weight: 'bold' } },
-                                grid: { color: 'rgba(255,255,255,0.1)' }
-                            }
-                        },
-                        plugins: {
-                            title: { display: false },
-                            legend: {
-                                position: 'top',
-                                labels: { color: '#ffffff', font: { size: 9, weight: 'bold' } }
-                            },
-                            datalabels: {
-                                anchor: 'end',
-                                align: 'start',
-                                color: '#ffffff',
-                                font: { weight: 'bold', size: 10 },
-                                formatter: (value) => {
-                                    return value > 0 ? value : '';
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-        });
-
-    </script>
-    <script src="~/js/modales.js" asp-append-version="true"></script>
+                const labelsSistemas = [
+                            @Html.Raw(string.Join(",", concentradoSistemas.Select(s => $"'{s.Sistema}'")))
+                        ];
+                const dataTotales = [
+                            @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.Total)))
+                        ];
+                const dataTiempoForma = [
+                            @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.TiempoForma)))
+                        ];
+                const dataCerradosAtrasados = [
+                            @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.CerradosAtrasados)))
+                        ];
+                const dataEnCurso = [
+                            @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.EnCurso)))
+                        ];
+        </script>
+    <script src="~/js/reporte-tickets.js" asp-append-version="true"></script>
 }

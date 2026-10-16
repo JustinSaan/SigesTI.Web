@@ -211,9 +211,9 @@
 .actividades-container .badge-sistema-dia,
 .tabla-sigest .badge-sistema-dia,
 select.badge-sistema-dia {
-    background-color: #2563eb !important;
+    background-color: #25B3EB !important;
     color: #ffffff !important;
-    border: 1px solid #60a5fa !important;
+    border: 1px solid #60C9FA !important;
 }
 
 .actividades-container .badge-sistema-diaweb,
@@ -277,9 +277,9 @@ select.badge-sistema-admin {
    ========================================================================== */
 
 select.form-select.badge-sistema-dia {
-    background-color: #2563eb !important;
+    background-color: #25B3EB !important;
     color: #ffffff !important;
-    border-color: #60a5fa !important;
+    border-color: #60C9FA !important;
 }
 
 select.form-select.badge-sistema-diaweb {
@@ -681,6 +681,42 @@ select.form-select option {
         padding: 3px 2px !important;
     }
 
+    #seccionImpresion .badge.badge-sistema-diaenlinea {
+        background-color: #16a34a !important;
+        color: #ffffff !important;
+        border: 1px solid #4ade80 !important;
+        padding: 3px 2px !important;
+    }
+
+    #seccionImpresion .badge.badge-sistema-sita {
+        background-color: #ea580c !important;
+        color: #ffffff !important;
+        border: 1px solid #fb923c !important;
+        padding: 3px 2px !important;
+    }
+
+    #seccionImpresion .badge.badge-sistema-coa {
+        background-color: #15803d !important;
+        color: #ffffff !important;
+        border: 1px solid #22c55e !important;
+        padding: 3px 2px !important;
+    }
+
+    #seccionImpresion .badge.badge-sistema-admin {
+        background-color: #0f172a !important;
+        color: #38bdf8 !important;
+        border: 1px solid rgba(56, 189, 248, 0.3) !important;
+        padding: 3px 2px !important;
+    }
+
+    #seccionImpresion .badge.badge-sistema-dia {
+        background-color: #25B3EB !important;
+        color: #ffffff !important;
+        border: 1px solid #60C9FA !important;
+        padding: 3px 2px !important;
+    }
+
+
 /* TABLA INDICADORES IMPRESIÓN */
 .tabla-print-indicadores {
     width: 100% !important;
@@ -1037,3 +1073,4 @@ select.form-select option {
     .btn-actualizar-fecha-sigest:hover {
         background: linear-gradient(135deg, #0284c7, #0369a1) !important;
     }
+
