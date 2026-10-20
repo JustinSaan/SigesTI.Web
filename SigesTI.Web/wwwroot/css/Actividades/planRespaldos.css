@@ -1,44 +1,603 @@
-﻿/* Estados de fila */
-.fila-inactiva {
-    opacity: 0.45;
-    background-color: rgba(0, 0, 0, 0.2) !important;
+﻿/* --------------------------------------------------------------------------
+   1. CONTENEDOR PRINCIPAL Y ESTRUCTURA BASE
+   -------------------------------------------------------------------------- */
+.actividades-container {
+    padding: 24px;
+    background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.25), transparent 40%), radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.15), transparent 35%), #0b132b !important;
+    min-height: calc(100vh - 120px);
+    color: #e2e8f0;
 }
 
-/* Badges de fechas y estatus */
-.badge-atrasado {
-    background-color: #dc3545;
-    color: #fff;
-}
-
-.badge-realizado {
-    background-color: #198754;
-    color: #fff;
-}
-
-.badge-encurso {
-    background-color: #fd7e14;
-    color: #fff;
-}
-
-.badge-pendiente {
-    background-color: #495057;
-    color: #fff;
-}
-
-/* Utilidades de cursor y Drag & Drop */
-.cursor-pointer {
-    cursor: pointer;
-}
-
-.drag-handle {
-    cursor: grab;
-}
-
-    .drag-handle:active {
-        cursor: grabbing;
+    .actividades-container * {
+        text-shadow: none !important;
     }
 
-.sortable-ghost {
-    opacity: 0.3;
-    background-color: rgba(13, 202, 240, 0.2) !important;
+    .actividades-container ::selection {
+        background-color: rgba(56, 189, 248, 0.3) !important;
+        color: #ffffff !important;
+    }
+
+/* Paneles y Tarjetas estilo Glassmorphism con relieve definido */
+.glass-panel {
+    background: linear-gradient(145deg, #172a45, #0f172a) !important;
+    border: 1px solid rgba(56, 189, 248, 0.28) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
+
+    .glass-panel h1,
+    .glass-panel h2,
+    .glass-panel h3,
+    .glass-panel h4,
+    .glass-panel span,
+    .glass-panel p,
+    .glass-panel label {
+        background-color: transparent !important;
+    }
+
+/* Encabezados de Paneles / Tarjetas */
+.glass-header {
+    background: rgba(15, 23, 42, 0.85) !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.3) !important;
+    padding: 14px 20px !important;
+    color: #38bdf8 !important;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.actividades-container .text-muted,
+.actividades-container .text-secondary {
+    color: #94a3b8 !important;
+}
+
+/* Containers de Gráficas e Indicadores */
+.chart-container-box {
+    position: relative;
+    height: 280px;
+    width: 100%;
+}
+
+.actividades-container canvas {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.35));
+}
+
+/* ==========================================================================
+   2. TABLAS INTERACTIVAS DEL SISTEMA (PANTALLA PRINCIPAL)
+   ========================================================================== */
+
+.tabla-sigest {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    table-layout: auto !important;
+}
+
+    /* Encabezados del módulo interactivo */
+    .tabla-sigest thead th,
+    .tabla-sigest th {
+        padding: 12px 10px !important;
+        color: #38bdf8 !important;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        background: #0f172a !important;
+        border: 1px solid rgba(148, 163, 184, 0.2) !important;
+        border-bottom: 2px solid rgba(56, 189, 248, 0.3) !important;
+        white-space: nowrap !important;
+    }
+
+    /* Celdas generales del sistema */
+    .tabla-sigest tbody td {
+        padding: 8px 10px !important;
+        color: #f1f5f9 !important;
+        font-size: 0.82rem !important;
+        vertical-align: middle !important;
+        text-align: center !important;
+        border: 1px solid rgba(148, 163, 184, 0.15) !important;
+        background: rgba(15, 23, 42, 0.6) !important;
+    }
+
+    /* Hover de filas */
+    .tabla-sigest tbody tr:hover td {
+        background: rgba(56, 189, 248, 0.15) !important;
+        color: #ffffff !important;
+    }
+
+/* CONTROL DE COLUMNA OBSERVACIONES RESUMIDA EN PANTALLA */
+.col-observaciones-pantalla {
+    max-width: 220px !important;
+    min-width: 160px !important;
+    text-align: left !important;
+    vertical-align: middle !important;
+}
+
+.box-observaciones-resumen {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.78rem !important;
+    line-height: 1.35 !important;
+    color: #94a3b8 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+}
+
+/* PROTECCIÓN PARA BANDERAS Y BOTONES EN CELDA */
+.celda-sin-recorte {
+    white-space: nowrap !important;
+}
+
+/* RESTAURACIÓN DE SOMBREADOS / INSIGNIAS EN TABLAS DE PANTALLA */
+.actividades-container .badge,
+.tabla-sigest .badge,
+.modal-content .badge {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.4px !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    display: inline-block !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+    .actividades-container .badge.bg-primary,
+    .tabla-sigest .badge.bg-primary {
+        background-color: #0284c7 !important;
+        color: #ffffff !important;
+        border: 1px solid #38bdf8 !important;
+    }
+
+    .actividades-container .badge.bg-success,
+    .tabla-sigest .badge.bg-success {
+        background-color: #15803d !important;
+        color: #ffffff !important;
+        border: 1px solid #4ade80 !important;
+    }
+
+    .actividades-container .badge.bg-warning,
+    .tabla-sigest .badge.bg-warning {
+        background-color: #d97706 !important;
+        color: #ffffff !important;
+        border: 1px solid #fbbf24 !important;
+    }
+
+    .actividades-container .badge.bg-danger,
+    .tabla-sigest .badge.bg-danger {
+        background-color: #b91c1c !important;
+        color: #ffffff !important;
+        border: 1px solid #f87171 !important;
+    }
+
+    .actividades-container .badge.bg-info,
+    .tabla-sigest .badge.bg-info {
+        background-color: #0369a1 !important;
+        color: #ffffff !important;
+        border: 1px solid #38bdf8 !important;
+    }
+
+    .actividades-container .badge.bg-secondary,
+    .tabla-sigest .badge.bg-secondary {
+        background-color: #475569 !important;
+        color: #f8fafc !important;
+        border: 1px solid #94a3b8 !important;
+    }
+
+.actividades-container .text-highlight,
+.tabla-sigest .ticket-number,
+.tabla-sigest .badge-escalado {
+    color: #38bdf8 !important;
+    font-weight: 700 !important;
+    background-color: rgba(56, 189, 248, 0.15) !important;
+    padding: 4px 10px !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+    display: inline-block !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. INPUTS, SELECTS Y BARRAS DE PROGRESO
+   -------------------------------------------------------------------------- */
+.actividades-container label {
+    color: #cbd5e1 !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 6px !important;
+    display: inline-block !important;
+}
+
+.actividades-container input[type="text"],
+.actividades-container input[type="date"],
+.actividades-container select,
+.actividades-container textarea {
+    color: #ffffff !important;
+    background-color: #0f172a !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+    outline: none !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    color-scheme: dark !important;
+}
+
+    .actividades-container select option {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+    }
+
+    .actividades-container input::placeholder,
+    .actividades-container textarea::placeholder {
+        color: #94a3b8 !important;
+        opacity: 1 !important;
+    }
+
+    .actividades-container input:focus,
+    .actividades-container select:focus,
+    .actividades-container textarea:focus {
+        border-color: #38bdf8 !important;
+        background-color: #1e293b !important;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+    }
+
+.actividades-container .form-switch .form-check-input {
+    background-color: #334155 !important;
+    border-color: #475569 !important;
+    width: 2.5em !important;
+    height: 1.25em !important;
+    cursor: pointer !important;
+}
+
+    .actividades-container .form-switch .form-check-input:checked {
+        background-color: #38bdf8 !important;
+        border-color: #38bdf8 !important;
+    }
+
+.actividades-container .progress {
+    background-color: #0f172a !important;
+    border: 1px solid #1e293b !important;
+    border-radius: 6px !important;
+    overflow: hidden;
+}
+
+.actividades-container .list-group-item {
+    background-color: transparent !important;
+    border-color: rgba(148, 163, 184, 0.15) !important;
+    color: #f1f5f9 !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. BOTONES Y ACCIONES
+   -------------------------------------------------------------------------- */
+.btn-primary-sigest {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid #0284c7 !important;
+    border-radius: 15px !important;
+    font-size: 0.85rem !important;
+    padding: 10px 22px;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease-in-out !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2) !important;
+}
+
+    .btn-primary-sigest:hover {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+        border-color: #38bdf8 !important;
+        box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4) !important;
+        transform: translateY(-1px);
+    }
+
+.btn-secondary-sigest {
+    color: #f1f5f9 !important;
+    font-weight: 700 !important;
+    background: #334155 !important;
+    border: 1px solid #475569 !important;
+    border-radius: 8px !important;
+    transition: all 0.18s ease !important;
+}
+
+    .btn-secondary-sigest:hover {
+        color: #ffffff !important;
+        background: #475569 !important;
+        transform: translateY(-1px) !important;
+    }
+
+/* --------------------------------------------------------------------------
+   5. VENTANAS MODALES
+   -------------------------------------------------------------------------- */
+.modal-content {
+    background-color: #0b132b !important;
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+}
+
+.modal-header {
+    background: #0f172a !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.25) !important;
+    color: #38bdf8 !important;
+}
+
+.modal-title {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.modal-body label,
+.modal-content label {
+    color: #cbd5e1 !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 6px !important;
+    display: inline-block !important;
+}
+
+.modal-content .form-control,
+.modal-content .form-select,
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+    color: #ffffff !important;
+    background-color: #172a45 !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+    font-size: 0.88rem !important;
+    color-scheme: dark !important;
+}
+
+    .modal-content select option {
+        background-color: #0f172a !important;
+        color: #ffffff !important;
+    }
+
+    .modal-content input::placeholder,
+    .modal-content textarea::placeholder {
+        color: #94a3b8 !important;
+        opacity: 1 !important;
+    }
+
+    .modal-content .form-control:focus,
+    .modal-content .form-select:focus,
+    .modal-content input:focus,
+    .modal-content select:focus,
+    .modal-content textarea:focus {
+        background-color: #1e293b !important;
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+        color: #ffffff !important;
+    }
+
+.modal-footer {
+    border-top: 1px solid rgba(148, 163, 184, 0.18) !important;
+    background-color: #0f172a !important;
+}
+
+/* ==========================================================================
+   8. NUEVOS ESTILOS ESPECÍFICOS DEL PLAN DE RESPALDOS (ÁREAS, BOTONES Y FILAS)
+   ========================================================================== */
+
+/* Badges de Áreas con Relleno Sólido Oscuro, Borde Sobrio y Texto Claro */
+.badge-area-sigest {
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    padding: 6px 14px !important;
+    border-radius: 8px !important;
+    display: inline-block !important;
+    letter-spacing: 0.3px !important;
+    white-space: nowrap !important;
+    transition: all 0.25 ease-in-out !important;
+}
+
+    /* 1. Dirección General (Morado Púrpura Oscuro con Glow) */
+    .badge-area-sigest.area-direccion-general {
+        background-color: #3b0764 !important;
+        color: #f3e8ff !important;
+        border: 1px solid #7e22ce !important;
+        box-shadow: 0 0 10px rgba(126, 34, 206, 0.4) !important;
+    }
+
+    /* 2. Administración (Marrón Cacao Oscuro con Glow) */
+    .badge-area-sigest.area-administracion,
+    .badge-area-sigest.area-capital-humano {
+        background-color: #451a03 !important;
+        color: #fef3c7 !important;
+        border: 1px solid #b45309 !important;
+        box-shadow: 0 0 10px rgba(180, 83, 9, 0.4) !important;
+    }
+
+    /* 3. Cobranza (Rojo Vino Oscuro con Glow) */
+    .badge-area-sigest.area-cobranza {
+        background-color: #450a0a !important;
+        color: #fee2e2 !important;
+        border: 1px solid #991b1b !important;
+        box-shadow: 0 0 10px rgba(153, 27, 27, 0.4) !important;
+    }
+
+    /* 4. Ventas (Azul Petróleo / Noche con Glow) */
+    .badge-area-sigest.area-ventas {
+        background-color: #0c4a6e !important;
+        color: #e0f2fe !important;
+        border: 1px solid #0369a1 !important;
+        box-shadow: 0 0 10px rgba(3, 105, 161, 0.4) !important;
+    }
+
+    /* 5. Consultoría (Marrón Terracota con Glow) */
+    .badge-area-sigest.area-consultoria {
+        background-color: #431407 !important;
+        color: #ffedd5 !important;
+        border: 1px solid #9a3412 !important;
+        box-shadow: 0 0 10px rgba(154, 52, 18, 0.4) !important;
+    }
+
+    /* 6. Sistemas (Índigo Profundo con Glow) */
+    .badge-area-sigest.area-sistemas,
+    .badge-area-sigest.area-ti {
+        background-color: #1e1b4b !important;
+        color: #e0e7ff !important;
+        border: 1px solid #4338ca !important;
+        box-shadow: 0 0 10px rgba(67, 56, 202, 0.45) !important;
+    }
+
+    /* 7. Desarrollo (Verde Bosque con Glow) */
+    .badge-area-sigest.area-desarrollo {
+        background-color: #064e3b !important;
+        color: #d1fae5 !important;
+        border: 1px solid #047857 !important;
+        box-shadow: 0 0 10px rgba(4, 120, 87, 0.4) !important;
+    }
+
+    /* 8. Soporte Técnico (Ciruela / Guinda Oscuro con Glow) */
+    .badge-area-sigest.area-soporte {
+        background-color: #500724 !important;
+        color: #fce7f3 !important;
+        border: 1px solid #831843 !important;
+        box-shadow: 0 0 10px rgba(131, 24, 67, 0.4) !important;
+    }
+
+    /* 9. Operaciones y Logística (Berenjena Oscuro con Glow) */
+    .badge-area-sigest.area-operaciones,
+    .badge-area-sigest.area-logistica {
+        background-color: #4a044e !important;
+        color: #fae8ff !important;
+        border: 1px solid #86198f !important;
+        box-shadow: 0 0 10px rgba(134, 25, 143, 0.4) !important;
+    }
+
+    /* 10. Contabilidad y Finanzas (Café Roble con Glow) */
+    .badge-area-sigest.area-contabilidad,
+    .badge-area-sigest.area-finanzas {
+        background-color: #3b200b !important;
+        color: #fef3c7 !important;
+        border: 1px solid #78350f !important;
+        box-shadow: 0 0 10px rgba(120, 53, 15, 0.4) !important;
+    }
+
+    /* 11. General / Sin Área (Gris Grafito con Glow) */
+    .badge-area-sigest.area-general {
+        background-color: #1f2937 !important;
+        color: #e5e7eb !important;
+        border: 1px solid #4b5563 !important;
+        box-shadow: 0 0 8px rgba(75, 85, 99, 0.3) !important;
+    }
+
+/* Apariencia de Fila Inactiva (Efecto Opaco / Apagado / Grayscale) */
+tr.fila-inactiva td {
+    background-color: rgba(11, 19, 43, 0.85) !important;
+    opacity: 0.35 !important;
+    filter: grayscale(80%) !important;
+}
+
+tr.fila-inactiva:hover td {
+    background-color: rgba(30, 41, 59, 0.9) !important;
+    opacity: 0.55 !important;
+}
+
+/* Insignias de Próximo Respaldo / Equipo Inactivo */
+.badge-proximo-respaldo {
+    background-color: rgba(56, 189, 248, 0.08) !important;
+    color: #38bdf8 !important;
+    border: 1px dashed rgba(56, 189, 248, 0.5) !important;
+    font-weight: 700 !important;
+    font-size: 0.78rem !important;
+    padding: 6px 12px !important;
+    border-radius: 8px !important;
+    display: inline-block !important;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.2) !important;
+}
+
+.badge-equipo-inactivo {
+    background-color: rgba(148, 163, 184, 0.08) !important;
+    color: #64748b !important;
+    border: 1px solid #334155 !important;
+    font-weight: 600 !important;
+    font-size: 0.78rem !important;
+    padding: 6px 12px !important;
+    border-radius: 8px !important;
+    display: inline-block !important;
+}
+
+/* Botones de Modales Rediseñados */
+.btn-cancelar-sigest {
+    color: #cbd5e1 !important;
+    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    padding: 7px 16px !important;
+    transition: all 0.2s ease !important;
+}
+
+    .btn-cancelar-sigest:hover {
+        color: #ffffff !important;
+        background: #334155 !important;
+        border-color: #475569 !important;
+    }
+
+.btn-anadir-fecha-sigest {
+    color: #38bdf8 !important;
+    background: rgba(56, 189, 248, 0.1) !important;
+    border: 1px solid rgba(56, 189, 248, 0.4) !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    padding: 7px 14px !important;
+    transition: all 0.2s ease !important;
+}
+
+    .btn-anadir-fecha-sigest:hover {
+        color: #ffffff !important;
+        background: #0284c7 !important;
+        border-color: #38bdf8 !important;
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3) !important;
+    }
+
+.btn-guardar-edicion-sigest {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #b45309, #78350f) !important;
+    border: 1px solid #d97706 !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3) !important;
+}
+
+    .btn-guardar-edicion-sigest:hover {
+        background: linear-gradient(135deg, #d97706, #b45309) !important;
+        box-shadow: 0 6px 16px rgba(217, 119, 6, 0.4) !important;
+    }
+
+.btn-guardar-estatus-sigest {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #047857, #064e3b) !important;
+    border: 1px solid #059669 !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3) !important;
+}
+
+    .btn-guardar-estatus-sigest:hover {
+        background: linear-gradient(135deg, #059669, #047857) !important;
+        box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4) !important;
+        transform: translateY(-1px);
+    }
+
+.btn-actualizar-fecha-sigest {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #0369a1, #075985) !important;
+    border: 1px solid #0284c7 !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    transition: all 0.2s ease !important;
+}
+
+    .btn-actualizar-fecha-sigest:hover {
+        background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    }

@@ -5,7 +5,7 @@
     var fechaConsultaDate = Model.FechaReporte?.Date ?? DateTime.Today;
 }
 
-<link rel="stylesheet" href="~/css/reporte-tickets.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Actividades/reporte-tickets.css" asp-append-version="true" />
 
 <div class="actividades-container px-4 py-3">
 
@@ -971,5 +971,5 @@
                             @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.EnCurso)))
                         ];
         </script>
-    <script src="~/js/reporte-tickets.js" asp-append-version="true"></script>
+    <script src="~/js/Activiades/reporte-tickets.js" asp-append-version="true"></script>
 }
