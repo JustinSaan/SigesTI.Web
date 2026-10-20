@@ -451,18 +451,22 @@ select.form-select option {
    -------------------------------------------------------------------------- */
 .btn-primary-sigest {
     color: #ffffff !important;
-    font-weight: 700 !important;
-    background: linear-gradient(135deg, #1d4ed8, #0284c7) !important;
-    border: 1px solid rgba(56, 189, 248, 0.4) !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3) !important;
-    transition: all 0.18s ease !important;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid #0284c7 !important;
+    border-radius: 15px !important;
+    font-size: 0.85rem !important;
+    padding: 10px 22px;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease-in-out !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2) !important;
 }
 
     .btn-primary-sigest:hover {
-        background: linear-gradient(135deg, #2563eb, #0369a1) !important;
-        box-shadow: 0 6px 16px rgba(56, 189, 248, 0.45) !important;
-        transform: translateY(-1px) !important;
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+        border-color: #38bdf8 !important;
+        box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4) !important;
+        transform: translateY(-1px);
     }
 
 .btn-secondary-sigest {
@@ -555,22 +559,24 @@ select.form-select option {
 
 /* Botón de Imprimir Reporte Rediseñado */
 .btn-imprimir-reporte {
-    color: #38bdf8 !important;
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(15, 23, 42, 0.8)) !important;
-    border: 1px solid #0284c7 !important;
-    border-radius: 8px !important;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid rgba(248, 113, 113, 0.5) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    border-radius: 15px !important;
     font-size: 0.85rem !important;
+    padding: 10px 20px !important;
     letter-spacing: 0.3px;
-    transition: all 0.2s ease-in-out !important;
-    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2) !important;
+    transition: all 0.25s ease !important;
+    box-shadow: 0 4px 18px rgba(220, 38, 38, 0.35) !important;
 }
 
     .btn-imprimir-reporte:hover {
+        background: linear-gradient(135deg, #991b1b, #7f1d1d) !important;
+        border-color: #f87171 !important;
+        box-shadow: 0 0 22px rgba(248, 113, 113, 0.5) !important;
+        transform: translateY(-2px) !important;
         color: #ffffff !important;
-        background: linear-gradient(135deg, #0284c7, #0369a1) !important;
-        border-color: #38bdf8 !important;
-        box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4) !important;
-        transform: translateY(-1px);
     }
 
 /* ComboBox Personalizado para Campaña */

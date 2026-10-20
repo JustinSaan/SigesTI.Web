@@ -132,7 +132,7 @@ function exportarExcelLocal() {
 
         // ENCABEZADOS DEL DOCUMENTO
         rows.push([{ v: 'REPORTE DIARIO DE TICKETS - ' + fecha, s: { font: { name: 'Segoe UI', sz: 14, bold: true, color: { rgb: '0F172A' } } } }]);
-        rows.push([{ v: 'SDI Cointer — Departamento de Soporte Técnico', s: { font: { name: 'Segoe UI', sz: 10, italic: true, color: { rgb: '475569' } } } }]);
+        rows.push([{ v: 'Área de Soporte Técnico', s: { font: { name: 'Segoe UI', sz: 10, italic: true, color: { rgb: '475569' } } } }]);
         rows.push([]);
 
         // SECCIÓN 1: INDICADORES

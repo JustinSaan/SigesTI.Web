@@ -17,43 +17,80 @@
     }
 
     // 3. Switches y ComboBox Campaña
+
     const switchActividades = document.getElementById('switchActividadesAdicionales');
     if (switchActividades) {
-        switchActividades.addEventListener('change', function () {
-            const panel = document.getElementById('panelActividadesAdicionales');
-            if (panel) {
-                if (this.checked) panel.classList.remove('d-none');
-                else panel.classList.add('d-none');
-            }
-        });
-    }
+    switchActividades.addEventListener('change', function () {
+        const panel = document.getElementById('panelActividadesAdicionales');
+        if (panel) {
+            if (this.checked) panel.classList.remove('d-none');
+            else panel.classList.add('d-none');
+        }
+    });
+}
 
-    const switchCampana = document.getElementById('switchCampanaRenovacion');
-    if (switchCampana) {
-        switchCampana.addEventListener('change', function () {
-            const panel = document.getElementById('panelCampanaRenovacion');
-            if (panel) {
-                if (this.checked) {
-                    panel.classList.remove('d-none');
-                    const ddl = document.getElementById('ddlMesAnioCampana');
-                    if (ddl) {
-                        const [mes, anio] = ddl.value.split('-');
-                        cargarAvancesCampana(mes, anio);
-                    }
-                } else {
-                    panel.classList.add('d-none');
-                }
-            }
-        });
-    }
+// 2. Función centralizada que extrae mes y año
+    function actualizarAvances() {
+    const ddlMes = document.getElementById('ddlMesCampana');
+    const ddlAnio = document.getElementById('ddlAnioCampana');
+    
+    if (ddlMes && ddlAnio) {
+        const mes = ddlMes.value;
+        const anio = ddlAnio.value;
+        
+        if (mes !== 'Seleccione' && anio !== 'Año') {
+            cargarAvancesCampana(mes, anio); 
+        } else {
+            // Lista de todos los IDs que se actualizan con números
+            const idsNum = [
+                'campTotalClientes', 'campEncuestasFin', 'campSeguimientoPend', 
+                'campEncuestasCurso', 'campContactadosHoy',
+                'printCampTotal', 'printCampFin', 'printCampPend', 
+                'printCampCurso', 'printCampContactados'
+            ];
+            
+            // Ponemos los contadores en '0'
+            idsNum.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = '0';
+            });
 
-    const ddlMesAnio = document.getElementById('ddlMesAnioCampana');
-    if (ddlMesAnio) {
-        ddlMesAnio.addEventListener('change', function () {
-            const [mes, anio] = this.value.split('-');
-            cargarAvancesCampana(mes, anio);
-        });
+            // Ponemos los porcentajes en '0%'
+            const idsPorcentaje = ['campPorcentaje', 'printCampPorcentaje'];
+            idsPorcentaje.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = '0%';
+            });
+        }
     }
+}
+
+// 3. Switch de Campaña de Renovación
+const switchCampana = document.getElementById('switchCampanaRenovacion');
+if (switchCampana) {
+    switchCampana.addEventListener('change', function () {
+        const panel = document.getElementById('panelCampanaRenovacion');
+        if (panel) {
+            if (this.checked) {
+                panel.classList.remove('d-none');
+                actualizarAvances(); // Carga si ya hay valores seleccionados
+            } else {
+                panel.classList.add('d-none');
+            }
+        }
+    });
+}
+
+// 4. Eventos de cambio para el Mes y el Año
+const ddlMes = document.getElementById('ddlMesCampana');
+if (ddlMes) {
+    ddlMes.addEventListener('change', actualizarAvances);
+}
+
+const ddlAnio = document.getElementById('ddlAnioCampana');
+if (ddlAnio) {
+    ddlAnio.addEventListener('change', actualizarAvances);
+}
 
     // 4. Agregar nuevo tipo de tarea
     const ddlTipo = document.getElementById('ddlTipo');
@@ -167,43 +204,67 @@ function aplicarFiltrosTabla() {
     const fSolicitud = (document.getElementById('filtroFechaSolicitud')?.value || '').trim();
     const fRealizacion = (document.getElementById('filtroFechaRealizacion')?.value || '').trim();
     const fEstatus = (document.getElementById('filtroEstatus')?.value || '').trim().toLowerCase();
+    const fGeneral = (document.getElementById('filtroGeneral')?.value || '').trim().toLowerCase();
 
     const hoy = obtenerFechaHoyISO();
-    const hayFiltrosActivos = fSolicitud !== '' || fRealizacion !== '' || fEstatus !== '';
+    const hayFechasActivas = fSolicitud !== '' || fRealizacion !== '';
 
     const filas = document.querySelectorAll('#tablaTareasOriginal tbody tr.fila-tarea');
 
     filas.forEach(row => {
-        const valSolicitud = row.querySelector('.text-fechasolicitud')?.getAttribute('data-fecha') || '';
-        const valRealizacion = row.querySelector('.text-fechareal')?.getAttribute('data-fecha') || '';
         const selectEstatus = row.querySelector('.ddl-estatus-tabla');
         const valEstatus = (selectEstatus ? selectEstatus.value : '').trim().toLowerCase();
 
-        if (!hayFiltrosActivos) {
-            const esResuelta = valEstatus === 'resuelta';
-            if (!esResuelta) {
-                row.classList.remove('d-none');
-            } else {
-                if (valRealizacion === hoy || valRealizacion === '') {
-                    row.classList.remove('d-none');
-                } else {
-                    row.classList.add('d-none');
-                }
-            }
-        } else {
-            let cumpleSolicitud = !fSolicitud || valSolicitud === fSolicitud;
-            let cumpleRealizacion = !fRealizacion || valRealizacion === fRealizacion;
-            let cumpleEstatus = !fEstatus || valEstatus === fEstatus;
+        // Obtenemos de forma segura las fechas de los atributos data-fecha
+        const valSolicitud = row.querySelector('.text-fechasolicitud')?.getAttribute('data-fecha') || '';
+        const valRealizacion = row.querySelector('.text-fechareal')?.getAttribute('data-fecha') || '';
 
-            if (cumpleSolicitud && cumpleRealizacion && cumpleEstatus) {
-                row.classList.remove('d-none');
-            } else {
-                row.classList.add('d-none');
+        // Texto completo de la fila para la búsqueda general (abarca nombre, tipo, personal, observaciones, etc.)
+        const textoFila = row.innerText.toLowerCase();
+
+        // 1. Búsqueda general por palabras (permite buscar varias palabras ej. "Juan ESET")
+        let cumpleGeneral = true;
+        if (fGeneral !== '') {
+            const palabras = fGeneral.split(/\s+/);
+            cumpleGeneral = palabras.every(palabra => textoFila.includes(palabra));
+        }
+
+        // 2. Filtro por Estatus
+        let cumpleEstatus = !fEstatus || valEstatus === fEstatus;
+
+        // 3. Filtro por Fechas
+        let cumpleFechas = true;
+        if (hayFechasActivas) {
+            if (fSolicitud && valSolicitud && valSolicitud < fSolicitud) {
+                cumpleFechas = false;
             }
+            if (fRealizacion && valRealizacion && valRealizacion > fRealizacion) {
+                cumpleFechas = false;
+            }
+
+            // si hay texto en la búsqueda general, se muestran tareas de cualquier estatus 
+        } else if (fGeneral === '') {
+            // Sin búsqueda: las tareas que solo se cargan para la búsqueda (Resueltas) quedan ocultas como antes
+            if (row.getAttribute('data-solo-busqueda') === 'true') {
+                cumpleFechas = false;
+            }
+
+            // Si no hay fechas activas, oculta las resueltas antiguas por defecto para limpiar la vista diaria
+            const esResuelta = valEstatus === 'resuelta';
+            if (esResuelta && valRealizacion !== hoy && valRealizacion !== '') {
+                cumpleFechas = false;
+            }
+        }
+
+        // Aplicar visibilidad final
+        if (cumpleGeneral && cumpleEstatus && cumpleFechas) {
+            row.classList.remove('d-none');
+        } else {
+            row.classList.add('d-none');
         }
     });
 
-    sincronizarScrollbars();
+    if (typeof sincronizarScrollbars === 'function') sincronizarScrollbars();
 }
 
 function cambiarEstatusTarea(id, nuevoEstatus, selectElement) {
@@ -568,11 +629,14 @@ function abrirVistaPreviaImpresionTareas() {
 
     const switchCampana = document.getElementById('switchCampanaRenovacion');
     const printCampanaContainer = document.getElementById('printCampanaContainer');
-    const ddlMesAnio = document.getElementById('ddlMesAnioCampana');
+    const ddlMes = document.getElementById('ddlMesCampana');
+    const ddlAnio = document.getElementById('ddlAnioCampana');
 
     if (switchCampana && switchCampana.checked) {
-        const textoMesAnio = ddlMesAnio ? ddlMesAnio.options[ddlMesAnio.selectedIndex].text : '';
-        document.getElementById('printCampanaTitulo').innerText = `Avances Campaña de Renovación - ${textoMesAnio}`;
+        //const textoMesAnio = ddlMesAnio ? ddlMesAnio.options[ddlMesAnio.selectedIndex].text : '';
+        const textoMes = ddlMes ? ddlMes.options[ddlMes.selectedIndex].text : '';
+        const textoAnio = ddlAnio ? ddlAnio.options[ddlAnio.selectedIndex].text : '';
+        document.getElementById('printCampanaTitulo').innerText = `Avances Campaña de Renovación - ${textoMes} ${textoAnio}`;
         if (printCampanaContainer) printCampanaContainer.classList.remove('d-none');
     } else {
         if (printCampanaContainer) printCampanaContainer.classList.add('d-none');

@@ -32,6 +32,12 @@ namespace SigesTI.Web.Pages.Actividades
         [BindProperty]
         public TareaInputModel TareaInput { get; set; } = new();
 
+        [BindProperty(SupportsGet = true)]
+        public DateTime? FiltroFechaInicio { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public DateTime? FiltroFechaFin { get; set; }
+
         public class TareaInputModel
         {
             public int Id { get; set; }
@@ -91,8 +97,47 @@ namespace SigesTI.Web.Pages.Actividades
 
         private async Task CargarDatosAsync()
         {
-            ListaTareas = await _context.TareasProgramadas
-                .AsNoTracking()
+            var queryTareas = _context.TareasProgramadas.AsNoTracking().AsQueryable();
+
+            if (!FiltroFechaInicio.HasValue && !FiltroFechaFin.HasValue)
+            {
+                
+            }
+            else
+            {
+                bool soloFechaSolicitud = FiltroFechaInicio.HasValue && !FiltroFechaFin.HasValue;
+                bool soloFechaRealizacion = !FiltroFechaInicio.HasValue && FiltroFechaFin.HasValue;
+
+                if (soloFechaSolicitud)
+                {
+                    // Filtrar exclusivamente por el día exacto de la Fecha de Solicitud
+                    var diaInicio = FiltroFechaInicio.Value.Date;
+                    var diaFin = diaInicio.AddDays(1).AddTicks(-1);
+
+                    queryTareas = queryTareas.Where(t => t.FechaSolicitud >= diaInicio && t.FechaSolicitud <= diaFin);
+                }
+                else if (soloFechaRealizacion)
+                {
+                    // Filtrar exclusivamente por el día exacto de la Fecha de Realización
+                    var diaInicio = FiltroFechaFin.Value.Date;
+                    var diaFin = diaInicio.AddDays(1).AddTicks(-1);
+
+                    queryTareas = queryTareas.Where(t => t.FechaRealizacion != null && t.FechaRealizacion >= diaInicio && t.FechaRealizacion <= diaFin);
+                }
+                else
+                {
+                    // Rango completo habitual (Fecha Inicio y Fecha Fin proporcionadas)
+                    var inicio = FiltroFechaInicio ?? DateTime.MinValue;
+                    var fin = FiltroFechaFin.HasValue ? FiltroFechaFin.Value.Date.AddDays(1).AddTicks(-1) : DateTime.MaxValue;
+
+                    queryTareas = queryTareas.Where(t =>
+                        (t.FechaSolicitud >= inicio && t.FechaSolicitud <= fin) ||
+                        (t.FechaRealizacion != null && t.FechaRealizacion >= inicio && t.FechaRealizacion <= fin)
+                    );
+                }
+            }
+
+            ListaTareas = await queryTareas
                 .OrderByDescending(t => t.FechaCreacion)
                 .Select(t => new TareaProgramada
                 {
@@ -178,8 +223,7 @@ namespace SigesTI.Web.Pages.Actividades
                     if (!string.IsNullOrWhiteSpace(TareaInput.NuevoComentario))
                     {
                         var fechaHora = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt");
-                        observacionesIniciales = $"Agregado el: {fechaHora} Por: {usuarioNombre}: " +
-                            $"\n\n{TareaInput.NuevoComentario.Trim()}";
+                        observacionesIniciales = $"Agregado el: {fechaHora} Por: {usuarioNombre}\n\n{TareaInput.NuevoComentario.Trim()}";
                     }
 
                     var nueva = new TareaProgramada
@@ -226,8 +270,7 @@ namespace SigesTI.Web.Pages.Actividades
                         if (!string.IsNullOrWhiteSpace(TareaInput.NuevoComentario))
                         {
                             var fechaHora = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt");
-                            string bloqueComentario = $"Agregado el: {fechaHora} Por: {usuarioNombre}: " +
-                                $"\n\n{TareaInput.NuevoComentario.Trim()}";
+                            string bloqueComentario = $"Agregado el: {fechaHora} Por: {usuarioNombre}\n\n{TareaInput.NuevoComentario.Trim()}";
 
                             if (string.IsNullOrWhiteSpace(existente.Observaciones))
                             {
