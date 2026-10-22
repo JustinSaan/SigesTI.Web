@@ -16,6 +16,10 @@ namespace SigesTI.Web.Models
         [ForeignKey("PersonalId")]
         public virtual Personal? Personal { get; set; }
 
+        // Nombre escrito a mano cuando el ejecutivo no está en la tabla Personal (no se guarda en Personal)
+        [StringLength(150)]
+        public string? EjecutivoManual { get; set; }
+
         [Required]
         [StringLength(100)]
         public string Hostname { get; set; } = string.Empty;

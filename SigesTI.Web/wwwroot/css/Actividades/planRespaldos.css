@@ -278,6 +278,7 @@
    -------------------------------------------------------------------------- */
 .btn-primary-sigest {
     color: #ffffff !important;
+    font-weight: 700 !important;
     background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(15, 23, 42, 0.8)) !important;
     border: 1px solid #0284c7 !important;
     border-radius: 15px !important;
@@ -309,6 +310,26 @@
         color: #ffffff !important;
         background: #475569 !important;
         transform: translateY(-1px) !important;
+    }
+
+.btn-third-sigest {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid #0284c7 !important;
+    border-radius: 15px !important;
+    font-size: 0.85rem !important;
+    padding: 10px 22px;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease-in-out !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2) !important;
+}
+
+    .btn-third-sigest:hover {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+        border-color: #38bdf8 !important;
+        box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4) !important;
+        transform: translateY(-1px);
     }
 
 /* --------------------------------------------------------------------------
@@ -601,3 +622,566 @@ tr.fila-inactiva:hover td {
     .btn-actualizar-fecha-sigest:hover {
         background: linear-gradient(135deg, #0284c7, #0369a1) !important;
     }
+
+/* ==========================================================================
+   MEJORAS PLAN DE RESPALDOS: CURSOR, ADVERTENCIAS Y ESTILOS DE RESPALDO
+   ========================================================================== */
+
+/* 1. Cursor de mano al pasar por cualquier fila de la tabla matriz */
+.tabla-sigest tbody tr {
+    cursor: pointer !important;
+}
+
+/* 2. Estilo de advertencia (rojo/amarillo) para fechas pendientes vencidas */
+.badge-atrasado-advertencia {
+    background-color: rgba(220, 38, 38, 0.2) !important;
+    color: #f87171 !important;
+    border: 1px solid #dc2626 !important;
+    font-weight: 700 !important;
+    padding: 5px 10px !important;
+    border-radius: 6px !important;
+    box-shadow: 0 0 8px rgba(220, 38, 38, 0.4) !important;
+}
+
+/* 3. Estilo para equipos respaldados (tono verde elegante con tooltips) */
+.badge-equipo-respaldado {
+    background-color: rgba(16, 185, 129, 0.15) !important;
+    color: #34d399 !important;
+    border: 1px solid #059669 !important;
+    font-weight: 700 !important;
+    padding: 6px 12px !important;
+    border-radius: 8px !important;
+    display: inline-block !important;
+    transition: all 0.2s ease;
+    cursor: help !important;
+}
+
+    .badge-equipo-respaldado:hover {
+        background-color: rgba(16, 185, 129, 0.3) !important;
+        box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+    }
+
+/* =========================================
+   ===== COLORES EN LA TABLA PRINCIPAL ===== 
+   ========================================= */
+
+/* Equipo respaldado (verde) */
+.glass-panel .tabla-sigest span.badge-equipo-respaldado {
+    background-color: rgba(16, 185, 129, 0.18) !important;
+    color: #34d399 !important;
+    border: 1px solid #059669 !important;
+}
+
+    .glass-panel .tabla-sigest span.badge-equipo-respaldado:hover {
+        background-color: rgba(16, 185, 129, 0.3) !important;
+    }
+
+/* Fecha pendiente en tiempo (amarillo) */
+.glass-panel .tabla-sigest span.badge.badge-pendiente {
+    background-color: rgba(245, 158, 11, 0.18) !important;
+    color: #fbbf24 !important;
+    border: 1px solid #d97706 !important;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.25) !important;
+}
+
+/* Fecha atrasada (rojo) */
+.glass-panel .tabla-sigest span.badge.badge-atrasado-advertencia {
+    background-color: rgba(220, 38, 38, 0.2) !important;
+    color: #f87171 !important;
+    border: 1px solid #dc2626 !important;
+    box-shadow: 0 0 8px rgba(220, 38, 38, 0.4) !important;
+}
+
+/* Fecha en curso (azul) */
+.glass-panel .tabla-sigest span.badge.badge-encurso {
+    background-color: rgba(56, 189, 248, 0.18) !important;
+    color: #38bdf8 !important;
+    border: 1px solid #0284c7 !important;
+}
+
+/* ===============================================
+   ===== CALENDARIO DE CONSULTA DE RESPALDOS =====
+   =============================================== */
+/* Barra de arriba: navegación del mes (izquierda) y resumen de conteos (derecha) */
+.cal-barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.cal-titulo {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.05rem;
+    min-width: 150px;
+    text-align: center;
+}
+
+/* Flechas ‹ › */
+.cal-btn-nav {
+    width: 34px;
+    height: 34px;
+    padding: 0 !important;
+    color: #38bdf8 !important;
+    background: rgba(56, 189, 248, 0.1) !important;
+    border: 1px solid #1e3a5f !important;
+    border-radius: 10px !important;
+    transition: all 0.2s ease !important;
+}
+
+    .cal-btn-nav:hover {
+        color: #ffffff !important;
+        background: #0284c7 !important;
+    }
+
+/* Botón "Hoy" */
+.cal-btn-hoy {
+    color: #cbd5e1 !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    padding: 6px 14px !important;
+    background: transparent !important;
+    border: 1px solid #334155 !important;
+    border-radius: 10px !important;
+}
+
+    .cal-btn-hoy:hover {
+        color: #ffffff !important;
+        border-color: #38bdf8 !important;
+    }
+
+/* Contenedor con scroll del calendario */
+.cal-scroll {
+    max-height: 640px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+    /* Scrollbar del calendario (mismos colores que la de las tablas del sistema) */
+    .cal-scroll::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .cal-scroll::-webkit-scrollbar-track {
+        background: #0f172a;
+    }
+
+    .cal-scroll::-webkit-scrollbar-thumb {
+        background: #1e293b;
+        border-radius: 4px;
+        border: 1px solid #38bdf8;
+    }
+
+        .cal-scroll::-webkit-scrollbar-thumb:hover {
+            background: #0284c7;
+        }
+
+/* Firefox no entiende ::-webkit-scrollbar; ahí se usan los mismos colores con scrollbar-color */
+@supports not selector(::-webkit-scrollbar) {
+    .cal-scroll {
+        scrollbar-color: #1e293b #0f172a;
+    }
+}
+
+/* Lun-Vie con ancho completo; Sábado y Domingo más angostos (no hay respaldos en fin de semana) */
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) repeat(2, minmax(0, 0.55fr));
+    gap: 6px;
+}
+
+.cal-encabezado {
+    background: #0f172a;
+    color: #38bdf8;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 6px 0;
+    border-radius: 6px;
+}
+
+    .cal-encabezado.cal-finde {
+        color: #64748b;
+    }
+
+.cal-dia {
+    min-height: 92px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 8px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+    /* Fin de semana en gris / apagado */
+    .cal-dia.cal-finde {
+        background: rgba(15, 23, 42, 0.25);
+        opacity: 0.55;
+    }
+
+    .cal-dia.cal-vacio {
+        background: transparent;
+        border-color: transparent;
+    }
+
+    .cal-dia.cal-hoy {
+        border-color: #38bdf8;
+        box-shadow: inset 0 0 0 1px #38bdf8;
+    }
+
+.cal-numero {
+    color: #94a3b8;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.cal-hoy .cal-numero {
+    color: #38bdf8;
+}
+
+.chip-cal {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: help;
+}
+
+/* Respaldos extra de un día: ocultos hasta dar clic en "+N más" */
+.cal-dia:not(.cal-expandido) .chip-oculto {
+    display: none;
+}
+
+.chip-mas {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #38bdf8;
+    background: transparent;
+    border: 1px dashed rgba(56, 189, 248, 0.45);
+    border-radius: 6px;
+    padding: 2px 6px;
+    text-align: center;
+}
+
+    .chip-mas:hover {
+        background: rgba(56, 189, 248, 0.12);
+    }
+
+/* Resumen de conteos de arriba (Realizados 12 · Pendientes 5 ...) */
+.chip-cal.chip-resumen {
+    display: inline-block;
+    font-size: 0.78rem;
+    padding: 5px 12px;
+    cursor: default;
+}
+
+    .chip-cal.chip-resumen b {
+        margin-left: 4px;
+        font-size: 0.85rem;
+    }
+
+/* Tooltip oscuro del calendario */
+.tooltip-respaldo {
+    --bs-tooltip-bg: #0f172a; /* color de la flechita */
+}
+
+.tooltip-respaldo .tooltip-inner {
+    max-width: 320px;
+    text-align: left;
+    font-size: 0.78rem;
+    color: #e2e8f0;
+    background: #0f172a;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+
+/* En Curso (azul) */
+.chip-cal.chip-encurso {
+    background-color: rgba(56, 189, 248, 0.18);
+    color: #38bdf8;
+    border: 1px solid #0284c7;
+}
+
+/* Realizado (verde) */
+.chip-cal.chip-realizado {
+    background-color: rgba(16, 185, 129, 0.18);
+    color: #34d399;
+    border: 1px solid #059669;
+}
+
+/* Pendiente (amarillo) */
+.chip-cal.chip-pendiente {
+    background-color: rgba(245, 158, 11, 0.18);
+    color: #fbbf24;
+    border: 1px solid #d97706;
+}
+
+/* Atrasado (rojo) */
+.chip-cal.chip-atrasado {
+    background-color: rgba(220, 38, 38, 0.2);
+    color: #f87171;
+    border: 1px solid #dc2626;
+}
+
+/* ====================================================================
+   ===== MODALES AGREGAR Y EDITAR EQUIPO (todo empieza con .modal-respaldo-sigest
+   o con el prefijo "mer-" para no afectar a los demás modales) =====
+   ==================================================================== */
+
+/* Fondo azul oscuro del modal (mismos colores darkblue del sistema) */
+.modal-respaldo-sigest .modal-content {
+    background: linear-gradient(160deg, #0f1d3a, #0b132b) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    border-radius: 18px !important;
+    overflow: hidden;
+}
+
+.modal-respaldo-sigest .modal-header {
+    background: #0b132b !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2) !important;
+    padding: 16px 22px !important;
+}
+
+.modal-respaldo-sigest .modal-body {
+    padding: 20px 22px !important;
+}
+
+.modal-respaldo-sigest .modal-footer {
+    background: #0b132b !important;
+    border-top: 1px solid rgba(56, 189, 248, 0.15) !important;
+    padding: 12px 22px !important;
+}
+
+/* Icono redondo del encabezado */
+.mer-icono {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+/* Texto pequeño debajo del título (hostname · IP) */
+.mer-subtitulo {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    font-family: Consolas, monospace;
+}
+
+/* Tarjetas de las dos columnas */
+.mer-tarjeta {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.mer-tarjeta-titulo {
+    color: #38bdf8;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+    .mer-tarjeta-titulo i {
+        margin-right: 6px;
+    }
+
+/* Etiquetas más discretas */
+.modal-respaldo-sigest .form-label {
+    color: #94a3b8 !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px !important;
+}
+
+/* Campos con fondo darkblue */
+.modal-respaldo-sigest .form-control,
+.modal-respaldo-sigest .form-select {
+    background-color: #0b132b !important;
+    border: 1px solid #1e3a5f !important;
+    border-radius: 10px !important;
+    padding: 8px 12px !important;
+}
+
+.modal-respaldo-sigest .input-group .form-control {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+/* Línea separadora dentro de la tarjeta */
+.mer-separador {
+    height: 1px;
+    background: rgba(148, 163, 184, 0.15);
+    margin: 18px 0 14px;
+}
+
+/* Botón principal (Actualizar / Guardar estatus) */
+.mer-btn-principal {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    padding: 9px 14px !important;
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    border: 1px solid #38bdf8 !important;
+    border-radius: 10px !important;
+    transition: all 0.2s ease !important;
+}
+
+    .mer-btn-principal:hover {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+        box-shadow: 0 6px 16px rgba(56, 189, 248, 0.35) !important;
+        transform: translateY(-1px);
+    }
+
+/* Botón secundario pegado a un campo de fecha (Guardar / Añadir) */
+.mer-btn-secundario {
+    color: #38bdf8 !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    background: rgba(56, 189, 248, 0.1) !important;
+    border: 1px solid #1e3a5f !important;
+    border-top-right-radius: 10px !important;
+    border-bottom-right-radius: 10px !important;
+    transition: all 0.2s ease !important;
+}
+
+    .mer-btn-secundario:hover {
+        color: #ffffff !important;
+        background: #0284c7 !important;
+    }
+
+/* Botón Eliminar Equipo (rojo, solo contorno) */
+.mer-btn-eliminar {
+    color: #f87171 !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    background: rgba(220, 38, 38, 0.08) !important;
+    border: 1px solid rgba(220, 38, 38, 0.6) !important;
+    border-radius: 10px !important;
+    padding: 7px 16px !important;
+    transition: all 0.2s ease !important;
+}
+
+    .mer-btn-eliminar:hover {
+        color: #ffffff !important;
+        background: #dc2626 !important;
+        border-color: #dc2626 !important;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35) !important;
+    }
+
+/* Botón "Añadir otra fecha" del modal Agregar (contorno punteado azul) */
+.mer-btn-agregar-fecha {
+    color: #38bdf8 !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    background: transparent !important;
+    border: 1px dashed rgba(56, 189, 248, 0.5) !important;
+    border-radius: 10px !important;
+    padding: 8px 14px !important;
+    transition: all 0.2s ease !important;
+}
+
+    .mer-btn-agregar-fecha:hover {
+        color: #ffffff !important;
+        background: rgba(56, 189, 248, 0.12) !important;
+        border-color: #38bdf8 !important;
+    }
+
+/* Botón de bote de basura para quitar una fecha agregada */
+.mer-btn-quitar-fecha {
+    color: #f87171 !important;
+    background: rgba(220, 38, 38, 0.08) !important;
+    border: 1px solid #1e3a5f !important;
+    border-top-right-radius: 10px !important;
+    border-bottom-right-radius: 10px !important;
+    transition: all 0.2s ease !important;
+}
+
+    .mer-btn-quitar-fecha:hover {
+        color: #ffffff !important;
+        background: #dc2626 !important;
+        border-color: #dc2626 !important;
+    }
+
+/* Si el campo de fecha va solo (sin botón al lado) conserva sus esquinas redondeadas */
+.modal-respaldo-sigest .input-group .form-control:only-child {
+    border-radius: 10px !important;
+}
+
+/* Botón X para cerrar los modales (icono bi-x-lg; cámbialo en el <i> del .cshtml si quieres otro) */
+.mer-btn-cerrar {
+    margin-left: auto;   /* lo empuja a la esquina superior derecha del encabezado */
+    flex-shrink: 0;      /* evita que se aplaste si el título es largo */
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #38bdf8;                          /* sin presionar: icono azul claro */
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+    /* Al pasar el cursor: rojo con icono blanco */
+    .mer-btn-cerrar:hover {
+        color: #ffffff;
+        background: #dc2626;
+        border-color: #f87171;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+
+    /* Al presionarlo: rojo más oscuro y se "hunde" un poco */
+    .mer-btn-cerrar:active {
+        color: #ffffff;
+        background: #991b1b;
+        border-color: #dc2626;
+        transform: scale(0.92);
+    }
+
+    .mer-btn-cerrar:focus-visible {
+        outline: 2px solid #38bdf8;
+        outline-offset: 2px;
+    }
+/* ===== FIN MODALES AGREGAR Y EDITAR EQUIPO ===== */
+
+/* ====================================================================
+   ===== FONDO BORROSO (BLUR) DETRÁS DE LOS MODALES =====
+   Este CSS solo se carga en Plan de Respaldos, así que no afecta otras páginas.
+   ==================================================================== */
+.modal-backdrop {
+    background-color: rgba(11, 19, 43, 0.55); /* darkblue semitransparente */
+    backdrop-filter: blur(6px);               /* qué tan borroso: más px = más borroso */
+    -webkit-backdrop-filter: blur(6px);
+    transition: opacity 0.2s ease;
+}
+
+    /* Bootstrap le pone opacidad 0.5; con 1 el blur se ve completo (la transparencia la da el rgba de arriba) */
+    .modal-backdrop.show {
+        opacity: 1;
+    }
+/* ===== FIN FONDO BORROSO ===== */

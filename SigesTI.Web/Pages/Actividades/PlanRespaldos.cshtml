@@ -17,9 +17,15 @@
             </h3>
             <p class="text-muted small mb-0">Control de fechas programadas y estatus de ejecución de respaldos.</p>
         </div>
-        <button class="btn btn-primary-sigest shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#modalNuevoRespaldo">
-            <i class="bi bi-plus-lg me-1"></i> Agregar Equipo / Respaldo
-        </button>
+        <div class="d-flex gap-2">
+            <!-- Nuevo Botón para Consultar Respaldos Realizados -->
+            <button class="btn btn-third-sigest shadow-sm px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalConsultarRespaldos">
+                <i class="bi bi-search me-1"></i> Consultar respaldos realizados
+            </button>
+            <button class="btn btn-primary-sigest shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#modalNuevoRespaldo">
+                <i class="bi bi-plus-circle-fill me-1"></i> Agregar Equipo / Respaldo
+            </button>
+        </div>
     </div>
 
     <!-- Tabla Matriz Plan de Respaldos -->
@@ -58,19 +64,19 @@
                         @foreach (var equipo in Model.EquiposMatriz)
                         {
                             var esDesarrollo = equipo.Area.ToLower().Contains("desarrollo");
-                            <tr class="@(!equipo.Activo ? "fila-inactiva" : "")" 
-                                data-id="@equipo.Id" 
+                            <tr class="@(!equipo.Activo ? "fila-inactiva" : "")"
+                                data-id="@equipo.Id"
                                 data-area="@equipo.Area"
                                 data-ejecutivo="@equipo.Ejecutivo"
                                 data-personalid="@(equipo.PersonalId?.ToString() ?? "")"
+                                data-ejecutivomanual="@(equipo.EjecutivoManual ?? "")"
                                 data-hostname="@equipo.Hostname"
                                 data-ip="@equipo.DireccionIP"
                                 data-activo="@equipo.Activo.ToString().ToLower()"
                                 data-programaciones='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(equipo.Programaciones))'>
-                                
+
                                 <td class="drag-handle text-muted"><i class="bi bi-grip-vertical fs-5"></i></td>
-                                
-                                <!-- La clase del color se aplica mediante JS -->
+
                                 <td class="text-start ps-3 cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">
                                     <span class="badge-area-sigest" data-area="@equipo.Area">
                                         @equipo.Area
@@ -93,51 +99,62 @@
                                         }
                                         else if (!equipo.Programaciones.Any())
                                         {
-                                            <span class="badge-proximo-respaldo">
-                                                <i class="bi bi-clock me-1"></i>El siguiente respaldo es en Enero 2027
+                                            @* ===== MODIFICADO (Plan de Respaldos): el mensaje se calcula en CalcularSiguienteRespaldo (PlanRespaldos.cshtml.cs) ===== *@
+                                            <span class="badge-equipo-respaldado" data-bs-toggle="tooltip" title="@equipo.SiguienteRespaldo">
+                                                Equipo respaldado
                                             </span>
                                         }
                                         else
                                         {
                                             var fechaHoy = DateTime.Today;
+                                            @* ===== MODIFICADO (Plan de Respaldos): solo fechas del mes actual, sin excepción para Desarrollo ===== *@
                                             var programacionesMostradas = equipo.Programaciones
-                                                .Where(p => p.FechaProgramada.Month == fechaHoy.Month && p.FechaProgramada.Year == fechaHoy.Year || esDesarrollo)
+                                                .Where(p => p.FechaProgramada.Month == fechaHoy.Month && p.FechaProgramada.Year == fechaHoy.Year)
                                                 .ToList();
 
-                                            if (!programacionesMostradas.Any())
+
+                                            if (!programacionesMostradas.Any()) 
                                             {
-                                                var proxima = equipo.Programaciones.FirstOrDefault(p => p.FechaProgramada >= fechaHoy);
-                                                if (proxima != null)
-                                                {
-                                                    <span class="badge-proximo-respaldo">
-                                                        <i class="bi bi-calendar-event me-1"></i>El siguiente respaldo es en @mesesEs[proxima.FechaProgramada.Month] @proxima.FechaProgramada.Year
-                                                    </span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge-proximo-respaldo">
-                                                        <i class="bi bi-clock me-1"></i>El siguiente respaldo es en Enero 2027
-                                                    </span>
-                                                }
+                                                <span class="badge-equipo-respaldado" data-bs-toggle="tooltip" title="@equipo.SiguienteRespaldo">
+                                                    Equipo respaldado
+                                                </span>
                                             }
                                             else
                                             {
                                                 @foreach (var p in programacionesMostradas)
                                                 {
                                                     var esAtrasado = p.Estado == "Pendiente" && p.FechaProgramada.Date < DateTime.Today;
-                                                    string claseBadge = p.Estado switch
-                                                    {
-                                                        "Realizado" => "badge-realizado",
-                                                        "En Curso" => "badge-encurso",
-                                                        _ => esAtrasado ? "badge-atrasado" : "badge-pendiente"
-                                                    };
 
-                                                    <span class="badge @claseBadge px-2 py-1" title="@(string.IsNullOrEmpty(p.Observaciones) ? p.Estado : $"{p.Estado}: {p.Observaciones}")">
-                                                        @p.FechaProgramada.ToString("dd/MM/yyyy")
-                                                        @if (p.Estado == "Realizado") { <i class="bi bi-check-circle-fill ms-1"></i> }
-                                                        else if (esAtrasado) { <i class="bi bi-exclamation-triangle-fill ms-1"></i> }
-                                                        else if (p.Estado == "En Curso") { <i class="bi bi-clock-history ms-1"></i> }
-                                                    </span>
+                                                    if (p.Estado == "Realizado")
+                                                    {
+                                                        <span class="badge-equipo-respaldado" data-bs-toggle="tooltip" title="Respaldo realizado el @p.FechaProgramada.ToString("dd/MM/yyyy"). @equipo.SiguienteRespaldo">
+                                                            Equipo respaldado <i class="bi bi-check-circle-fill ms-1"></i>
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        string claseBadge = p.Estado switch
+                                                        {
+                                                            "En Curso" => "badge-encurso",
+                                                            _ => esAtrasado ? "badge-atrasado-advertencia" : "badge-pendiente"
+                                                        };
+
+                                                        @* ===== MODIFICADO (Plan de Respaldos): si la fecha ya pasó y sigue pendiente, el tooltip dice "Atrasado" ===== *@
+                                                        string estatusMostrado = esAtrasado ? "Atrasado" : p.Estado;
+
+                                                        <span class="badge @claseBadge px-2 py-1" title="@(string.IsNullOrEmpty(p.Observaciones) ? estatusMostrado : $"{estatusMostrado}: {p.Observaciones}")">
+                                                            @p.FechaProgramada.ToString("dd/MM/yyyy")
+                                                            @if (esAtrasado)
+                                                            {
+                                                                <i class="bi bi-exclamation-triangle-fill ms-1 text-warning"></i>
+                                                            }
+                                                            else if (p.Estado == "En Curso")
+                                                            {
+
+                                                                <i class="bi bi-clock-history ms-1"></i>
+                                                            }
+                                                        </span>
+                                                    }
                                                 }
                                             }
                                         }
@@ -163,176 +180,294 @@
     </div>
 </div>
 
-<!-- Modal 1: Agregar Nuevo Equipo -->
-<div class="modal fade" id="modalNuevoRespaldo" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-dark text-white border-secondary">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle text-info me-2"></i>Agregar Equipo a Plan de Respaldos</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+<!-- Modal Nuevo Respaldo -->
+<!-- ===== MODIFICADO (Plan de Respaldos): mismo diseño que el modal de Editar (estilos .modal-respaldo-sigest / mer-) ===== -->
+<div class="modal fade modal-respaldo-sigest" id="modalNuevoRespaldo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="mer-icono"><i class="bi bi-plus-lg"></i></div>
+                    <div>
+                        <h5 class="modal-title mb-0">Agregar Equipo</h5>
+                        <small class="mer-subtitulo">Nuevo equipo en el Plan de Respaldos</small>
+                    </div>
+                </div>
+                <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
             <div class="modal-body">
                 <form id="formNuevoEquipo">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">Área (Opcional)</label>
-                        <select class="form-select bg-dark text-white border-secondary" id="selectAreaNuevo" onchange="cargarEjecutivos('Nuevo')">
-                            <option value="">Sin Área / General</option>
-                            @foreach (var area in Model.Areas)
-                            {
-                                <option value="@area">@area</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">Ejecutivo (Opcional)</label>
-                        <select class="form-select bg-dark text-white border-secondary" id="selectEjecutivoNuevo" disabled>
-                            <option value="">Sin Ejecutivo Asignado</option>
-                        </select>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-bold text-muted">Equipo (Hostname)</label>
-                            <input type="text" class="form-control bg-dark text-white border-secondary" id="txtHostnameNuevo" placeholder="Ej. DIRECCION" required />
+                    <div class="row g-3">
+                        <!-- Tarjeta 1: Datos del equipo -->
+                        <div class="col-md-6">
+                            <div class="mer-tarjeta h-100">
+                                <div class="mer-tarjeta-titulo"><i class="bi bi-laptop"></i> Datos del Equipo</div>
+                                <div class="mb-3">
+                                    <label class="form-label">Área (Opcional)</label>
+                                    <select class="form-select" id="selectAreaNuevo" onchange="cargarEjecutivos('Nuevo')">
+                                        <option value="">Sin Área / General</option>
+                                        @foreach (var area in Model.Areas)
+                                        {
+                                            <option value="@area">@area</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Ejecutivo (Opcional)</label>
+                                    <select class="form-select" id="selectEjecutivoNuevo" onchange="alternarEjecutivoManual('Nuevo')">
+                                        <option value="">Sin Ejecutivo Asignado</option>
+                                        <option value="manual">Otro (escribir nombre)...</option>
+                                    </select>
+                                    <!-- Se muestra al elegir "Otro (escribir nombre)"; NO se guarda en la tabla Personal -->
+                                    <input type="text" class="form-control mt-2 d-none" id="txtEjecutivoManualNuevo" maxlength="150" placeholder="Nombre del ejecutivo" />
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Hostname</label>
+                                        <input type="text" class="form-control" id="txtHostnameNuevo" placeholder="Ej. DIRECCION" required />
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Dirección IP</label>
+                                        <input type="text" class="form-control" id="txtIpNuevo" placeholder="192.168.x.x" required />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="form-label">Estado del Equipo</label>
+                                    <select class="form-select" id="selectEstadoEquipoNuevo">
+                                        <option value="true" selected>Activo</option>
+                                        <option value="false">Inactivo</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label small fw-bold text-muted">Dirección IP</label>
-                            <input type="text" class="form-control bg-dark text-white border-secondary" id="txtIpNuevo" placeholder="192.168.x.x" required />
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">Estado del Equipo</label>
-                        <select class="form-select bg-dark text-white border-secondary" id="selectEstadoEquipoNuevo">
-                            <option value="true" selected>Activo</option>
-                            <option value="false">Inactivo</option>
-                        </select>
-                    </div>
 
-                    <hr class="border-secondary" />
-
-                    <!-- Sección de Fechas -->
-                    <div class="mb-2" id="contenedorSeccionFechasNuevo">
-                        <label class="form-label small fw-bold text-info"><i class="bi bi-calendar-plus me-1"></i>Seleccionar Fechas Programadas</label>
-                        <div id="contenedorFechasNuevo">
-                            <div class="input-group mb-2">
-                                <input type="date" class="form-control bg-dark text-white border-secondary fecha-input-nuevo" required />
-                                <button type="button" class="btn btn-anadir-fecha-sigest" onclick="agregarCampoFechaNuevo()"><i class="bi bi-plus-lg me-1"></i> Añadir otra fecha</button>
+                        <!-- Tarjeta 2: Fechas programadas (se oculta si el equipo es Inactivo) -->
+                        <div class="col-md-6" id="contenedorSeccionFechasNuevo">
+                            <div class="mer-tarjeta h-100">
+                                <div class="mer-tarjeta-titulo"><i class="bi bi-calendar-plus"></i> Fechas Programadas</div>
+                                <label class="form-label">Fechas de Respaldo</label>
+                                <div id="contenedorFechasNuevo">
+                                    <div class="input-group mb-2">
+                                        <input type="date" class="form-control fecha-input-nuevo" required />
+                                    </div>
+                                </div>
+                                <button type="button" class="btn mer-btn-agregar-fecha w-100 mt-1" onclick="agregarCampoFechaNuevo()">
+                                    <i class="bi bi-plus-lg me-1"></i> Añadir otra fecha
+                                </button>
                             </div>
                         </div>
                     </div>
                 </form>
             </div>
-            <div class="modal-footer border-secondary">
+            <div class="modal-footer">
                 <button type="button" class="btn btn-cancelar-sigest" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary-sigest" onclick="guardarNuevoEquipo()">Guardar Equipo</button>
+                <button type="button" class="btn mer-btn-principal px-4" onclick="guardarNuevoEquipo()">
+                    <i class="bi bi-save me-1"></i> Guardar Equipo
+                </button>
             </div>
         </div>
     </div>
 </div>
+<!-- ===== FIN MODIFICADO ===== -->
 
-<!-- Modal 2: Editar Equipo y Estatus -->
-<div class="modal fade" id="modalEditarRespaldo" tabindex="-1" aria-hidden="true">
+<!-- Modal Editar Equipo y Estatus -->
+<!-- ===== MODIFICADO (Plan de Respaldos): nuevo diseño, ejecutivo manual y botón Eliminar equipo ===== -->
+<div class="modal fade modal-respaldo-sigest" id="modalEditarRespaldo" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content bg-dark text-white border-secondary">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square text-warning me-2"></i>Editar Equipo y Gestión de Respaldos</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="mer-icono"><i class="bi bi-pc-display"></i></div>
+                    <div>
+                        <h5 class="modal-title mb-0">Editar Equipo</h5>
+                        <small class="mer-subtitulo" id="lblEquipoEditar">Gestión de datos y respaldos</small>
+                    </div>
+                </div>
+                <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="txtEquipoIdEditar" />
-                
-                <div class="row">
-                    <!-- Datos del Equipo -->
-                    <div class="col-md-6 border-end border-secondary">
-                        <h6 class="text-info fw-bold mb-3"><i class="bi bi-laptop me-1"></i> Datos del Equipo</h6>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Área</label>
-                            <select class="form-select bg-dark text-white border-secondary" id="selectAreaEditar" onchange="cargarEjecutivos('Editar')">
-                                <option value="">Sin Área / General</option>
+                <div class="row g-3">
+                    <!-- Tarjeta 1: Datos del equipo -->
+                    <div class="col-md-6">
+                        <div class="mer-tarjeta h-100">
+                            <div class="mer-tarjeta-titulo"><i class="bi bi-laptop"></i> Datos del Equipo</div>
+                            <div class="mb-3">
+                                <label class="form-label">Área</label>
+                                <select class="form-select" id="selectAreaEditar" onchange="cargarEjecutivos('Editar')">
+                                    <option value="">Sin Área / General</option>
+                                    @foreach (var area in Model.Areas)
+                                    {
+                                        <option value="@area">@area</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Ejecutivo</label>
+                                <select class="form-select" id="selectEjecutivoEditar" onchange="alternarEjecutivoManual('Editar')">
+                                    <option value="">Sin Ejecutivo Asignado</option>
+                                </select>
+                                <!-- Se muestra al elegir "Otro (escribir nombre)"; NO se guarda en la tabla Personal -->
+                                <input type="text" class="form-control mt-2 d-none" id="txtEjecutivoManualEditar" maxlength="150" placeholder="Nombre del ejecutivo" />
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">Hostname</label>
+                                    <input type="text" class="form-control" id="txtHostnameEditar" />
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">IP</label>
+                                    <input type="text" class="form-control" id="txtIpEditar" />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Estado de Equipo</label>
+                                <select class="form-select" id="selectEstadoEquipoEditar">
+                                    <option value="true">Activo</option>
+                                    <option value="false">Inactivo</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn mer-btn-principal w-100" onclick="guardarEdicionEquipo()">
+                                <i class="bi bi-check2-circle me-1"></i> Actualizar Datos de Equipo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 2: Fechas y estatus de respaldo -->
+                    <div class="col-md-6" id="panelGestionFechasEditar">
+                        <div class="mer-tarjeta h-100">
+                            <div class="mer-tarjeta-titulo"><i class="bi bi-calendar-check"></i> Fechas Programadas</div>
+                            <div class="mb-3">
+                                <label class="form-label">Seleccionar Fecha a Modificar / Estatus</label>
+                                <select class="form-select" id="selectFechaProgramacion" onchange="cargarFechaSeleccionadaParaEditar()">
+                                    <option value="">Seleccione una fecha...</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 d-none" id="divEditarFechaDirecta">
+                                <label class="form-label">Corregir Fecha Seleccionada</label>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" id="txtModificarFechaInput" />
+                                    <button type="button" class="btn mer-btn-secundario" onclick="guardarCambioFechaIndividual()">Guardar</button>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Nuevo Estatus de Cumplimiento</label>
+                                <select class="form-select" id="selectNuevoEstatus" onchange="evaluarEstadoProgramacion()">
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="En Curso">En Curso</option>
+                                    <option value="Realizado">Marcar como Completado</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 d-none" id="divObservaciones">
+                                <label class="form-label">Observaciones (Requerido para En Curso)</label>
+                                <textarea class="form-control" id="txtObservaciones" rows="2" placeholder="Razón por la que el respaldo está en curso..."></textarea>
+                            </div>
+                            <button type="button" class="btn mer-btn-principal w-100" onclick="guardarEstatusRespaldo()">
+                                <i class="bi bi-check-circle me-1"></i> Guardar Estatus de Respaldo
+                            </button>
+
+                            <div class="mer-separador"></div>
+
+                            <label class="form-label">Añadir Nueva Fecha a este Equipo</label>
+                            <div class="input-group">
+                                <input type="date" class="form-control" id="txtNuevaFechaEditar" />
+                                <button type="button" class="btn mer-btn-secundario" onclick="agregarFechaAEquipoExistente()"><i class="bi bi-plus-lg"></i> Añadir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn mer-btn-eliminar" onclick="eliminarEquipo()">
+                    <i class="bi bi-trash3 me-1"></i> Eliminar Equipo
+                </button>
+                <button type="button" class="btn btn-cancelar-sigest" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ===== FIN MODIFICADO ===== -->
+
+<!-- ==========================================================================
+     NUEVO MODAL: CONSULTAR RESPALDOS REALIZADOS (FILTROS POR AÑO Y ÁREA)
+     ========================================================================== -->
+<!-- ===== MODIFICADO (Plan de Respaldos): mismo diseño que Agregar/Editar, navegación por mes, resumen y años automáticos ===== -->
+<div class="modal fade modal-respaldo-sigest" id="modalConsultarRespaldos" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="mer-icono"><i class="bi bi-calendar-check"></i></div>
+                    <div>
+                        <h5 class="modal-title mb-0">Consulta de Respaldos</h5>
+                        <small class="mer-subtitulo">Realizados y programados por mes</small>
+                    </div>
+                </div>
+                <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <!-- Filtros (se filtra automáticamente al cambiar cualquiera) -->
+                <div class="mer-tarjeta mb-3">
+                    <div class="mer-tarjeta-titulo"><i class="bi bi-funnel"></i> Filtros</div>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Año</label>
+                            <select class="form-select" id="filtroConsultaAnio">
+                                @* Años automáticos: del año pasado a dos años adelante *@
+                                @for (int a = DateTime.Today.Year - 1; a <= DateTime.Today.Year + 2; a++)
+                                {
+                                    <option value="@a" selected="@(a == DateTime.Today.Year)">@a</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Mes</label>
+                            <select class="form-select" id="filtroConsultaMes">
+                                @for (int m = 1; m <= 12; m++)
+                                {
+                                    <option value="@m" selected="@(m == DateTime.Today.Month)">@mesesEs[m]</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Área (Opcional)</label>
+                            <select class="form-select" id="filtroConsultaArea">
+                                <option value="">-- Todas las Áreas --</option>
                                 @foreach (var area in Model.Areas)
                                 {
                                     <option value="@area">@area</option>
                                 }
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Ejecutivo</label>
-                            <select class="form-select bg-dark text-white border-secondary" id="selectEjecutivoEditar">
-                                <option value="">Sin Ejecutivo Asignado</option>
+                        <div class="col-md-3">
+                            <label class="form-label">Ejecutivo</label>
+                            <select class="form-select" id="filtroConsultaEjecutivo">
+                                <option value="">-- Todos los Ejecutivos --</option>
                             </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Hostname</label>
-                            <input type="text" class="form-control bg-dark text-white border-secondary" id="txtHostnameEditar" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">IP</label>
-                            <input type="text" class="form-control bg-dark text-white border-secondary" id="txtIpEditar" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Estado de Equipo</label>
-                            <select class="form-select bg-dark text-white border-secondary" id="selectEstadoEquipoEditar">
-                                <option value="true">Activo</option>
-                                <option value="false">Inactivo</option>
-                            </select>
-                        </div>
-                        <button type="button" class="btn btn-guardar-edicion-sigest w-100 py-2" onclick="guardarEdicionEquipo()">
-                            <i class="bi bi-check2-circle me-1"></i> Actualizar Datos de Equipo
-                        </button>
-                    </div>
-
-                    <!-- Panel de Fechas y Estatus -->
-                    <div class="col-md-6" id="panelGestionFechasEditar">
-                        <h6 class="text-info fw-bold mb-3"><i class="bi bi-check-all me-1"></i> Estado de Fechas Programadas</h6>
-                        
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Seleccionar Fecha a Modificar / Estatus</label>
-                            <select class="form-select bg-dark text-white border-secondary" id="selectFechaProgramacion" onchange="cargarFechaSeleccionadaParaEditar()">
-                                <option value="">Seleccione una fecha...</option>
-                            </select>
-                        </div>
-
-                        <!-- Edición directa de la fecha asignada -->
-                        <div class="mb-3 d-none" id="divEditarFechaDirecta">
-                            <label class="form-label small fw-bold text-warning"><i class="bi bi-calendar-event me-1"></i>Corregir / Editar Fecha Seleccionada</label>
-                            <div class="input-group">
-                                <input type="date" class="form-control bg-dark text-white border-secondary" id="txtModificarFechaInput" />
-                                <button type="button" class="btn btn-actualizar-fecha-sigest" onclick="guardarCambioFechaIndividual()">Guardar Fecha</button>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Nuevo Estatus de Cumplimiento</label>
-                            <select class="form-select bg-dark text-white border-secondary" id="selectNuevoEstatus" onchange="evaluarEstadoProgramacion()">
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="En Curso">En Curso</option>
-                                <option value="Realizado">Marcar como Completado</option>
-                            </select>
-                        </div>
-
-                        <!-- Recuadro Observaciones -->
-                        <div class="mb-3 d-none" id="divObservaciones">
-                            <label class="form-label small fw-bold text-warning"><i class="bi bi-chat-left-text me-1"></i>Observaciones (Requerido para En Curso)</label>
-                            <textarea class="form-control bg-dark text-white border-secondary" id="txtObservaciones" rows="3" placeholder="Razón por la que el respaldo está en curso..."></textarea>
-                        </div>
-
-                        <button type="button" class="btn btn-guardar-estatus-sigest w-100 py-2 mt-2" onclick="guardarEstatusRespaldo()">
-                            <i class="bi bi-check-circle me-1"></i> Guardar Estatus de Respaldo
-                        </button>
-
-                        <hr class="border-secondary my-3" />
-
-                        <!-- Añadir nueva fecha adicional -->
-                        <label class="form-label small fw-bold text-info"><i class="bi bi-calendar-plus me-1"></i>Añadir Nueva Fecha a este Equipo</label>
-                        <div class="input-group">
-                            <input type="date" class="form-control bg-dark text-white border-secondary" id="txtNuevaFechaEditar" />
-                            <button type="button" class="btn btn-anadir-fecha-sigest" onclick="agregarFechaAEquipoExistente()">Añadir</button>
                         </div>
                     </div>
                 </div>
+
+                <!-- Barra de navegación: ‹ Mes Año ›  [Hoy]  y resumen de conteos (lo llena planRespaldos.js) -->
+                <div class="cal-barra mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn cal-btn-nav" onclick="cambiarMesConsulta(-1)" title="Mes anterior"><i class="bi bi-chevron-left"></i></button>
+                        <div class="cal-titulo" id="lblMesCalendario"></div>
+                        <button type="button" class="btn cal-btn-nav" onclick="cambiarMesConsulta(1)" title="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
+                        <button type="button" class="btn cal-btn-hoy ms-1" onclick="irAMesActualConsulta()">Hoy</button>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2" id="resumenCalendario"></div>
+                </div>
+
+                <!-- Calendario del mes (lo dibuja planRespaldos.js) -->
+                <div class="cal-scroll">
+                    <div id="calendarioRespaldos"></div>
+                </div>
             </div>
-            <div class="modal-footer border-secondary">
+            <div class="modal-footer">
                 <button type="button" class="btn btn-cancelar-sigest" data-bs-dismiss="modal">Cerrar</button>
             </div>
+<!-- ===== FIN MODIFICADO ===== -->
         </div>
     </div>
 </div>
