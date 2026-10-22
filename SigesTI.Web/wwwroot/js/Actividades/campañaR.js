@@ -1,87 +1,61 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
     // Inicialización de sincronización de Scrollbar Superior e Inferior
     inicializarDobleScroll();
+
+    // Permite arrastrar el archivo Excel al modal de carga
+    inicializarZonaArchivo();
+
+    // Si la página se recargó después de guardar, se recuperan filtros y scroll
+    restaurarVista();
 });
 
 /* =========================================================
-   SINCRONIZACIÓN DE SCROLLBAR HORIZONTAL SUPERIOR E INFERIOR
+   ALERTAS (SweetAlert2 con estilo oscuro)
    ========================================================= */
-function inicializarDobleScroll() {
-    const topScroll = document.getElementById("topScrollContainer");
-    const topDummy = document.getElementById("topScrollDummy");
-    const mainTable = document.getElementById("mainTableContainer");
-    const tabla = document.getElementById("tablaCampana");
-
-    if (topScroll && topDummy && mainTable && tabla) {
-        // Ajusta el ancho del div interno ficticio al ancho real scrollable de la tabla
-        function ajustarAnchoScroll() {
-            topDummy.style.width = tabla.scrollWidth + "px";
-        }
-
-        ajustarAnchoScroll();
-        window.addEventListener("resize", ajustarAnchoScroll);
-
-        let isSyncingTop = false;
-        let isSyncingMain = false;
-
-        // Desplazamiento desde el scrollbar superior
-        topScroll.addEventListener("scroll", () => {
-            if (!isSyncingTop) {
-                isSyncingMain = true;
-                mainTable.scrollLeft = topScroll.scrollLeft;
-            }
-            isSyncingTop = false;
-        });
-
-        // Desplazamiento desde el contenedor inferior de la tabla
-        mainTable.addEventListener("scroll", () => {
-            if (!isSyncingMain) {
-                isSyncingTop = true;
-                topScroll.scrollLeft = mainTable.scrollLeft;
-            }
-            isSyncingMain = false;
-        });
-    }
+function alerta(icono, titulo, texto) {
+    return Swal.fire({
+        icon: icono,
+        title: titulo,
+        text: texto,
+        confirmButtonText: 'Aceptar',
+        customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
+        buttonsStyling: false
+    });
 }
 
-const SISTEMAS_REGISTRADOS = [
-    "DIA 8",
-    "SITA",
-    "VUCEM",
-    "COA",
-    "DIAENLINEA PREMIUM",
-    "DIAWEB",
-    "MÓDULO DE ENLACE"
-];
-
-function normalizarNombreSistema(sistemaRaw) {
-    if (!sistemaRaw) return "";
-    const sysUpper = sistemaRaw.trim().toUpperCase();
-
-    if (sysUpper.includes("DIAENLINEA") || sysUpper.includes("DIA EN LINEA")) return "DIAENLINEA PREMIUM";
-    if (sysUpper.includes("DIAWEB") || sysUpper.includes("DIA WEB")) return "DIAWEB";
-    if (sysUpper.includes("SITA")) return "SITA";
-    if (sysUpper.includes("VUCEM")) return "VUCEM";
-    if (sysUpper.includes("ENLACE")) return "MÓDULO DE ENLACE";
-    if (sysUpper.includes("COA")) return "COA";
-    if (sysUpper.includes("DIA 8") || sysUpper === "DIA") return "DIA 8";
-
-    return sistemaRaw.trim();
+function confirmar(titulo, texto, textoBoton) {
+    return Swal.fire({
+        icon: 'warning',
+        title: titulo,
+        text: texto,
+        showCancelButton: true,
+        confirmButtonText: textoBoton,
+        cancelButtonText: 'Cancelar',
+        customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-danger', cancelButton: 'swal-btn-cancel' },
+        buttonsStyling: false
+    });
 }
 
-function deducirSistemaPorSerieJS(serie) {
-    if (!serie) return "";
-    const s = serie.trim().toUpperCase();
+/* =========================================================
+   UTILIDADES
+   ========================================================= */
+function abrirModal(idModal) {
+    bootstrap.Modal.getOrCreateInstance(document.getElementById(idModal)).show();
+}
 
-    if (s.startsWith("DNL") || s.startsWith("DNLP")) return "DIAENLINEA PREMIUM";
-    if (s.startsWith("COVE")) return "VUCEM";
-    if (s.startsWith("M3WIN")) return "SITA";
-    if (s.startsWith("DIAW")) return "DIAWEB";
-    if (s.startsWith("DIA")) return "DIA 8";
-    if (s.startsWith("COA")) return "COA";
-    if (s.startsWith("MED")) return "MÓDULO DE ENLACE";
+function obtenerToken() {
+    const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+    return tokenInput ? tokenInput.value : '';
+}
 
-    return "";
+// Evita que texto escrito por usuarios se interprete como HTML
+function escaparHtml(texto) {
+    return (texto || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 
 function autoAjustarAltura(textarea) {
@@ -92,24 +66,88 @@ function autoAjustarAltura(textarea) {
     textarea.style.height = (scrollH > minH ? scrollH : minH) + "px";
 }
 
-function aplicarColorSelectSistemaModal(selectElement) {
-    if (!selectElement) return;
-
-    selectElement.classList.remove("select-sistema-modal", "sys-dia8", "sys-sita", "sys-vucem", "sys-coa", "sys-diaenlinea", "sys-diaweb", "sys-enlace");
-
-    const val = selectElement.value.toUpperCase();
-    if (val) {
-        selectElement.classList.add("select-sistema-modal");
-        if (val.includes("DIA 8")) selectElement.classList.add("sys-dia8");
-        else if (val.includes("SITA")) selectElement.classList.add("sys-sita");
-        else if (val.includes("VUCEM")) selectElement.classList.add("sys-vucem");
-        else if (val.includes("COA")) selectElement.classList.add("sys-coa");
-        else if (val.includes("DIAENLINEA")) selectElement.classList.add("sys-diaenlinea");
-        else if (val.includes("DIAWEB")) selectElement.classList.add("sys-diaweb");
-        else if (val.includes("ENLACE")) selectElement.classList.add("sys-enlace");
+/* =========================================================
+   SINCRONIZACIÓN DE SCROLLBAR HORIZONTAL SUPERIOR E INFERIOR
+   ========================================================= */
+function ajustarAnchoScrollSuperior() {
+    const topDummy = document.getElementById("topScrollDummy");
+    const tabla = document.getElementById("tablaCampana");
+    if (topDummy && tabla) {
+        topDummy.style.width = tabla.scrollWidth + "px";
     }
 }
 
+function inicializarDobleScroll() {
+    const topScroll = document.getElementById("topScrollContainer");
+    const mainTable = document.getElementById("mainTableContainer");
+
+    if (!topScroll || !mainTable) return;
+
+    ajustarAnchoScrollSuperior();
+    window.addEventListener("resize", ajustarAnchoScrollSuperior);
+
+    let isSyncingTop = false;
+    let isSyncingMain = false;
+
+    // Desplazamiento desde el scrollbar superior
+    topScroll.addEventListener("scroll", () => {
+        if (!isSyncingTop) {
+            isSyncingMain = true;
+            mainTable.scrollLeft = topScroll.scrollLeft;
+        }
+        isSyncingTop = false;
+    });
+
+    // Desplazamiento desde el contenedor inferior de la tabla
+    mainTable.addEventListener("scroll", () => {
+        if (!isSyncingMain) {
+            isSyncingTop = true;
+            topScroll.scrollLeft = mainTable.scrollLeft;
+        }
+        isSyncingMain = false;
+    });
+}
+
+/* =========================================================
+   CATÁLOGO DE SISTEMAS (SISTEMAS_CATALOGO viene del servidor)
+   ========================================================= */
+function buscarSistema(sistemaRaw) {
+    if (!sistemaRaw) return null;
+
+    let sysUpper = sistemaRaw.trim().toUpperCase();
+    if (sysUpper === "DIA") sysUpper = "DIA 8";
+
+    return SISTEMAS_CATALOGO.find(s => s.claves.some(c => sysUpper.includes(c))) || null;
+}
+
+function normalizarNombreSistema(sistemaRaw) {
+    const sistema = buscarSistema(sistemaRaw);
+    return sistema ? sistema.nombre : (sistemaRaw || "").trim();
+}
+
+function deducirSistemaPorSerie(serie) {
+    if (!serie) return "";
+    const s = serie.trim().toUpperCase();
+
+    const sistema = SISTEMAS_CATALOGO.find(x => x.prefijos.some(p => s.startsWith(p)));
+    return sistema ? sistema.nombre : "";
+}
+
+function aplicarColorSelectSistemaModal(selectElement) {
+    if (!selectElement) return;
+
+    // Quitar los colores anteriores
+    SISTEMAS_CATALOGO.forEach(s => selectElement.classList.remove(s.claseCss));
+
+    const sistema = buscarSistema(selectElement.value);
+    if (sistema) {
+        selectElement.classList.add(sistema.claseCss);
+    }
+}
+
+/* =========================================================
+   MODAL DE EDICIÓN: FILAS DE SISTEMA Y SERIE
+   ========================================================= */
 function agregarFilaSistemaSerie(sistemaSeleccionado = "", serieTexto = "") {
     const contenedor = document.getElementById("contenedorSistemasSeries");
     if (!contenedor) return;
@@ -118,13 +156,13 @@ function agregarFilaSistemaSerie(sistemaSeleccionado = "", serieTexto = "") {
 
     if (!sistemaLimpio && serieTexto) {
         const primeraSerie = serieTexto.split(",")[0].split("\n")[0];
-        sistemaLimpio = deducirSistemaPorSerieJS(primeraSerie);
+        sistemaLimpio = deducirSistemaPorSerie(primeraSerie);
     }
 
     let opcionesHtml = `<option value="" class="bg-dark text-white">-- Selecciona Sistema --</option>`;
-    SISTEMAS_REGISTRADOS.forEach(sys => {
-        const selected = sys.toUpperCase() === sistemaLimpio.toUpperCase() ? "selected" : "";
-        opcionesHtml += `<option value="${sys}" ${selected} class="bg-dark text-white">${sys}</option>`;
+    SISTEMAS_CATALOGO.forEach(sys => {
+        const selected = sys.nombre === sistemaLimpio ? "selected" : "";
+        opcionesHtml += `<option value="${sys.nombre}" ${selected} class="bg-dark text-white">${sys.nombre}</option>`;
     });
 
     const seriesFormateadas = serieTexto.split(", ").join("\n");
@@ -133,14 +171,14 @@ function agregarFilaSistemaSerie(sistemaSeleccionado = "", serieTexto = "") {
     divRow.className = "row g-2 align-items-start sistema-serie-row";
     divRow.innerHTML = `
         <div class="col-md-5">
-            <select class="form-select campana-filter-select input-sistema-item" onchange="aplicarColorSelectSistemaModal(this)">
+            <select class="form-select campana-filter-select select-sistema-modal input-sistema-item" onchange="aplicarColorSelectSistemaModal(this)">
                 ${opcionesHtml}
             </select>
         </div>
         <div class="col-md-6">
-            <textarea class="form-control campana-filter-input input-serie-item textarea-auto-expand" 
-                      rows="1" placeholder="N. de serie (una por línea)..." 
-                      oninput="autoSeleccionarSistemaPorSerie(this); autoAjustarAltura(this);">${seriesFormateadas}</textarea>
+            <textarea class="form-control campana-filter-input input-serie-item textarea-auto-expand"
+                      rows="1" placeholder="N. de serie (una por línea)..."
+                      oninput="autoSeleccionarSistemaPorSerie(this); autoAjustarAltura(this);"></textarea>
         </div>
         <div class="col-md-1 text-center pt-1">
             <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmarEliminarSistemaSerie(this)">
@@ -151,33 +189,25 @@ function agregarFilaSistemaSerie(sistemaSeleccionado = "", serieTexto = "") {
 
     contenedor.appendChild(divRow);
 
-    const selectCreado = divRow.querySelector(".input-sistema-item");
-    aplicarColorSelectSistemaModal(selectCreado);
-
+    // El texto de las series se asigna con .value para que no se interprete como HTML
     const textareaSerie = divRow.querySelector(".input-serie-item");
+    textareaSerie.value = seriesFormateadas;
     autoAjustarAltura(textareaSerie);
+
+    aplicarColorSelectSistemaModal(divRow.querySelector(".input-sistema-item"));
 }
 
-/* Alerta SweetAlert2 al pulsar la papelera */
 function confirmarEliminarSistemaSerie(btnElement) {
     const row = btnElement.closest(".sistema-serie-row");
     const selectSys = row.querySelector(".input-sistema-item");
     const nombreSys = selectSys && selectSys.value ? selectSys.value : "este sistema";
 
-    Swal.fire({
-        icon: 'warning',
-        title: '¿Eliminar sistema?',
-        text: `¿Estás seguro de quitar ${nombreSys} de la lista de este cliente?`,
-        showCancelButton: true,
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar',
-        customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-danger', cancelButton: 'swal-btn-cancel' },
-        buttonsStyling: false
-    }).then((result) => {
-        if (result.isConfirmed) {
-            row.remove();
-        }
-    });
+    confirmar('¿Eliminar sistema?', `¿Estás seguro de quitar ${nombreSys} de la lista de este cliente?`, 'Sí, eliminar')
+        .then((result) => {
+            if (result.isConfirmed) {
+                row.remove();
+            }
+        });
 }
 
 function autoSeleccionarSistemaPorSerie(inputSerie) {
@@ -185,22 +215,25 @@ function autoSeleccionarSistemaPorSerie(inputSerie) {
     if (!row) return;
 
     const selectSistema = row.querySelector(".input-sistema-item");
-    if (!selectSistema.value) {
-        const lineas = inputSerie.value.split("\n");
-        for (let l of lineas) {
-            const sistemaDeducido = deducirSistemaPorSerieJS(l);
-            if (sistemaDeducido) {
-                selectSistema.value = sistemaDeducido;
-                aplicarColorSelectSistemaModal(selectSistema);
-                break;
-            }
+    if (selectSistema.value) return;
+
+    for (const linea of inputSerie.value.split("\n")) {
+        const sistemaDeducido = deducirSistemaPorSerie(linea);
+        if (sistemaDeducido) {
+            selectSistema.value = sistemaDeducido;
+            aplicarColorSelectSistemaModal(selectSistema);
+            break;
         }
     }
 }
 
+/* =========================================================
+   MODAL DE EDICIÓN: ABRIR Y GUARDAR
+   ========================================================= */
 function abrirModalEdicionDesdeFila(trElement) {
     const ds = trElement.dataset;
 
+    document.getElementById("editSubtitulo").innerText = `${ds.empresa || ""} · No. ${ds.nocliente || ""}`;
     document.getElementById("editId").value = ds.id || "";
     document.getElementById("editTipoCliente").value = ds.tipo || "Normal";
     document.getElementById("editNoCliente").value = ds.nocliente || "";
@@ -210,13 +243,13 @@ function abrirModalEdicionDesdeFila(trElement) {
     document.getElementById("editTelefono").value = ds.telefono || "";
     document.getElementById("editEjecutivo").value = ds.ejecutivo || "";
     document.getElementById("editTicket").value = ds.ticket || "";
-    document.getElementById("editEstatus").value = ds.estatus || "Pendiente";
 
-    actualizarColorEstatusModal(ds.estatus || "Pendiente");
+    const selectEstatus = document.getElementById("editEstatus");
+    selectEstatus.value = normalizarEstatus(ds.estatus);
+    pintarSelectEstatus(selectEstatus);
 
     ["editNombreCliente", "editCorreo", "editTelefono"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) autoAjustarAltura(el);
+        autoAjustarAltura(document.getElementById(id));
     });
 
     const contenedor = document.getElementById("contenedorSistemasSeries");
@@ -225,8 +258,8 @@ function abrirModalEdicionDesdeFila(trElement) {
     const listaSistemas = (ds.sistemas || "").split("\n");
     const listaSeries = (ds.noserie || "").split("\n");
 
-    const maxFilas = Math.max(listaSistemas.length, listaSeries.length);
-    if (maxFilas > 0 && (listaSistemas[0] || listaSeries[0])) {
+    if (listaSistemas[0] || listaSeries[0]) {
+        const maxFilas = Math.max(listaSistemas.length, listaSeries.length);
         for (let i = 0; i < maxFilas; i++) {
             agregarFilaSistemaSerie(listaSistemas[i] || "", listaSeries[i] || "");
         }
@@ -234,29 +267,31 @@ function abrirModalEdicionDesdeFila(trElement) {
         agregarFilaSistemaSerie("", "");
     }
 
-    const modalElement = document.getElementById("modalEdicion");
-    const modal = new bootstrap.Modal(modalElement);
-    modal.show();
+    abrirModal("modalEdicion");
 }
 
 async function guardarEdicionRegistro() {
-    const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+    const noCliente = document.getElementById("editNoCliente").value.trim();
+    const empresa = document.getElementById("editEmpresa").value.trim();
 
-    const sistemasInputs = document.querySelectorAll(".input-sistema-item");
-    const seriesInputs = document.querySelectorAll(".input-serie-item");
+    if (!noCliente || !empresa) {
+        alerta('warning', 'Campos obligatorios', 'El No. Cliente y la Empresa son obligatorios.');
+        return;
+    }
 
-    let arraySistemas = [];
-    let arraySeries = [];
+    // Juntar los sistemas y series de cada fila
+    const arraySistemas = [];
+    const arraySeries = [];
 
-    sistemasInputs.forEach((sel, idx) => {
-        const valSys = sel.value.trim();
-        const rawSerie = seriesInputs[idx] ? seriesInputs[idx].value.trim() : "";
-        
-        const arraySeriesLimpio = rawSerie.split("\n").map(s => s.trim()).filter(s => s.length > 0);
-        const valSerieFormateado = arraySeriesLimpio.join(", ");
+    document.querySelectorAll(".sistema-serie-row").forEach(row => {
+        const valSys = row.querySelector(".input-sistema-item").value.trim();
+        const rawSerie = row.querySelector(".input-serie-item").value.trim();
+
+        const seriesLimpias = rawSerie.split("\n").map(s => s.trim()).filter(s => s.length > 0);
+        const valSerieFormateado = seriesLimpias.join(", ");
 
         if (valSys || valSerieFormateado) {
-            arraySistemas.push(valSys || deducirSistemaPorSerieJS(arraySeriesLimpio[0]));
+            arraySistemas.push(valSys || deducirSistemaPorSerie(seriesLimpias[0]));
             arraySeries.push(valSerieFormateado);
         }
     });
@@ -264,8 +299,8 @@ async function guardarEdicionRegistro() {
     const formData = new FormData();
     formData.append("model.Id", document.getElementById("editId").value);
     formData.append("model.TipoCliente", document.getElementById("editTipoCliente").value);
-    formData.append("model.NoCliente", document.getElementById("editNoCliente").value);
-    formData.append("model.Empresa", document.getElementById("editEmpresa").value);
+    formData.append("model.NoCliente", noCliente);
+    formData.append("model.Empresa", empresa);
     formData.append("model.NombreCliente", document.getElementById("editNombreCliente").value);
     formData.append("model.CorreoElectronico", document.getElementById("editCorreo").value);
     formData.append("model.Telefono", document.getElementById("editTelefono").value);
@@ -278,62 +313,72 @@ async function guardarEdicionRegistro() {
     try {
         const response = await fetch('?handler=EditarRegistro', {
             method: 'POST',
-            headers: { 'RequestVerificationToken': tokenInput ? tokenInput.value : '' },
+            headers: { 'RequestVerificationToken': obtenerToken() },
             body: formData
         });
 
         const res = await response.json();
         if (res.exito) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Cliente actualizado',
-                text: 'Los datos fueron modificados correctamente.',
-                confirmButtonText: 'Aceptar',
-                customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
-                buttonsStyling: false
-            }).then(() => { location.reload(); });
+            alerta('success', 'Cliente actualizado', 'Los datos fueron modificados correctamente.')
+                .then(() => recargarConservandoVista());
         } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: res.mensaje,
-                confirmButtonText: 'Aceptar',
-                customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
-                buttonsStyling: false
-            });
+            alerta('error', 'Error', res.mensaje);
         }
     } catch (err) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Ocurrió un error al intentar actualizar el registro.',
-            confirmButtonText: 'Aceptar',
-            customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
-            buttonsStyling: false
-        });
+        alerta('error', 'Error', 'Ocurrió un error al intentar actualizar el registro.');
     }
 }
 
+/* =========================================================
+   CARGA DE ARCHIVO EXCEL
+   ========================================================= */
+// Muestra el nombre del archivo elegido dentro de la zona punteada
+function mostrarNombreArchivo() {
+    const archivo = document.getElementById("archivoExcel").files[0];
+    const zona = document.getElementById("zonaArchivo");
+    const texto = document.getElementById("nombreArchivo");
+
+    if (archivo) {
+        texto.innerText = archivo.name;
+        zona.classList.add("con-archivo");
+    } else {
+        texto.innerText = "Haz clic o arrastra aquí tu archivo";
+        zona.classList.remove("con-archivo");
+    }
+}
+
+function inicializarZonaArchivo() {
+    const zona = document.getElementById("zonaArchivo");
+    const input = document.getElementById("archivoExcel");
+    if (!zona || !input) return;
+
+    zona.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        zona.classList.add("arrastrando");
+    });
+
+    zona.addEventListener("dragleave", () => zona.classList.remove("arrastrando"));
+
+    zona.addEventListener("drop", (e) => {
+        e.preventDefault();
+        zona.classList.remove("arrastrando");
+        input.files = e.dataTransfer.files;
+        mostrarNombreArchivo();
+    });
+}
+
 async function procesarEnvioArchivo(confirmarSobrescritura) {
-    const fileInput = document.getElementById('archivoExcel').files[0];
+    const archivo = document.getElementById('archivoExcel').files[0];
     const mes = document.getElementById('selectMes').value;
     const anio = document.getElementById('selectAnio').value;
-    const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
 
-    if (!fileInput) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Archivo no seleccionado',
-            text: 'Por favor selecciona un archivo Excel.',
-            confirmButtonText: 'Aceptar',
-            customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
-            buttonsStyling: false
-        });
+    if (!archivo) {
+        alerta('warning', 'Archivo no seleccionado', 'Por favor selecciona un archivo Excel.');
         return;
     }
 
     const formData = new FormData();
-    formData.append("Input.Archivo", fileInput);
+    formData.append("Input.Archivo", archivo);
     formData.append("Input.Mes", mes);
     formData.append("Input.Anio", anio);
     formData.append("Input.ConfirmarSobrescritura", confirmarSobrescritura);
@@ -341,112 +386,81 @@ async function procesarEnvioArchivo(confirmarSobrescritura) {
     try {
         const response = await fetch('?handler=CargarExcel', {
             method: 'POST',
-            headers: { 'RequestVerificationToken': tokenInput ? tokenInput.value : '' },
+            headers: { 'RequestVerificationToken': obtenerToken() },
             body: formData
         });
 
         const res = await response.json();
 
         if (res.exito) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Carga completada',
-                text: res.mensaje,
-                confirmButtonText: 'Aceptar',
-                customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
-                buttonsStyling: false
-            }).then(() => { location.reload(); });
+            // Se abre directamente el mes que se acaba de cargar
+            alerta('success', 'Carga completada', res.mensaje)
+                .then(() => { window.location.href = `?mes=${mes}&anio=${anio}`; });
         } else if (res.requiereConfirmacion) {
-            Swal.fire({
-                icon: 'warning',
-                title: '¿Sobrescribir Campaña?',
-                text: res.mensaje,
-                showCancelButton: true,
-                confirmButtonText: 'Sí, sobrescribir',
-                cancelButtonText: 'Cancelar',
-                customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-danger', cancelButton: 'swal-btn-cancel' },
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    procesarEnvioArchivo(true);
-                }
-            });
+            confirmar('¿Sobrescribir Campaña?', res.mensaje, 'Sí, sobrescribir')
+                .then((result) => {
+                    if (result.isConfirmed) {
+                        procesarEnvioArchivo(true);
+                    }
+                });
         } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: res.mensaje,
-                confirmButtonText: 'Aceptar',
-                customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
-                buttonsStyling: false
-            });
+            alerta('error', 'Error', res.mensaje);
         }
     } catch (error) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error de servidor',
-            text: 'Ocurrió un error al procesar la solicitud.',
-            confirmButtonText: 'Aceptar',
-            customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
-            buttonsStyling: false
-        });
+        alerta('error', 'Error de servidor', 'Ocurrió un error al procesar la solicitud.');
     }
 }
 
-/**
- * Abre el Modal de Bitácora mediante doble clic en la celda de comentarios
- */
-function abrirModalComentarios(id, empresa, historial, estatusActual, ticketActual) {
-    document.getElementById('detalleIdModal').value = id;
-    document.getElementById('empresaModalTitle').innerText = empresa;
-    
-    const historialBox = document.getElementById('historialText');
+/* =========================================================
+   BITÁCORA DE SEGUIMIENTO
+   ========================================================= */
 
-    if (historial && historial.includes("Encuesta atendida")) {
-        let textoFormateado = historial.replace(/Encuesta atendida/g, "<span class='atendida-tag'><i class='bi bi-check-circle-fill me-1'></i>Encuesta atendida</span>");
-        historialBox.innerHTML = textoFormateado;
-    } else {
-        historialBox.innerText = historial || "Sin comentarios previos.";
+// Valores con los que se abrió la bitácora, para saber si hubo cambios
+let bitacoraOriginal = { estatus: "", ticket: "" };
+
+function abrirModalComentarios(trElement) {
+    const ds = trElement.dataset;
+
+    document.getElementById('detalleIdModal').value = ds.id;
+    document.getElementById('empresaModalTitle').innerText = ds.empresa || "";
+
+    // Se quitan las líneas "Encuesta atendida" del texto y, si está cerrado, la etiqueta se muestra una sola vez arriba
+    const comentarios = (ds.comentarios || "")
+        .split("\n")
+        .filter(linea => linea.trim().toLowerCase() !== "encuesta atendida")
+        .join("\n")
+        .trim();
+
+    let html = "";
+    if (normalizarEstatus(ds.estatus) === "Cerrado") {
+        html += "<span class='atendida-tag'><i class='bi bi-check-circle-fill me-1'></i>Encuesta atendida</span>\n";
     }
+    html += comentarios ? escaparHtml(comentarios) : "Sin comentarios previos.";
+
+    document.getElementById('historialText').innerHTML = html;
 
     document.getElementById('nuevoSeguimientoText').value = "";
-    
-    // Asignar el valor del Ticket al input del modal
-    const inputTicket = document.getElementById('bitacoraTicketInput');
-    if (inputTicket) {
-        inputTicket.value = ticketActual || "";
-    }
+    document.getElementById('bitacoraTicketInput').value = ds.ticket || "";
 
-    // Asignar el valor del Estatus
     const selectEstatus = document.getElementById('bitacoraEstatusSelect');
-    if (selectEstatus) {
-        selectEstatus.value = estatusActual || "Pendiente";
-        actualizarColorEstatusModal(selectEstatus.value);
-    }
+    selectEstatus.value = normalizarEstatus(ds.estatus);
+    pintarSelectEstatus(selectEstatus);
 
-    const modal = new bootstrap.Modal(document.getElementById('modalComentarios'));
-    modal.show();
+    bitacoraOriginal = { estatus: selectEstatus.value, ticket: ds.ticket || "" };
+
+    abrirModal('modalComentarios');
 }
 
-/**
- * Guarda el comentario, el número de ticket y el estatus actual
- */
 async function guardarComentarioModal() {
     const id = document.getElementById('detalleIdModal').value;
-    const texto = document.getElementById('nuevoSeguimientoText').value;
+    const texto = document.getElementById('nuevoSeguimientoText').value.trim();
     const estatus = document.getElementById('bitacoraEstatusSelect').value;
-    const ticket = document.getElementById('bitacoraTicketInput').value;
-    const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+    const ticket = document.getElementById('bitacoraTicketInput').value.trim();
 
-    if (!texto.trim()) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Campo vacío',
-            text: 'Ingresa un comentario antes de guardar.',
-            confirmButtonText: 'Aceptar',
-            customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
-            buttonsStyling: false
-        });
+    // Se puede guardar solo un cambio de ticket o estatus, sin comentario
+    const huboCambios = texto || estatus !== bitacoraOriginal.estatus || ticket !== bitacoraOriginal.ticket;
+    if (!huboCambios) {
+        alerta('warning', 'Sin cambios', 'Escribe un comentario o cambia el ticket o estatus antes de guardar.');
         return;
     }
 
@@ -459,83 +473,180 @@ async function guardarComentarioModal() {
     try {
         const response = await fetch('?handler=GuardarComentario', {
             method: 'POST',
-            headers: { 'RequestVerificationToken': tokenInput ? tokenInput.value : '' },
+            headers: { 'RequestVerificationToken': obtenerToken() },
             body: formData
         });
 
         const res = await response.json();
         if (res.exito) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Bitácora guardada',
-                text: 'Se ha registrado la nueva entrada correctamente.',
-                confirmButtonText: 'Aceptar',
-                customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
-                buttonsStyling: false
-            }).then(() => { location.reload(); });
+            alerta('success', 'Bitácora guardada', 'Se ha registrado la nueva entrada correctamente.')
+                .then(() => recargarConservandoVista());
         } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: res.mensaje,
-                confirmButtonText: 'Aceptar',
-                customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
-                buttonsStyling: false
-            });
+            alerta('error', 'Error', res.mensaje);
         }
     } catch (error) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Ocurrió un error al guardar el comentario.',
-            confirmButtonText: 'Aceptar',
-            customClass: { popup: 'swal-dark', confirmButton: 'swal-btn-confirm' },
-            buttonsStyling: false
-        });
+        alerta('error', 'Error', 'Ocurrió un error al guardar el comentario.');
     }
+}
+
+/* =========================================================
+   ESTATUS
+   ========================================================= */
+function normalizarEstatus(estatus) {
+    const st = (estatus || "").trim().toLowerCase();
+    if (st === "cerrado") return "Cerrado";
+    if (st === "en curso") return "En curso";
+    return "Pendiente";
+}
+
+function pintarSelectEstatus(select) {
+    if (!select) return;
+
+    select.classList.remove("st-pendiente", "st-encurso", "st-cerrado");
+
+    if (select.value === "Cerrado") select.classList.add("st-cerrado");
+    else if (select.value === "En curso") select.classList.add("st-encurso");
+    else select.classList.add("st-pendiente");
+}
+
+/* =========================================================
+   FILTROS DE LA TABLA
+   ========================================================= */
+let temporizadorBusqueda = null;
+
+// Espera a que el usuario deje de escribir para filtrar
+function filtrarConEspera() {
+    clearTimeout(temporizadorBusqueda);
+    temporizadorBusqueda = setTimeout(filtrarTablaLocal, 250);
 }
 
 function filtrarTablaLocal() {
-    const input = document.getElementById("inputBuscador").value.toLowerCase();
-    const filas = document.querySelectorAll("#tablaCampana tbody tr");
+    const texto = document.getElementById("inputBuscador").value.trim().toLowerCase();
+    const estatus = document.getElementById("filtroEstatus").value;
+    const ejecutivo = document.getElementById("filtroEjecutivo").value;
+    const sistema = document.getElementById("filtroSistema").value;
 
-    filas.forEach(fila => {
-        const textoFila = fila.innerText.toLowerCase();
-        fila.style.display = textoFila.includes(input) ? "" : "none";
+    let visibles = 0;
+
+    document.querySelectorAll("#tablaCampana tbody tr.fila-registro").forEach(fila => {
+        const ds = fila.dataset;
+
+        const textoFila = `${ds.empresa} ${ds.nocliente} ${ds.nombre} ${ds.ticket}`.toLowerCase();
+        const sistemasFila = (ds.sistemas || "").split("\n").map(normalizarNombreSistema);
+
+        const coincide =
+            textoFila.includes(texto) &&
+            (!estatus || normalizarEstatus(ds.estatus) === estatus) &&
+            (!ejecutivo || ds.ejecutivo === ejecutivo) &&
+            (!sistema || sistemasFila.includes(sistema));
+
+        fila.style.display = coincide ? "" : "none";
+        if (coincide) visibles++;
     });
 
-    // Actualizar el ancho del scrollbar superior falso por si cambia el layout
-    const topDummy = document.getElementById("topScrollDummy");
-    const tabla = document.getElementById("tablaCampana");
-    if (topDummy && tabla) {
-        topDummy.style.width = tabla.scrollWidth + "px";
+    const filaSinResultados = document.getElementById("filaSinResultados");
+    if (filaSinResultados) {
+        filaSinResultados.style.display = visibles === 0 ? "" : "none";
     }
+
+    // Actualizar el ancho del scrollbar superior por si cambia el layout
+    ajustarAnchoScrollSuperior();
 }
 
+/* =========================================================
+   CONSERVAR FILTROS Y SCROLL AL RECARGAR
+   ========================================================= */
+const CLAVE_VISTA = "campanaR_vista";
+
+function recargarConservandoVista() {
+    const vista = {
+        busqueda: document.getElementById("inputBuscador").value,
+        estatus: document.getElementById("filtroEstatus").value,
+        ejecutivo: document.getElementById("filtroEjecutivo").value,
+        sistema: document.getElementById("filtroSistema").value,
+        scrollY: window.scrollY,
+        scrollX: document.getElementById("mainTableContainer").scrollLeft,
+        scrollTabla: document.getElementById("mainTableContainer").scrollTop
+    };
+
+    try {
+        sessionStorage.setItem(CLAVE_VISTA, JSON.stringify(vista));
+    } catch (e) { /* Si el navegador no lo permite, solo se recarga */ }
+
+    location.reload();
+}
+
+function restaurarVista() {
+    let vista = null;
+    try {
+        vista = JSON.parse(sessionStorage.getItem(CLAVE_VISTA));
+        sessionStorage.removeItem(CLAVE_VISTA);
+    } catch (e) { return; }
+
+    if (!vista) return;
+
+    document.getElementById("inputBuscador").value = vista.busqueda || "";
+    document.getElementById("filtroEstatus").value = vista.estatus || "";
+    document.getElementById("filtroEjecutivo").value = vista.ejecutivo || "";
+    document.getElementById("filtroSistema").value = vista.sistema || "";
+    filtrarTablaLocal();
+
+    window.scrollTo(0, vista.scrollY || 0);
+    document.getElementById("mainTableContainer").scrollLeft = vista.scrollX || 0;
+    document.getElementById("mainTableContainer").scrollTop = vista.scrollTabla || 0;
+}
+
+/* =========================================================
+   LAYOUT DE LA CAMPAÑA (EXISTE_LAYOUT viene del servidor)
+   ========================================================= */
+function descargarLayout() {
+    window.location.href = '?handler=DescargarLayout';
+}
+
+async function cargarLayout(input) {
+    const archivo = input.files[0];
+    if (!archivo) return;
+
+    // Si ya hay un layout se pide confirmación para reemplazarlo
+    if (EXISTE_LAYOUT) {
+        const respuesta = await confirmar('¿Reemplazar layout?', 'Ya existe un layout cargado. ¿Deseas reemplazarlo por el nuevo archivo?', 'Sí, reemplazar');
+        if (!respuesta.isConfirmed) {
+            input.value = "";
+            return;
+        }
+    }
+
+    const formData = new FormData();
+    formData.append("archivo", archivo);
+
+    try {
+        const response = await fetch('?handler=CargarLayout', {
+            method: 'POST',
+            headers: { 'RequestVerificationToken': obtenerToken() },
+            body: formData
+        });
+
+        const res = await response.json();
+        if (res.exito) {
+            alerta('success', 'Layout guardado', res.mensaje).then(() => recargarConservandoVista());
+        } else {
+            alerta('error', 'Error', res.mensaje);
+        }
+    } catch (error) {
+        alerta('error', 'Error de servidor', 'Ocurrió un error al guardar el layout.');
+    }
+
+    // Limpiar el input para poder elegir el mismo archivo otra vez
+    input.value = "";
+}
+
+/* =========================================================
+   CAMBIO DE PERIODO Y EXPORTACIÓN
+   ========================================================= */
 function cambiarPeriodo() {
     const mes = document.getElementById("filtroMes").value;
     const anio = document.getElementById("filtroAnio").value;
     window.location.href = `?mes=${mes}&anio=${anio}`;
-}
-
-function actualizarColorEstatusModal(estatus) {
-    const select = document.getElementById("editEstatus");
-    if (select) {
-        select.classList.remove("st-pendiente", "st-encurso", "st-cerrado");
-        const st = (estatus || "").trim().toLowerCase();
-        if (st === "cerrado") select.classList.add("st-cerrado");
-        else if (st === "en curso") select.classList.add("st-encurso");
-        else select.classList.add("st-pendiente");
-    }
-
-    const selectBitacora = document.getElementById("bitacoraEstatusSelect");
-    if (selectBitacora) {
-        selectBitacora.classList.remove("st-pendiente", "st-encurso", "st-cerrado");
-        const stB = (estatus || "").trim().toLowerCase();
-        if (stB === "cerrado") selectBitacora.classList.add("st-cerrado");
-        else if (stB === "en curso") selectBitacora.classList.add("st-encurso");
-        else selectBitacora.classList.add("st-pendiente");
-    }
 }
 
 /**

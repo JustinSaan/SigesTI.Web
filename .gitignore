@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Archivos subidos en tiempo de ejecución (layout de Campaña de Renovación)
+SigesTI.Web/App_Data/

@@ -11,17 +11,32 @@ namespace SigesTI.Web.Pages
     public class CampañaRModel : PageModel
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public CampañaRModel(ApplicationDbContext context)
+        public CampañaRModel(ApplicationDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
+
+        // El layout (plantilla) se guarda en la carpeta App_Data del proyecto, fuera de wwwroot
+        private string RutaLayout => Path.Combine(_env.ContentRootPath, "App_Data", "Layouts", "LayoutCampanaRenovacion.xlsx");
+
+        // Encabezados del Excel (se usan al exportar y al validar la carga)
+        private static readonly string[] Encabezados = new[] {
+            "Tipo de Cliente", "No Cliente", "Empresa", "Nombre del Cliente",
+            "Correo Electrónico", "Teléfono", "Sistema(s)", "N. de serie",
+            "Ejecutivo Asignado", "Comentarios Adicionales", "Ticket", "Estatus"
+        };
 
         public List<CampanaRenovacionDetalle> Detalles { get; set; } = new();
         public List<string> EjecutivosSoporte { get; set; } = new();
+        public List<int> AniosDisponibles { get; set; } = new();
         public int MesSeleccionado { get; set; }
         public int AnioSeleccionado { get; set; }
         public MetricasAvance Metricas { get; set; } = new();
+        public bool ExisteLayout { get; set; }
+        public DateTime? FechaLayout { get; set; }
 
         [BindProperty]
         public CargaCampanaInput Input { get; set; } = new();
@@ -48,10 +63,20 @@ namespace SigesTI.Web.Pages
             MesSeleccionado = mes ?? DateTime.Now.Month;
             AnioSeleccionado = anio ?? DateTime.Now.Year;
 
-            EjecutivosSoporte = await _context.Personal
-                .Where(p => p.Area == "Soporte Técnico" || p.Area == "Soporte Tecnico")
-                .Select(p => p.Nombre)
+            EjecutivosSoporte = await ObtenerEjecutivosSoporteAsync();
+
+            ExisteLayout = System.IO.File.Exists(RutaLayout);
+            if (ExisteLayout) FechaLayout = System.IO.File.GetLastWriteTime(RutaLayout);
+
+            // Años con campañas cargadas + el año actual + el seleccionado
+            AniosDisponibles = await _context.CampanaRenovacion
+                .Select(c => c.Anio)
+                .Distinct()
                 .ToListAsync();
+
+            if (!AniosDisponibles.Contains(DateTime.Now.Year)) AniosDisponibles.Add(DateTime.Now.Year);
+            if (!AniosDisponibles.Contains(AnioSeleccionado)) AniosDisponibles.Add(AnioSeleccionado);
+            AniosDisponibles.Sort();
 
             var campana = await _context.CampanaRenovacion
                 .FirstOrDefaultAsync(c => c.Mes == MesSeleccionado && c.Anio == AnioSeleccionado);
@@ -66,12 +91,22 @@ namespace SigesTI.Web.Pages
             }
         }
 
+        private async Task<List<string>> ObtenerEjecutivosSoporteAsync()
+        {
+            return await _context.Personal
+                .Where(p => p.Area == "Soporte Técnico" || p.Area == "Soporte Tecnico")
+                .Select(p => p.Nombre)
+                .ToListAsync();
+        }
+
         private void CalcularMetricas(List<CampanaRenovacionDetalle> listaDetalles)
         {
             Metricas.TotalClientes = listaDetalles.Count;
-            Metricas.Finalizadas = listaDetalles.Count(d => (d.Estatus ?? "").Trim().Equals("Cerrado", StringComparison.OrdinalIgnoreCase));
-            Metricas.EnCurso = listaDetalles.Count(d => (d.Estatus ?? "").Trim().Equals("En curso", StringComparison.OrdinalIgnoreCase));
-            Metricas.Pendientes = listaDetalles.Count(d => (d.Estatus ?? "").Trim().Equals("Pendiente", StringComparison.OrdinalIgnoreCase));
+            Metricas.Finalizadas = listaDetalles.Count(d => NormalizarEstatus(d.Estatus) == "Cerrado");
+            Metricas.EnCurso = listaDetalles.Count(d => NormalizarEstatus(d.Estatus) == "En curso");
+
+            // Todo lo que no está cerrado ni en curso cuenta como pendiente, así los totales siempre cuadran
+            Metricas.Pendientes = Metricas.TotalClientes - Metricas.Finalizadas - Metricas.EnCurso;
 
             // Porcentaje entero sin decimales
             Metricas.PorcentajeAvance = Metricas.TotalClientes > 0
@@ -79,25 +114,61 @@ namespace SigesTI.Web.Pages
                 : 0;
         }
 
-        private XLColor ObtenerColorSistema(string sistemaRaw)
+        /// <summary>
+        /// Convierte cualquier texto de estatus a uno de los 3 valores oficiales.
+        /// </summary>
+        private string NormalizarEstatus(string? estatusRaw)
         {
-            if (string.IsNullOrWhiteSpace(sistemaRaw)) return XLColor.NoColor;
-            string sysUpper = sistemaRaw.Trim().ToUpper();
+            string st = (estatusRaw ?? "").Trim().ToLower();
 
-            if (sysUpper.Contains("DIAENLINEA") || sysUpper.Contains("DIA EN LINEA")) return XLColor.FromHtml("#4ADE80"); // Verde brillante
-            if (sysUpper.Contains("DIAWEB") || sysUpper.Contains("DIA WEB")) return XLColor.FromHtml("#38BDF8"); // Azul claro
-            if (sysUpper.Contains("SITA")) return XLColor.FromHtml("#EA580C"); // Naranja
-            if (sysUpper.Contains("VUCEM")) return XLColor.FromHtml("#0284C7"); // Azul
-            if (sysUpper.Contains("ENLACE") || sysUpper.Contains("MÓDULO")) return XLColor.FromHtml("#B45309"); // Café / Ámbar
-            if (sysUpper.Contains("COA")) return XLColor.FromHtml("#16A34A"); // Verde oscuro
-            if (sysUpper.Contains("DIA 8") || sysUpper == "DIA") return XLColor.FromHtml("#0284C7"); // Azul
+            if (st.Contains("cerr") || st.Contains("atend") || st.Contains("finaliz")) return "Cerrado";
+            if (st.Contains("curso") || st.Contains("proceso")) return "En curso";
 
-            return XLColor.FromHtml("#64748B"); // Gris por defecto
+            return "Pendiente";
+        }
+
+        private const string EtiquetaAtendida = "Encuesta atendida";
+
+        // Quita todas las líneas "Encuesta atendida" del historial
+        private string QuitarEncuestaAtendida(string? historial)
+        {
+            var lineas = (historial ?? "").Split('\n')
+                .Where(l => !l.Trim().Equals(EtiquetaAtendida, StringComparison.OrdinalIgnoreCase));
+
+            return string.Join("\n", lineas).Trim();
+        }
+
+        // Si el registro está cerrado, pone "Encuesta atendida" una sola vez al inicio del historial
+        private string AgregarEncuestaAtendida(string historial, string estatus)
+        {
+            historial = QuitarEncuestaAtendida(historial);
+
+            if (estatus != "Cerrado") return historial;
+
+            return historial == "" ? EtiquetaAtendida : EtiquetaAtendida + "\n" + historial;
+        }
+
+        private string FormatearNoCliente(string noCliente)
+        {
+            noCliente = noCliente.Trim();
+            return noCliente.Contains("-") ? noCliente : $"{noCliente}-0";
+        }
+
+        // Pone cada línea de contactos en formato "Nombre Apellido"
+        private string FormatearContactos(string? nombres)
+        {
+            string[] lineas = (nombres ?? "").Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            for (int i = 0; i < lineas.Length; i++)
+            {
+                lineas[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(lineas[i].ToLower());
+            }
+            return string.Join("\n", lineas);
         }
 
         /// <summary>
         /// Exporta el Excel desglosando licencias separadas por coma en celdas individuales,
-        /// combinando el sistema correspondiente, con cuadrícula negra y encabezados en azul corporativo.
+        /// combinando el sistema correspondiente. Se respeta la estructura (título en fila 1,
+        /// encabezados en fila 2 y datos desde la fila 3) para que el archivo se pueda volver a cargar.
         /// </summary>
         public async Task<IActionResult> OnGetExportarExcelAsync(int mes, int anio)
         {
@@ -117,58 +188,62 @@ namespace SigesTI.Web.Pages
             string nombreMes = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(mes).ToUpper();
             string nombreArchivo = $"CAMPAÑA DE RENOVACIÓN - {nombreMes} {anio}.xlsx";
 
+            // Colores del archivo (los mismos tonos que la página)
+            var colorTitulo = XLColor.FromHtml("#082F49");
+            var colorEncabezado = XLColor.FromHtml("#0C4A6E");
+            var colorAcento = XLColor.FromHtml("#38BDF8");
+            var colorFilaAlterna = XLColor.FromHtml("#F1F5F9");
+            var colorBorde = XLColor.FromHtml("#94A3B8");
+
             using (var workbook = new XLWorkbook())
             {
                 // =========================================================
                 // HOJA 1: CAMPAÑA DE RENOVACIÓN
                 // =========================================================
                 var ws1 = workbook.Worksheets.Add("Campaña de Renovación");
-                ws1.ShowGridLines = true;
+                ws1.ShowGridLines = false;
+                ws1.SetTabColor(colorEncabezado);
+                ws1.Style.Font.FontName = "Calibri";
 
                 // 1. TÍTULO PRINCIPAL (Fila 1)
                 var rangoTitulo = ws1.Range(1, 1, 1, 12);
                 rangoTitulo.Merge();
                 rangoTitulo.Value = $"CAMPAÑA DE RENOVACIÓN {nombreMes} {anio}";
                 rangoTitulo.Style.Font.Bold = true;
-                rangoTitulo.Style.Font.FontName = "Calibri";
-                rangoTitulo.Style.Font.FontSize = 13;
+                rangoTitulo.Style.Font.FontSize = 15;
                 rangoTitulo.Style.Font.SetFontColor(XLColor.White);
-                rangoTitulo.Style.Fill.BackgroundColor = XLColor.FromHtml("#0369A1"); // Azul Corporativo Elegante
+                rangoTitulo.Style.Fill.BackgroundColor = colorTitulo;
                 rangoTitulo.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                 rangoTitulo.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                ws1.Row(1).Height = 28;
+                ws1.Row(1).Height = 34;
 
                 // 2. ENCABEZADOS DE COLUMNA (Fila 2)
-                string[] encabezados = new[] {
-                    "Tipo de Cliente", "No Cliente", "Empresa", "Nombre del Cliente",
-                    "Correo Electrónico", "Teléfono", "Sistema(s)", "N. de serie",
-                    "Ejecutivo Asignado", "Comentarios Adicionales", "Ticket", "Estatus"
-                };
-
-                for (int i = 0; i < encabezados.Length; i++)
+                var rangoEncabezados = ws1.Range(2, 1, 2, Encabezados.Length);
+                for (int i = 0; i < Encabezados.Length; i++)
                 {
-                    var cell = ws1.Cell(2, i + 1);
-                    cell.Value = encabezados[i];
-                    cell.Style.Font.Bold = true;
-                    cell.Style.Font.FontName = "Calibri";
-                    cell.Style.Font.FontSize = 10;
-                    cell.Style.Font.SetFontColor(XLColor.White);
-                    cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#0284C7"); // Azul Agradable/Claro
-                    cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                    cell.Style.Alignment.WrapText = true;
-
-                    // Borde Negro para el Encabezado
-                    cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                    cell.Style.Border.OutsideBorderColor = XLColor.Black;
+                    ws1.Cell(2, i + 1).Value = Encabezados[i];
                 }
-                ws1.Row(2).Height = 26;
+                rangoEncabezados.Style.Font.Bold = true;
+                rangoEncabezados.Style.Font.FontSize = 10;
+                rangoEncabezados.Style.Font.SetFontColor(XLColor.White);
+                rangoEncabezados.Style.Fill.BackgroundColor = colorEncabezado;
+                rangoEncabezados.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                rangoEncabezados.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                rangoEncabezados.Style.Alignment.WrapText = true;
+                rangoEncabezados.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                rangoEncabezados.Style.Border.InsideBorderColor = XLColor.FromHtml("#1E5A7E");
+                rangoEncabezados.Style.Border.BottomBorder = XLBorderStyleValues.Medium;
+                rangoEncabezados.Style.Border.BottomBorderColor = colorAcento;
+                ws1.Row(2).Height = 30;
 
                 int filaInicioEmpresa = 3;
+                int numeroCliente = 0;
 
                 // 3. RECORRIDO Y FORMATEO DE REGISTROS POR CLIENTE
                 foreach (var item in listaDetalles)
                 {
+                    numeroCliente++;
+
                     var listaSistemasRaw = (item.Sistemas ?? "").Split(new[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
                     var listaSeriesRaw = (item.NoSerie ?? "").Split(new[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -197,50 +272,56 @@ namespace SigesTI.Web.Pages
                     if (filasTotalesEmpresa == 0) filasTotalesEmpresa = 1;
 
                     int filaFinEmpresa = filaInicioEmpresa + filasTotalesEmpresa - 1;
-                    int filaCursor = filaInicioEmpresa;
+                    var rangoEmpresa = ws1.Range(filaInicioEmpresa, 1, filaFinEmpresa, 12);
 
+                    // Estilo base del cliente (los colores de sistema, VIP y estatus se aplican encima)
+                    rangoEmpresa.Style.Font.FontSize = 9;
+                    rangoEmpresa.Style.Font.SetFontColor(XLColor.FromHtml("#1E293B"));
+                    rangoEmpresa.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    rangoEmpresa.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    rangoEmpresa.Style.Alignment.WrapText = true;
+
+                    // Un cliente sí y otro no con fondo gris claro para distinguirlos
+                    if (numeroCliente % 2 == 0)
+                    {
+                        rangoEmpresa.Style.Fill.BackgroundColor = colorFilaAlterna;
+                    }
+
+                    int filaCursor = filaInicioEmpresa;
                     foreach (var sistemaInfo in bloqueSistemas)
                     {
                         int cantSeries = sistemaInfo.Series.Count;
-                        int subFilaInicio = filaCursor;
                         int subFilaFin = filaCursor + cantSeries - 1;
 
                         for (int sIdx = 0; sIdx < cantSeries; sIdx++)
                         {
-                            int rActual = subFilaInicio + sIdx;
-                            var cellSerie = ws1.Cell(rActual, 8);
-                            cellSerie.Value = sistemaInfo.Series[sIdx];
-                            cellSerie.Style.Font.FontName = "Calibri";
-                            cellSerie.Style.Font.FontSize = 9;
-                            cellSerie.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                            cellSerie.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                            ws1.Cell(filaCursor + sIdx, 8).Value = sistemaInfo.Series[sIdx];
                         }
 
-                        var cellSys = ws1.Cell(subFilaInicio, 7);
-                        cellSys.Value = sistemaInfo.NombreSistema;
+                        ws1.Cell(filaCursor, 7).Value = sistemaInfo.NombreSistema;
 
+                        var rangoSys = ws1.Range(filaCursor, 7, subFilaFin, 7);
                         if (cantSeries > 1)
                         {
-                            ws1.Range(subFilaInicio, 7, subFilaFin, 7).Merge();
+                            rangoSys.Merge();
                         }
 
                         if (!string.IsNullOrWhiteSpace(sistemaInfo.NombreSistema))
                         {
-                            var colorSys = ObtenerColorSistema(sistemaInfo.NombreSistema);
-                            var rangoSys = ws1.Range(subFilaInicio, 7, subFilaFin, 7);
-                            rangoSys.Style.Fill.BackgroundColor = colorSys;
-                            rangoSys.Style.Font.SetFontColor(colorSys == XLColor.FromHtml("#4ADE80") || colorSys == XLColor.FromHtml("#38BDF8") ? XLColor.Black : XLColor.White);
+                            var sistema = SistemasCampana.Buscar(sistemaInfo.NombreSistema);
+                            string colorFondo = sistema != null ? sistema.ColorExcel : "#64748B"; // Gris por defecto
+                            string colorTexto = sistema != null ? sistema.ColorTexto : "#FFFFFF";
+
+                            rangoSys.Style.Fill.BackgroundColor = XLColor.FromHtml(colorFondo);
+                            rangoSys.Style.Font.SetFontColor(XLColor.FromHtml(colorTexto));
                             rangoSys.Style.Font.Bold = true;
                         }
 
-                        ws1.Range(subFilaInicio, 7, subFilaFin, 7).Style.Font.FontName = "Calibri";
-                        ws1.Range(subFilaInicio, 7, subFilaFin, 7).Style.Font.FontSize = 9;
-                        ws1.Range(subFilaInicio, 7, subFilaFin, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                        ws1.Range(subFilaInicio, 7, subFilaFin, 7).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                        ws1.Range(subFilaInicio, 7, subFilaFin, 7).Style.Alignment.WrapText = true;
-
                         filaCursor += cantSeries;
                     }
+
+                    // Las series en letra de ancho fijo para leerlas mejor
+                    ws1.Range(filaInicioEmpresa, 8, filaFinEmpresa, 8).Style.Font.FontName = "Consolas";
 
                     ws1.Cell(filaInicioEmpresa, 1).Value = item.TipoCliente;
                     ws1.Cell(filaInicioEmpresa, 2).Value = item.NoCliente;
@@ -253,55 +334,43 @@ namespace SigesTI.Web.Pages
                     ws1.Cell(filaInicioEmpresa, 11).Value = item.Ticket;
                     ws1.Cell(filaInicioEmpresa, 12).Value = item.Estatus;
 
-                    int[] columnasACombinar = new[] { 1, 2, 3, 4, 5, 6, 9, 10, 11, 12 };
-                    foreach (int col in columnasACombinar)
+                    if (filasTotalesEmpresa > 1)
                     {
-                        if (filasTotalesEmpresa > 1)
+                        foreach (int col in new[] { 1, 2, 3, 4, 5, 6, 9, 10, 11, 12 })
                         {
                             ws1.Range(filaInicioEmpresa, col, filaFinEmpresa, col).Merge();
                         }
-
-                        var cell = ws1.Cell(filaInicioEmpresa, col);
-                        cell.Style.Font.FontName = "Calibri";
-                        cell.Style.Font.FontSize = 9;
-                        cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                        cell.Style.Alignment.WrapText = true;
-
-                        if (col == 10)
-                            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
-                        else
-                            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                     }
 
-                    // Formato estatus: Negrita y texto negro
-                    var cellEstatus = ws1.Cell(filaInicioEmpresa, 12);
-                    cellEstatus.Style.Font.Bold = true;
-                    cellEstatus.Style.Font.SetFontColor(XLColor.Black);
+                    // Datos importantes en negrita
+                    ws1.Cell(filaInicioEmpresa, 2).Style.Font.Bold = true;
+                    ws1.Cell(filaInicioEmpresa, 3).Style.Font.Bold = true;
+                    ws1.Cell(filaInicioEmpresa, 11).Style.Font.Bold = true;
 
+                    // Comentarios alineados a la izquierda
+                    ws1.Cell(filaInicioEmpresa, 10).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+
+                    // VIP en amarillo dorado
                     if (item.TipoCliente?.ToUpper() == "VIP")
                     {
                         var rangoVip = ws1.Range(filaInicioEmpresa, 1, filaFinEmpresa, 1);
-                        rangoVip.Style.Fill.BackgroundColor = XLColor.FromHtml("#E67E22");
-                        rangoVip.Style.Font.SetFontColor(XLColor.White);
+                        rangoVip.Style.Fill.BackgroundColor = XLColor.FromHtml("#FACC15");
+                        rangoVip.Style.Font.SetFontColor(XLColor.FromHtml("#422006"));
                         rangoVip.Style.Font.Bold = true;
                     }
 
-                    // Cuadrícula negra explícita
-                    for (int r = filaInicioEmpresa; r <= filaFinEmpresa; r++)
-                    {
-                        for (int c = 1; c <= 12; c++)
-                        {
-                            var cellBorder = ws1.Cell(r, c);
-                            cellBorder.Style.Border.TopBorder = XLBorderStyleValues.Thin;
-                            cellBorder.Style.Border.BottomBorder = XLBorderStyleValues.Thin;
-                            cellBorder.Style.Border.LeftBorder = XLBorderStyleValues.Thin;
-                            cellBorder.Style.Border.RightBorder = XLBorderStyleValues.Thin;
-                            cellBorder.Style.Border.TopBorderColor = XLColor.Black;
-                            cellBorder.Style.Border.BottomBorderColor = XLColor.Black;
-                            cellBorder.Style.Border.LeftBorderColor = XLColor.Black;
-                            cellBorder.Style.Border.RightBorderColor = XLColor.Black;
-                        }
-                    }
+                    // Estatus con su color (verde, amarillo o rojo)
+                    var (fondoEstatus, textoEstatus) = ObtenerColoresEstatus(item.Estatus);
+                    var rangoEstatus = ws1.Range(filaInicioEmpresa, 12, filaFinEmpresa, 12);
+                    rangoEstatus.Style.Fill.BackgroundColor = XLColor.FromHtml(fondoEstatus);
+                    rangoEstatus.Style.Font.SetFontColor(XLColor.FromHtml(textoEstatus));
+                    rangoEstatus.Style.Font.Bold = true;
+
+                    // Bordes: líneas grises suaves dentro y una línea más marcada entre clientes
+                    rangoEmpresa.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                    rangoEmpresa.Style.Border.InsideBorderColor = colorBorde;
+                    rangoEmpresa.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                    rangoEmpresa.Style.Border.OutsideBorderColor = XLColor.FromHtml("#475569");
 
                     filaInicioEmpresa = filaFinEmpresa + 1;
                 }
@@ -319,49 +388,95 @@ namespace SigesTI.Web.Pages
                 ws1.Column(11).Width = 10;
                 ws1.Column(12).Width = 12;
 
+                // El título y los encabezados quedan fijos al bajar
+                ws1.SheetView.FreezeRows(2);
+
+                // Impresión: horizontal, a lo ancho de una hoja y repitiendo encabezados en cada página
+                ws1.PageSetup.PageOrientation = XLPageOrientation.Landscape;
+                ws1.PageSetup.PaperSize = XLPaperSize.LegalPaper;
+                ws1.PageSetup.FitToPages(1, 0);
+                ws1.PageSetup.SetRowsToRepeatAtTop(1, 2);
+                ws1.PageSetup.CenterHorizontally = true;
+                ws1.PageSetup.Margins.Left = 0.3;
+                ws1.PageSetup.Margins.Right = 0.3;
+                ws1.PageSetup.Margins.Top = 0.4;
+                ws1.PageSetup.Margins.Bottom = 0.5;
+                ws1.PageSetup.Footer.Center.AddText("Página &P de &N");
+
                 // =========================================================
                 // HOJA 2: TABLA DE AVANCES Y MÉTRICAS
                 // =========================================================
                 var ws2 = workbook.Worksheets.Add("Avances");
-                ws2.ShowGridLines = true;
+                ws2.ShowGridLines = false;
+                ws2.SetTabColor(XLColor.FromHtml("#15803D"));
+                ws2.Style.Font.FontName = "Calibri";
 
+                // Título
+                var rangoTituloAvance = ws2.Range(1, 1, 1, 5);
+                rangoTituloAvance.Merge();
+                rangoTituloAvance.Value = $"AVANCE DE LA CAMPAÑA {nombreMes} {anio}";
+                rangoTituloAvance.Style.Font.Bold = true;
+                rangoTituloAvance.Style.Font.FontSize = 14;
+                rangoTituloAvance.Style.Font.SetFontColor(XLColor.White);
+                rangoTituloAvance.Style.Fill.BackgroundColor = colorTitulo;
+                rangoTituloAvance.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                rangoTituloAvance.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                ws2.Row(1).Height = 30;
+
+                // Encabezados
                 string[] encabezadosMetricas = new[] {
                     "Total de clientes", "Encuestas finalizadas", "Seguimiento pendiente",
                     "Encuestas en Curso", "Porcentaje"
                 };
 
+                var rangoEncabezadosAvance = ws2.Range(2, 1, 2, 5);
                 for (int i = 0; i < encabezadosMetricas.Length; i++)
                 {
-                    var cell = ws2.Cell(1, i + 1);
-                    cell.Value = encabezadosMetricas[i];
-                    cell.Style.Font.Bold = true;
-                    cell.Style.Font.SetFontColor(XLColor.White);
-                    cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#0284C7");
-                    cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-
-                    cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                    cell.Style.Border.OutsideBorderColor = XLColor.Black;
+                    ws2.Cell(2, i + 1).Value = encabezadosMetricas[i];
                 }
+                rangoEncabezadosAvance.Style.Font.Bold = true;
+                rangoEncabezadosAvance.Style.Font.FontSize = 10;
+                rangoEncabezadosAvance.Style.Font.SetFontColor(XLColor.White);
+                rangoEncabezadosAvance.Style.Fill.BackgroundColor = colorEncabezado;
+                rangoEncabezadosAvance.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                rangoEncabezadosAvance.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                rangoEncabezadosAvance.Style.Border.BottomBorder = XLBorderStyleValues.Medium;
+                rangoEncabezadosAvance.Style.Border.BottomBorderColor = colorAcento;
+                ws2.Row(2).Height = 24;
 
-                ws2.Cell(2, 1).Value = Metricas.TotalClientes;
-                ws2.Cell(2, 2).Value = Metricas.Finalizadas;
-                ws2.Cell(2, 3).Value = Metricas.Pendientes;
-                ws2.Cell(2, 4).Value = Metricas.EnCurso;
-                ws2.Cell(2, 5).Value = $"{Metricas.PorcentajeAvance}%"; // Valor entero en la hoja de Avances
+                // Valores (el porcentaje se guarda como número para poder usarlo en fórmulas)
+                ws2.Cell(3, 1).Value = Metricas.TotalClientes;
+                ws2.Cell(3, 2).Value = Metricas.Finalizadas;
+                ws2.Cell(3, 3).Value = Metricas.Pendientes;
+                ws2.Cell(3, 4).Value = Metricas.EnCurso;
+                ws2.Cell(3, 5).Value = Metricas.PorcentajeAvance / 100.0;
+                ws2.Cell(3, 5).Style.NumberFormat.Format = "0%";
 
-                for (int c = 1; c <= 5; c++)
-                {
-                    var cell = ws2.Cell(2, c);
-                    cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                    cell.Style.Font.Bold = true;
+                var rangoValores = ws2.Range(3, 1, 3, 5);
+                rangoValores.Style.Font.Bold = true;
+                rangoValores.Style.Font.FontSize = 16;
+                rangoValores.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                rangoValores.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                ws2.Row(3).Height = 34;
 
-                    cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-                    cell.Style.Border.OutsideBorderColor = XLColor.Black;
-                }
+                // Cada métrica con su color
+                ws2.Cell(3, 1).Style.Font.SetFontColor(XLColor.FromHtml("#1E293B"));
+                ws2.Cell(3, 2).Style.Font.SetFontColor(XLColor.FromHtml("#166534"));
+                ws2.Cell(3, 2).Style.Fill.BackgroundColor = XLColor.FromHtml("#DCFCE7");
+                ws2.Cell(3, 3).Style.Font.SetFontColor(XLColor.FromHtml("#991B1B"));
+                ws2.Cell(3, 3).Style.Fill.BackgroundColor = XLColor.FromHtml("#FEE2E2");
+                ws2.Cell(3, 4).Style.Font.SetFontColor(XLColor.FromHtml("#854D0E"));
+                ws2.Cell(3, 4).Style.Fill.BackgroundColor = XLColor.FromHtml("#FEF9C3");
+                ws2.Cell(3, 5).Style.Font.SetFontColor(XLColor.FromHtml("#0C4A6E"));
+                ws2.Cell(3, 5).Style.Fill.BackgroundColor = XLColor.FromHtml("#E0F2FE");
 
-                ws2.Columns().AdjustToContents();
+                var tablaAvance = ws2.Range(2, 1, 3, 5);
+                tablaAvance.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                tablaAvance.Style.Border.OutsideBorderColor = XLColor.FromHtml("#475569");
+                tablaAvance.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                tablaAvance.Style.Border.InsideBorderColor = colorBorde;
+
+                ws2.Columns(1, 5).Width = 24;
 
                 using (var stream = new MemoryStream())
                 {
@@ -372,16 +487,23 @@ namespace SigesTI.Web.Pages
             }
         }
 
+        // Colores de fondo y texto del estatus para el Excel
+        private (string Fondo, string Texto) ObtenerColoresEstatus(string? estatus)
+        {
+            switch (NormalizarEstatus(estatus))
+            {
+                case "Cerrado": return ("#DCFCE7", "#166534");
+                case "En curso": return ("#FEF9C3", "#854D0E");
+                default: return ("#FEE2E2", "#991B1B");
+            }
+        }
+
         private string ObtenerTextoCelda(IXLCell celda)
         {
             if (celda == null) return string.Empty;
             if (celda.IsMerged())
             {
-                var mergedRange = celda.MergedRange();
-                var valorCombinado = mergedRange.FirstCell().GetFormattedString();
-                if (string.IsNullOrEmpty(valorCombinado))
-                    valorCombinado = mergedRange.FirstCell().Value.ToString() ?? string.Empty;
-                return valorCombinado.Replace("\r\n", "\n").Replace("\r", "\n").Trim();
+                celda = celda.MergedRange().FirstCell();
             }
 
             string val = celda.GetFormattedString();
@@ -389,49 +511,83 @@ namespace SigesTI.Web.Pages
             return val.Replace("\r\n", "\n").Replace("\r", "\n").Trim();
         }
 
-        private string NormalizarSistemaOficial(string sistemaRaw)
+        // Revisa que la fila 2 tenga los encabezados de la campaña. Regresa el error o null si está bien.
+        private string? ValidarEncabezados(IXLWorksheet worksheet)
         {
-            if (string.IsNullOrWhiteSpace(sistemaRaw)) return string.Empty;
-            string sysUpper = sistemaRaw.Trim().ToUpper();
-
-            if (sysUpper.Contains("DIAENLINEA") || sysUpper.Contains("DIA EN LINEA")) return "DIAENLINEA PREMIUM";
-            if (sysUpper.Contains("DIAWEB") || sysUpper.Contains("DIA WEB")) return "DIAWEB";
-            if (sysUpper.Contains("SITA")) return "SITA";
-            if (sysUpper.Contains("VUCEM")) return "VUCEM";
-            if (sysUpper.Contains("ENLACE")) return "MÓDULO DE ENLACE";
-            if (sysUpper.Contains("COA")) return "COA";
-            if (sysUpper.Contains("DIA 8") || sysUpper == "DIA") return "DIA 8";
-
-            return sistemaRaw.Trim();
+            for (int col = 1; col <= Encabezados.Length; col++)
+            {
+                var valorCelda = ObtenerTextoCelda(worksheet.Cell(2, col));
+                if (!valorCelda.Equals(Encabezados[col - 1], StringComparison.OrdinalIgnoreCase))
+                {
+                    return $"El archivo no coincide con la estructura requerida. Se esperaba '{Encabezados[col - 1]}' en la columna {col}.";
+                }
+            }
+            return null;
         }
 
-        private string DeducirSistemaPorSerie(string serie)
+        /// <summary>
+        /// Descarga el layout (plantilla) de la campaña que se cargó previamente.
+        /// </summary>
+        public IActionResult OnGetDescargarLayout()
         {
-            if (string.IsNullOrWhiteSpace(serie)) return string.Empty;
-            string s = serie.Trim().ToUpper();
+            if (!System.IO.File.Exists(RutaLayout))
+                return NotFound("Aún no se ha cargado un layout.");
 
-            if (s.StartsWith("DNL") || s.StartsWith("DNLP")) return "DIAENLINEA PREMIUM";
-            if (s.StartsWith("COVE")) return "VUCEM";
-            if (s.StartsWith("M3WIN")) return "SITA";
-            if (s.StartsWith("DIAW")) return "DIAWEB";
-            if (s.StartsWith("DIA")) return "DIA 8";
-            if (s.StartsWith("COA")) return "COA";
-            if (s.StartsWith("MED")) return "MÓDULO DE ENLACE";
+            var contenido = System.IO.File.ReadAllBytes(RutaLayout);
+            return File(contenido, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "LAYOUT CAMPAÑA DE RENOVACIÓN.xlsx");
+        }
 
-            return string.Empty;
+        /// <summary>
+        /// Guarda (o reemplaza) el layout de la campaña. Se valida que tenga los encabezados correctos.
+        /// </summary>
+        public async Task<IActionResult> OnPostCargarLayoutAsync(IFormFile? archivo)
+        {
+            if (archivo == null || archivo.Length == 0)
+                return new JsonResult(new { exito = false, mensaje = "Por favor selecciona un archivo." });
+
+            if (Path.GetExtension(archivo.FileName).ToLower() != ".xlsx")
+                return new JsonResult(new { exito = false, mensaje = "El layout debe tener formato .xlsx." });
+
+            try
+            {
+                using (var memoria = new MemoryStream())
+                {
+                    await archivo.CopyToAsync(memoria);
+
+                    // Validar que sea un layout de campaña antes de guardarlo
+                    memoria.Position = 0;
+                    using (var workbook = new XLWorkbook(memoria))
+                    {
+                        var worksheet = workbook.Worksheets.FirstOrDefault();
+                        if (worksheet == null)
+                            return new JsonResult(new { exito = false, mensaje = "El archivo Excel está vacío." });
+
+                        string? errorEncabezados = ValidarEncabezados(worksheet);
+                        if (errorEncabezados != null)
+                            return new JsonResult(new { exito = false, mensaje = errorEncabezados });
+                    }
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(RutaLayout)!);
+                    await System.IO.File.WriteAllBytesAsync(RutaLayout, memoria.ToArray());
+                }
+
+                return new JsonResult(new { exito = true, mensaje = "El layout se guardó correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { exito = false, mensaje = "Error al guardar el layout: " + ex.Message });
+            }
         }
 
         private string NormalizarEjecutivo(string nombreExcel, List<string> personalSoporte)
         {
             if (string.IsNullOrWhiteSpace(nombreExcel)) return string.Empty;
 
-            string normalizadoExcel = nombreExcel.ToLower()
-                .Replace("ing.", "").Replace("lic.", "").Replace("ing ", "").Replace("lic ", "").Trim();
+            string normalizadoExcel = QuitarTitulo(nombreExcel);
 
             foreach (var nombreBD in personalSoporte)
             {
-                string normalizadoBD = nombreBD.ToLower()
-                    .Replace("ing.", "").Replace("lic.", "").Replace("ing ", "").Replace("lic ", "").Trim();
+                string normalizadoBD = QuitarTitulo(nombreBD);
 
                 if (normalizadoBD.Contains(normalizadoExcel) || normalizadoExcel.Contains(normalizadoBD))
                 {
@@ -442,19 +598,30 @@ namespace SigesTI.Web.Pages
             return nombreExcel;
         }
 
+        // Quita "Ing." y "Lic." del nombre para poder compararlo
+        private string QuitarTitulo(string nombre)
+        {
+            return nombre.ToLower()
+                .Replace("ing.", "").Replace("lic.", "").Replace("ing ", "").Replace("lic ", "").Trim();
+        }
+
         public async Task<IActionResult> OnPostCargarExcelAsync([FromForm] CargaCampanaInput input)
         {
             if (input.Archivo == null || input.Archivo.Length == 0)
                 return new JsonResult(new { exito = false, mensaje = "Por favor selecciona un archivo." });
 
+            // ClosedXML solo puede leer .xlsx
             var extension = Path.GetExtension(input.Archivo.FileName).ToLower();
-            if (extension != ".xlsx" && extension != ".xls")
-                return new JsonResult(new { exito = false, mensaje = "El archivo debe tener formato .xlsx o .xls." });
+            if (extension != ".xlsx")
+                return new JsonResult(new { exito = false, mensaje = "El archivo debe tener formato .xlsx. Si es .xls, ábrelo en Excel y guárdalo como .xlsx." });
 
-            var personalSoporte = await _context.Personal
-                .Where(p => p.Area == "Soporte Técnico" || p.Area == "Soporte Tecnico")
-                .Select(p => p.Nombre)
-                .ToListAsync();
+            if (input.Mes < 1 || input.Mes > 12)
+                return new JsonResult(new { exito = false, mensaje = "Selecciona un mes válido." });
+
+            if (input.Anio < 2020 || input.Anio > 2100)
+                return new JsonResult(new { exito = false, mensaje = "Ingresa un año válido (2020 - 2100)." });
+
+            var personalSoporte = await ObtenerEjecutivosSoporteAsync();
 
             var campanaExistente = await _context.CampanaRenovacion
                 .FirstOrDefaultAsync(c => c.Mes == input.Mes && c.Anio == input.Anio);
@@ -466,7 +633,7 @@ namespace SigesTI.Web.Pages
                 {
                     exito = false,
                     requiereConfirmacion = true,
-                    mensaje = $"Ya existe una campaña de renovación de {nombreMes} {input.Anio}, ¿estás seguro de sobrescribir los datos?"
+                    mensaje = $"Ya existe una campaña de renovación de {nombreMes} {input.Anio}. Si la sobrescribes se perderán los comentarios, tickets y estatus capturados. ¿Deseas continuar?"
                 });
             }
 
@@ -479,29 +646,14 @@ namespace SigesTI.Web.Pages
                     using (var workbook = new XLWorkbook(stream))
                     {
                         var worksheet = workbook.Worksheets.FirstOrDefault();
-                        if (worksheet == null)
+                        if (worksheet == null || worksheet.LastRowUsed() == null)
                             return new JsonResult(new { exito = false, mensaje = "El archivo Excel está vacío." });
 
-                        var encabezadosEsperados = new[] {
-                            "Tipo de Cliente", "No Cliente", "Empresa", "Nombre del Cliente",
-                            "Correo Electrónico", "Teléfono", "Sistema(s)", "N. de serie",
-                            "Ejecutivo Asignado", "Comentarios Adicionales", "Ticket", "Estatus"
-                        };
+                        string? errorEncabezados = ValidarEncabezados(worksheet);
+                        if (errorEncabezados != null)
+                            return new JsonResult(new { exito = false, mensaje = errorEncabezados });
 
-                        for (int col = 1; col <= encabezadosEsperados.Length; col++)
-                        {
-                            var valorCelda = ObtenerTextoCelda(worksheet.Cell(2, col));
-                            if (!valorCelda.Equals(encabezadosEsperados[col - 1], StringComparison.OrdinalIgnoreCase))
-                            {
-                                return new JsonResult(new
-                                {
-                                    exito = false,
-                                    mensaje = $"El archivo no coincide con la estructura requerida. Se esperaba '{encabezadosEsperados[col - 1]}' en la columna {col}."
-                                });
-                            }
-                        }
-
-                        var ultimaFila = worksheet.LastRowUsed().RowNumber();
+                        var ultimaFila = worksheet.LastRowUsed()!.RowNumber();
                         int r = 3;
                         while (r <= ultimaFila)
                         {
@@ -536,19 +688,16 @@ namespace SigesTI.Web.Pages
                             for (int offset = 0; offset < numFilasBloque; offset++)
                             {
                                 int filaActual = r + offset;
-                                string sysSub = worksheet.Cell(filaActual, 7).GetFormattedString().Replace("\r\n", "\n").Replace("\r", "\n").Trim();
-                                string serieSub = worksheet.Cell(filaActual, 8).GetFormattedString().Replace("\r\n", "\n").Replace("\r", "\n").Trim();
-
-                                if (string.IsNullOrEmpty(sysSub)) sysSub = worksheet.Cell(filaActual, 7).Value.ToString().Trim();
-                                if (string.IsNullOrEmpty(serieSub)) serieSub = worksheet.Cell(filaActual, 8).Value.ToString().Trim();
+                                string sysSub = ObtenerTextoCelda(worksheet.Cell(filaActual, 7));
+                                string serieSub = ObtenerTextoCelda(worksheet.Cell(filaActual, 8));
 
                                 if (string.IsNullOrWhiteSpace(sysSub) && !string.IsNullOrWhiteSpace(serieSub))
                                 {
-                                    sysSub = DeducirSistemaPorSerie(serieSub);
+                                    sysSub = SistemasCampana.DeducirPorSerie(serieSub);
                                 }
                                 else if (!string.IsNullOrWhiteSpace(sysSub))
                                 {
-                                    sysSub = NormalizarSistemaOficial(sysSub);
+                                    sysSub = SistemasCampana.Normalizar(sysSub);
                                 }
 
                                 if (!string.IsNullOrWhiteSpace(sysSub))
@@ -560,11 +709,11 @@ namespace SigesTI.Web.Pages
 
                                     if (!string.IsNullOrWhiteSpace(serieSub))
                                     {
-                                        var subSeries = serieSub.Split(new[] { "\n", "\r\n", "," }, StringSplitOptions.RemoveEmptyEntries);
+                                        var subSeries = serieSub.Split(new[] { "\n", "," }, StringSplitOptions.RemoveEmptyEntries);
                                         foreach (var s in subSeries)
                                         {
                                             string serieLimpia = s.Trim();
-                                            if (!mapaSistemasSeries[sysSub].Contains(serieLimpia))
+                                            if (serieLimpia != "" && !mapaSistemasSeries[sysSub].Contains(serieLimpia))
                                             {
                                                 mapaSistemasSeries[sysSub].Add(serieLimpia);
                                             }
@@ -573,33 +722,23 @@ namespace SigesTI.Web.Pages
                                 }
                             }
 
-                            string noClienteFormateado = noClienteRaw.Contains("-") ? noClienteRaw : $"{noClienteRaw}-0";
-                            string empresaFormateada = empresaRaw.ToUpper();
-                            string ejecutivoNormalizado = NormalizarEjecutivo(ejecutivoRaw, personalSoporte);
-
-                            string[] contactosLineas = nombreClienteRaw.Split('\n');
-                            for (int i = 0; i < contactosLineas.Length; i++)
-                            {
-                                contactosLineas[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(contactosLineas[i].ToLower());
-                            }
-
                             var listaSistemasFinal = mapaSistemasSeries.Keys.ToList();
                             var listaSeriesFinal = mapaSistemasSeries.Select(kv => string.Join(", ", kv.Value)).ToList();
 
                             nuevosDetalles.Add(new CampanaRenovacionDetalle
                             {
                                 TipoCliente = tipoCliente,
-                                NoCliente = noClienteFormateado,
-                                Empresa = empresaFormateada,
-                                NombreCliente = string.Join("\n", contactosLineas),
+                                NoCliente = FormatearNoCliente(noClienteRaw),
+                                Empresa = empresaRaw.ToUpper(),
+                                NombreCliente = FormatearContactos(nombreClienteRaw),
                                 CorreoElectronico = correo,
                                 Telefono = telefono,
                                 Sistemas = string.Join("\n", listaSistemasFinal),
                                 NoSerie = string.Join("\n", listaSeriesFinal),
-                                EjecutivoAsignado = ejecutivoNormalizado,
-                                ComentariosAdicionales = comentarios,
+                                EjecutivoAsignado = NormalizarEjecutivo(ejecutivoRaw, personalSoporte),
+                                ComentariosAdicionales = AgregarEncuestaAtendida(comentarios, NormalizarEstatus(estatusRaw)),
                                 Ticket = ticket,
-                                Estatus = string.IsNullOrEmpty(estatusRaw) ? "Pendiente" : estatusRaw
+                                Estatus = NormalizarEstatus(estatusRaw)
                             });
 
                             r += numFilasBloque;
@@ -607,30 +746,36 @@ namespace SigesTI.Web.Pages
                     }
                 }
 
-                if (campanaExistente != null && input.ConfirmarSobrescritura)
+                // Transacción: si algo falla, no se borra la campaña anterior
+                using (var transaccion = await _context.Database.BeginTransactionAsync())
                 {
-                    _context.CampanaRenovacionDetalle.RemoveRange(
-                        _context.CampanaRenovacionDetalle.Where(d => d.CampanaId == campanaExistente.Id)
-                    );
-                    _context.CampanaRenovacion.Remove(campanaExistente);
+                    if (campanaExistente != null)
+                    {
+                        _context.CampanaRenovacionDetalle.RemoveRange(
+                            _context.CampanaRenovacionDetalle.Where(d => d.CampanaId == campanaExistente.Id)
+                        );
+                        _context.CampanaRenovacion.Remove(campanaExistente);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    var nuevaCampana = new CampanaRenovacion
+                    {
+                        Mes = input.Mes,
+                        Anio = input.Anio,
+                        FechaCarga = DateTime.Now
+                    };
+
+                    _context.CampanaRenovacion.Add(nuevaCampana);
                     await _context.SaveChangesAsync();
+
+                    foreach (var d in nuevosDetalles) d.CampanaId = nuevaCampana.Id;
+                    _context.CampanaRenovacionDetalle.AddRange(nuevosDetalles);
+                    await _context.SaveChangesAsync();
+
+                    await transaccion.CommitAsync();
                 }
 
-                var nuevaCampana = new CampanaRenovacion
-                {
-                    Mes = input.Mes,
-                    Anio = input.Anio,
-                    FechaCarga = DateTime.Now
-                };
-
-                _context.CampanaRenovacion.Add(nuevaCampana);
-                await _context.SaveChangesAsync();
-
-                foreach (var d in nuevosDetalles) d.CampanaId = nuevaCampana.Id;
-                _context.CampanaRenovacionDetalle.AddRange(nuevosDetalles);
-                await _context.SaveChangesAsync();
-
-                return new JsonResult(new { exito = true, mensaje = "Cargado con éxito." });
+                return new JsonResult(new { exito = true, mensaje = $"Cargado con éxito. Se registraron {nuevosDetalles.Count} clientes." });
             }
             catch (Exception ex)
             {
@@ -643,66 +788,59 @@ namespace SigesTI.Web.Pages
             var registro = await _context.CampanaRenovacionDetalle.FindAsync(model.Id);
             if (registro == null) return new JsonResult(new { exito = false, mensaje = "Registro no encontrado." });
 
-            registro.TipoCliente = model.TipoCliente;
-            registro.NoCliente = model.NoCliente.Contains("-") ? model.NoCliente : $"{model.NoCliente}-0";
-            registro.Empresa = model.Empresa.ToUpper();
+            if (string.IsNullOrWhiteSpace(model.NoCliente))
+                return new JsonResult(new { exito = false, mensaje = "El No. Cliente es obligatorio." });
 
-            string[] contactosLineas = (model.NombreCliente ?? "").Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-            for (int i = 0; i < contactosLineas.Length; i++)
-            {
-                contactosLineas[i] = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(contactosLineas[i].ToLower());
-            }
-            registro.NombreCliente = string.Join("\n", contactosLineas);
+            if (string.IsNullOrWhiteSpace(model.Empresa))
+                return new JsonResult(new { exito = false, mensaje = "La Empresa es obligatoria." });
 
+            registro.TipoCliente = model.TipoCliente ?? "Normal";
+            registro.NoCliente = FormatearNoCliente(model.NoCliente);
+            registro.Empresa = model.Empresa.Trim().ToUpper();
+            registro.NombreCliente = FormatearContactos(model.NombreCliente);
             registro.CorreoElectronico = model.CorreoElectronico;
             registro.Telefono = model.Telefono;
             registro.Sistemas = model.Sistemas;
             registro.NoSerie = model.NoSerie;
             registro.EjecutivoAsignado = model.EjecutivoAsignado;
-            registro.Ticket = model.Ticket;
-            registro.Estatus = model.Estatus;
+            registro.Ticket = model.Ticket?.Trim();
+            registro.Estatus = NormalizarEstatus(model.Estatus);
+            registro.ComentariosAdicionales = AgregarEncuestaAtendida(registro.ComentariosAdicionales ?? "", registro.Estatus);
 
             await _context.SaveChangesAsync();
             return new JsonResult(new { exito = true, mensaje = "Registro actualizado correctamente." });
         }
 
-        public async Task<IActionResult> OnPostGuardarComentarioAsync(int id, string nuevoSeguimiento, string nuevoEstatus, string nuevoTicket)
+        public async Task<IActionResult> OnPostGuardarComentarioAsync(int id, string? nuevoSeguimiento, string? nuevoEstatus, string? nuevoTicket)
         {
             var detalle = await _context.CampanaRenovacionDetalle.FindAsync(id);
             if (detalle == null) return new JsonResult(new { exito = false, mensaje = "Registro no encontrado." });
 
             string fechaHoy = DateTime.Now.ToString("dd/MM/yyyy");
+            string texto = (nuevoSeguimiento ?? "").Trim();
+            string historial = detalle.ComentariosAdicionales ?? "";
 
-            if (!string.IsNullOrWhiteSpace(nuevoEstatus))
+            string estatusNuevo = string.IsNullOrWhiteSpace(nuevoEstatus) ? detalle.Estatus : NormalizarEstatus(nuevoEstatus);
+
+            // Se quita la etiqueta para trabajar solo con los comentarios
+            historial = QuitarEncuestaAtendida(historial);
+
+            if (texto != "")
             {
-                detalle.Estatus = nuevoEstatus;
-            }
+                // Solo se revisa el último bloque para saber si ya hay notas de hoy
+                string ultimoBloque = historial.Split("\n\n").Last();
 
-            detalle.Ticket = nuevoTicket?.Trim();
-
-            string lineaAtendida = "";
-            if (nuevoEstatus?.Trim().Equals("Cerrado", StringComparison.OrdinalIgnoreCase) == true)
-            {
-                lineaAtendida = "Encuesta atendida\n";
-            }
-
-            if (string.IsNullOrWhiteSpace(detalle.ComentariosAdicionales))
-            {
-                detalle.ComentariosAdicionales = $"{lineaAtendida}{fechaHoy} {nuevoSeguimiento}";
-            }
-            else
-            {
-                string historialActual = detalle.ComentariosAdicionales;
-
-                if (historialActual.Contains(fechaHoy))
-                {
-                    detalle.ComentariosAdicionales += $"\n{nuevoSeguimiento}";
-                }
+                if (historial == "")
+                    historial = $"{fechaHoy} {texto}";
+                else if (ultimoBloque.Contains(fechaHoy))
+                    historial += "\n" + texto;
                 else
-                {
-                    detalle.ComentariosAdicionales += $"\n\n{lineaAtendida}{fechaHoy} {nuevoSeguimiento}";
-                }
+                    historial += $"\n\n{fechaHoy} {texto}";
             }
+
+            detalle.ComentariosAdicionales = AgregarEncuestaAtendida(historial, estatusNuevo);
+            detalle.Estatus = estatusNuevo;
+            detalle.Ticket = nuevoTicket?.Trim();
 
             await _context.SaveChangesAsync();
             return new JsonResult(new
