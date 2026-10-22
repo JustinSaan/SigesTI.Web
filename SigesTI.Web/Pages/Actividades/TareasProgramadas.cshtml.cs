@@ -26,6 +26,8 @@ namespace SigesTI.Web.Pages.Actividades
         public SelectList SelectUsuarios { get; set; } = default!;
         public SelectList SelectPersonal { get; set; } = default!;
 
+        public List<int> AniosCampana { get; set; } = new();
+
         public string RolUsuario { get; set; } = string.Empty;
         public string NombreUsuarioSesion { get; set; } = string.Empty;
 
@@ -177,7 +179,25 @@ namespace SigesTI.Web.Pages.Actividades
                 .ToListAsync();
 
             SelectPersonal = new SelectList(personalList, "Nombre", "Nombre");
-            SelectUsuarios = new SelectList(personalList, "Id", "Nombre");
+
+            // Persona Asignada: solo el personal del área de Soporte Técnico
+            var personalSoporte = await _context.Personal
+                .AsNoTracking()
+                .Where(p => p.Activo == true && (p.Area == "Soporte Técnico" || p.Area == "Soporte Tecnico"))
+                .OrderBy(p => p.Nombre)
+                .Select(p => new { p.Id, p.Nombre })
+                .ToListAsync();
+
+            SelectUsuarios = new SelectList(personalSoporte, "Id", "Nombre");
+
+            // Años con campañas cargadas + el año actual
+            AniosCampana = await _context.CampanaRenovacion
+                .Select(c => c.Anio)
+                .Distinct()
+                .ToListAsync();
+
+            if (!AniosCampana.Contains(DateTime.Now.Year)) AniosCampana.Add(DateTime.Now.Year);
+            AniosCampana.Sort();
         }
 
         public async Task<IActionResult> OnPostGuardarTareaAsync()
@@ -194,9 +214,14 @@ namespace SigesTI.Web.Pages.Actividades
                 });
             }
 
+            if (TareaInput.TipoTareaId == -1 && string.IsNullOrWhiteSpace(TareaInput.NuevoTipo))
+            {
+                return new JsonResult(new { success = false, message = "Escribe el nombre del nuevo tipo de tarea." });
+            }
+
             try
             {
-                if (TareaInput.TipoTareaId == -1 && !string.IsNullOrWhiteSpace(TareaInput.NuevoTipo))
+                if (TareaInput.TipoTareaId == -1)
                 {
                     string nombreTipoLimpio = TareaInput.NuevoTipo.Trim();
                     var tipoExistente = await _context.TiposTareaProgramada
@@ -305,8 +330,15 @@ namespace SigesTI.Web.Pages.Actividades
             var tarea = await _context.TareasProgramadas.FindAsync(id);
             if (tarea == null) return NotFound();
 
+            // El nombre se usa si la persona asignada ya no es de Soporte Técnico (tareas antiguas)
+            string? personaAsignadaNombre = await _context.Personal
+                .Where(p => p.Id == tarea.PersonaAsignadaId)
+                .Select(p => p.Nombre)
+                .FirstOrDefaultAsync();
+
             return new JsonResult(new
             {
+                personaAsignadaNombre,
                 id = tarea.Id,
                 tarea = tarea.Tarea,
                 tipoTareaId = tarea.TipoTareaId,
@@ -353,7 +385,8 @@ namespace SigesTI.Web.Pages.Actividades
                     message = $"Se cambió el estatus de \"{estatusAnterior}\" a \"{nuevoEstatus}\" de manera correcta",
                     estatusAnterior = estatusAnterior,
                     nuevoEstatus = nuevoEstatus,
-                    fechaRealizacion = tarea.FechaRealizacion?.ToString("dd/MM/yyyy") ?? "-"
+                    fechaRealizacion = tarea.FechaRealizacion?.ToString("dd/MM/yyyy") ?? "-",
+                    fechaRealizacionIso = tarea.FechaRealizacion?.ToString("yyyy-MM-dd") ?? ""
                 });
             }
             catch (Exception ex)
@@ -393,6 +426,12 @@ namespace SigesTI.Web.Pages.Actividades
 
         public async Task<IActionResult> OnGetResumenCampanaAsync(int mes, int anio)
         {
+            var (usuarioId, _, _) = ObtenerUsuarioSesion();
+            if (!usuarioId.HasValue)
+            {
+                return new JsonResult(new { redirect = "/InicioSesion/Login" });
+            }
+
             var resumen = new CampanaResumenDTO();
 
             var campana = await _context.CampanaRenovacion

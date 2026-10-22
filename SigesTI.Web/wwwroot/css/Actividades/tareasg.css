@@ -74,6 +74,12 @@
    2. TABLAS INTERACTIVAS DEL SISTEMA (PANTALLA PRINCIPAL)
    ========================================================================== */
 
+/* La tabla tiene su propio scroll vertical para que el encabezado quede fijo */
+#scrollTableContainer {
+    max-height: 65vh;
+    overflow-y: auto;
+}
+
 .tabla-sigest {
     width: 100% !important;
     border-collapse: separate !important;
@@ -81,38 +87,153 @@
     table-layout: auto !important;
 }
 
-    /* Encabezados del módulo interactivo */
+    /* Encabezado fijo con degradado azul (mismo estilo que Campaña de Renovación) */
     .tabla-sigest thead th,
     .tabla-sigest th {
-        padding: 12px 10px !important;
-        color: #38bdf8 !important;
-        font-size: 0.75rem !important;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding: 14px 12px !important;
+        color: #ffffff !important;
+        font-size: 0.74rem !important;
         font-weight: 700 !important;
         text-align: center !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
-        background: #0f172a !important;
-        border: 1px solid rgba(148, 163, 184, 0.2) !important;
-        border-bottom: 2px solid rgba(56, 189, 248, 0.3) !important;
+        letter-spacing: 0.8px !important;
+        background: linear-gradient(180deg, #0c4a6e 0%, #082f49 100%) !important;
+        border: none !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-bottom: 3px solid #38bdf8 !important;
         white-space: nowrap !important;
     }
 
-    /* Celdas generales del sistema */
+    /* Celdas: solo línea horizontal entre filas para que se vea más limpio */
     .tabla-sigest tbody td {
-        padding: 8px 10px !important;
+        padding: 12px !important;
         color: #f1f5f9 !important;
-        font-size: 0.82rem !important;
+        font-size: 0.84rem !important;
         vertical-align: middle !important;
         text-align: center !important;
-        border: 1px solid rgba(148, 163, 184, 0.15) !important;
-        background: rgba(15, 23, 42, 0.6) !important;
+        border: none !important;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12) !important;
+        background: rgba(15, 23, 42, 0.65) !important;
+        transition: background 0.2s ease;
     }
 
-    /* Hover de filas */
-    .tabla-sigest tbody tr:hover td {
-        background: rgba(56, 189, 248, 0.15) !important;
+        .tabla-sigest thead th:last-child {
+            border-right: none !important;
+        }
+
+    /* Hover de filas: se ilumina y aparece una línea azul a la izquierda */
+    .tabla-sigest tbody tr.fila-tarea:hover td {
+        background: rgba(56, 189, 248, 0.14) !important;
         color: #ffffff !important;
     }
+
+        .tabla-sigest tbody tr.fila-tarea:hover td:first-child {
+            box-shadow: inset 4px 0 0 #38bdf8;
+        }
+
+    /* Número de fila */
+    .tabla-sigest .text-index {
+        color: #38bdf8 !important;
+        font-size: 0.8rem !important;
+    }
+
+/* Contador de pendientes en el encabezado */
+.badge-contador {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #fde68a;
+}
+
+/* ".glass-panel" se agrega para ganarle a ".glass-panel span { background-color: transparent }" */
+.glass-panel .badge-contador {
+    background: rgba(217, 119, 6, 0.18) !important;
+    border: 1px solid rgba(251, 191, 36, 0.45);
+}
+
+    .badge-contador::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #fbbf24;
+        box-shadow: 0 0 8px #fbbf24;
+    }
+
+/* Título con icono cuadrado (Programa de Actividades, Comentarios, Campaña) */
+.panel-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.panel-icono {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    flex-shrink: 0;
+}
+
+.glass-panel .panel-icono {
+    background: rgba(56, 189, 248, 0.15) !important;
+}
+
+.panel-icono-campana {
+    color: #2dd4bf;
+    border-color: rgba(45, 212, 191, 0.4);
+}
+
+.glass-panel .panel-icono-campana {
+    background: rgba(45, 212, 191, 0.15) !important;
+}
+
+/* Paneles de Comentarios Adicionales y Avances de Campaña */
+.panel-resumen {
+    overflow: hidden;
+}
+
+.panel-resumen-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(15, 23, 42, 0.85);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.panel-resumen-body {
+    padding: 14px 16px;
+}
+
+.txt-comentarios-adicionales {
+    min-height: 90px;
+    resize: vertical;
+    font-size: 0.85rem !important;
+    line-height: 1.5;
+}
+
+.lbl-estado-guardado {
+    font-size: 0.75rem;
+    transition: color 0.3s ease;
+}
 
 /* CONTROL DE COLUMNA OBSERVACIONES RESUMIDA EN PANTALLA */
 .col-observaciones-pantalla {
@@ -384,6 +505,113 @@
     background-color: #0f172a !important;
 }
 
+/* Desenfoque del fondo al abrir un modal o una alerta */
+.modal-backdrop.show {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    background-color: rgba(2, 6, 23, 0.55);
+    opacity: 1;
+}
+
+.swal2-container.swal2-backdrop-show {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+/* Botón X para cerrar los modales (mismo diseño que Plan de Respaldos y Campaña) */
+.btn-cerrar-modal {
+    margin-left: auto;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+    /* Al pasar el cursor: rojo con icono blanco */
+    .btn-cerrar-modal:hover {
+        color: #ffffff;
+        background: #dc2626;
+        border-color: #f87171;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+
+    /* Al presionarlo: rojo más oscuro y se "hunde" un poco */
+    .btn-cerrar-modal:active {
+        color: #ffffff;
+        background: #991b1b;
+        border-color: #dc2626;
+        transform: scale(0.92);
+    }
+
+    .btn-cerrar-modal:focus-visible {
+        outline: 2px solid #38bdf8;
+        outline-offset: 2px;
+    }
+
+/* Icono cuadrado junto al título del modal */
+.modal-icono {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    flex-shrink: 0;
+}
+
+.modal-subtitulo {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+/* Secciones dentro del modal (Datos generales, Fechas, Seguimiento) */
+.modal-seccion {
+    background: rgba(30, 41, 59, 0.35);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.modal-seccion-titulo {
+    color: #38bdf8;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+}
+
+    .modal-seccion-titulo i {
+        margin-right: 8px;
+    }
+
+/* Campo desactivado (Fecha de Realización mientras no esté Resuelta) */
+.modal-content input:disabled {
+    background-color: #0f172a !important;
+    border-style: dashed !important;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Flecha azul claro en los combobox del modal */
+.modal-content .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2338bdf8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    cursor: pointer;
+}
+
 /* Botones */
 
 /* Botón de Imprimir Reporte Rediseñado */
@@ -408,18 +636,110 @@
         color: #ffffff !important;
     }
 
+/* --------------------------------------------------------------------------
+   FILTROS DE BÚSQUEDA
+   -------------------------------------------------------------------------- */
+.actividades-container .filtro-label {
+    color: #94a3b8 !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px !important;
+}
+
+/* Campo con icono a la izquierda */
+.filtro-campo {
+    position: relative;
+}
+
+    .filtro-campo > i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #38bdf8;
+        font-size: 0.9rem;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .actividades-container .filtro-campo .form-control {
+        height: 40px;
+        padding-left: 36px !important;
+        font-size: 0.85rem !important;
+        background-color: rgba(15, 23, 42, 0.9) !important;
+        border: 1px solid rgba(56, 189, 248, 0.25) !important;
+        border-radius: 10px !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .actividades-container .filtro-campo .form-control:hover {
+            border-color: rgba(56, 189, 248, 0.5) !important;
+        }
+
+        .actividades-container .filtro-campo .form-control:focus {
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
+        }
+
+/* Botón Limpiar: mismo alto y fondo que los campos; al pasar el cursor se ilumina y el icono gira */
+.btn-limpiar-filtros {
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 18px;
+    color: #e2e8f0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    background: linear-gradient(180deg, #1e293b, #0f172a);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    transition: all 0.2s ease;
+}
+
+    .btn-limpiar-filtros i {
+        color: #38bdf8;
+        font-size: 0.95rem;
+        transition: transform 0.35s ease;
+    }
+
+    .btn-limpiar-filtros:hover {
+        color: #ffffff;
+        background: linear-gradient(180deg, #0c4a6e, #082f49);
+        border-color: #38bdf8;
+        box-shadow: 0 0 14px rgba(56, 189, 248, 0.35);
+    }
+
+        .btn-limpiar-filtros:hover i {
+            transform: rotate(-180deg);
+        }
+
+    .btn-limpiar-filtros:active {
+        transform: scale(0.96);
+    }
+
 /* ComboBox Personalizado para Campaña */
 .select-campana-custom {
     background-color: #0b132b !important;
     color: #38bdf8 !important;
     border: 1px solid rgba(56, 189, 248, 0.4) !important;
     border-radius: 6px !important;
-    padding: 3px 8px !important;
+    padding: 3px 24px 3px 8px !important;
     font-size: 0.75rem !important;
     font-weight: 600 !important;
     outline: none !important;
     cursor: pointer;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+    /* Flecha azul claro para que se note que se puede desplegar */
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2338bdf8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 7px center;
+    background-size: 10px 10px;
 }
 
     .select-campana-custom:focus {
@@ -427,28 +747,83 @@
         box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3) !important;
     }
 
-/* Tabla de Campaña de Renovación */
-.tabla-campana-renovacion {
-    width: 100% !important;
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
-    font-size: 0.72rem !important;
+/* Avances de Campaña: porcentaje con barra arriba y los indicadores abajo */
+.campana-avance-etiqueta {
+    color: #94a3b8;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-    .tabla-campana-renovacion thead th {
-        background-color: #0f172a !important;
-        color: #38bdf8 !important;
-        padding: 6px 4px !important;
-        border: 1px solid rgba(148, 163, 184, 0.2) !important;
-        font-weight: 700 !important;
+.campana-avance-valor {
+    color: #2dd4bf;
+    font-size: 1.7rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.campana-total-valor {
+    color: #ffffff;
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.campana-barra {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    overflow: hidden;
+}
+
+.campana-barra-relleno {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #0d9488, #2dd4bf);
+    box-shadow: 0 0 10px rgba(45, 212, 191, 0.5);
+    transition: width 0.6s ease;
+}
+
+.campana-indicadores {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.campana-indicador {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(30, 41, 59, 0.55);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+    .campana-indicador i {
+        color: var(--color-indicador);
+        font-size: 1rem;
     }
 
-    .tabla-campana-renovacion tbody td {
-        background-color: rgba(15, 23, 42, 0.7) !important;
-        color: #f1f5f9 !important;
-        padding: 6px 4px !important;
-        border: 1px solid rgba(148, 163, 184, 0.15) !important;
-    }
+.campana-indicador-texto {
+    flex: 1;
+    color: #cbd5e1;
+    font-size: 0.78rem;
+}
+
+.campana-indicador-valor {
+    color: var(--color-indicador);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.ind-finalizadas { --color-indicador: #4ade80; }
+.ind-encurso { --color-indicador: #facc15; }
+.ind-pendiente { --color-indicador: #f87171; }
+.ind-contactados { --color-indicador: #fb923c; }
 
 /* Select de Estatus en Fila de Tabla */
 .ddl-estatus-tabla {
@@ -458,6 +833,14 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
     width: auto !important;
     min-width: 105px !important;
+}
+
+/* Flecha blanca sobre el fondo de color del estatus */
+.form-select.ddl-estatus-tabla {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-position: right 8px center;
+    background-size: 10px 10px;
+    padding-right: 24px !important;
 }
 
     .ddl-estatus-tabla.estatus-pendiente {
@@ -491,48 +874,10 @@
     white-space: nowrap !important;
     color: #ffffff !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid transparent;
 }
 
-    /* Insignias de Tipo de Tarea con Colores de Relleno Oscuros por Categoría */
-    .badge-tipo-tabla[data-tipo="Red"],
-    .badge-tipo-red,
-    td[data-tipo="Red"] .badge-tipo-tabla {
-        background-color: #0f3d61 !important;
-        color: #ffffff !important;
-        border: 1px solid #1d6fa5 !important;
-    }
-
-    .badge-tipo-tabla[data-tipo="Interno"],
-    .badge-tipo-interno,
-    td[data-tipo="Interno"] .badge-tipo-tabla {
-        background-color: #3d2b0f !important;
-        color: #ffffff !important;
-        border: 1px solid #855b18 !important;
-    }
-
-    .badge-tipo-tabla[data-tipo="Plan de Respaldos"],
-    .badge-tipo-respaldos,
-    td[data-tipo="Plan de Respaldos"] .badge-tipo-tabla {
-        background-color: #0f4229 !important;
-        color: #ffffff !important;
-        border: 1px solid #1b7a4d !important;
-    }
-
-    .badge-tipo-tabla[data-tipo="Mantenimiento"],
-    .badge-tipo-mantenimiento,
-    td[data-tipo="Mantenimiento"] .badge-tipo-tabla {
-        background-color: #3b1f52 !important;
-        color: #ffffff !important;
-        border: 1px solid #6b3ba4 !important;
-    }
-
-    .badge-tipo-tabla[data-tipo="Licenciamiento"],
-    .badge-tipo-licenciamiento,
-    td[data-tipo="Licenciamiento"] .badge-tipo-tabla {
-        background-color: #521f3a !important;
-        color: #ffffff !important;
-        border: 1px solid #942b65 !important;
-    }
+/* Los colores de cada tipo se asignan en tareasprogramadas.js (aplicarColoresTiposTarea) */
 
 /* Botones de Acción (Editar y Eliminar) - Relleno Sólido como el de Estatus */
 .btn-accion-tabla {
@@ -630,316 +975,389 @@
     background-color: #090e1a !important;
     border: 1px solid #1e293b !important;
     border-radius: 10px !important;
-    padding: 14px 16px !important;
+    padding: 10px !important;
     max-height: 230px !important;
     overflow-y: auto !important;
     color: #e2e8f0 !important;
     font-size: 0.83rem !important;
     line-height: 1.5 !important;
-    white-space: pre-wrap !important;
-    word-break: break-word !important;
+}
+
+/* Cada comentario del historial como tarjeta */
+.comentario-item {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-left: 3px solid #38bdf8;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+    .comentario-item + .comentario-item {
+        margin-top: 8px;
+    }
+
+.comentario-cabecera {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+}
+
+.comentario-autor {
+    color: #38bdf8;
+    font-weight: 700;
+}
+
+.comentario-fecha {
+    color: #94a3b8;
+}
+
+.comentario-texto {
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 /* ==========================================================================
-   7. IMPRESIÓN Y VISTA PREVIA PDF (MÓDULO REPORTE DE TICKETS Y TAREAS)
+   7. REPORTE IMPRESO Y VISTA PREVIA
+   Todo va dentro de #seccionImpresion para que la vista previa y el PDF se vean
+   igual (el id le gana a ".glass-panel span" del modal, que quitaba los fondos).
    ========================================================================== */
 
-#contenedorIndicadoresPrint .badge,
-#seccionImpresion .badge {
-    color: #000000 !important;
-    background-color: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    font-size: inherit !important;
-    font-weight: bold !important;
+/* Fondo gris del modal: el reporte se ve como una hoja */
+.modal-body.reporte-fondo {
+    background: #cbd5e1 !important;
+    padding: 24px !important;
 }
 
-    #seccionImpresion .badge.bg-dark {
-        background-color: #0f172a !important;
-        color: #ffffff !important;
-        padding: 4px 8px !important;
-        border-radius: 4px !important;
-    }
-
-    /* FORZAR COLOR ESTRUCTURAL DE INSIGNIAS DE SISTEMA EN IMPRESIÓN Y VISTA PREVIA */
-    #seccionImpresion .badge.badge-sistema-med {
-        background-color: #704332 !important;
-        color: #ffffff !important;
-        border: 1px solid #9a5e47 !important;
-        padding: 3px 2px !important;
-    }
-
-    #seccionImpresion .badge.badge-sistema-vucem {
-        background-color: #1d4ed8 !important;
-        color: #ffffff !important;
-        border: 1px solid #60a5fa !important;
-        padding: 3px 2px !important;
-    }
-
-    #seccionImpresion .badge.badge-sistema-diaweb {
-        background-color: #0284c7 !important;
-        color: #ffffff !important;
-        border: 1px solid #38bdf8 !important;
-        padding: 3px 2px !important;
-    }
-
-/* TABLA INDICADORES IMPRESIÓN */
-.tabla-print-indicadores {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    font-size: 7.5pt !important;
+#seccionImpresion {
+    background: #ffffff !important;
+    color: #1e293b !important;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-    margin-bottom: 12px !important;
+    font-size: 7.5pt;
+    padding: 28px 32px;
+    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
 }
 
-    .tabla-print-indicadores th,
-    .tabla-print-indicadores td {
-        border: 1px solid #000000 !important;
-        padding: 3px 2px !important;
-        text-align: center !important;
-        color: #000000 !important;
-        font-size: 7pt !important;
-        white-space: normal !important;
-        word-wrap: break-word !important;
+    #seccionImpresion * {
+        text-shadow: none !important;
     }
 
-        .tabla-print-indicadores th.th-tickets,
-        .tabla-print-indicadores th.th-total,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(1),
-        .tabla-print-indicadores thead tr:first-child th:nth-child(2) {
-            background-color: #8ea9db !important;
-            font-weight: bold !important;
-        }
-
-        .tabla-print-indicadores th.th-tipo,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(3) {
-            background-color: #db6e6e !important;
-            font-weight: bold !important;
-        }
-
-        .tabla-print-indicadores th.th-sistemas-ext,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(4) {
-            background-color: #a9d18e !important;
-            font-weight: bold !important;
-        }
-
-        .tabla-print-indicadores th.th-sistema-int,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(5) {
-            background-color: #ffd966 !important;
-            font-weight: bold !important;
-        }
-
-        .tabla-print-indicadores th.th-origen,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(6) {
-            background-color: #fce4d6 !important;
-            font-weight: bold !important;
-        }
-
-        .tabla-print-indicadores th.th-escalados,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(7) {
-            background-color: #b4a7d6 !important;
-            font-weight: bold !important;
-        }
-
-        .tabla-print-indicadores th.th-estatus,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(8) {
-            background-color: #fff2cc !important;
-            font-weight: bold !important;
-        }
-
-    .tabla-print-indicadores tbody td:first-child,
-    .tabla-print-indicadores tbody td:nth-child(2) {
-        background-color: #d9e1f2 !important;
-        font-weight: bold !important;
+    /* Encabezado: franja azul marino con título y fecha */
+    #seccionImpresion .rep-encabezado {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #0f172a !important;
+        border-left: 6px solid #0284c7;
+        border-radius: 6px;
+        padding: 12px 18px;
+        margin-bottom: 12px;
     }
 
-/* TABLA PRINCIPAL DE DETALLE PARA IMPRESIÓN (SOPORTA TICKETS Y TAREAS GENERALES) */
-.tabla-print-detalle {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    table-layout: fixed !important;
-    font-size: 7pt !important;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-    margin-top: 8px !important;
-}
+    #seccionImpresion .rep-area {
+        color: #7dd3fc !important;
+        font-size: 7pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 
-    .tabla-print-detalle th {
-        background-color: #022778 !important;
+    #seccionImpresion .rep-titulo {
         color: #ffffff !important;
-        font-weight: bold !important;
-        text-transform: uppercase !important;
-        font-size: 6.5pt !important;
-        letter-spacing: 0.2px !important;
-        padding: 5px 2px !important;
-        border: 1px solid #1d4ed8 !important;
-        text-align: center !important;
-        vertical-align: middle !important;
-        white-space: normal !important;
-        word-wrap: break-word !important;
-        overflow-wrap: break-word !important;
+        font-size: 13pt;
+        font-weight: 800;
+        letter-spacing: 0.3px;
     }
 
-    .tabla-print-detalle td {
-        border: 1px solid #cbd5e1 !important;
-        padding: 4px 3px !important;
-        color: #1e293b !important;
-        vertical-align: middle !important;
-        font-size: 7pt !important;
-        word-wrap: break-word !important;
-        overflow-wrap: break-word !important;
-        text-align: center !important;
-        white-space: normal !important;
+    #seccionImpresion .rep-fecha {
+        text-align: right;
     }
 
-        /* RESPETAR Y RENDERIZAR PARÁGRAFOS Y SALTOS DE LÍNEA (\n) EN IMPRESIÓN */
-        .tabla-print-detalle td.col-print-objetivo,
-        .tabla-print-detalle td.col-print-obs,
-        .tabla-print-detalle td.col-texto-largo,
-        .tabla-print-detalle td.col-descripcion,
-        .tabla-print-detalle td.col-comentarios,
-        .tabla-print-detalle td.col-solucion {
-            text-align: left !important;
-            white-space: pre-wrap !important;
-            word-break: break-word !important;
+        #seccionImpresion .rep-fecha span {
+            display: block;
+            color: #94a3b8 !important;
+            font-size: 6.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-    /* DISTRIBUCIÓN PROPORCIONAL DE ANCHOS PARA TICKETS (SUMA = 100%) */
-    .tabla-print-detalle th.col-fecha {
-        width: 6.5% !important;
+        #seccionImpresion .rep-fecha strong {
+            color: #ffffff !important;
+            font-size: 11pt;
+        }
+
+    /* Resumen: cuatro recuadros con el conteo por estatus */
+    #seccionImpresion .rep-resumen {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 12px;
     }
 
-    .tabla-print-detalle th.col-hora {
-        width: 4.5% !important;
+    #seccionImpresion .rep-resumen-item {
+        border: 1px solid #e2e8f0;
+        border-top: 3px solid var(--rep-color);
+        border-radius: 5px;
+        padding: 6px 10px;
+        background: #f8fafc !important;
     }
 
-    .tabla-print-detalle th.col-ticket {
-        width: 5% !important;
+        #seccionImpresion .rep-resumen-item span {
+            display: block;
+            color: #64748b !important;
+            font-size: 6.5pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        #seccionImpresion .rep-resumen-item strong {
+            color: var(--rep-color) !important;
+            font-size: 14pt;
+            font-weight: 800;
+        }
+
+    #seccionImpresion .rep-total { --rep-color: #0f172a; }
+    #seccionImpresion .rep-pendiente { --rep-color: #d97706; }
+    #seccionImpresion .rep-encurso { --rep-color: #0284c7; }
+    #seccionImpresion .rep-resuelta { --rep-color: #15803d; }
+
+    /* Bloques de Comentarios Adicionales y Campaña */
+    #seccionImpresion .rep-bloque {
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid #0284c7;
+        border-radius: 5px;
+        padding: 8px 12px;
+        margin-bottom: 12px;
+        background: #f8fafc !important;
     }
 
-    .tabla-print-detalle th.col-cliente {
-        width: 8.5% !important;
+    #seccionImpresion .rep-bloque-campana {
+        border-left-color: #0d9488;
     }
 
-    .tabla-print-detalle th.col-ejecutivo {
-        width: 6.5% !important;
+    #seccionImpresion .rep-bloque-titulo {
+        color: #0f172a !important;
+        font-size: 7.5pt;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
     }
 
-    .tabla-print-detalle th.col-reporto {
-        width: 6.5% !important;
+    #seccionImpresion .rep-bloque-texto {
+        color: #334155 !important;
+        font-size: 7.5pt;
+        white-space: pre-wrap;
     }
 
-    .tabla-print-detalle th.col-estatus {
-        width: 5.5% !important;
+    #seccionImpresion .rep-tabla-campana {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        margin-top: 4px;
     }
 
-    .tabla-print-detalle th.col-sistema {
-        width: 6.5% !important;
+        #seccionImpresion .rep-tabla-campana th {
+            background: #ccfbf1 !important;
+            color: #115e59 !important;
+            font-size: 6.5pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 4px;
+            border: 1px solid #99f6e4;
+            text-align: center;
+        }
+
+        #seccionImpresion .rep-tabla-campana td {
+            background: #ffffff !important;
+            color: #0f172a !important;
+            font-size: 9pt;
+            font-weight: 800;
+            padding: 4px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+    #seccionImpresion .rep-seccion-titulo {
+        color: #0f172a !important;
+        font-size: 8pt;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        padding-bottom: 4px;
+        margin-bottom: 6px;
+        border-bottom: 2px solid #0284c7;
     }
 
-    .tabla-print-detalle th.col-tipo {
-        width: 4.5% !important;
+    /* Tabla principal de tareas */
+    #seccionImpresion .tabla-print-detalle {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
     }
 
-    .tabla-print-detalle th.col-descripcion {
-        width: 18.5% !important;
+        #seccionImpresion .tabla-print-detalle th {
+            background: #0f172a !important;
+            color: #ffffff !important;
+            font-size: 6.5pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            padding: 6px 4px;
+            border: 1px solid #0f172a;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+
+        #seccionImpresion .tabla-print-detalle td {
+            background: #ffffff !important;
+            color: #1e293b !important;
+            font-size: 7pt;
+            padding: 5px 4px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* Filas alternadas */
+        #seccionImpresion .tabla-print-detalle tbody tr:nth-child(even) td {
+            background: #f1f5f9 !important;
+        }
+
+        #seccionImpresion .tabla-print-detalle td.rep-col-num {
+            color: #0284c7 !important;
+            font-weight: 700;
+        }
+
+        #seccionImpresion .tabla-print-detalle td.rep-col-tarea {
+            font-weight: 700;
+        }
+
+        /* Objetivo y Observaciones: a la izquierda pero centrados de arriba a abajo */
+        #seccionImpresion .tabla-print-detalle td.rep-col-texto {
+            text-align: left;
+            vertical-align: middle;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        #seccionImpresion .tabla-print-detalle td.rep-sin-tareas {
+            color: #64748b !important;
+            padding: 14px;
+        }
+
+    /* Ancho de las columnas (suma 100%) */
+    #seccionImpresion .col-print-num { width: 3%; }
+    #seccionImpresion .col-print-tarea { width: 13%; }
+    #seccionImpresion .col-print-tipo { width: 8%; }
+    #seccionImpresion .col-print-asignado { width: 10%; }
+    #seccionImpresion .col-print-fecha { width: 7%; }
+    #seccionImpresion .col-print-objetivo { width: 22%; }
+    #seccionImpresion .col-print-obs { width: 23%; }
+    #seccionImpresion .col-print-estatus { width: 7%; }
+
+    /* Estatus: mismos colores que en la tabla de la pantalla */
+    #seccionImpresion .badge-print-pendiente,
+    #seccionImpresion .badge-print-encurso,
+    #seccionImpresion .badge-print-cerrado {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 6.5pt;
+        font-weight: 700;
+        white-space: nowrap;
     }
 
-    .tabla-print-detalle th.col-comentarios {
-        width: 13.5% !important;
+    #seccionImpresion .badge-print-pendiente {
+        background: #fef3c7 !important;
+        color: #92400e !important;
+        border: 1px solid #fcd34d;
     }
 
-    .tabla-print-detalle th.col-solucion {
-        width: 13.5% !important;
+    #seccionImpresion .badge-print-encurso {
+        background: #dbeafe !important;
+        color: #1e40af !important;
+        border: 1px solid #93c5fd;
     }
 
-    /* DISTRIBUCIÓN PROPORCIONAL PARA TAREAS PROGRAMADAS */
-    .tabla-print-detalle th.col-print-num {
-        width: 3% !important;
+    #seccionImpresion .badge-print-cerrado {
+        background: #dcfce7 !important;
+        color: #166534 !important;
+        border: 1px solid #86efac;
     }
 
-    .tabla-print-detalle th.col-print-tarea {
-        width: 12% !important;
+    #seccionImpresion .rep-pie {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        padding-top: 6px;
+        border-top: 1px solid #e2e8f0;
+        color: #94a3b8 !important;
+        font-size: 6.5pt;
     }
 
-    .tabla-print-detalle th.col-print-tipo {
-        width: 7% !important;
-    }
-
-    .tabla-print-detalle th.col-print-asignado {
-        width: 10% !important;
-    }
-
-    .tabla-print-detalle th.col-print-fecha {
-        width: 7% !important;
-    }
-
-    .tabla-print-detalle th.col-print-objetivo {
-        width: 25% !important;
-    }
-
-    .tabla-print-detalle th.col-print-obs {
-        width: 23% !important;
-    }
-
-    .tabla-print-detalle th.col-print-estatus {
-        width: 6% !important;
-    }
-
-.badge-print-cerrado {
-    background-color: #dcfce7 !important;
-    color: #166534 !important;
-    border: 1px solid #bbf7d0 !important;
-    padding: 1px 4px !important;
-    border-radius: 3px !important;
-    font-weight: bold !important;
-    font-size: 6.5pt !important;
-    display: inline-block !important;
+/* Botones del modal de vista previa */
+.btn-modal-cancelar,
+.btn-modal-imprimir {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
 }
 
-.badge-print-atrasado {
-    background-color: #dbeafe !important;
-    color: #1e40af !important;
-    border: 1px solid #bfdbfe !important;
-    padding: 1px 4px !important;
-    border-radius: 3px !important;
-    font-weight: bold !important;
-    font-size: 6.5pt !important;
-    display: inline-block !important;
+.btn-modal-cancelar {
+    color: #cbd5e1 !important;
+    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    padding: 7px 16px !important;
+    transition: all 0.2s ease !important;
 }
 
-.badge-print-encurso {
-    background-color: #fef9c3 !important;
-    color: #854d0e !important;
-    border: 1px solid #fef08a !important;
-    padding: 1px 4px !important;
-    border-radius: 3px !important;
-    font-weight: bold !important;
-    font-size: 6.5pt !important;
-    display: inline-block !important;
+    .btn-modal-cancelar:hover {
+        color: #ffffff !important;
+        background: #334155 !important;
+        border-color: #475569 !important;
+    }
+
+.btn-modal-imprimir {
+    color: #ffffff;
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    border: 1px solid #38bdf8;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
 }
 
-.box-print-resumen {
-    background-color: #f1f5f9 !important;
-    border-left: 4px solid #0284c7 !important;
-    border-top: 1px solid #e2e8f0 !important;
-    border-right: 1px solid #e2e8f0 !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-    border-radius: 4px !important;
-    padding: 8px 10px !important;
-    font-size: 7.5pt !important;
+    .btn-modal-imprimir:hover {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.55);
+        transform: translateY(-1px);
+    }
+
+.btn-modal-cancelar:active,
+.btn-modal-imprimir:active {
+    transform: scale(0.96);
 }
 
 @media print {
     @page {
         size: landscape;
-        margin: 6mm;
+        margin: 8mm;
     }
 
-    body, #seccionImpresion, table, th, td {
+    body, #seccionImpresion, #seccionImpresion * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
-        color-adjust: exact !important;
     }
 
         body * {
@@ -951,6 +1369,7 @@
             visibility: visible !important;
         }
 
+    /* En papel se quita el aspecto de "hoja" (sombra y márgenes) */
     #seccionImpresion {
         position: absolute !important;
         left: 0 !important;
@@ -958,21 +1377,57 @@
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
-        background: transparent !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
     }
 
-    .salto-pagina-print {
-        page-break-before: always !important;
-        break-before: page !important;
-        margin-top: 10px !important;
-    }
-
-    .d-print-none {
-        display: none !important;
-    }
-
-    .tabla-print-detalle {
-        table-layout: fixed !important;
-        width: 100% !important;
-    }
+        #seccionImpresion thead {
+            display: table-header-group;
+        }
 }
+
+/* Botones de cancelar y guardar */
+.btn-cancelar,
+.btn-guardar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.btn-cancelar {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 4px 14px rgba(138, 138, 138, 0.4);
+}
+
+    .btn-cancelar:hover {
+        background: #334155 !important;
+        box-shadow: 0 6px 20px rgba(191, 191, 191, 0.55);
+        transform: translateY(-1px);
+    }
+
+.btn-guardar {
+    color: #ffffff;
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    border: 1px solid #38bdf8;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+}
+
+    .btn-guardar:hover {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.55);
+        transform: translateY(-1px);
+    }
+
+.btn-cancelar:active,
+.btn-guardar:active {
+    transform: scale(0.96);
+}
+
+

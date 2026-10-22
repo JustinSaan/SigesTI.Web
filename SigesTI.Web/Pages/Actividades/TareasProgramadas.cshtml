@@ -2,6 +2,7 @@
 @model SigesTI.Web.Pages.Actividades.TareasProgramadasModel
 @{
     ViewData["Title"] = "Tareas Programadas Generales";
+    var meses = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat;
 }
 <link rel="stylesheet" href="~/css/Actividades/tareasg.css" asp-append-version="true" />
 
@@ -25,30 +26,47 @@
     </div>
 
     <!-- Panel de Filtros Automáticos -->
-    <div class="glass-panel mb-4 p-3">
-        <div class="fw-bold text-info fs-6 mb-2">
-            <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+    <div class="glass-panel panel-resumen mb-4">
+        <div class="panel-resumen-header">
+            <div class="panel-titulo">
+                <span class="panel-icono"><i class="bi bi-funnel-fill"></i></span>Filtros de Búsqueda
+            </div>
         </div>
 
-        <form method="get" id="formFiltrosFechas">
+        <form method="get" id="formFiltrosFechas" class="panel-resumen-body">
             <div class="row g-3 align-items-end">
                 <div class="col-md-2">
-                    <label class="form-label small text-muted">Fecha Solicitud</label>
-                    <input type="date" id="filtroFechaSolicitud" name="FiltroFechaInicio" value="@Model.FiltroFechaInicio?.ToString("yyyy-MM-dd")" class="form-control form-control-sm filtro-auto" onchange="this.form.submit()" />
+                    <label class="filtro-label" for="filtroFechaSolicitud">Fecha Solicitud</label>
+                    <div class="filtro-campo">
+                        <i class="bi bi-calendar-plus"></i>
+                        <input type="date" id="filtroFechaSolicitud" name="FiltroFechaInicio" value="@Model.FiltroFechaInicio?.ToString("yyyy-MM-dd")" class="form-control filtro-auto" onchange="this.form.submit()" />
+                    </div>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label small text-muted">Fecha Realización</label>
-                    <input type="date" id="filtroFechaRealizacion" name="FiltroFechaFin" value="@Model.FiltroFechaFin?.ToString("yyyy-MM-dd")" class="form-control form-control-sm filtro-auto" onchange="this.form.submit()" />
+                    <label class="filtro-label" for="filtroFechaRealizacion">Fecha Realización</label>
+                    <div class="filtro-campo">
+                        <i class="bi bi-calendar-check"></i>
+                        <input type="date" id="filtroFechaRealizacion" name="FiltroFechaFin" value="@Model.FiltroFechaFin?.ToString("yyyy-MM-dd")" class="form-control filtro-auto" onchange="this.form.submit()" />
+                    </div>
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label small text-muted">Búsqueda general</label>
-                    <input type="text" id="filtroGeneral" class="form-control form-control-sm filtro-auto" placeholder="Buscar tareas..." />
+                    <label class="filtro-label" for="filtroGeneral">Búsqueda general</label>
+                    <div class="filtro-campo">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="filtroGeneral" class="form-control filtro-auto" placeholder="Buscar tareas..." />
+                    </div>
                 </div>
 
-                <div class="col-md-5 d-flex justify-content-end gap-2">
+                <div class="col-auto">
+                    <button type="button" class="btn-limpiar-filtros" id="btnLimpiarFiltros" title="Limpiar filtros">
+                        <i class="bi bi-eraser-fill me-1"></i> Limpiar
+                    </button>
+                </div>
+
+                <div class="col d-flex justify-content-end gap-2">
                     <button type="button" class="btn btn-imprimir-reporte shadow-sm px-3 fw-bold" id="btnImprimirReporte">
-                        <i class="bi bi-file-earmark-pdf-fill me-2"></i> Generar Reporte
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Generar Reporte
                     </button>
                     <button type="button" class="btn btn-primary-sigest shadow-sm px-3" id="btnNuevaTarea">
                         <i class="bi bi-plus-circle-fill me-1"></i> Nueva Tarea
@@ -71,88 +89,97 @@
     <!-- Bloques Superiores: Soportes Internos + Campañas de Renovación -->
     <div class="row g-3 mb-4">
         <div class="col-md-6">
-            <div class="glass-panel p-3 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div class="fw-bold text-info small">
-                        <i class="bi bi-chat-dots-fill me-2"></i>Comentarios Adicionales
+            <div class="glass-panel panel-resumen h-100">
+                <div class="panel-resumen-header">
+                    <div class="panel-titulo">
+                        <span class="panel-icono"><i class="bi bi-chat-dots-fill"></i></span>Comentarios Adicionales
                     </div>
-                    <div class="form-check form-switch d-flex align-items-center gap-2">
-                        <input class="form-check-input mt-0" type="checkbox" role="switch" id="switchActividadesAdicionales" style="cursor: pointer;">
+                    <div class="form-check form-switch m-0">
+                        <input class="form-check-input mt-0" type="checkbox" role="switch" id="switchActividadesAdicionales">
                     </div>
                 </div>
 
-                <div id="panelActividadesAdicionales" class="d-none">
+                <div id="panelActividadesAdicionales" class="panel-resumen-body d-none">
                     <textarea id="txtSoportesInternos"
-                              class="form-control bg-transparent text-white border-secondary small"
+                              class="form-control txt-comentarios-adicionales"
                               rows="3"
-                              placeholder="Escribe aquí los comentarios adicionales..."
-                              style="border-radius: 8px; resize: vertical;"></textarea>
+                              placeholder="Escribe aquí los comentarios adicionales..."></textarea>
                     <div class="d-flex justify-content-end mt-1">
-                        <small id="lblEstadoGuardado" class="text-muted fst-italic" style="font-size: 0.75rem; transition: color 0.3s ease;"></small>
+                        <small id="lblEstadoGuardado" class="lbl-estado-guardado text-muted fst-italic"></small>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="col-md-6">
-            <div class="glass-panel p-3 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="fw-bold text-info small"><i class="bi bi-patch-check-fill me-1"></i>Avances campaña de renovación</span>
+            <div class="glass-panel panel-resumen h-100">
+                <div class="panel-resumen-header">
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <div class="panel-titulo">
+                            <span class="panel-icono panel-icono-campana"><i class="bi bi-patch-check-fill"></i></span>Avances campaña de renovación
+                        </div>
                         <select id="ddlMesCampana" class="select-campana-custom">
-                            <option value="Seleccione" selected>Seleccione el mes</option>
-                            <option value="01">Enero</option>
-                            <option value="02">Febrero</option>
-                            <option value="03">Marzo</option>
-                            <option value="04">Abril</option>
-                            <option value="05">Mayo</option>
-                            <option value="06">Junio</option>
-                            <option value="07">Julio</option>
-                            <option value="08">Agosto</option>
-                            <option value="09">Septiembre</option>
-                            <option value="10">Octubre</option>
-                            <option value="11">Noviembre</option>
-                            <option value="12">Diciembre</option>
+                            @for (int m = 1; m <= 12; m++)
+                            {
+                                string nombreMes = meses.GetMonthName(m);
+                                <option value="@m" selected="@(m == DateTime.Now.Month)">@(char.ToUpper(nombreMes[0]) + nombreMes.Substring(1))</option>
+                            }
                         </select>
 
                         <select id="ddlAnioCampana" class="select-campana-custom">
-                            <option value="Año" selected>Año</option>
-                            <option value="2026">2026</option>
-                            <option value="2027">2027</option>
-                            <option value="2028">2028</option>
-                            <option value="2029">2029</option>
-                            <option value="2030">2030</option>
+                            @foreach (var a in Model.AniosCampana)
+                            {
+                                <option value="@a" selected="@(a == DateTime.Now.Year)">@a</option>
+                            }
                         </select>
 
                     </div>
-                    <div class="form-check form-switch d-flex align-items-center gap-2">
-                        <input class="form-check-input mt-0" type="checkbox" role="switch" id="switchCampanaRenovacion" style="cursor: pointer;">
+                    <div class="form-check form-switch m-0">
+                        <input class="form-check-input mt-0" type="checkbox" role="switch" id="switchCampanaRenovacion">
                     </div>
                 </div>
 
-                <div id="panelCampanaRenovacion" class="d-none table-responsive mt-2">
-                    <table class="tabla-campana-renovacion align-middle text-center mb-0">
-                        <thead>
-                            <tr>
-                                <th>Total clientes</th>
-                                <th>Encuestas finalizadas</th>
-                                <th>Seguimiento pendiente</th>
-                                <th>Encuestas en Curso</th>
-                                <th>Porcentaje</th>
-                                <th>Contactados hoy</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td id="campTotalClientes">-</td>
-                                <td id="campEncuestasFin">-</td>
-                                <td id="campSeguimientoPend">-</td>
-                                <td id="campEncuestasCurso">-</td>
-                                <td id="campPorcentaje" class="fw-bold text-success">-</td>
-                                <td id="campContactadosHoy" class="fw-bold text-warning">-</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div id="panelCampanaRenovacion" class="panel-resumen-body d-none">
+                    <!-- Avance general -->
+                    <div class="campana-avance">
+                        <div class="d-flex justify-content-between align-items-end mb-2">
+                            <div>
+                                <div class="campana-avance-etiqueta">Porcentaje de avance</div>
+                                <div id="campPorcentaje" class="campana-avance-valor">-</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="campana-avance-etiqueta">Total clientes</div>
+                                <div id="campTotalClientes" class="campana-total-valor">-</div>
+                            </div>
+                        </div>
+                        <div class="campana-barra">
+                            <div id="barraAvanceCampana" class="campana-barra-relleno" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Detalle -->
+                    <div class="campana-indicadores">
+                        <div class="campana-indicador ind-finalizadas">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span class="campana-indicador-texto">Encuestas finalizadas</span>
+                            <span id="campEncuestasFin" class="campana-indicador-valor">-</span>
+                        </div>
+                        <div class="campana-indicador ind-encurso">
+                            <i class="bi bi-hourglass-split"></i>
+                            <span class="campana-indicador-texto">Encuestas en curso</span>
+                            <span id="campEncuestasCurso" class="campana-indicador-valor">-</span>
+                        </div>
+                        <div class="campana-indicador ind-pendiente">
+                            <i class="bi bi-exclamation-circle-fill"></i>
+                            <span class="campana-indicador-texto">Seguimiento pendiente</span>
+                            <span id="campSeguimientoPend" class="campana-indicador-valor">-</span>
+                        </div>
+                        <div class="campana-indicador ind-contactados">
+                            <i class="bi bi-telephone-fill"></i>
+                            <span class="campana-indicador-texto">Contactados hoy</span>
+                            <span id="campContactadosHoy" class="campana-indicador-valor">-</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -161,8 +188,10 @@
     <!-- Tabla Principal de Tareas -->
     <div class="glass-panel mb-4 overflow-hidden">
         <div class="glass-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-calendar-check me-2"></i>Programa de Actividades</span>
-            <span class="badge bg-primary px-3 py-2 rounded-pill" id="badgeContadorTareas">
+            <div class="panel-titulo">
+                <span class="panel-icono"><i class="bi bi-calendar-check"></i></span>Programa de Actividades
+            </div>
+            <span class="badge-contador" id="badgeContadorTareas">
                 Pendientes: @Model.ListaTareas.Count(t => t.Estatus == "Pendiente" || t.Estatus == "En Curso")
             </span>
         </div>
@@ -250,6 +279,11 @@
                             </tr>
                         }
                     }
+                    <tr id="rowSinResultados" class="d-none">
+                        <td colspan="11" class="text-center text-muted py-4">
+                            <i class="bi bi-search me-2"></i>No hay tareas que coincidan con los filtros.
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -261,97 +295,116 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content glass-panel text-white border-0">
             <div class="modal-header glass-header border-0">
-                <h5 class="modal-title fs-6 fw-bold text-white" id="modalTareaTitulo">
-                    <i class="bi bi-pencil-square me-2 text-info"></i>Tarea Programada
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="modal-icono"><i id="modalTareaIcono" class="bi bi-pencil-square"></i></div>
+                    <div>
+                        <h5 class="modal-title fs-6 fw-bold text-white mb-0" id="modalTareaTitulo">Tarea Programada</h5>
+                        <small id="modalTareaSubtitulo" class="modal-subtitulo"></small>
+                    </div>
+                </div>
+                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
             <form id="formTarea">
                 @Html.AntiForgeryToken()
                 <div class="modal-body p-4">
                     <input type="hidden" id="tareaId" name="TareaInput.Id" value="0" />
 
-                    <div class="row g-3">
-                        <div class="col-md-12">
-                            <label class="form-label small text-muted">Tarea / Pendiente</label>
-                            <input type="text" id="txtTarea" name="TareaInput.Tarea" class="form-control form-control-sm" required />
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Tipo de Tarea</label>
-                            <select id="ddlTipo" name="TareaInput.TipoTareaId" class="form-select form-select-sm" required>
-                                <option value="">-- Seleccione --</option>
-                                @foreach (SelectListItem item in Model.SelectTipos)
-                                {
-                                    <option value="@item.Value">@item.Text</option>
-                                }
-                                <option value="-1" class="fw-bold text-info">+ Agregar tipo...</option>
-                            </select>
-                            <div id="divNuevoTipo" class="mt-2 d-none">
-                                <input type="text" id="txtNuevoTipo" name="TareaInput.NuevoTipo" class="form-control form-control-sm" placeholder="Escriba el nuevo tipo de tarea" />
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Persona Solicitante</label>
-                            <select id="ddlPersonaSolicitante" name="TareaInput.PersonaSolicitante" class="form-select form-select-sm" required>
-                                <option value="">-- Seleccione Solicitante --</option>
-                                @foreach (SelectListItem p in Model.SelectPersonal)
-                                {
-                                    <option value="@p.Value">@p.Text</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Persona Asignada (Soporte Técnico)</label>
-                            <select id="ddlUsuario" name="TareaInput.PersonaAsignadaId" class="form-select form-select-sm" required>
-                                <option value="">-- Seleccione Ejecutivo --</option>
-                                @foreach (SelectListItem user in Model.SelectUsuarios)
-                                {
-                                    <option value="@user.Value">@user.Text</option>
-                                }
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Fecha de Solicitud</label>
-                            <input type="date" id="txtFechaSolicitud" name="TareaInput.FechaSolicitud" class="form-control form-control-sm" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Estatus</label>
-                            <select id="ddlEstatusModal" name="TareaInput.Estatus" class="form-select form-select-sm">
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="En Curso">En Curso</option>
-                                <option value="Resuelta">Resuelta</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Fecha de Realización</label>
-                            <input type="date" id="txtFechaRealizacion" name="TareaInput.FechaRealizacion" class="form-control form-control-sm" disabled />
-                        </div>
-
-                        <div class="col-md-12">
-                            <label class="form-label small text-muted">Objetivo</label>
-                            <textarea id="txtObjetivo" name="TareaInput.Objetivo" class="form-control form-control-sm" rows="2" placeholder="Detalle qué se espera realizar con esta tarea..."></textarea>
-                        </div>
-
-                        <div class="col-md-12">
-                            <label class="form-label small text-info fw-bold mb-1">Historial de Comentarios</label>
-                            <div id="contenedorHistorialComentarios" class="box-historial-comentarios mb-3">
-                                <span class="text-muted small fst-italic">No hay observaciones registradas.</span>
+                    <div class="modal-seccion">
+                        <div class="modal-seccion-titulo"><i class="bi bi-card-text"></i>Datos generales</div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label small text-muted">Tarea / Actividad</label>
+                                <input type="text" id="txtTarea" name="TareaInput.Tarea" class="form-control form-control-sm" required />
                             </div>
 
-                            <label class="form-label small text-info fw-bold mb-1">Agregar Nuevo Comentario</label>
-                            <textarea id="txtNuevoComentario" name="TareaInput.NuevoComentario" class="form-control form-control-sm" rows="3" placeholder="Escribe las notas de seguimiento..."></textarea>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">Tipo de Tarea</label>
+                                <select id="ddlTipo" name="TareaInput.TipoTareaId" class="form-select form-select-sm" required>
+                                    <option value="">-- Seleccione --</option>
+                                    @foreach (SelectListItem item in Model.SelectTipos)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                    <option value="-1" class="fw-bold text-info">+ Agregar tipo...</option>
+                                </select>
+                                <div id="divNuevoTipo" class="mt-2 d-none">
+                                    <input type="text" id="txtNuevoTipo" name="TareaInput.NuevoTipo" class="form-control form-control-sm" placeholder="Escriba el nuevo tipo de tarea" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">Persona Solicitante</label>
+                                <select id="ddlPersonaSolicitante" name="TareaInput.PersonaSolicitante" class="form-select form-select-sm" required>
+                                    <option value="">-- Seleccione Solicitante --</option>
+                                    @foreach (SelectListItem p in Model.SelectPersonal)
+                                    {
+                                        <option value="@p.Value">@p.Text</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">Persona Asignada</label>
+                                <select id="ddlUsuario" name="TareaInput.PersonaAsignadaId" class="form-select form-select-sm" required>
+                                    <option value="">-- Seleccione Ejecutivo --</option>
+                                    @foreach (SelectListItem user in Model.SelectUsuarios)
+                                    {
+                                        <option value="@user.Value">@user.Text</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-seccion">
+                        <div class="modal-seccion-titulo"><i class="bi bi-calendar-event"></i>Fechas y estatus</div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">Fecha de Solicitud</label>
+                                <input type="date" id="txtFechaSolicitud" name="TareaInput.FechaSolicitud" class="form-control form-control-sm" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">Estatus</label>
+                                <select id="ddlEstatusModal" name="TareaInput.Estatus" class="form-select form-select-sm">
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="En Curso">En Curso</option>
+                                    <option value="Resuelta">Resuelta</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">Fecha de Realización</label>
+                                <input type="date" id="txtFechaRealizacion" name="TareaInput.FechaRealizacion" class="form-control form-control-sm" disabled title="Se habilita cuando el estatus es Resuelta" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-seccion mb-0">
+                        <div class="modal-seccion-titulo"><i class="bi bi-chat-left-text"></i>Seguimiento</div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label small text-muted">Objetivo</label>
+                                <textarea id="txtObjetivo" name="TareaInput.Objetivo" class="form-control form-control-sm" rows="2" placeholder="Detalle qué se espera realizar con esta tarea..."></textarea>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label small text-muted">Historial de Comentarios</label>
+                                <div id="contenedorHistorialComentarios" class="box-historial-comentarios">
+                                    <span class="text-muted small fst-italic">No hay observaciones registradas.</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label small text-muted">Agregar Nuevo Comentario</label>
+                                <textarea id="txtNuevoComentario" name="TareaInput.NuevoComentario" class="form-control form-control-sm" rows="3" placeholder="Escribe las notas de seguimiento..."></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0 bg-transparent pt-0">
-                    <button type="button" class="btn btn-sm btn-secondary-sigest px-3" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-sm btn-primary-sigest px-3">Guardar Tarea</button>
+                    <button type="button" class="btn btn-sm btn-cancelar px-3" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cancelar</button>
+                    <button type="submit" class="btn btn-sm btn-guardar px-3" data-bs-dismiss="modal"><i class="bi bi-save"></i> Guardar Tarea</button>
                 </div>
             </form>
         </div>
@@ -363,37 +416,58 @@
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content glass-panel text-white border-0">
             <div class="modal-header glass-header border-0">
-                <h5 class="modal-title fs-6 fw-bold text-white">
-                    <i class="bi bi-printer me-2 text-info"></i>Vista Previa de Impresión del Reporte
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="modal-icono"><i class="bi bi-printer"></i></div>
+                    <div>
+                        <h5 class="modal-title fs-6 fw-bold text-white mb-0">Vista Previa de Impresión del Reporte</h5>
+                        <small class="modal-subtitulo">Revisa el reporte antes de imprimirlo o guardarlo como PDF</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
-            <div class="modal-body p-4 bg-white text-dark" id="contenedorVistaPreviaPDF">
+            <div class="modal-body reporte-fondo" id="contenedorVistaPreviaPDF">
+                <!-- Todo lo que está dentro de #seccionImpresion es lo que se imprime -->
                 <div id="seccionImpresion">
-                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                    <div class="rep-encabezado">
                         <div>
-                            <h4 class="fw-bold mb-1" style="color: #0F172A; font-family: 'Segoe UI', sans-serif;">REPORTE DE TAREAS PROGRAMADAS GENERALES</h4>
-                            <p class="text-muted small mb-0">Área de Soporte Técnico</p>
+                            <div class="rep-area">Área de Soporte Técnico</div>
+                            <div class="rep-titulo">Reporte de Tareas Programadas Generales</div>
                         </div>
-                        <div class="text-end">
-                            <span class="badge bg-dark fs-6 px-3 py-2" style="color: #ffffff !important; background-color: #0f172a !important;">Fecha: @DateTime.Now.ToString("dd/MM/yyyy")</span>
+                        <div class="rep-fecha">
+                            <span>Fecha del reporte</span>
+                            <strong>@DateTime.Now.ToString("dd/MM/yyyy")</strong>
                         </div>
                     </div>
 
-                    <div id="printSoportesContainer" class="box-print-resumen mb-3 d-none">
-                        <div class="fw-bold text-uppercase mb-1" style="color: #0284c7; font-size: 8pt;">
-                            <i class="bi bi-chat-dots-fill me-2"></i> Comentarios Adicionales:
+                    <div class="rep-resumen">
+                        <div class="rep-resumen-item rep-total">
+                            <span>Total de tareas</span>
+                            <strong id="repTotalTareas">0</strong>
                         </div>
-                        <div id="printSoportesTexto" class="small text-dark" style="white-space: pre-wrap; font-size: 7.5pt;"></div>
+                        <div class="rep-resumen-item rep-pendiente">
+                            <span>Pendientes</span>
+                            <strong id="repPendientes">0</strong>
+                        </div>
+                        <div class="rep-resumen-item rep-encurso">
+                            <span>En curso</span>
+                            <strong id="repEnCurso">0</strong>
+                        </div>
+                        <div class="rep-resumen-item rep-resuelta">
+                            <span>Resueltas</span>
+                            <strong id="repResueltas">0</strong>
+                        </div>
                     </div>
 
-                    <div id="printCampanaContainer" class="box-print-resumen mb-3 d-none" style="border-left-color: #0d9488 !important;">
-                        <div class="fw-bold text-uppercase mb-1" style="color: #0d9488; font-size: 8pt;">
-                            <i class="bi bi-arrow-repeat me-1"></i> <span id="printCampanaTitulo">Avances Campaña de Renovación</span>
-                        </div>
-                        <table class="tabla-print-detalle mb-0 text-center" style="font-size: 7pt;">
+                    <div id="printSoportesContainer" class="rep-bloque d-none">
+                        <div class="rep-bloque-titulo">Comentarios Adicionales</div>
+                        <div id="printSoportesTexto" class="rep-bloque-texto"></div>
+                    </div>
+
+                    <div id="printCampanaContainer" class="rep-bloque rep-bloque-campana d-none">
+                        <div class="rep-bloque-titulo" id="printCampanaTitulo">Avances Campaña de Renovación</div>
+                        <table class="rep-tabla-campana">
                             <thead>
-                                <tr style="background-color: #0f766e !important;">
+                                <tr>
                                     <th>Total Clientes</th>
                                     <th>Encuestas Finalizadas</th>
                                     <th>Seguimiento Pendiente</th>
@@ -408,16 +482,14 @@
                                     <td id="printCampFin">-</td>
                                     <td id="printCampPend">-</td>
                                     <td id="printCampCurso">-</td>
-                                    <td id="printCampPorcentaje" class="fw-bold">-</td>
-                                    <td id="printCampContactados" class="fw-bold">-</td>
+                                    <td id="printCampPorcentaje">-</td>
+                                    <td id="printCampContactados">-</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <div class="fw-bold text-uppercase mb-2" style="color: #0F172A; font-size: 8pt;">
-                        <i class="bi bi-list-check me-1"></i> Programa General de Actividades:
-                    </div>
+                    <div class="rep-seccion-titulo">Programa General de Actividades</div>
                     <table class="tabla-print-detalle">
                         <thead>
                             <tr>
@@ -435,12 +507,19 @@
                         <tbody id="tbodyTareasPrint">
                         </tbody>
                     </table>
+
+                    <div class="rep-pie">
+                        <span>SigesTI · Área de Soporte Técnico</span>
+                        <span>Generado el @DateTime.Now.ToString("dd/MM/yyyy hh:mm tt")</span>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer border-0 bg-transparent">
-                <button type="button" class="btn btn-sm btn-secondary-sigest px-3" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-sm btn-info px-4 fw-bold" id="btnConfirmarImpresion">
-                    <i class="bi bi-printer me-1"></i> Imprimir / Guardar PDF
+                <button type="button" class="btn-cancelar" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <button type="button" class="btn-modal-imprimir" id="btnConfirmarImpresion">
+                    <i class="bi bi-printer-fill"></i> Imprimir / Guardar PDF
                 </button>
             </div>
         </div>
