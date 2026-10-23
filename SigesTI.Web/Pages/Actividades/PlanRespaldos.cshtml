@@ -34,17 +34,16 @@
             <span><i class="bi bi-calendar3 me-2"></i>Cronograma de Respaldos (Arrastra <i class="bi bi-grip-vertical"></i> para reordenar)</span>
             <span class="badge bg-primary px-3 py-2 rounded-pill">Equipos Registrados: @Model.EquiposMatriz.Count</span>
         </div>
-        <div class="p-0 table-responsive">
-            <table class="tabla-sigest align-middle text-center text-nowrap mb-0 small">
+        <div class="table-responsive tabla-contenedor-respaldos">
+            <table class="tabla-sigest tabla-respaldos align-middle text-center text-nowrap mb-0 small">
                 <thead>
                     <tr>
-                        <th style="width: 40px;"></th>
-                        <th colspan="3" class="bg-success bg-opacity-20 text-success fw-bold">Información del Equipo</th>
-                        <th class="bg-primary bg-opacity-20 text-info fw-bold">Fechas Programadas</th>
-                        <th class="bg-info bg-opacity-20 text-white fw-bold">Estado del Equipo</th>
+                        <th rowspan="2" style="width: 40px;"></th>
+                        <th colspan="3" class="th-grupo">Información del Equipo</th>
+                        <th class="th-grupo">Fechas Programadas</th>
+                        <th class="th-grupo">Estado del Equipo</th>
                     </tr>
                     <tr>
-                        <th></th>
                         <th>Área</th>
                         <th>Ejecutivo</th>
                         <th>Equipo / IP</th>
@@ -75,7 +74,7 @@
                                 data-activo="@equipo.Activo.ToString().ToLower()"
                                 data-programaciones='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(equipo.Programaciones))'>
 
-                                <td class="drag-handle text-muted"><i class="bi bi-grip-vertical fs-5"></i></td>
+                                <td class="drag-handle" title="Arrastra para reordenar"><i class="bi bi-grip-vertical fs-5"></i></td>
 
                                 <td class="text-start ps-3 cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">
                                     <span class="badge-area-sigest" data-area="@equipo.Area">
@@ -83,9 +82,19 @@
                                     </span>
                                 </td>
 
-                                <td class="cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">@equipo.Ejecutivo</td>
+                                <td class="cursor-pointer celda-ejecutivo" onclick="abrirModalEditarDesdeFila(this)">
+                                    @if (equipo.Ejecutivo == "Sin Ejecutivo Asignado")
+                                    {
+                                        <span class="texto-tenue">@equipo.Ejecutivo</span>
+                                    }
+                                    else
+                                    {
+                                        @equipo.Ejecutivo
+                                    }
+                                </td>
                                 <td class="cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">
-                                    <code class="text-info bg-dark px-2 py-1 rounded">@equipo.Hostname (@equipo.DireccionIP)</code>
+                                    <span class="equipo-folio">@equipo.Hostname</span>
+                                    <span class="equipo-ip">@equipo.DireccionIP</span>
                                 </td>
 
                                 <!-- Columna de Fechas Vigentes -->

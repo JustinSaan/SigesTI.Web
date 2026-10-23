@@ -735,7 +735,15 @@ function inicializarDragAndDrop() {
         handle: '.drag-handle',
         animation: 150,
         ghostClass: 'sortable-ghost',
+        // forceFallback hace que Sortable mueva la fila con el mouse (no con el arrastre nativo del navegador),
+        // así sí se puede mostrar el cursor de "mano agarrando" mientras se arrastra
+        forceFallback: true,
+        onStart: function () {
+            document.body.classList.add('arrastrando-fila');
+        },
         onEnd: async function () {
+            document.body.classList.remove('arrastrando-fila');
+
             const filas = el.querySelectorAll('tr[data-id]');
             const ordenIds = Array.from(filas).map(tr => parseInt(tr.dataset.id));
 
@@ -777,17 +785,9 @@ function aplicarColoresAreas() {
 }
 
 // ==========================================
-// 9. EVENT LISTENERS Y EXPONER A WINDOW
+// 9. EXPONER FUNCIONES A WINDOW
+// (los eventos de inicio están en la sección 2)
 // ==========================================
-document.addEventListener('DOMContentLoaded', function () {
-    inicializarDragAndDrop();
-    aplicarColoresAreas();
-
-    document.getElementById('selectEstadoEquipoNuevo')?.addEventListener('change', alternarFechasNuevo);
-    document.getElementById('selectEstadoEquipoEditar')?.addEventListener('change', alternarFechasEditar);
-});
-
-// Exponer funciones globales
 window.cargarEjecutivos = cargarEjecutivos;
 window.abrirModalEditarDesdeFila = abrirModalEditarDesdeFila;
 window.cargarFechaSeleccionadaParaEditar = cargarFechaSeleccionadaParaEditar;

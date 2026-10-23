@@ -509,6 +509,140 @@
         box-shadow: 0 0 8px rgba(75, 85, 99, 0.3) !important;
     }
 
+/* --------------------------------------------------------------------------
+   TABLA DEL CRONOGRAMA (estilo "Concentrado del Día por Sistema" de Reporte de Tickets,
+   pero con cuadrícula completa: líneas entre todas las columnas)
+   -------------------------------------------------------------------------- */
+
+/* Colores de la cuadrícula: cámbialos aquí para hacer las líneas más o menos visibles */
+.tabla-respaldos {
+    --linea-vertical: rgba(56, 189, 248, 0.16);
+    --linea-horizontal: rgba(148, 163, 184, 0.12);
+}
+
+/* Marco redondeado alrededor de la tabla */
+.tabla-contenedor-respaldos {
+    margin: 12px;
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 12px;
+    background: rgba(11, 19, 43, 0.55);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Encabezado con degradado azul y texto celeste */
+.tabla-sigest.tabla-respaldos thead th {
+    background: linear-gradient(180deg, #14294d 0%, #0f1d38 100%) !important;
+    color: #7dd3fc !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 0.9px !important;
+    padding: 11px 12px !important;
+    border: none !important;
+    border-left: 1px solid var(--linea-vertical) !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.25) !important;
+}
+
+    /* La primera columna (agarradera) no lleva línea a la izquierda */
+    .tabla-sigest.tabla-respaldos thead tr:first-child th:first-child {
+        border-left: none !important;
+    }
+
+    /* Títulos de grupo (Información / Fechas / Estado) en blanco y subrayados */
+    .tabla-sigest.tabla-respaldos thead th.th-grupo {
+        color: #e2e8f0 !important;
+        border-bottom: 2px solid rgba(56, 189, 248, 0.55) !important;
+    }
+
+/* Celdas con línea abajo y a la izquierda (cuadrícula) */
+.tabla-sigest.tabla-respaldos tbody td {
+    background: transparent !important;
+    border: none !important;
+    border-left: 1px solid var(--linea-vertical) !important;
+    border-bottom: 1px solid var(--linea-horizontal) !important;
+    padding: 10px 12px !important;
+    font-variant-numeric: tabular-nums;
+    transition: background-color 0.15s ease;
+}
+
+    .tabla-sigest.tabla-respaldos tbody td:first-child {
+        border-left: none !important;
+    }
+
+    /* La última fila no lleva línea abajo (ya la cierra el marco) */
+    .tabla-sigest.tabla-respaldos tbody tr:last-child td {
+        border-bottom: none !important;
+    }
+
+/* Filas intercaladas (cebra) */
+.tabla-sigest.tabla-respaldos tbody tr:nth-child(even) td {
+    background: rgba(148, 163, 184, 0.035) !important;
+}
+
+/* Al pasar el cursor: fondo azul suave y barrita celeste a la izquierda */
+.tabla-sigest.tabla-respaldos tbody tr:hover td {
+    background: rgba(56, 189, 248, 0.08) !important;
+}
+
+    .tabla-sigest.tabla-respaldos tbody tr:hover td:first-child {
+        box-shadow: inset 3px 0 0 #38bdf8;
+    }
+
+/* Ejecutivo en blanco y negritas; "Sin Ejecutivo Asignado" apagado */
+.tabla-sigest.tabla-respaldos tbody td.celda-ejecutivo {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.tabla-respaldos .texto-tenue {
+    color: #475569;
+    font-weight: 600;
+}
+
+/* Hostname como "folio" (igual que el No. Ticket) y la IP en gris al lado */
+.equipo-folio {
+    display: inline-block;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #7dd3fc;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 6px;
+    padding: 2px 8px;
+}
+
+.equipo-ip {
+    margin-left: 6px;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+/* Agarradera del drag and drop: mano abierta, y mano agarrando al arrastrar */
+.tabla-sigest.tabla-respaldos tbody td.drag-handle {
+    cursor: grab !important;
+    color: #475569 !important;
+}
+
+    .tabla-sigest.tabla-respaldos tbody tr:hover td.drag-handle {
+        color: #38bdf8 !important;
+    }
+
+    .tabla-sigest.tabla-respaldos tbody td.drag-handle:active {
+        cursor: grabbing !important;
+    }
+
+/* Mientras se arrastra una fila (clase que pone planRespaldos.js) toda la página muestra la mano agarrando */
+body.arrastrando-fila,
+body.arrastrando-fila * {
+    cursor: grabbing !important;
+}
+
+/* Hueco donde va a caer la fila que se arrastra */
+.tabla-respaldos tr.sortable-ghost td {
+    background: rgba(56, 189, 248, 0.15) !important;
+    opacity: 0.6;
+}
+
 /* Apariencia de Fila Inactiva (Efecto Opaco / Apagado / Grayscale) */
 tr.fila-inactiva td {
     background-color: rgba(11, 19, 43, 0.85) !important;
