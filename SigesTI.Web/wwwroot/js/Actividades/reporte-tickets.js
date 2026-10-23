@@ -2,37 +2,6 @@
    MÓDULO REPORTE DE TICKETS - IMPRESIÓN Y EXPORTACIÓN EXCEL ESTILIZADA
    ========================================================================== */
 
-/* Helper que convierte la gráfica del sistema a imagen sobre fondo blanco e invierte textos a negro al vuelo */
-function exportarChartCanvasBlanco(chartInstance) {
-    if (!chartInstance || !chartInstance.canvas) return '';
-
-    try {
-        const canvasOriginal = chartInstance.canvas;
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvasOriginal.width;
-        tempCanvas.height = canvasOriginal.height;
-        const ctx = tempCanvas.getContext('2d');
-
-        // 1. Pintar fondo blanco sólido
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-        // 2. Aplicar filtro de inversión de color (Blanco -> Negro) preservando los tonos de color
-        ctx.filter = 'invert(1) hue-rotate(180deg)';
-
-        // 3. Dibujar el canvas original con el filtro aplicado
-        ctx.drawImage(canvasOriginal, 0, 0);
-
-        // 4. Limpiar filtro por seguridad
-        ctx.filter = 'none';
-
-        return tempCanvas.toDataURL('image/png', 1.0);
-    } catch (err) {
-        console.error("Error al exportar imagen adaptada del gráfico:", err);
-        return chartInstance.toBase64Image ? chartInstance.toBase64Image() : '';
-    }
-}
-
 function abrirVistaPreviaImpresion() {
     const txtPuntos = document.getElementById("txtPuntosRelevantes")?.value;
     const chkActividades = document.getElementById("chkActividades")?.checked;
@@ -52,18 +21,12 @@ function abrirVistaPreviaImpresion() {
         printInd.innerHTML = clonTabla.outerHTML;
     }
 
-    // Exportar directamente las imágenes adaptadas a blanco/negro de las gráficas activas
+    // Gráficas en tema claro para que se lean sobre la hoja blanca
+    const imagenes = imagenesGraficasParaImpresion();
     const imgSistemas = document.getElementById("imgChartSistemasPrint");
     const imgEstatus = document.getElementById("imgChartEstatusPrint");
-
-    if (window.chartSistemasInstance && imgSistemas) {
-        const dataUrlSistemas = exportarChartCanvasBlanco(window.chartSistemasInstance);
-        if (dataUrlSistemas) imgSistemas.src = dataUrlSistemas;
-    }
-    if (window.chartEstatusInstance && imgEstatus) {
-        const dataUrlEstatus = exportarChartCanvasBlanco(window.chartEstatusInstance);
-        if (dataUrlEstatus) imgEstatus.src = dataUrlEstatus;
-    }
+    if (imgSistemas) imgSistemas.src = imagenes.sistemas;
+    if (imgEstatus) imgEstatus.src = imagenes.estatus;
 
     const printAct = document.getElementById("contenedorActividadesPrint");
     const printSoportes = document.getElementById("printSoportesInternos");
@@ -164,7 +127,7 @@ function exportarExcelLocal() {
         ];
         rows.push(headerInd1);
 
-        const subHeaders = ['Servicio', 'Incidencia', 'Ajuste', 'Mejora', 'DIA', 'DIAWEB', 'MED', 'SITA', 'VUCEM', 'DIAENLINEA', 'COA', 'ADMIN', 'Llamada', 'Correo', 'Desarrollo', 'Consultoría', 'Ventas', 'Cobranza', 'Cerrado', 'En Curso'];
+        const subHeaders = ['Servicio', 'Incidencia', 'Ajuste', 'Mejora', 'DIA', 'DIAWEB', 'SITA', 'VUCEM', 'DIAENLINEA PREMIUM', 'COA', 'CONECTOR DIAWEB-ZOÉ', 'ADMIN', 'Llamada', 'Correo', 'Desarrollo', 'Consultoría', 'Ventas', 'Cobranza', 'Cerrado', 'En Curso'];
         const colorsSubHeaders = ['DB6E6E', 'DB6E6E', 'DB6E6E', 'DB6E6E', 'A9D18E', 'A9D18E', 'A9D18E', 'A9D18E', 'A9D18E', 'A9D18E', 'A9D18E', 'FFD966', 'FCE4D6', 'FCE4D6', 'B4A7D6', 'B4A7D6', 'B4A7D6', 'B4A7D6', 'FFF2CC', 'FFF2CC'];
 
         let headerInd2 = [
@@ -220,44 +183,39 @@ function exportarExcelLocal() {
         // SECCIÓN 4: DETALLE COMPLETO DE TICKETS
         rows.push([{ v: 'DETALLE COMPLETO DE TICKETS', s: { font: { name: 'Segoe UI', sz: 10, bold: true, color: { rgb: '0F172A' } } } }]);
 
-        const headersDetalle = ['Fecha Entrada', 'Hora', 'No. Ticket', 'Cliente', 'Ejecutivo', 'Reportó', 'Estatus', 'Sistema', 'Tipo', 'Descripción', 'Comentarios', 'Solución'];
-        let rowHeadersDetalle = [];
-        headersDetalle.forEach(h => {
-            rowHeadersDetalle.push({
-                v: h,
-                s: { fill: { fgColor: { rgb: colorHeaderExcel } }, font: fontHeader, alignment: alignCenter, border: borderNegro }
-            });
-        });
-        rows.push(rowHeadersDetalle);
+        // Mismo orden de columnas que el reporte manual que se usaba en Excel
+        const headersDetalle = [
+            'Fecha de apertura del Ticket', 'Fecha de Solución', 'Hora del reporte', 'No. de Cliente', 'Nombre del Cliente',
+            'Ejecutivo', 'Ticket', 'Estatus', 'Contacto', 'Sistema', 'Entrada', 'Tipo',
+            'Descripción', 'Comentarios', 'Solución', 'Escalado', 'Área Escalada'
+        ];
+        rows.push(headersDetalle.map(h => ({
+            v: h,
+            s: { fill: { fgColor: { rgb: colorHeaderExcel } }, font: fontHeader, alignment: { ...alignCenter, wrapText: true }, border: borderNegro }
+        })));
+
+        // yyyy-MM-dd -> dd/MM/yyyy
+        const fechaCorta = (valor) => valor ? valor.split('-').reverse().join('/') : '';
 
         const tablaDetalleHTML = document.getElementById('tablaDetalleTickets');
         if (tablaDetalleHTML) {
-            const trs = tablaDetalleHTML.querySelectorAll('tbody tr');
+            const trs = tablaDetalleHTML.querySelectorAll('tbody tr[data-id]');
             trs.forEach((tr, rowIdx) => {
-                if (tr.cells.length < 10) return;
-
                 const bgRow = rowIdx % 2 === 0 ? 'FFFFFF' : 'F8FAFC';
+                const d = tr.dataset;
+                const estatus = d.estatus || '';
 
-                const fechaEntrada = tr.cells[0]?.innerText.trim() || '';
-                const hora = tr.cells[2]?.innerText.trim() || '';
-                const numTicket = tr.getAttribute('data-numticket') || tr.cells[3]?.innerText.trim() || '';
-                const cliente = tr.getAttribute('data-cliente') || tr.cells[4]?.innerText.trim() || '';
-                const ejecutivo = tr.getAttribute('data-ejecutivo') || tr.cells[5]?.innerText.trim() || '';
-                const reporto = tr.getAttribute('data-reporto') || tr.cells[6]?.innerText.trim() || '';
-                const estatus = tr.getAttribute('data-estatus') || tr.cells[7]?.innerText.trim() || '';
-                const sistema = tr.getAttribute('data-sistema') || tr.cells[8]?.innerText.trim() || '';
-                const tipo = tr.getAttribute('data-tipo') || tr.cells[9]?.innerText.trim() || '';
-                const descripcion = tr.getAttribute('data-descripcion') || '';
-                const comentarios = tr.getAttribute('data-comentarios') || '';
-                const solucion = tr.getAttribute('data-solucion') || '';
+                const celda = (valor, font = fontGeneral, alineacion = alignCenter) =>
+                    ({ v: valor || '', s: { fill: { fgColor: { rgb: bgRow } }, font: font, alignment: alineacion, border: borderNegro } });
 
-                const rowDetalle = [
-                    { v: fechaEntrada, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } },
-                    { v: hora, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } },
-                    { v: numTicket, s: { fill: { fgColor: { rgb: bgRow } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
-                    { v: cliente, s: { fill: { fgColor: { rgb: bgRow } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
-                    { v: ejecutivo, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } },
-                    { v: reporto, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } },
+                rows.push([
+                    celda(fechaCorta(d.fechaentrada)),
+                    celda(fechaCorta(d.fechasolucion)),
+                    celda(d.hora),
+                    celda(d.clavecliente),
+                    celda(d.cliente, fontBlackBold),
+                    celda(d.ejecutivo),
+                    celda(d.numticket, fontBlackBold),
                     {
                         v: estatus,
                         s: {
@@ -267,14 +225,16 @@ function exportarExcelLocal() {
                             border: borderNegro
                         }
                     },
-                    { v: sistema, s: { fill: { fgColor: { rgb: bgRow } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
-                    { v: tipo, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } },
-                    { v: descripcion, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignLeft, border: borderNegro } },
-                    { v: comentarios, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignLeft, border: borderNegro } },
-                    { v: solucion, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignLeft, border: borderNegro } }
-                ];
-
-                rows.push(rowDetalle);
+                    celda(d.reporto),
+                    celda(normalizarSistema(d.sistema), fontBlackBold),
+                    celda(d.origen),
+                    celda(d.tipo),
+                    celda(d.descripcion, fontGeneral, alignLeft),
+                    celda(d.comentarios, fontGeneral, alignLeft),
+                    celda(d.solucion, fontGeneral, alignLeft),
+                    celda(d.escalado === 'true' ? 'Sí' : 'No'),
+                    celda(d.areaescalada || 'Ninguna')
+                ]);
             });
         }
 
@@ -289,75 +249,96 @@ function exportarExcelLocal() {
             { s: { r: 4, c: 14 }, e: { r: 4, c: 15 } },
             { s: { r: 4, c: 16 }, e: { r: 4, c: 19 } },
             { s: { r: 4, c: 20 }, e: { r: 4, c: 21 } },
-            { s: { r: 9, c: 0 }, e: { r: 9, c: 11 } },
-            { s: { r: 10, c: 0 }, e: { r: 10, c: 11 } }
+            { s: { r: 9, c: 0 }, e: { r: 9, c: 16 } },
+            { s: { r: 10, c: 0 }, e: { r: 10, c: 16 } }
         ];
 
         ws['!cols'] = [
-            { wch: 14 }, // Fecha Entrada
-            { wch: 10 }, // Hora
-            { wch: 12 }, // No. Ticket
-            { wch: 28 }, // Cliente
-            { wch: 22 }, // Ejecutivo
-            { wch: 22 }, // Reportó
-            { wch: 12 }, // Estatus
-            { wch: 12 }, // Sistema
-            { wch: 12 }, // Tipo
+            { wch: 12 }, // Fecha de apertura
+            { wch: 12 }, // Fecha de solución
+            { wch: 11 }, // Hora del reporte
+            { wch: 10 }, // No. de cliente
+            { wch: 26 }, // Nombre del cliente
+            { wch: 18 }, // Ejecutivo
+            { wch: 8 },  // Ticket
+            { wch: 10 }, // Estatus
+            { wch: 18 }, // Contacto
+            { wch: 14 }, // Sistema
+            { wch: 9 },  // Entrada
+            { wch: 10 }, // Tipo
             { wch: 45 }, // Descripción
             { wch: 45 }, // Comentarios
-            { wch: 45 }  // Solución
+            { wch: 45 }, // Solución
+            { wch: 9 },  // Escalado
+            { wch: 13 }  // Área escalada
         ];
 
         XLSX.utils.book_append_sheet(wb, ws, 'Reporte Diario');
 
-        /* HOJA 2: CONCENTRADO POR SISTEMA (ACTUALIZADA A 3 CATEGORÍAS DE ESTATUS) */
+        /* HOJA 2: CONCENTRADO POR SISTEMA (MISMAS COLUMNAS QUE LA PANTALLA) */
         const ws2_rows = [];
         ws2_rows.push([{ v: 'CONCENTRADO DE TICKETS POR SISTEMA - ' + fecha, s: { font: { name: 'Segoe UI', sz: 12, bold: true, color: { rgb: '0F172A' } } } }]);
         ws2_rows.push([]);
 
         const headersWs2 = [
-            'Sistema',
-            'Total Tickets',
-            'Incidencias',
-            'Servicios',
-            'Por Teléfono',
-            'Por Correo',
-            'Atendidos (Tiempo y Forma)',
-            'Cerrados (Atrasados)',
-            'En Curso (Seguimiento)'
+            'Sistema', 'Total',
+            'Incidencias', 'Servicios', 'Otros (Ajuste/Mejora)',
+            'Teléfono', 'Correo', 'Interno',
+            'Tiempo y forma', 'Atrasados', 'En curso',
+            '% en tiempo'
         ];
-        let rowHeader2 = [];
-        headersWs2.forEach(h => {
-            rowHeader2.push({ v: h, s: { fill: { fgColor: { rgb: colorHeaderExcel } }, font: fontHeader, alignment: alignCenter, border: borderNegro } });
-        });
-        ws2_rows.push(rowHeader2);
+        ws2_rows.push(headersWs2.map(h => ({ v: h, s: { fill: { fgColor: { rgb: colorHeaderExcel } }, font: fontHeader, alignment: { ...alignCenter, wrapText: true }, border: borderNegro } })));
 
-        const tablaConcentradoHTML = document.getElementById('tablaConcentradoSistema');
-        if (tablaConcentradoHTML) {
-            const trs = tablaConcentradoHTML.querySelectorAll('tbody tr');
-            trs.forEach((tr, rowIdx) => {
-                let rData = [];
-                const bgRow = rowIdx % 2 === 0 ? 'FFFFFF' : 'F8FAFC';
-                tr.querySelectorAll('td').forEach(td => {
-                    const txt = td.innerText.trim();
-                    const num = !isNaN(txt) && txt !== '' ? Number(txt) : txt;
-                    rData.push({ v: num, s: { fill: { fgColor: { rgb: bgRow } }, font: fontGeneral, alignment: alignCenter, border: borderNegro } });
-                });
-                ws2_rows.push(rData);
+        // Columnas de estatus pintadas con los colores de la gráfica
+        const colorEstatusColumna = {
+            8: colorPaleta('--estatus-tiempo'),
+            9: colorPaleta('--estatus-atrasado'),
+            10: colorPaleta('--estatus-encurso')
+        };
+        const sinGato = (color) => (color || '#FFFFFF').replace('#', '').toUpperCase();
+
+        const filasConcentrado = document.querySelectorAll('#tablaConcentradoSistema tbody tr.fila-concentrado, #tablaConcentradoSistema tfoot tr');
+        filasConcentrado.forEach((tr, rowIdx) => {
+            const esTotal = tr.parentElement.tagName === 'TFOOT';
+            const bgRow = esTotal ? 'E2E8F0' : (rowIdx % 2 === 0 ? 'FFFFFF' : 'F8FAFC');
+            const sistema = tr.dataset.sistema || 'TOTAL';
+
+            const rData = [...tr.querySelectorAll('td')].map((td, colIdx) => {
+                const txt = td.innerText.trim();
+                const estilo = { fill: { fgColor: { rgb: bgRow } }, font: esTotal ? fontBlackBold : fontGeneral, alignment: alignCenter, border: borderNegro };
+
+                if (colIdx === 0) {
+                    if (!esTotal) {
+                        estilo.fill = { fgColor: { rgb: sinGato(colorSistema(sistema)) } };
+                        estilo.font = { ...fontBlackBold, color: { rgb: sinGato(colorTextoSistema(sistema)) } };
+                    }
+                    return { v: sistema, s: estilo };
+                }
+
+                if (colIdx === 11) {
+                    return txt.endsWith('%')
+                        ? { v: Number(txt.replace('%', '')) / 100, t: 'n', z: '0%', s: estilo }
+                        : { v: '—', s: estilo };
+                }
+
+                const valor = (txt === '—' || txt === '') ? 0 : Number(txt);
+                if (colorEstatusColumna[colIdx] && valor > 0 && !esTotal) {
+                    estilo.fill = { fgColor: { rgb: sinGato(colorEstatusColumna[colIdx]) } };
+                    estilo.font = fontBlackBold;
+                }
+                return { v: valor, t: 'n', s: estilo };
             });
-        }
+
+            ws2_rows.push(rData);
+        });
 
         const wsConcentrado = XLSX.utils.aoa_to_sheet(ws2_rows);
         wsConcentrado['!cols'] = [
-            { wch: 18 }, // Sistema
-            { wch: 14 }, // Total Tickets
-            { wch: 14 }, // Incidencias
-            { wch: 12 }, // Servicios
-            { wch: 14 }, // Por Teléfono
-            { wch: 14 }, // Por Correo
-            { wch: 28 }, // Atendidos (Tiempo y Forma)
-            { wch: 24 }, // Cerrados (Atrasados)
-            { wch: 26 }  // En Curso (Seguimiento)
+            { wch: 24 }, { wch: 8 },
+            { wch: 12 }, { wch: 11 }, { wch: 14 },
+            { wch: 11 }, { wch: 9 }, { wch: 9 },
+            { wch: 15 }, { wch: 11 }, { wch: 10 },
+            { wch: 12 }
         ];
 
         XLSX.utils.book_append_sheet(wb, wsConcentrado, 'Concentrado por Sistema');
@@ -433,6 +414,23 @@ function cambiarEscalado(elem) {
    MÓDULO REPORTE DE TICKETS - FUNCIONALIDAD DE FECHAS Y MODALES
    ========================================================================== */
 
+// Fecha de hoy en formato yyyy-MM-dd según la hora local (no UTC)
+function fechaLocalHoy() {
+    const hoy = new Date();
+    const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoy.getDate()).padStart(2, "0");
+    return `${hoy.getFullYear()}-${mes}-${dia}`;
+}
+
+// Todas las variantes guardadas del Conector se muestran con un solo valor
+function normalizarSistema(sistema) {
+    const valor = (sistema || "").toUpperCase();
+    if (valor.includes("CONECTOR") || valor.includes("ZOE") || valor.includes("ZOÉ")) {
+        return "CONECTOR DIAWEB-ZOÉ";
+    }
+    return sistema || "";
+}
+
 function evaluarFechaSolucionNuevo(estatus) {
     const inputFecha = document.getElementById("regFechaSolucion");
     if (!inputFecha) return;
@@ -440,8 +438,7 @@ function evaluarFechaSolucionNuevo(estatus) {
     if (estatus === "Cerrado") {
         inputFecha.removeAttribute("disabled");
         if (!inputFecha.value) {
-            const hoy = new Date().toISOString().split("T")[0];
-            inputFecha.value = hoy;
+            inputFecha.value = fechaLocalHoy();
         }
     } else {
         inputFecha.setAttribute("disabled", "true");
@@ -456,8 +453,7 @@ function evaluarFechaSolucion(estatus) {
     if (estatus === "Cerrado") {
         inputFecha.removeAttribute("disabled");
         if (!inputFecha.value) {
-            const hoy = new Date().toISOString().split("T")[0];
-            inputFecha.value = hoy;
+            inputFecha.value = fechaLocalHoy();
         }
     } else {
         inputFecha.setAttribute("disabled", "true");
@@ -506,14 +502,13 @@ function abrirModalDetalleDesdeFila(filaElem) {
         inputHora.value = convertir12a24(hora);
     }
 
-    document.getElementById("editCliente").value = cliente || "";
-    document.getElementById("editReporto").value = reporto || "";
+    seleccionarClienteDetalle(cliente, reporto);
     document.getElementById("editEjecutivo").value = ejecutivo || "";
 
     // Asignación de Sistema y actualización de color
     const selectEditSistema = document.getElementById("editSistema");
     if (selectEditSistema) {
-        selectEditSistema.value = sistema || "SITA";
+        selectEditSistema.value = normalizarSistema(sistema) || "SITA";
         aplicarColorSelectSistema(selectEditSistema);
     }
 
@@ -534,7 +529,9 @@ function abrirModalDetalleDesdeFila(filaElem) {
     document.getElementById("txtDetalleSolucion").value = solucion || "";
 
     const esAdmin = (typeof rolUsuario !== 'undefined' && rolUsuario === "Administrador");
-    const esMio = (typeof usuarioSesion !== 'undefined' && ejecutivo === usuarioSesion);
+    const ejecutivoMinus = (ejecutivo || "").toLowerCase();
+    const esMio = (typeof usuarioSesion !== 'undefined' && ejecutivoMinus === usuarioSesion.toLowerCase())
+        || (typeof nombreSesion !== 'undefined' && nombreSesion !== "" && ejecutivoMinus === nombreSesion.toLowerCase());
     const estaAbierto = (estatus !== "Cerrado");
 
     const campos = [
@@ -566,53 +563,151 @@ function abrirModalDetalleDesdeFila(filaElem) {
         if (btnGuardar) btnGuardar.classList.add("d-none");
     }
 
+    // Los combos con búsqueda se activan o bloquean junto con el resto de campos
+    const editable = esAdmin || (estaAbierto && esMio);
+    [comboEditCliente, comboEditReporto].forEach(combo => {
+        if (combo) editable ? combo.enable() : combo.disable();
+    });
+
     const modalElem = document.getElementById("modalDetalleTicket");
     if (modalElem) {
-        const modal = new bootstrap.Modal(modalElem);
-        modal.show();
+        bootstrap.Modal.getOrCreateInstance(modalElem).show();
     }
+}
+
+/* ==========================================================================
+   MÓDULO REPORTE DE TICKETS - COMBOS CON BÚSQUEDA (CLIENTE Y PERSONA QUE REPORTÓ)
+   ========================================================================== */
+
+let comboNuevoCliente = null;
+let comboEditCliente = null;
+let comboEditReporto = null;
+
+// Convierte un <select> en un combo donde se puede escribir para buscar
+function crearComboBuscable(select, opciones) {
+    if (!select || typeof TomSelect === 'undefined') return null;
+
+    return new TomSelect(select, Object.assign({
+        maxOptions: null,
+        allowEmptyOption: false,
+        dropdownParent: 'body',
+        render: {
+            no_results: () => '<div class="no-results">Sin coincidencias</div>'
+        }
+    }, opciones));
+}
+
+function inicializarCombosCliente() {
+    comboNuevoCliente = crearComboBuscable(document.getElementById('ddlClientes'), {
+        placeholder: 'Escribe para buscar el cliente...'
+    });
+
+    const selectEditCliente = document.getElementById('editCliente');
+    comboEditCliente = crearComboBuscable(selectEditCliente, {
+        placeholder: 'Escribe para buscar el cliente...'
+    });
+
+    // Permite escribir un nombre que no esté en la lista de contactos
+    comboEditReporto = crearComboBuscable(document.getElementById('editReporto'), {
+        placeholder: 'Escribe o elige quien reporta...',
+        create: true,
+        createOnBlur: true,
+        render: {
+            option_create: (data, escape) => `<div class="create">+ Usar "<strong>${escape(data.input)}</strong>"</div>`,
+            no_results: () => '<div class="no-results">Sin coincidencias</div>'
+        }
+    });
+
+    // Al cambiar de empresa se quita la persona anterior y se cargan los contactos de la nueva
+    if (comboEditCliente) {
+        comboEditCliente.on('change', (valor) => cargarContactosDetalle(idClienteDetalle(valor), ''));
+    }
+}
+
+function idClienteDetalle(nombreCliente) {
+    const opcion = [...document.querySelectorAll('#editCliente option')].find(o => o.value === nombreCliente);
+    return opcion ? opcion.dataset.id || '' : '';
+}
+
+async function cargarContactosDetalle(clienteId, reportoActual) {
+    if (!comboEditReporto) return;
+
+    comboEditReporto.clear(true);
+    comboEditReporto.clearOptions();
+
+    if (clienteId) {
+        try {
+            const respuesta = await fetch(`?handler=ContactosPorCliente&clienteId=${clienteId}`);
+            const contactos = await respuesta.json();
+            contactos.forEach(c => comboEditReporto.addOption({ value: c.nombreContacto, text: c.nombreContacto }));
+        } catch (error) {
+            console.error('Error al obtener los contactos:', error);
+        }
+    }
+
+    if (reportoActual) {
+        comboEditReporto.addOption({ value: reportoActual, text: reportoActual });
+        comboEditReporto.setValue(reportoActual, true);
+    }
+}
+
+// Coloca el cliente y la persona del ticket sin disparar el borrado de la persona
+function seleccionarClienteDetalle(cliente, reporto) {
+    if (!comboEditCliente) {
+        document.getElementById('editCliente').value = cliente || '';
+        document.getElementById('editReporto').value = reporto || '';
+        return;
+    }
+
+    if (cliente && !comboEditCliente.options[cliente]) {
+        comboEditCliente.addOption({ value: cliente, text: cliente });
+    }
+    comboEditCliente.setValue(cliente || '', true);
+    cargarContactosDetalle(idClienteDetalle(cliente), reporto || '');
 }
 
 /* ==========================================================================
    MÓDULO REPORTE DE TICKETS - GRÁFICAS, ESTILOS Y FILTROS AUTOMÁTICOS
    ========================================================================== */
 
-// Función para cambiar dinámicamente la clase/color del <select> de Sistema
+// Lee un color de la paleta definida en reporte-tickets.css
+function colorPaleta(nombreVariable) {
+    return getComputedStyle(document.documentElement).getPropertyValue(nombreVariable).trim();
+}
+
+// Clave de la paleta de cada sistema (equivale a ClaseSistema del servidor)
+function claveSistema(sistema) {
+    const valor = normalizarSistema(sistema).trim().toUpperCase();
+
+    if (valor === 'CONECTOR DIAWEB-ZOÉ') return 'med';
+    if (valor === 'DIA') return 'dia';
+    if (valor === 'DIAWEB') return 'diaweb';
+    if (valor === 'SITA') return 'sita';
+    if (valor === 'VUCEM') return 'vucem';
+    if (valor.includes('DIAENLINEA')) return 'diaenlinea';
+    if (valor === 'COA') return 'coa';
+    if (valor === 'ADMIN') return 'admin';
+
+    return 'otro';
+}
+
+function colorSistema(sistema) {
+    return colorPaleta(`--sis-${claveSistema(sistema)}`);
+}
+
+function colorTextoSistema(sistema) {
+    return colorPaleta(`--sis-${claveSistema(sistema)}-texto`);
+}
+
+// Pinta el <select> de Sistema con el color del sistema elegido
 function aplicarColorSelectSistema(selectElement) {
     if (!selectElement) return;
-    const val = (selectElement.value || '').toUpperCase().trim();
 
-    // Remover todas las clases de sistemas previas
-    selectElement.classList.remove(
-        'badge-sistema-dia',
-        'badge-sistema-diaweb',
-        'badge-sistema-med',
-        'badge-sistema-sita',
-        'badge-sistema-vucem',
-        'badge-sistema-diaenlinea',
-        'badge-sistema-coa',
-        'badge-sistema-admin'
-    );
+    [...selectElement.classList]
+        .filter(clase => clase.startsWith('badge-sistema-'))
+        .forEach(clase => selectElement.classList.remove(clase));
 
-    if (val.includes('CONECTOR') || val.includes('ZOE')) {
-        selectElement.classList.add('badge-sistema-med');
-    } else if (val.includes('DIAWEB')) {
-        selectElement.classList.add('badge-sistema-diaweb');
-    } else if (val.includes('DIAENLINEA')) {
-        selectElement.classList.add('badge-sistema-diaenlinea');
-    } else if (val === 'DIA') {
-        selectElement.classList.add('badge-sistema-dia');
-    } else if (val === 'SITA') {
-        selectElement.classList.add('badge-sistema-sita');
-    } else if (val === 'VUCEM') {
-        selectElement.classList.add('badge-sistema-vucem');
-    } else if (val === 'COA') {
-        selectElement.classList.add('badge-sistema-coa');
-    } else if (val === 'ADMIN') {
-        selectElement.classList.add('badge-sistema-admin');
-    } else {
-        selectElement.classList.add('badge-sistema-dia');
-    }
+    selectElement.classList.add(`badge-sistema-${claveSistema(selectElement.value)}`);
 }
 
 // Variables globales para las instancias
@@ -629,6 +724,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 formFiltros.submit();
             });
         });
+
+        inicializarBuscador(formFiltros);
     }
 
     // 2. Inicializar color del select al cargar
@@ -637,128 +734,384 @@ document.addEventListener('DOMContentLoaded', function () {
     if (regSys) aplicarColorSelectSistema(regSys);
     if (editSys) aplicarColorSelectSistema(editSys);
 
+    inicializarCombosCliente();
+
+    // Puntos Relevantes: se guardan en el navegador por fecha consultada
+    const inputFecha = document.getElementById("fechaReporteConsulta");
+    const txtPuntos = document.getElementById("txtPuntosRelevantes");
+    if (inputFecha && txtPuntos) {
+        const keyPuntos = `sigesti_puntos_${inputFecha.value}`;
+        txtPuntos.value = localStorage.getItem(keyPuntos) || "";
+        txtPuntos.addEventListener("input", function () {
+            localStorage.setItem(keyPuntos, this.value);
+        });
+    }
+
+    const btnGenerar = document.getElementById("btnGenerarReporte");
+    if (btnGenerar) btnGenerar.addEventListener("click", abrirVistaPreviaImpresion);
+
+    const btnExcel = document.getElementById("btnExportarExcel");
+    if (btnExcel) btnExcel.addEventListener("click", exportarExcelLocal);
+
+    // Hora actual por defecto al abrir el modal de nuevo ticket
+    const modalNuevoElem = document.getElementById("modalNuevoTicket");
+    if (modalNuevoElem) {
+        modalNuevoElem.addEventListener("show.bs.modal", function () {
+            const regHoraInput = document.getElementById("regHora");
+            if (regHoraInput && !regHoraInput.value) {
+                const ahora = new Date();
+                const hh = String(ahora.getHours()).padStart(2, "0");
+                const mm = String(ahora.getMinutes()).padStart(2, "0");
+                regHoraInput.value = `${hh}:${mm}`;
+            }
+        });
+    }
+
     // 3. Registrar plugin para datalabels
     if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
         Chart.register(ChartDataLabels);
     }
 
-    // Asegurarse de que las variables de Razor existan en window (Vienen del cshtml)
-    if (typeof labelsSistemas === 'undefined') return;
+    inicializarGraficasConcentrado();
+    inicializarFiltroPorSistema();
+});
 
-    const obtenerColorSistema = (sistema) => {
-        const sysUpper = (sistema || '').toUpperCase().trim();
+/* ==========================================================================
+   MÓDULO REPORTE DE TICKETS - GRÁFICAS DEL CONCENTRADO
+   ========================================================================== */
 
-        if (sysUpper.includes('CONECTOR') || sysUpper.includes('ZOE')) return '#704332';
-        if (sysUpper.includes('DIAWEB')) return '#0284c7';
-        if (sysUpper.includes('DIAENLINEA')) return '#16a34a';
-        if (sysUpper === 'DIA') return '#25B3EB';
-        if (sysUpper === 'SITA') return '#ea580c';
-        if (sysUpper === 'VUCEM') return '#1d4ed8';
-        if (sysUpper === 'COA') return '#15803d';
-        if (sysUpper === 'ADMIN') return '#0f172a';
+const temaGraficaOscuro = { texto: '#e2e8f0', rejilla: 'rgba(255, 255, 255, 0.1)', borde: '#111c33' };
+const temaGraficaClaro = { texto: '#0f172a', rejilla: 'rgba(15, 23, 42, 0.12)', borde: '#ffffff' };
 
-        return '#38bdf8';
-    };
+function porcentajeDe(valor, datos) {
+    const total = datos.reduce((suma, n) => suma + n, 0);
+    return total === 0 ? 0 : Math.round(valor * 100 / total);
+}
 
-    const coloresDona = labelsSistemas.map(sys => obtenerColorSistema(sys));
+// Dibuja el total de tickets en el centro de la dona
+// Con la leyenda a la derecha, deja el mismo espacio a la izquierda
+// para que la dona quede centrada bajo el título
+const pluginCentrarDona = {
+    id: 'centrarDona',
+    afterLayout(chart) {
+        const leyenda = chart.legend;
+        if (!leyenda || leyenda.options.position !== 'right') return;
 
-    // Gráfica de Dona
-    const ctx1 = document.getElementById('chartSistemas');
-    if (ctx1 && labelsSistemas.length > 0) {
-        window.chartSistemasInstance = new Chart(ctx1, {
-            type: 'doughnut',
-            data: {
-                labels: labelsSistemas,
-                datasets: [{
-                    data: dataTotales,
-                    backgroundColor: coloresDona,
-                    borderWidth: 1,
-                    borderColor: '#0f172a'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: false,
-                plugins: {
-                    title: { display: false },
-                    legend: {
-                        position: 'right',
-                        labels: { color: '#ffffff', font: { size: 10, weight: 'bold' } }
-                    },
-                    datalabels: {
-                        color: '#ffffff',
-                        font: { weight: 'bold', size: 11 },
-                        formatter: (value, ctx) => {
-                            if (!value || value === 0) return '';
-                            let sum = 0;
-                            let dataArr = ctx.chart.data.datasets[0].data;
-                            dataArr.map(data => { sum += data; });
-                            let percentage = (value * 100 / sum).toFixed(1) + "%";
-                            return percentage;
-                        }
-                    }
-                }
-            }
-        });
+        const area = chart.chartArea;
+        area.left += leyenda.width;
+        area.width = area.right - area.left;
     }
+};
 
-    // Gráfica de Barras
-    const ctx2 = document.getElementById('chartEstatusSistema');
-    if (ctx2 && labelsSistemas.length > 0) {
-        window.chartEstatusInstance = new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: labelsSistemas,
-                datasets: [
-                    {
-                        label: 'Tiempo y Forma',
-                        data: dataTiempoForma,
-                        backgroundColor: '#22c55e'
-                    },
-                    {
-                        label: 'Cerrado (Atrasados)',
-                        data: dataCerradosAtrasados,
-                        backgroundColor: '#3b82f6'
-                    },
-                    {
-                        label: 'En Curso',
-                        data: dataEnCurso,
-                        backgroundColor: '#eab308'
-                    }
-                ]
+const pluginTotalCentro = {
+    id: 'totalCentro',
+    afterDraw(chart, args, opciones) {
+        const { ctx, chartArea } = chart;
+        const total = chart.data.datasets[0].data.reduce((suma, n) => suma + n, 0);
+        const x = (chartArea.left + chartArea.right) / 2;
+        const y = (chartArea.top + chartArea.bottom) / 2;
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = opciones.color;
+        ctx.font = 'bold 26px "Segoe UI", sans-serif';
+        ctx.fillText(total, x, y - 8);
+        ctx.font = '12px "Segoe UI", sans-serif';
+        ctx.fillText(total === 1 ? 'ticket' : 'tickets', x, y + 16);
+        ctx.restore();
+    }
+};
+
+function cursorDeClic(evento, elementos) {
+    evento.native.target.style.cursor = elementos.length ? 'pointer' : 'default';
+}
+
+// Leyenda a un lado si hay espacio; abajo en pantallas angostas
+function posicionLeyendaDona(ancho) {
+    return ancho < 520 ? 'bottom' : 'right';
+}
+
+function crearGraficaSistemas(canvas) {
+    return new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: labelsSistemas,
+            datasets: [{
+                data: dataTotales,
+                backgroundColor: labelsSistemas.map(colorSistema),
+                borderColor: temaGraficaOscuro.borde,
+                borderWidth: 2
+            }]
+        },
+        plugins: [pluginTotalCentro, pluginCentrarDona],
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            cutout: '58%',
+            layout: { padding: 6 },
+            onResize: (chart, tamano) => {
+                chart.options.plugins.legend.position = posicionLeyendaDona(tamano.width);
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: false,
-                scales: {
-                    x: {
-                        ticks: { color: '#ffffff', font: { size: 9, weight: 'bold' } },
-                        grid: { display: false }
-                    },
-                    y: {
-                        ticks: { color: '#ffffff', precision: 0, font: { weight: 'bold' } },
-                        grid: { color: 'rgba(255,255,255,0.1)' }
+            onHover: cursorDeClic,
+            onClick: (evento, elementos) => {
+                if (elementos.length) filtrarDetallePorSistema(labelsSistemas[elementos[0].index]);
+            },
+            plugins: {
+                legend: {
+                    position: posicionLeyendaDona(canvas.parentElement.clientWidth),
+                    labels: {
+                        color: temaGraficaOscuro.texto,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        boxWidth: 10,
+                        padding: 10,
+                        font: { size: 11, weight: 'bold' }
                     }
                 },
-                plugins: {
-                    title: { display: false },
-                    legend: {
-                        position: 'top',
-                        labels: { color: '#ffffff', font: { size: 9, weight: 'bold' } }
-                    },
-                    datalabels: {
-                        anchor: 'end',
-                        align: 'start',
-                        color: '#ffffff',
-                        font: { weight: 'bold', size: 10 },
-                        formatter: (value) => {
-                            return value > 0 ? value : '';
-                        }
+                totalCentro: { color: temaGraficaOscuro.texto },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => ` ${ctx.label}: ${ctx.parsed} tickets · ${porcentajeDe(ctx.parsed, ctx.dataset.data)}%`
+                    }
+                },
+                datalabels: {
+                    color: (ctx) => colorTextoSistema(labelsSistemas[ctx.dataIndex]),
+                    font: { weight: 'bold', size: 11 },
+                    textAlign: 'center',
+                    formatter: (valor, ctx) => {
+                        const porcentaje = porcentajeDe(valor, ctx.dataset.data);
+                        return porcentaje < 5 ? '' : `${valor}\n${porcentaje}%`;
                     }
                 }
             }
-        });
+        }
+    });
+}
+
+function crearGraficaEstatus(canvas) {
+    const estatus = [
+        { nombre: 'Tiempo y forma', datos: dataTiempoForma, variable: '--estatus-tiempo' },
+        { nombre: 'Atrasados', datos: dataCerradosAtrasados, variable: '--estatus-atrasado' },
+        { nombre: 'En curso', datos: dataEnCurso, variable: '--grafica-encurso' }
+    ];
+
+    return new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: labelsSistemas,
+            datasets: estatus.map(e => ({
+                label: e.nombre,
+                data: e.datos,
+                backgroundColor: colorPaleta(e.variable),
+                borderRadius: 4,
+                maxBarThickness: 26,
+                datalabels: { color: colorPaleta(e.variable + '-texto') }
+            }))
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            onHover: cursorDeClic,
+            onClick: (evento, elementos) => {
+                if (elementos.length) filtrarDetallePorSistema(labelsSistemas[elementos[0].index]);
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    beginAtZero: true,
+                    ticks: { color: temaGraficaOscuro.texto, precision: 0 },
+                    grid: { color: temaGraficaOscuro.rejilla },
+                    title: { display: true, text: 'Tickets', color: temaGraficaOscuro.texto }
+                },
+                y: {
+                    stacked: true,
+                    ticks: { color: temaGraficaOscuro.texto, font: { size: 11, weight: 'bold' } },
+                    grid: { display: false }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { color: temaGraficaOscuro.texto, boxWidth: 12, font: { size: 11, weight: 'bold' } }
+                },
+                datalabels: {
+                    font: { weight: 'bold', size: 10 },
+                    formatter: (valor) => valor > 0 ? valor : ''
+                }
+            }
+        }
+    });
+}
+
+function inicializarGraficasConcentrado() {
+    if (typeof Chart === 'undefined' || typeof labelsSistemas === 'undefined' || labelsSistemas.length === 0) return;
+
+    const canvasSistemas = document.getElementById('chartSistemas');
+    if (canvasSistemas) window.chartSistemasInstance = crearGraficaSistemas(canvasSistemas);
+
+    const canvasEstatus = document.getElementById('chartEstatusSistema');
+    if (canvasEstatus) window.chartEstatusInstance = crearGraficaEstatus(canvasEstatus);
+}
+
+function aplicarTemaGraficas(tema) {
+    const dona = window.chartSistemasInstance;
+    if (dona) {
+        dona.data.datasets[0].borderColor = tema.borde;
+        dona.options.plugins.totalCentro.color = tema.texto;
+        dona.options.plugins.legend.labels.color = tema.texto;
+        dona.update('none');
     }
-});
+
+    const barras = window.chartEstatusInstance;
+    if (barras) {
+        barras.options.scales.x.ticks.color = tema.texto;
+        barras.options.scales.y.ticks.color = tema.texto;
+        barras.options.scales.x.grid.color = tema.rejilla;
+        barras.options.scales.x.title.color = tema.texto;
+        barras.options.plugins.legend.labels.color = tema.texto;
+        barras.update('none');
+    }
+}
+
+// Genera las imágenes de las gráficas en tema claro (texto oscuro) para el PDF
+function imagenesGraficasParaImpresion() {
+    aplicarTemaGraficas(temaGraficaClaro);
+
+    const imagenes = {
+        sistemas: window.chartSistemasInstance ? window.chartSistemasInstance.toBase64Image('image/png', 1) : '',
+        estatus: window.chartEstatusInstance ? window.chartEstatusInstance.toBase64Image('image/png', 1) : ''
+    };
+
+    aplicarTemaGraficas(temaGraficaOscuro);
+    return imagenes;
+}
+
+/* ==========================================================================
+   MÓDULO REPORTE DE TICKETS - FILTRO DEL DETALLE POR SISTEMA
+   ========================================================================== */
+
+window.sistemaFiltrado = '';
+
+function claveFiltroSistema(sistema) {
+    return normalizarSistema(sistema).trim().toUpperCase() || 'SIN SISTEMA';
+}
+
+// Muestra solo los tickets del sistema elegido; un segundo clic quita el filtro
+function filtrarDetallePorSistema(sistema) {
+    const tabla = document.getElementById('tablaDetalleTickets');
+    if (!tabla) return;
+
+    const clave = sistema ? claveFiltroSistema(sistema) : '';
+    window.sistemaFiltrado = (clave === window.sistemaFiltrado) ? '' : clave;
+    const filtro = window.sistemaFiltrado;
+
+    let visibles = 0;
+    tabla.querySelectorAll('tbody tr[data-id]').forEach(fila => {
+        const coincide = !filtro || claveFiltroSistema(fila.dataset.sistema) === filtro;
+        fila.classList.toggle('d-none', !coincide);
+        if (coincide) visibles++;
+    });
+
+    document.querySelectorAll('#tablaConcentradoSistema .fila-concentrado').forEach(fila => {
+        fila.classList.toggle('activa', filtro !== '' && fila.dataset.sistema === filtro);
+    });
+
+    const chip = document.getElementById('chipFiltroSistema');
+    if (chip) {
+        chip.textContent = filtro ? `Sistema: ${filtro}  ✕` : '';
+        chip.classList.toggle('d-none', !filtro);
+    }
+
+    const lblRegistros = document.getElementById('lblRegistrosDetalle');
+    if (lblRegistros) lblRegistros.textContent = `Registros: ${visibles}`;
+}
+
+function inicializarFiltroPorSistema() {
+    document.querySelectorAll('#tablaConcentradoSistema .fila-concentrado').forEach(fila => {
+        fila.addEventListener('click', () => filtrarDetallePorSistema(fila.dataset.sistema));
+    });
+
+    activarChipFiltroSistema();
+}
+
+function activarChipFiltroSistema() {
+    const chip = document.getElementById('chipFiltroSistema');
+    if (chip) chip.addEventListener('click', () => filtrarDetallePorSistema(window.sistemaFiltrado));
+}
+
+/* ==========================================================================
+   MÓDULO REPORTE DE TICKETS - BÚSQUEDA EN VIVO
+   ========================================================================== */
+
+let temporizadorBusqueda = null;
+let peticionBusqueda = null;
+
+// Busca mientras se escribe: pide la página con el término y reemplaza solo el Detalle
+function inicializarBuscador(formFiltros) {
+    const txtBusqueda = document.getElementById('txtBusqueda');
+    const btnLimpiar = document.getElementById('btnLimpiarBusqueda');
+    if (!txtBusqueda) return;
+
+    txtBusqueda.addEventListener('input', () => {
+        btnLimpiar?.classList.toggle('d-none', txtBusqueda.value === '');
+        clearTimeout(temporizadorBusqueda);
+        temporizadorBusqueda = setTimeout(() => buscarTickets(formFiltros), 400);
+    });
+
+    txtBusqueda.addEventListener('keydown', (evento) => {
+        if (evento.key === 'Enter') {
+            evento.preventDefault();
+            clearTimeout(temporizadorBusqueda);
+            buscarTickets(formFiltros);
+        }
+    });
+
+    btnLimpiar?.addEventListener('click', () => {
+        txtBusqueda.value = '';
+        btnLimpiar.classList.add('d-none');
+        buscarTickets(formFiltros);
+        txtBusqueda.focus();
+    });
+}
+
+async function buscarTickets(formFiltros) {
+    const parametros = new URLSearchParams(new FormData(formFiltros));
+    if (!parametros.get('Busqueda')) parametros.delete('Busqueda');
+
+    if (peticionBusqueda) peticionBusqueda.abort();
+    peticionBusqueda = new AbortController();
+
+    const cargando = document.getElementById('buscadorCargando');
+    const btnLimpiar = document.getElementById('btnLimpiarBusqueda');
+    cargando?.classList.remove('d-none');
+    btnLimpiar?.classList.add('d-none');
+
+    try {
+        const respuesta = await fetch(`?${parametros}`, { signal: peticionBusqueda.signal });
+        const html = await respuesta.text();
+        const pagina = new DOMParser().parseFromString(html, 'text/html');
+
+        // Detalle en pantalla y su copia para el PDF
+        ['panelDetalle', 'tablaDetallePrint'].forEach(id => {
+            const nuevo = pagina.getElementById(id);
+            const actual = document.getElementById(id);
+            if (nuevo && actual) actual.replaceWith(nuevo);
+        });
+
+        window.sistemaFiltrado = '';
+        document.querySelectorAll('#tablaConcentradoSistema .fila-concentrado.activa').forEach(f => f.classList.remove('activa'));
+        activarChipFiltroSistema();
+
+        history.replaceState(null, '', `?${parametros}`);
+    } catch (error) {
+        if (error.name !== 'AbortError') console.error('Error al buscar tickets:', error);
+    } finally {
+        cargando?.classList.add('d-none');
+        const txtBusqueda = document.getElementById('txtBusqueda');
+        btnLimpiar?.classList.toggle('d-none', !txtBusqueda || txtBusqueda.value === '');
+    }
+}

@@ -2,9 +2,50 @@
 @model SigesTI.Web.Pages.Actividades.ReporteTicketsModel
 @{
     ViewData["Title"] = "Reporte Diario de Tickets";
-    var fechaConsultaDate = Model.FechaReporte?.Date ?? DateTime.Today;
+    var concentradoSistemas = Model.ConcentradoSistemas;
+
+    // Los ceros se muestran tenues para que destaquen los valores reales
+    void Celda(int valor)
+    {
+        if (valor == 0)
+        {
+            <span class="valor-cero">—</span>
+        }
+        else
+        {
+            @valor
+        }
+    }
+
+    void CeldaEstatus(int valor, string claseEstatus)
+    {
+        if (valor == 0)
+        {
+            <span class="valor-cero">—</span>
+        }
+        else
+        {
+            <span class="badge @claseEstatus">@valor</span>
+        }
+    }
+
+    void CeldaPorcentaje(int? porcentaje)
+    {
+        if (porcentaje == null)
+        {
+            <span class="valor-cero">—</span>
+        }
+        else
+        {
+            <div class="barra-tiempo">
+                <div class="barra-tiempo-pista"><div class="barra-tiempo-relleno" style="width: @porcentaje%;"></div></div>
+                <span>@porcentaje%</span>
+            </div>
+        }
+    }
 }
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" />
 <link rel="stylesheet" href="~/css/Actividades/reporte-tickets.css" asp-append-version="true" />
 
 <div class="actividades-container px-4 py-3">
@@ -40,20 +81,21 @@
                     <option value="VUCEM" style="background-color: #1d4ed8; color: #ffffff;">VUCEM</option>
                     <option value="DIAENLINEA PREMIUM" style="background-color: #0f172a; color: #4ade80;">DIAENLINEA PREMIUM</option>
                     <option value="COA" style="background-color: #0f172a; color: #22c55e;">COA</option>
-                    <option value="ConectorDiawebZoe" style="background-color: #704332; color: #ffffff;">CONECTOR DIAWEB-ZOÉ</option>
+                    <option value="CONECTOR DIAWEB-ZOÉ" style="background-color: #704332; color: #ffffff;">CONECTOR DIAWEB-ZOÉ</option>
                     <option value="ADMIN" style="background-color: #0f172a; color: #ffffff;">ADMIN</option>
                 </select>
             </div>
 
         <!-- Campo 3 -->
             <div class="col-md-2">
-                <label class="form-label small text-muted mb-1">Origen Servicio</label>
-                <select class="form-select form-select-sm" id="FiltroOrigen" asp-for="FiltroOrigen">
-                    <option value="">-- Todos --</option>
-                    <option value="Llamada">Llamada</option>
-                    <option value="Correo">Correo</option>
-                    <option value="Interno">Interno</option>
-                </select>
+                <label class="form-label small text-muted mb-1" for="txtBusqueda">Buscar ticket</label>
+                <div class="buscador-ticket">
+                    <i class="bi bi-search buscador-icono"></i>
+                    <input type="text" id="txtBusqueda" name="Busqueda" value="@Model.Busqueda" class="form-control form-control-sm"
+                           placeholder="No. ticket, cliente o clave" title="Busca en todas las fechas mientras escribes" autocomplete="off" />
+                    <span id="buscadorCargando" class="spinner-border buscador-cargando d-none" role="status"></span>
+                    <button type="button" id="btnLimpiarBusqueda" class="buscador-limpiar @(Model.EnBusqueda ? "" : "d-none")" title="Quitar búsqueda"><i class="bi bi-x-lg"></i></button>
+                </div>
             </div>
 
         <!-- Botones de Acción -->
@@ -136,8 +178,8 @@
                         <td class="text-center">@Model.IndicadoresSeguimiento.EscaladoConsultoria</td>
                         <td class="text-center">@Model.IndicadoresSeguimiento.EscaladoVentas</td>
                         <td class="text-center">@Model.IndicadoresSeguimiento.EscaladoCobranza</td>
-                        <td class="text-center"><span class="badge bg-success">@Model.IndicadoresSeguimiento.Cerrado</span></td>
-                        <td class="text-center"><span class="badge bg-warning text-dark">@Model.IndicadoresSeguimiento.EnCurso</span></td>
+                        <td class="text-center"><span class="badge estatus-tiempo">@Model.IndicadoresSeguimiento.Cerrado</span></td>
+                        <td class="text-center"><span class="badge estatus-encurso">@Model.IndicadoresSeguimiento.EnCurso</span></td>
                     </tr>
                     <tr>
                         <td class="fw-bold text-info text-center">Resumen del Día</td>
@@ -160,78 +202,78 @@
                         <td class="text-center">@Model.IndicadoresDia.EscaladoConsultoria</td>
                         <td class="text-center">@Model.IndicadoresDia.EscaladoVentas</td>
                         <td class="text-center">@Model.IndicadoresDia.EscaladoCobranza</td>
-                        <td class="text-center"><span class="badge bg-success">@Model.IndicadoresDia.Cerrado</span></td>
-                        <td class="text-center"><span class="badge bg-warning text-dark">@Model.IndicadoresDia.EnCurso</span></td>
+                        <td class="text-center"><span class="badge estatus-tiempo">@Model.IndicadoresDia.Cerrado</span></td>
+                        <td class="text-center"><span class="badge estatus-encurso">@Model.IndicadoresDia.EnCurso</span></td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- CÁLCULO C# PARA CONCENTRADO POR SISTEMA -->
-    @{
-        var concentradoSistemas = Enumerable.Empty<dynamic>();
-
-        if (Model.ListaTickets != null && Model.ListaTickets.Any())
-        {
-            concentradoSistemas = Model.ListaTickets
-                .GroupBy(t => string.IsNullOrWhiteSpace(t.Sistema) ? "SIN SISTEMA" : t.Sistema.ToUpper().Trim())
-                .Select(g => new {
-                    Sistema = g.Key,
-                    Total = g.Count(),
-                    Incidencias = g.Count(x => x.Tipo == "Incidencia"),
-                    Servicios = g.Count(x => x.Tipo == "Servicio"),
-                    Telefono = g.Count(x => x.Origen == "Llamada"),
-                    Correo = g.Count(x => x.Origen == "Correo"),
-                    TiempoForma = g.Count(x => (x.Estatus == "Cerrado" || x.Estatus == "Resuelto") && x.FechaEntrada.Date == fechaConsultaDate),
-                    CerradosAtrasados = g.Count(x => (x.Estatus == "Cerrado" || x.Estatus == "Resuelto") && x.FechaEntrada.Date < fechaConsultaDate),
-                    EnCurso = g.Count(x => x.Estatus == "En curso" || x.Estatus == "Pendiente")
-                }).OrderByDescending(x => x.Total).ToList();
-        }
-    }
-
     <!-- Sección: Concentrado y Gráficas del Día por Sistema -->
     <div class="glass-panel mb-4 p-3 overflow-hidden">
         <div class="glass-header mb-3">
             <i class="bi bi-pie-chart-fill me-2 text-info"></i>Concentrado del Día por Sistema
         </div>
-        
+
         <div class="row g-3">
             <!-- Gráfica 1 -->
-            <div class="col-md-5">
-                <div class="bg-dark bg-opacity-50 p-3 rounded border border-secondary text-center h-100 d-flex flex-column justify-content-center align-items-center">
-                    <span class="small fw-bold text-info mb-2">Distribución de Tickets por Sistema</span>
-                    <div style="position: relative; height: 210px; width: 100%;">
-                        <canvas id="chartSistemas"></canvas>
-                    </div>
+            <div class="col-lg-6">
+                <div class="tarjeta-grafica">
+                    <div class="tarjeta-grafica-titulo">Distribución por sistema</div>
+                    @if (concentradoSistemas.Any())
+                    {
+                        <div class="chart-container-box">
+                            <canvas id="chartSistemas"></canvas>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="grafica-vacia"><i class="bi bi-pie-chart"></i>Sin tickets para la fecha seleccionada</div>
+                    }
                 </div>
             </div>
 
             <!-- Gráfica 2 -->
-            <div class="col-md-7">
-                <div class="bg-dark bg-opacity-50 p-3 rounded border border-secondary text-center h-100 d-flex flex-column justify-content-center align-items-center">
-                    <span class="small fw-bold text-info mb-2">Tiempo y Forma vs Cerrados (Atrasados) vs En Curso</span>
-                    <div style="position: relative; height: 210px; width: 100%;">
-                        <canvas id="chartEstatusSistema"></canvas>
-                    </div>
+            <div class="col-lg-6">
+                <div class="tarjeta-grafica">
+                    <div class="tarjeta-grafica-titulo">Estatus de atención por sistema</div>
+                    @if (concentradoSistemas.Any())
+                    {
+                        <div class="chart-container-box">
+                            <canvas id="chartEstatusSistema"></canvas>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="grafica-vacia"><i class="bi bi-bar-chart"></i>Sin tickets para la fecha seleccionada</div>
+                    }
                 </div>
             </div>
         </div>
 
         <!-- Tabla Concentrada por Sistema -->
-        <div class="table-responsive mt-3">
-            <table class="tabla-sigest text-center align-middle mb-0 small" id="tablaConcentradoSistema">
+        <div class="table-responsive tabla-contenedor mt-3">
+            <table class="tabla-sigest tabla-concentrado text-center align-middle mb-0 small" id="tablaConcentradoSistema">
                 <thead>
                     <tr>
-                        <th class="text-center col-sistema">Sistema</th>
-                        <th class="text-center">Total Tickets</th>
-                        <th class="text-center">Incidencias</th>
-                        <th class="text-center">Servicios</th>
-                        <th class="text-center">Por Teléfono</th>
-                        <th class="text-center">Por Correo</th>
-                        <th class="text-center">Atendidos (Tiempo y Forma)</th>
-                        <th class="text-center">Cerrados (Atrasados)</th>
-                        <th class="text-center">En Curso (Seguimiento)</th>
+                        <th rowspan="2" class="align-middle col-sistema">Sistema</th>
+                        <th rowspan="2" class="align-middle">Total</th>
+                        <th colspan="3">Tipo</th>
+                        <th colspan="3">Origen</th>
+                        <th colspan="3">Estatus</th>
+                        <th rowspan="2" class="align-middle">% en tiempo</th>
+                    </tr>
+                    <tr>
+                        <th>Incidencias</th>
+                        <th>Servicios</th>
+                        <th title="Ajuste y Mejora">Otros</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>Interno</th>
+                        <th>Tiempo y forma <i class="bi bi-info-circle" title="Abierto y cerrado el mismo día consultado"></i></th>
+                        <th>Atrasados <i class="bi bi-info-circle" title="Abierto en un día anterior y cerrado en el día consultado"></i></th>
+                        <th>En curso <i class="bi bi-info-circle" title="Seguía abierto al cierre del día consultado"></i></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -239,57 +281,58 @@
                     {
                         @foreach (var s in concentradoSistemas)
                         {
-                            string sisUpper = (s.Sistema ?? "").ToString().ToUpper().Trim();
-                            string claseSistema = "badge-sistema-med";
-                            bool esConector = sisUpper.Contains("CONECTOR") || sisUpper.Contains("ZOE");
-
-                            if (esConector) claseSistema = "badge-sistema-med";
-                            else if (sisUpper.Contains("DIAWEB")) claseSistema = "badge-sistema-diaweb";
-                            else if (sisUpper.Contains("DIAENLINEA")) claseSistema = "badge-sistema-diaenlinea";
-                            else if (sisUpper == "DIA") claseSistema = "badge-sistema-dia";
-                            else if (sisUpper == "SITA") claseSistema = "badge-sistema-sita";
-                            else if (sisUpper == "VUCEM") claseSistema = "badge-sistema-vucem";
-                            else if (sisUpper == "COA") claseSistema = "badge-sistema-coa";
-                            else if (sisUpper == "ADMIN") claseSistema = "badge-sistema-admin";
-
-                            <tr>
-                                <td class="text-center align-middle col-sistema">
-                                    <span class="badge @claseSistema text-wrap" style="line-height: 1.2;">
-                                        @if (esConector)
-                                        {
-                                            @:CONECTOR<br />DIAWEB-ZOÉ
-                                        }
-                                        else
-                                        {
-                                            @s.Sistema
-                                        }
-                                    </span>
+                            <tr class="fila-concentrado" data-sistema="@s.Sistema" title="Clic para ver solo los tickets de @s.Sistema">
+                                <td class="col-sistema">
+                                    <span class="badge @ReporteTicketsModel.ClaseSistema(s.Sistema)">@s.Sistema</span>
                                 </td>
-                                <td class="fw-bold text-center">@s.Total</td>
-                                <td class="text-center">@s.Incidencias</td>
-                                <td class="text-center">@s.Servicios</td>
-                                <td class="text-center">@s.Telefono</td>
-                                <td class="text-center">@s.Correo</td>
-                                <td class="text-center"><span class="badge bg-success">@s.TiempoForma</span></td>
-                                <td class="text-center"><span class="badge bg-info">@s.CerradosAtrasados</span></td>
-                                <td class="text-center"><span class="badge bg-warning text-dark">@s.EnCurso</span></td>
+                                <td class="fw-bold">@s.Total</td>
+                                <td>@{ Celda(s.Incidencias); }</td>
+                                <td>@{ Celda(s.Servicios); }</td>
+                                <td>@{ Celda(s.Otros); }</td>
+                                <td>@{ Celda(s.Telefono); }</td>
+                                <td>@{ Celda(s.Correo); }</td>
+                                <td>@{ Celda(s.Interno); }</td>
+                                <td>@{ CeldaEstatus(s.TiempoForma, "estatus-tiempo"); }</td>
+                                <td>@{ CeldaEstatus(s.CerradosAtrasados, "estatus-atrasado"); }</td>
+                                <td>@{ CeldaEstatus(s.EnCurso, "estatus-encurso"); }</td>
+                                <td>@{ CeldaPorcentaje(s.PorcentajeEnTiempo); }</td>
                             </tr>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="9" class="text-center py-3 text-muted">No hay datos agrupados para mostrar.</td>
+                            <td colspan="12" class="text-center py-3 text-muted">No hay datos agrupados para mostrar.</td>
                         </tr>
                     }
                 </tbody>
+                @if (concentradoSistemas.Any())
+                {
+                    var t = Model.ConcentradoTotal;
+                    <tfoot>
+                        <tr>
+                            <td>TOTAL</td>
+                            <td>@t.Total</td>
+                            <td>@t.Incidencias</td>
+                            <td>@t.Servicios</td>
+                            <td>@t.Otros</td>
+                            <td>@t.Telefono</td>
+                            <td>@t.Correo</td>
+                            <td>@t.Interno</td>
+                            <td>@t.TiempoForma</td>
+                            <td>@t.CerradosAtrasados</td>
+                            <td>@t.EnCurso</td>
+                            <td>@{ CeldaPorcentaje(t.PorcentajeEnTiempo); }</td>
+                        </tr>
+                    </tfoot>
+                }
             </table>
         </div>
     </div>
 
     <!-- Sección de Redacción -->
     <div class="row g-3 mb-4">
-        <div class="col-md-20">
+        <div class="col-12">
             <div class="glass-panel h-100 overflow-hidden">
                 <div class="glass-header">
                     <i class="bi bi-card-text me-2"></i>Puntos Relevantes del Día
@@ -299,22 +342,33 @@
                 </div>
             </div>
         </div>
+    </div>
 
     <!-- Tabla 2: Matriz Detallada Módulo Pantalla -->
-    <div class="glass-panel mb-4 overflow-hidden">
+    <div class="glass-panel mb-4 overflow-hidden" id="panelDetalle">
         <div class="glass-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-table me-2"></i>Detalle Completo de Tickets</span>
-            <span class="badge bg-primary px-3 py-2 rounded-pill">Registros: @Model.ListaTickets.Count</span>
+            <span>
+                <i class="bi bi-table me-2"></i>Detalle Completo de Tickets
+                @if (Model.EnBusqueda)
+                {
+                    <span class="aviso-busqueda ms-2"><i class="bi bi-search me-1"></i>Resultados para "@Model.Busqueda" en todas las fechas</span>
+                }
+            </span>
+            <span class="d-flex align-items-center gap-2">
+                <span id="chipFiltroSistema" class="badge bg-secondary chip-filtro-sistema d-none" title="Quitar filtro"></span>
+                <span id="lblRegistrosDetalle" class="badge bg-primary px-3 py-2 rounded-pill">Registros: @Model.ListaTickets.Count</span>
+            </span>
         </div>
-        <div class="p-0 table-responsive">
-            <table class="tabla-sigest text-nowrap small" id="tablaDetalleTickets">
+        <div class="p-0 table-responsive tabla-detalle-scroll">
+            <table class="tabla-sigest tabla-detalle text-nowrap small" id="tablaDetalleTickets">
                 <thead>
                     <tr>
                         <th class="text-center">Fecha Entrada</th>
                         <th class="text-center">Última Modif.</th>
                         <th class="text-center">Hora</th>
                         <th class="text-center">No. Ticket</th>
-                        <th class="text-center">Cliente</th>
+                        <th class="text-center">No. de cliente</th>
+                        <th class="text-center">Nombre del cliente</th>
                         <th class="text-center">Ejecutivo</th>
                         <th class="text-center">Reportó</th>
                         <th class="text-center">Estatus</th>
@@ -339,10 +393,12 @@
                                 data-hora="@item.Hora"
                                 data-numticket="@item.NumeroTicket"
                                 data-cliente="@item.Cliente"
+                                data-clavecliente="@Model.ClaveCliente(item.Cliente)"
                                 data-reporto="@item.Reporto"
                                 data-ejecutivo="@item.Ejecutivo"
                                 data-sistema="@item.Sistema"
                                 data-tipo="@item.Tipo"
+                                data-origen="@item.Origen"
                                 data-estatus="@item.Estatus"
                                 data-escalado="@item.Escalado.ToString().ToLower()"
                                 data-areaescalada="@item.AreaEscalada"
@@ -350,41 +406,41 @@
                                 data-descripcion="@item.Descripcion"
                                 data-comentarios="@item.Comentarios"
                                 data-solucion="@item.Solucion"
-                                ondblclick="abrirModalDetalleDesdeFila(this)">
+                                title="Clic para ver el detalle"
+                                onclick="abrirModalDetalleDesdeFila(this)">
 
-                                <td class="text-center">@item.FechaEntrada.ToString("dd/MM/yyyy")</td>
-                                <td class="text-center">@(item.FechaUltimaModificacion.HasValue ? item.FechaUltimaModificacion.Value.ToString("dd/MM/yyyy") : "-")</td>
+                                <td class="text-center celda-fecha">@item.FechaEntrada.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center celda-fecha">@(item.FechaUltimaModificacion.HasValue ? item.FechaUltimaModificacion.Value.ToString("dd/MM/yyyy") : "—")</td>
                                 <td class="text-center">@item.Hora</td>
-                                <td class="text-center"><span class="badge bg-info text-dark fw-bold">@item.NumeroTicket</span></td>
-                                <td class="text-center fw-bold">@item.Cliente</td>
-                                <td class="text-center">@item.Ejecutivo</td>
-                                <td class="text-center">@item.Reporto</td>
+                                <td class="text-center"><span class="ticket-folio">#@item.NumeroTicket</span></td>
                                 <td class="text-center">
-                                    @if (item.Estatus == "Cerrado")
+                                    @if (Model.ClaveCliente(item.Cliente) != "")
                                     {
-                                        <span class="badge bg-success">Cerrado</span>
+                                        <span class="clave-cliente">@Model.ClaveCliente(item.Cliente)</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-warning text-dark">En curso</span>
+                                        <span class="texto-tenue">—</span>
+                                    }
+                                </td>
+                                <td class="celda-cliente">@item.Cliente</td>
+                                <td class="text-center">@item.Ejecutivo</td>
+                                <td class="text-center">@item.Reporto</td>
+                                <td class="text-center">
+                                    @if (Model.EstatusEnFecha(item) == "Cerrado")
+                                    {
+                                        <span class="pill-estado estado-cerrado">Cerrado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="pill-estado estado-encurso">En curso</span>
                                     }
                                 </td>
                                 <td class="text-center align-middle col-sistema">
                                     @{
-                                        string sistemaUpper = (item.Sistema ?? "").ToUpper().Trim();
-                                        string claseSistema = "badge-sistema-med";
-                                        bool esConectorItem = sistemaUpper.Contains("CONECTOR") || sistemaUpper.Contains("ZOE");
-
-                                        if (esConectorItem) claseSistema = "badge-sistema-med";
-                                        else if (sistemaUpper.Contains("DIAWEB")) claseSistema = "badge-sistema-diaweb";
-                                        else if (sistemaUpper.Contains("DIAENLINEA")) claseSistema = "badge-sistema-diaenlinea";
-                                        else if (sistemaUpper == "DIA") claseSistema = "badge-sistema-dia";
-                                        else if (sistemaUpper == "SITA") claseSistema = "badge-sistema-sita";
-                                        else if (sistemaUpper == "VUCEM") claseSistema = "badge-sistema-vucem";
-                                        else if (sistemaUpper == "COA") claseSistema = "badge-sistema-coa";
-                                        else if (sistemaUpper == "ADMIN") claseSistema = "badge-sistema-admin";
+                                        bool esConectorItem = ReporteTicketsModel.NormalizarSistema(item.Sistema) == ReporteTicketsModel.SistemaConector;
                                     }
-                                    <span class="badge @claseSistema text-wrap" style="line-height: 1.2;">
+                                    <span class="badge @ReporteTicketsModel.ClaseSistema(item.Sistema) text-wrap" style="line-height: 1.2;">
                                         @if (esConectorItem)
                                         {
                                             @:CONECTOR<br />DIAWEB-ZOÉ
@@ -408,24 +464,33 @@
                                 <td class="text-center">
                                     @if (item.Escalado)
                                     {
-                                        <span class="badge bg-danger">SI</span>
+                                        <span class="pill-estado estado-escalado">Sí</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-secondary">NO</span>
+                                        <span class="texto-tenue">No</span>
                                     }
                                 </td>
-                                <td class="text-center">@(string.IsNullOrEmpty(item.AreaEscalada) ? "-" : item.AreaEscalada)</td>
-                                <td class="text-center">@(item.FechaSolucion.HasValue ? item.FechaSolucion.Value.ToString("dd/MM/yyyy") : "-")</td>
+                                <td class="text-center">
+                                    @if (string.IsNullOrEmpty(item.AreaEscalada))
+                                    {
+                                        <span class="texto-tenue">—</span>
+                                    }
+                                    else
+                                    {
+                                        @item.AreaEscalada
+                                    }
+                                </td>
+                                <td class="text-center celda-fecha">@(item.FechaSolucion.HasValue ? item.FechaSolucion.Value.ToString("dd/MM/yyyy") : "—")</td>
                             </tr>
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="16" class="text-center py-4 text-muted">
+                            <td colspan="17" class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox fs-3 d-block mb-2"></i>
-                                No hay tickets registrados para la fecha seleccionada.
+                                @(Model.EnBusqueda ? "No se encontraron tickets con esa búsqueda." : "No hay tickets registrados para la fecha seleccionada.")
                             </td>
                         </tr>
                     }
@@ -436,164 +501,185 @@
 </div>
 
 <!-- Modal 1: Nuevo Ticket -->
-<div class="modal fade" id="modalNuevoTicket" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content glass-panel border-0 text-white">
-            <div class="modal-header glass-header border-0">
-                <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2 text-info"></i>Registrar Nuevo Ticket</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="modalNuevoTicket" tabindex="-1" aria-hidden="true" aria-labelledby="tituloNuevoTicket">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content modal-ticket text-white border-0">
+            <div class="modal-header border-0">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="modal-icono"><i class="bi bi-ticket-perforated"></i></div>
+                    <div>
+                        <h5 class="modal-title fs-6 fw-bold text-white mb-0" id="tituloNuevoTicket">Registrar Nuevo Ticket</h5>
+                        <small class="modal-subtitulo">Captura los datos del ticket atendido</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
-            <form method="post" asp-page-handler="CrearTicket">
+            <form method="post" asp-page-handler="CrearTicket" class="d-flex flex-column overflow-hidden">
                 @Html.AntiForgeryToken()
                 <div class="modal-body p-4">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Fecha Entrada</label>
-                            <input type="date" name="FechaEntrada" class="form-control form-control-sm" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">No. Ticket / Folio</label>
-                            <input type="text" name="NumeroTicket" class="form-control form-control-sm" required placeholder="Ej: 7016" />
-                        </div>
-                        <div class="col-md-3">
-                            <label for="regHora" class="form-label small text-muted">Hora de Entrada</label>
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-light text-secondary">
-                                    <i class="bi bi-clock"></i>
-                                </span>
+
+                    <div class="modal-seccion">
+                        <div class="modal-seccion-titulo"><i class="bi bi-calendar-event"></i>Datos del ticket</div>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">Fecha Entrada</label>
+                                <input type="date" name="FechaEntrada" class="form-control form-control-sm" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">No. Ticket / Folio</label>
+                                <input type="text" name="NumeroTicket" class="form-control form-control-sm" required placeholder="Ej: 7016" />
+                            </div>
+                            <div class="col-md-3">
+                                <label for="regHora" class="form-label small text-muted">Hora de Entrada</label>
                                 <input type="time" class="form-control form-control-sm" id="regHora" name="Hora" required />
                             </div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Origen del Ticket</label>
-                            <select name="Origen" class="form-select form-select-sm" required>
-                                <option value="Llamada">Llamada</option>
-                                <option value="Correo">Correo</option>
-                                <option value="Interno">Interno</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Cliente (Empresa)</label>
-                            <select id="ddlClientes" name="ClienteId" class="form-select form-select-sm" onchange="cambiarCliente(this)">
-                                <option value="">-- Selecciona Cliente --</option>
-                                @foreach (var c in Model.ListaClientes)
-                                {
-                                    <option value="@c.Id">@c.Clave - @c.Nombre</option>
-                                }
-                                <option value="OTRO">+ Agregar Cliente Nuevo...</option>
-                            </select>
-                        </div>
-
-                        <div id="boxClienteNuevo" class="col-md-6 row g-2 d-none">
-                            <div class="col-md-5">
-                                <label class="form-label small text-muted">Clave Cliente</label>
-                                <input type="text" name="NuevaClaveCliente" class="form-control form-control-sm" placeholder="Ej: CLI01" />
-                            </div>
-                            <div class="col-md-7">
-                                <label class="form-label small text-muted">Nombre Empresa</label>
-                                <input type="text" name="NuevoNombreCliente" class="form-control form-control-sm" placeholder="Razón Social" />
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">Origen del Ticket</label>
+                                <select name="Origen" class="form-select form-select-sm" required>
+                                    <option value="Llamada">Llamada</option>
+                                    <option value="Correo">Correo</option>
+                                    <option value="Interno">Interno</option>
+                                </select>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Persona que Reportó</label>
-                            <select id="ddlContactos" name="Reporto" class="form-select form-select-sm" onchange="cambiarContacto(this)">
-                                <option value="">-- Selecciona quien reporta --</option>
-                                <option value="OTRO">+ Agregar otra persona...</option>
-                            </select>
-                        </div>
+                    <div class="modal-seccion">
+                        <div class="modal-seccion-titulo"><i class="bi bi-building"></i>Cliente y contacto</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Cliente (Empresa)</label>
+                                <select id="ddlClientes" name="ClienteId" class="form-select form-select-sm" onchange="cambiarCliente(this)">
+                                    <option value="">-- Selecciona Cliente --</option>
+                                    @foreach (var c in Model.ListaClientes)
+                                    {
+                                        <option value="@c.Id">@c.Clave - @c.Nombre</option>
+                                    }
+                                    <option value="OTRO">+ Agregar Cliente Nuevo...</option>
+                                </select>
+                            </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Nombre Persona (Si es otro)</label>
-                            <input type="text" id="txtReportoManual" name="ReportoManual" class="form-control form-control-sm d-none" placeholder="Nombre completo" />
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Correo Electrónico</label>
-                            <input type="email" id="txtCorreoReporto" name="CorreoReporto" class="form-control form-control-sm" placeholder="correo@empresa.com" />
-                        </div>
+                            <div id="boxClienteNuevo" class="col-md-6 d-none">
+                                <div class="row g-2">
+                                    <div class="col-md-5">
+                                        <label class="form-label small text-muted">Clave Cliente</label>
+                                        <input type="text" name="NuevaClaveCliente" class="form-control form-control-sm" placeholder="Ej: CLI01" />
+                                    </div>
+                                    <div class="col-md-7">
+                                        <label class="form-label small text-muted">Nombre Empresa</label>
+                                        <input type="text" name="NuevoNombreCliente" class="form-control form-control-sm" placeholder="Razón Social" />
+                                    </div>
+                                </div>
+                            </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Ejecutivo de Soporte</label>
-                            <select name="Ejecutivo" class="form-select form-select-sm" required>
-                                <option value="">-- Selecciona Ejecutivo --</option>
-                                @foreach (var pers in Model.ListaEjecutivosSoporte)
-                                {
-                                    <option value="@pers.Nombre">@pers.Nombre</option>
-                                }
-                            </select>
-                        </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Persona que Reportó</label>
+                                <select id="ddlContactos" name="Reporto" class="form-select form-select-sm" onchange="cambiarContacto(this)">
+                                    <option value="">-- Selecciona quien reporta --</option>
+                                    <option value="OTRO">+ Agregar otra persona...</option>
+                                </select>
+                            </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label small text-muted">Sistema</label>
-                            <select id="regSistema" name="Sistema" class="form-select form-select-sm" onchange="aplicarColorSelectSistema(this)" required>
-    <option value="DIA" style="background-color: #2563eb; color: #ffffff;">DIA</option>
-    <option value="DIAWEB" style="background-color: #0284c7; color: #ffffff;">DIAWEB</option>
-    <option value="CONECTOR DIAWEB-ZOÉ" style="background-color: #704332; color: #ffffff;">CONECTOR DIAWEB-ZOÉ</option>
-    <option value="SITA" style="background-color: #ea580c; color: #ffffff;">SITA</option>
-    <option value="VUCEM" style="background-color: #1d4ed8; color: #ffffff;">VUCEM</option>
-    <option value="DIAENLINEA PREMIUM" style="background-color: #16a34a; color: #ffffff;">DIAENLINEA PREMIUM</option>
-    <option value="COA" style="background-color: #15803d; color: #ffffff;">COA</option>
-    <option value="ADMIN" style="background-color: #0f172a; color: #ffffff;">ADMIN</option>
-</select>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Nombre Persona (Si es otro)</label>
+                                <input type="text" id="txtReportoManual" name="ReportoManual" class="form-control form-control-sm d-none" placeholder="Nombre completo" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Correo Electrónico</label>
+                                <input type="email" id="txtCorreoReporto" name="CorreoReporto" class="form-control form-control-sm" placeholder="correo@empresa.com" />
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small text-muted">Tipo Requerimiento</label>
-                            <select name="Tipo" class="form-select form-select-sm" required>
-                                <option value="Servicio">Servicio</option>
-                                <option value="Incidencia">Incidencia</option>
-                                <option value="Ajuste">Ajuste</option>
-                                <option value="Mejora">Mejora</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small text-muted">Estatus Inicial</label>
-                            <select name="Estatus" class="form-select form-select-sm" onchange="evaluarFechaSolucionNuevo(this.value)" required>
-                                <option value="En curso">En curso</option>
-                                <option value="Cerrado">Cerrado</option>
-                            </select>
-                        </div>
+                    </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Fecha de Solución</label>
-                            <input type="date" id="regFechaSolucion" name="FechaSolucion" class="form-control form-control-sm" disabled />
-                        </div>
+                    <div class="modal-seccion">
+                        <div class="modal-seccion-titulo"><i class="bi bi-diagram-3"></i>Clasificación y atención</div>
+                        <div class="row g-3">
+                            <div class="col-auto campo-lg">
+                                <label class="form-label small text-muted">Ejecutivo de Soporte</label>
+                                <select name="Ejecutivo" class="form-select form-select-sm" required>
+                                    <option value="">-- Selecciona Ejecutivo --</option>
+                                    @foreach (var pers in Model.ListaEjecutivosSoporte)
+                                    {
+                                        <option value="@pers.Nombre">@pers.Nombre</option>
+                                    }
+                                </select>
+                            </div>
 
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">¿Se escala?</label>
-                            <select id="ddlEscalado" name="Escalado" class="form-select form-select-sm" onchange="cambiarEscalado(this)">
-                                <option value="false">NO</option>
-                                <option value="true">SI</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 d-none" id="boxAreaEscalada">
-                            <label class="form-label small text-muted">Área Escalada</label>
-                            <select name="AreaEscalada" class="form-select form-select-sm">
-                                <option value="">-- Selecciona Área --</option>
-                                <option value="Desarrollo">Desarrollo</option>
-                                <option value="Consultoría">Consultoría</option>
-                                <option value="Ventas">Ventas</option>
-                                <option value="Cobranza">Cobranza</option>
-                            </select>
-                        </div>
+                            <div class="col-auto campo-lg">
+                                <label class="form-label small text-muted">Sistema</label>
+                                <select id="regSistema" name="Sistema" class="form-select form-select-sm" onchange="aplicarColorSelectSistema(this)" required>
+                                    <option value="DIA">DIA</option>
+                                    <option value="DIAWEB">DIAWEB</option>
+                                    <option value="CONECTOR DIAWEB-ZOÉ">CONECTOR DIAWEB-ZOÉ</option>
+                                    <option value="SITA">SITA</option>
+                                    <option value="VUCEM">VUCEM</option>
+                                    <option value="DIAENLINEA PREMIUM">DIAENLINEA PREMIUM</option>
+                                    <option value="COA">COA</option>
+                                    <option value="ADMIN">ADMIN</option>
+                                </select>
+                            </div>
+                            <div class="col-auto campo-sm">
+                                <label class="form-label small text-muted">Tipo Requerimiento</label>
+                                <select name="Tipo" class="form-select form-select-sm" required>
+                                    <option value="Servicio">Servicio</option>
+                                    <option value="Incidencia">Incidencia</option>
+                                    <option value="Ajuste">Ajuste</option>
+                                    <option value="Mejora">Mejora</option>
+                                </select>
+                            </div>
+                            <div class="col-auto campo-sm">
+                                <label class="form-label small text-muted">Estatus Inicial</label>
+                                <select name="Estatus" class="form-select form-select-sm" onchange="evaluarFechaSolucionNuevo(this.value)" required>
+                                    <option value="En curso">En curso</option>
+                                    <option value="Cerrado">Cerrado</option>
+                                </select>
+                            </div>
+                            <div class="col-auto campo-md">
+                                <label class="form-label small text-muted">Fecha de Solución</label>
+                                <input type="date" id="regFechaSolucion" name="FechaSolucion" class="form-control form-control-sm" disabled />
+                            </div>
 
-                        <div class="col-md-12">
-                            <label class="form-label small text-muted">Descripción del Ticket</label>
-                            <textarea name="Descripcion" class="form-control form-control-sm" rows="4" placeholder="Escribe aquí la bitácora o historial..." required></textarea>
+                            <div class="col-auto campo-xs">
+                                <label class="form-label small text-muted">¿Se escala?</label>
+                                <select id="ddlEscalado" name="Escalado" class="form-select form-select-sm" onchange="cambiarEscalado(this)">
+                                    <option value="false">NO</option>
+                                    <option value="true">SI</option>
+                                </select>
+                            </div>
+                            <div class="col-auto campo-md d-none" id="boxAreaEscalada">
+                                <label class="form-label small text-muted">Área Escalada</label>
+                                <select name="AreaEscalada" class="form-select form-select-sm">
+                                    <option value="">-- Selecciona Área --</option>
+                                    <option value="Desarrollo">Desarrollo</option>
+                                    <option value="Consultoría">Consultoría</option>
+                                    <option value="Ventas">Ventas</option>
+                                    <option value="Cobranza">Cobranza</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-md-12">
-                            <label class="form-label small text-muted">Comentarios / Falla Reportada</label>
-                            <textarea name="Comentarios" class="form-control form-control-sm" rows="3" placeholder="Descripción detallada..."></textarea>
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label small text-muted">Solución Brindada</label>
-                            <textarea name="Solucion" class="form-control form-control-sm" rows="3" placeholder="Detalles de la resolución técnica..."></textarea>
+                    </div>
+
+                    <div class="modal-seccion mb-0">
+                        <div class="modal-seccion-titulo"><i class="bi bi-journal-text"></i>Descripción y seguimiento</div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label small text-muted">Descripción del Ticket</label>
+                                <textarea name="Descripcion" class="form-control form-control-sm" rows="4" placeholder="Escribe aquí la bitácora o historial..." required></textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label small text-muted">Comentarios / Falla Reportada</label>
+                                <textarea name="Comentarios" class="form-control form-control-sm" rows="3" placeholder="Descripción detallada..."></textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label small text-muted">Solución Brindada</label>
+                                <textarea name="Solucion" class="form-control form-control-sm" rows="3" placeholder="Detalles de la resolución técnica..."></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-sm btn-secondary-sigest px-3" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-sm btn-primary-sigest px-3"><i class="bi bi-save me-1"></i> Guardar Ticket</button>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-sm btn-cancelar px-3" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cancelar</button>
+                    <button type="submit" class="btn btn-sm btn-guardar px-3"><i class="bi bi-save"></i> Guardar Ticket</button>
                 </div>
             </form>
         </div>
@@ -601,124 +687,147 @@
 </div>
 
 <!-- Modal 2: Detalle / Edición -->
-<div class="modal fade" id="modalDetalleTicket" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content glass-panel border-0 text-white">
-            <div class="modal-header glass-header border-0 d-flex justify-content-between align-items-center">
-                <h5 class="modal-title fw-bold">
-                    <i class="bi bi-pencil-square me-2 text-info"></i>Detalle del Ticket <span id="lblNumTicket" class="text-info"></span>
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="modalDetalleTicket" tabindex="-1" aria-hidden="true" aria-labelledby="tituloDetalleTicket">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content modal-ticket text-white border-0">
+            <div class="modal-header border-0">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="modal-icono"><i class="bi bi-pencil-square"></i></div>
+                    <div>
+                        <h5 class="modal-title fs-6 fw-bold text-white mb-0" id="tituloDetalleTicket">
+                            Detalle del Ticket <span id="lblNumTicket" class="text-info"></span>
+                        </h5>
+                        <small class="modal-subtitulo">Consulta o actualiza la información del ticket</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
-            <form method="post" asp-page-handler="ActualizarTicket">
+            <form method="post" asp-page-handler="ActualizarTicket" class="d-flex flex-column overflow-hidden">
                 @Html.AntiForgeryToken()
                 <input type="hidden" id="editTicketId" name="TicketId" />
 
                 <div class="modal-body p-4">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Fecha Entrada</label>
-                            <input type="date" id="editFechaEntrada" name="FechaEntrada" class="form-control form-control-sm" required />
-                        </div>
-                        <div class="col-md-3">
-                            <label for="editHora" class="form-label small text-muted">Hora</label>
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-light text-secondary">
-                                    <i class="bi bi-clock"></i>
-                                </span>
+
+                    <div class="modal-seccion">
+                        <div class="modal-seccion-titulo"><i class="bi bi-calendar-event"></i>Datos del ticket</div>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">Fecha Entrada</label>
+                                <input type="date" id="editFechaEntrada" name="FechaEntrada" class="form-control form-control-sm" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label for="editHora" class="form-label small text-muted">Hora</label>
                                 <input type="time" class="form-control form-control-sm" id="editHora" name="Hora" />
                             </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Cliente (Empresa)</label>
+                                <select id="editCliente" name="Cliente" class="form-select form-select-sm" required>
+                                    <option value="">-- Selecciona Cliente --</option>
+                                    @foreach (var c in Model.ListaClientes)
+                                    {
+                                        <option value="@c.Nombre" data-id="@c.Id">@c.Clave - @c.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-muted">Persona que Reportó</label>
+                                <select id="editReporto" name="Reporto" class="form-select form-select-sm" required>
+                                    <option value="">-- Selecciona quien reporta --</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Cliente (Empresa)</label>
-                            <input type="text" id="editCliente" name="Cliente" class="form-control form-control-sm" required />
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Persona que Reportó</label>
-                            <input type="text" id="editReporto" name="Reporto" class="form-control form-control-sm" required />
-                        </div>
+                    </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Ejecutivo de Soporte</label>
-                            <select id="editEjecutivo" name="Ejecutivo" class="form-select form-select-sm" required>
-                                <option value="">-- Selecciona Ejecutivo --</option>
-                                @foreach (var pers in Model.ListaEjecutivosSoporte)
-                                {
-                                    <option value="@pers.Nombre">@pers.Nombre</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Sistema</label>
-                            <select id="editSistema" name="Sistema" class="form-select form-select-sm badge-sistema-dia" onchange="aplicarColorSelectSistema(this)" required>
-                                <option value="DIA" style="background-color: #2563eb; color: #ffffff;">DIA</option>
-                                <option value="DIAWEB" style="background-color: #0284c7; color: #ffffff;">DIAWEB</option>
-                                <option value="ConectorDiawebZoe" style="background-color: #704332; color: #ffffff;">CONECTOR DIAWEB-ZOÉ</option>
-                                <option value="SITA" style="background-color: #ea580c; color: #ffffff;">SITA</option>
-                                <option value="VUCEM" style="background-color: #1d4ed8; color: #ffffff;">VUCEM</option>
-                                <option value="DIAENLINEA PREMIUM" style="background-color: #16a34a; color: #ffffff;">DIAENLINEA PREMIUM</option>
-                                <option value="COA" style="background-color: #15803d; color: #ffffff;">COA</option>
-                                <option value="ADMIN" style="background-color: #0f172a; color: #ffffff;">ADMIN</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Tipo</label>
-                            <select id="editTipo" name="Tipo" class="form-select form-select-sm" required>
-                                <option value="Servicio">Servicio</option>
-                                <option value="Incidencia">Incidencia</option>
-                                <option value="Ajuste">Ajuste</option>
-                                <option value="Mejora">Mejora</option>
-                            </select>
-                        </div>
+                    <div class="modal-seccion">
+                        <div class="modal-seccion-titulo"><i class="bi bi-diagram-3"></i>Clasificación y atención</div>
+                        <div class="row g-3">
+                            <div class="col-auto campo-lg">
+                                <label class="form-label small text-muted">Ejecutivo de Soporte</label>
+                                <select id="editEjecutivo" name="Ejecutivo" class="form-select form-select-sm" required>
+                                    <option value="">-- Selecciona Ejecutivo --</option>
+                                    @foreach (var pers in Model.ListaEjecutivosSoporte)
+                                    {
+                                        <option value="@pers.Nombre">@pers.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-auto campo-lg">
+                                <label class="form-label small text-muted">Sistema</label>
+                                <select id="editSistema" name="Sistema" class="form-select form-select-sm badge-sistema-dia" onchange="aplicarColorSelectSistema(this)" required>
+                                    <option value="DIA">DIA</option>
+                                    <option value="DIAWEB">DIAWEB</option>
+                                    <option value="CONECTOR DIAWEB-ZOÉ">CONECTOR DIAWEB-ZOÉ</option>
+                                    <option value="SITA">SITA</option>
+                                    <option value="VUCEM">VUCEM</option>
+                                    <option value="DIAENLINEA PREMIUM">DIAENLINEA PREMIUM</option>
+                                    <option value="COA">COA</option>
+                                    <option value="ADMIN">ADMIN</option>
+                                </select>
+                            </div>
+                            <div class="col-auto campo-sm">
+                                <label class="form-label small text-muted">Tipo</label>
+                                <select id="editTipo" name="Tipo" class="form-select form-select-sm" required>
+                                    <option value="Servicio">Servicio</option>
+                                    <option value="Incidencia">Incidencia</option>
+                                    <option value="Ajuste">Ajuste</option>
+                                    <option value="Mejora">Mejora</option>
+                                </select>
+                            </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Estatus</label>
-                            <select id="editEstatus" name="Estatus" class="form-select form-select-sm" onchange="evaluarFechaSolucion(this.value)" required>
-                                <option value="En curso">En curso</option>
-                                <option value="Cerrado">Cerrado</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Fecha de Solución</label>
-                            <input type="date" id="editFechaSolucion" name="FechaSolucion" class="form-control form-control-sm" disabled />
-                        </div>
+                            <div class="col-auto campo-sm">
+                                <label class="form-label small text-muted">Estatus</label>
+                                <select id="editEstatus" name="Estatus" class="form-select form-select-sm" onchange="evaluarFechaSolucion(this.value)" required>
+                                    <option value="En curso">En curso</option>
+                                    <option value="Cerrado">Cerrado</option>
+                                </select>
+                            </div>
+                            <div class="col-auto campo-md">
+                                <label class="form-label small text-muted">Fecha de Solución</label>
+                                <input type="date" id="editFechaSolucion" name="FechaSolucion" class="form-control form-control-sm" disabled />
+                            </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">¿Se escala?</label>
-                            <select id="editEscalado" name="Escalado" class="form-select form-select-sm" onchange="evaluarAreaEscaladaEdit(this.value)">
-                                <option value="false">NO</option>
-                                <option value="true">SI</option>
-                            </select>
+                            <div class="col-auto campo-xs">
+                                <label class="form-label small text-muted">¿Se escala?</label>
+                                <select id="editEscalado" name="Escalado" class="form-select form-select-sm" onchange="evaluarAreaEscaladaEdit(this.value)">
+                                    <option value="false">NO</option>
+                                    <option value="true">SI</option>
+                                </select>
+                            </div>
+                            <div class="col-auto campo-md d-none" id="boxEditAreaEscalada">
+                                <label class="form-label small text-muted">Área Escalada</label>
+                                <select id="editAreaEscalada" name="AreaEscalada" class="form-select form-select-sm">
+                                    <option value="">-- Selecciona Área --</option>
+                                    <option value="Desarrollo">Desarrollo</option>
+                                    <option value="Consultoría">Consultoría</option>
+                                    <option value="Ventas">Ventas</option>
+                                    <option value="Cobranza">Cobranza</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-md-6 d-none" id="boxEditAreaEscalada">
-                            <label class="form-label small text-muted">Área Escalada</label>
-                            <select id="editAreaEscalada" name="AreaEscalada" class="form-select form-select-sm">
-                                <option value="">-- Selecciona Área --</option>
-                                <option value="Desarrollo">Desarrollo</option>
-                                <option value="Consultoría">Consultoría</option>
-                                <option value="Ventas">Ventas</option>
-                                <option value="Cobranza">Cobranza</option>
-                            </select>
-                        </div>
+                    </div>
 
-                        <div class="col-12">
-                            <label class="form-label small text-muted">Descripción</label>
-                            <textarea id="txtDetalleDescripcion" name="Descripcion" class="form-control" rows="4"></textarea>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label small text-muted">Comentarios</label>
-                            <textarea id="txtDetalleComentarios" name="Comentarios" class="form-control" rows="3"></textarea>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label small text-muted">Solución</label>
-                            <textarea id="txtDetalleSolucion" name="Solucion" class="form-control" rows="3"></textarea>
+                    <div class="modal-seccion mb-0">
+                        <div class="modal-seccion-titulo"><i class="bi bi-journal-text"></i>Descripción y seguimiento</div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label small text-muted">Descripción</label>
+                                <textarea id="txtDetalleDescripcion" name="Descripcion" class="form-control" rows="4"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small text-muted">Comentarios</label>
+                                <textarea id="txtDetalleComentarios" name="Comentarios" class="form-control" rows="3"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small text-muted">Solución</label>
+                                <textarea id="txtDetalleSolucion" name="Solucion" class="form-control" rows="3"></textarea>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 pt-0 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-sm btn-secondary-sigest px-3" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="submit" id="btnGuardarCambios" class="btn btn-sm btn-primary-sigest px-3 d-none">
-                        <i class="bi bi-save me-1"></i> Guardar Cambios
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-sm btn-cancelar px-3" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cerrar</button>
+                    <button type="submit" id="btnGuardarCambios" class="btn btn-sm btn-guardar px-3 d-none">
+                        <i class="bi bi-save"></i> Guardar Cambios
                     </button>
                 </div>
             </form>
@@ -729,16 +838,21 @@
 <!-- Modal 3: Vista Previa y PDF del Reporte -->
 <div class="modal fade" id="modalVistaPreviaReporte" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
-        <div class="modal-content glass-panel border-0 text-white">
-            <div class="modal-header glass-header border-0">
-                <h5 class="modal-title fw-bold text-white">
-                    <i class="bi bi-file-earmark-pdf me-2 text-info"></i>Vista Previa del Reporte Diario
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="modal-content modal-ticket text-white border-0">
+            <div class="modal-header border-0">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="modal-icono"><i class="bi bi-file-earmark-pdf"></i></div>
+                    <div>
+                        <h5 class="modal-title fs-6 fw-bold text-white mb-0">Vista Previa del Reporte Diario</h5>
+                        <small class="modal-subtitulo">Revisa el reporte antes de imprimirlo o guardarlo en PDF</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
 
-            <!-- Contenedor de Impresión -->
-            <div class="modal-body p-4 text-dark bg-white" id="seccionImpresion">
+            <!-- Contenedor de Impresión: la hoja blanca sobre un fondo oscuro tipo visor -->
+            <div class="modal-body vista-previa-fondo">
+            <div class="hoja-reporte p-4 text-dark bg-white" id="seccionImpresion">
 
                 <!-- ENCABEZADO -->
                 <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-2 border-primary">
@@ -769,65 +883,75 @@
                 <!-- Contenedor dinámico de gráficas -->
                 <div class="row g-2 mb-3" id="contenedorGraficasPrint">
                     <div class="col-6 text-center">
-                        <div class="fw-bold text-dark small mb-1" style="font-size: 8.5pt;">Distribución de Tickets por Sistema</div>
-                        <img id="imgChartSistemasPrint" style="max-width: 100%; height: auto; max-height: 180px;" />
+                        <div class="fw-bold text-dark small mb-1" style="font-size: 8.5pt;">Distribución por sistema</div>
+                        <img id="imgChartSistemasPrint" style="max-width: 100%; height: auto; max-height: 190px;" />
                     </div>
                     <div class="col-6 text-center">
-                        <div class="fw-bold text-dark small mb-1" style="font-size: 8.5pt;">Tiempo y Forma vs Cerrados (Atrasados) vs En Curso</div>
-                        <img id="imgChartEstatusPrint" style="max-width: 100%; height: auto; max-height: 180px;" />
+                        <div class="fw-bold text-dark small mb-1" style="font-size: 8.5pt;">Estatus de atención por sistema</div>
+                        <img id="imgChartEstatusPrint" style="max-width: 100%; height: auto; max-height: 190px;" />
                     </div>
                 </div>
 
                 <!-- Tabla de Concentrado para Impresión -->
                 <div class="mb-3">
-                    <table class="tabla-print-detalle">
+                    <table class="tabla-print-detalle tabla-print-concentrado">
                         <thead>
-                            <tr style="background-color: #2563eb; color: #ffffff;">
-                                <th class="text-center col-sistema">SISTEMA</th>
-                                <th class="text-center">TOTAL TICKETS</th>
-                                <th class="text-center">INCIDENCIAS</th>
-                                <th class="text-center">SERVICIOS</th>
-                                <th class="text-center">POR TELÉFONO</th>
-                                <th class="text-center">POR CORREO</th>
-                                <th class="text-center">ATENDIDOS (TIEMPO Y FORMA)</th>
-                                <th class="text-center">CERRADOS (ATRASADOS)</th>
-                                <th class="text-center">EN CURSO (SEGUIMIENTO)</th>
+                            <tr>
+                                <th rowspan="2" class="col-sistema">SISTEMA</th>
+                                <th rowspan="2">TOTAL</th>
+                                <th colspan="3">TIPO</th>
+                                <th colspan="3">ORIGEN</th>
+                                <th colspan="3">ESTATUS</th>
+                                <th rowspan="2">% EN TIEMPO</th>
+                            </tr>
+                            <tr>
+                                <th>INCIDENCIAS</th>
+                                <th>SERVICIOS</th>
+                                <th>OTROS</th>
+                                <th>TELÉFONO</th>
+                                <th>CORREO</th>
+                                <th>INTERNO</th>
+                                <th>TIEMPO Y FORMA</th>
+                                <th>ATRASADOS</th>
+                                <th>EN CURSO</th>
                             </tr>
                         </thead>
                         <tbody>
                             @if (concentradoSistemas.Any())
                             {
-                                @foreach (var s in concentradoSistemas)
+                                var filasPrint = concentradoSistemas.Append(Model.ConcentradoTotal);
+                                @foreach (var s in filasPrint)
                                 {
-                                    string sisPrintCheck = (s.Sistema ?? "").ToString().ToUpper().Trim();
-                                    bool esConectorPrint = sisPrintCheck.Contains("CONECTOR") || sisPrintCheck.Contains("ZOE");
-
-                                    <tr>
-                                        <td class="text-center fw-bold text-dark col-sistema" style="line-height: 1.2;">
-                                            @if (esConectorPrint)
+                                    bool esTotal = s == Model.ConcentradoTotal;
+                                    <tr style="@(esTotal ? "font-weight: bold; background-color: #e2e8f0;" : "")">
+                                        <td class="col-sistema">
+                                            @if (esTotal)
                                             {
-                                                @:CONECTOR<br />DIAWEB-ZOÉ
+                                                <b>TOTAL</b>
                                             }
                                             else
                                             {
-                                                @s.Sistema
+                                                <span class="badge @ReporteTicketsModel.ClaseSistema(s.Sistema)" style="font-size: 6.5pt !important;">@s.Sistema</span>
                                             }
                                         </td>
-                                        <td class="text-center fw-bold">@s.Total</td>
-                                        <td class="text-center">@s.Incidencias</td>
-                                        <td class="text-center">@s.Servicios</td>
-                                        <td class="text-center">@s.Telefono</td>
-                                        <td class="text-center">@s.Correo</td>
-                                        <td class="text-center"><span class="badge-print-cerrado">@s.TiempoForma</span></td>
-                                        <td class="text-center"><span class="badge-print-atrasado">@s.CerradosAtrasados</span></td>
-                                        <td class="text-center"><span class="badge-print-encurso">@s.EnCurso</span></td>
+                                        <td class="fw-bold">@s.Total</td>
+                                        <td>@s.Incidencias</td>
+                                        <td>@s.Servicios</td>
+                                        <td>@s.Otros</td>
+                                        <td>@s.Telefono</td>
+                                        <td>@s.Correo</td>
+                                        <td>@s.Interno</td>
+                                        <td><span class="badge-print-cerrado">@s.TiempoForma</span></td>
+                                        <td><span class="badge-print-atrasado">@s.CerradosAtrasados</span></td>
+                                        <td><span class="badge-print-encurso">@s.EnCurso</span></td>
+                                        <td>@(s.PorcentajeEnTiempo.HasValue ? s.PorcentajeEnTiempo + "%" : "—")</td>
                                     </tr>
                                 }
                             }
                             else
                             {
                                 <tr>
-                                    <td colspan="9" class="text-center py-2 text-muted">No hay datos de concentrado para mostrar.</td>
+                                    <td colspan="12" class="text-center py-2 text-muted">No hay datos de concentrado para mostrar.</td>
                                 </tr>
                             }
                         </tbody>
@@ -845,21 +969,26 @@
                     <h6 class="fw-bold text-dark mb-2" style="font-size: 10pt; color: #0f172a !important;">
                         <i class="bi bi-list-check me-1 text-primary"></i> Detalle Completo de Tickets
                     </h6>
-                    <table class="tabla-print-detalle">
+                    <table class="tabla-print-detalle" id="tablaDetallePrint">
                         <thead>
                             <tr style="background-color: #1e293b; color: #ffffff;">
-                                <th class="col-fecha text-center">FECHA ENTRADA</th>
-                                <th class="col-hora text-center">HORA</th>
-                                <th class="col-ticket text-center">NO. TICKET</th>
-                                <th class="col-cliente text-center">CLIENTE</th>
+                                <th class="col-fecha text-center">FECHA DE APERTURA</th>
+                                <th class="col-fechasol text-center">FECHA DE SOLUCIÓN</th>
+                                <th class="col-hora text-center">HORA DEL REPORTE</th>
+                                <th class="col-nocliente text-center">NO. DE CLIENTE</th>
+                                <th class="col-cliente text-center">NOMBRE DEL CLIENTE</th>
                                 <th class="col-ejecutivo text-center">EJECUTIVO</th>
-                                <th class="col-reporto text-center">REPORTÓ</th>
+                                <th class="col-ticket text-center">TICKET</th>
                                 <th class="col-estatus text-center">ESTATUS</th>
+                                <th class="col-reporto text-center">CONTACTO</th>
                                 <th class="col-sistema text-center">SISTEMA</th>
+                                <th class="col-entrada text-center">ENTRADA</th>
                                 <th class="col-tipo text-center">TIPO</th>
                                 <th class="col-descripcion text-center">DESCRIPCIÓN</th>
                                 <th class="col-comentarios text-center">COMENTARIOS</th>
                                 <th class="col-solucion text-center">SOLUCIÓN</th>
+                                <th class="col-escalado text-center">ESCALADO</th>
+                                <th class="col-area text-center">ÁREA ESCALADA</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -869,13 +998,14 @@
                                 {
                                     <tr>
                                         <td class="text-center">@item.FechaEntrada.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-center">@(item.FechaSolucion.HasValue ? item.FechaSolucion.Value.ToString("dd/MM/yyyy") : "—")</td>
                                         <td class="text-center">@item.Hora</td>
-                                        <td class="text-center"><b>#@item.NumeroTicket</b></td>
+                                        <td class="text-center">@(Model.ClaveCliente(item.Cliente) == "" ? "—" : Model.ClaveCliente(item.Cliente))</td>
                                         <td class="text-center fw-bold">@item.Cliente</td>
                                         <td class="text-center">@item.Ejecutivo</td>
-                                        <td class="text-center">@item.Reporto</td>
+                                        <td class="text-center"><b>@item.NumeroTicket</b></td>
                                         <td class="text-center">
-                                            @if (item.Estatus == "Cerrado")
+                                            @if (Model.EstatusEnFecha(item) == "Cerrado")
                                             {
                                                 <span class="badge-print-cerrado">Cerrado</span>
                                             }
@@ -884,48 +1014,24 @@
                                                 <span class="badge-print-encurso">En curso</span>
                                             }
                                         </td>
-                                        <td class="text-center align-middle col-sistema" style="padding: 2px !important;">
-                                            @{
-                                                string sisPrintUpper = (item.Sistema ?? "").ToUpper().Trim();
-                                                string clasePrintSistema = "badge-sistema-med";
-                                                bool esConectorItemPrint = sisPrintUpper.Contains("CONECTOR") || sisPrintUpper.Contains("ZOE");
-
-                                                if (esConectorItemPrint)
-                                                {
-                                                    clasePrintSistema = "badge-sistema-med";
-                                                }
-                                                else if (sisPrintUpper.Contains("DIAWEB")) clasePrintSistema = "badge-sistema-diaweb";
-                                                else if (sisPrintUpper.Contains("DIAENLINEA")) clasePrintSistema = "badge-sistema-diaenlinea";
-                                                else if (sisPrintUpper == "DIA") clasePrintSistema = "badge-sistema-dia";
-                                                else if (sisPrintUpper == "SITA") clasePrintSistema = "badge-sistema-sita";
-                                                else if (sisPrintUpper == "VUCEM") clasePrintSistema = "badge-sistema-vucem";
-                                                else if (sisPrintUpper == "COA") clasePrintSistema = "badge-sistema-coa";
-                                                else if (sisPrintUpper == "ADMIN") clasePrintSistema = "badge-sistema-admin";
-                                            }
-                                            <span class="badge @clasePrintSistema" style="white-space: pre-line !important; font-size: 6.5pt !important; display: inline-block; width: 100%; word-break: break-word !important; line-height: 1.1; padding: 3px 2px !important;">
-                                                @if (esConectorItemPrint)
-                                                {
-                                                    @:CONECTOR<br />DIAWEB-ZOÉ
-                                                }
-                                                else
-                                                {
-                                                    @item.Sistema
-                                                }
-                                            </span>
+                                        <td class="text-center">@item.Reporto</td>
+                                        <td class="text-center col-sistema">
+                                            <span class="badge badge-print-sistema @ReporteTicketsModel.ClaseSistema(item.Sistema)">@ReporteTicketsModel.NormalizarSistema(item.Sistema)</span>
                                         </td>
-                                        <td class="text-center align-middle col-tipo">
-                                            @item.Tipo
-                                        </td>
+                                        <td class="text-center">@item.Origen</td>
+                                        <td class="text-center col-tipo">@item.Tipo</td>
                                         <td class="col-texto-largo col-descripcion">@item.Descripcion</td>
                                         <td class="col-texto-largo col-comentarios">@item.Comentarios</td>
                                         <td class="col-texto-largo col-solucion">@item.Solucion</td>
+                                        <td class="text-center">@(item.Escalado ? "Sí" : "No")</td>
+                                        <td class="text-center">@(string.IsNullOrEmpty(item.AreaEscalada) ? "Ninguna" : item.AreaEscalada)</td>
                                     </tr>
                                 }
                             }
                             else
                             {
                                 <tr>
-                                    <td colspan="12" class="text-center py-3 text-muted">No hay tickets registrados en esta fecha.</td>
+                                    <td colspan="17" class="text-center py-3 text-muted">No hay tickets registrados en esta fecha.</td>
                                 </tr>
                             }
                         </tbody>
@@ -933,11 +1039,12 @@
                 </div>
 
             </div>
+            </div>
 
-            <div class="modal-footer border-top bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary fw-bold" onclick="imprimirContenidoLimpio()">
-                    <i class="bi bi-printer me-1"></i> Imprimir / Guardar PDF
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-sm btn-cancelar px-3" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cerrar</button>
+                <button type="button" class="btn btn-sm btn-guardar px-3" onclick="imprimirContenidoLimpio()">
+                    <i class="bi bi-printer"></i> Imprimir / Guardar PDF
                 </button>
             </div>
         </div>
@@ -946,30 +1053,22 @@
 
     @section Scripts {
         <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+        <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
         <!-- Mantenemos SOLO las variables de C# (Razor) aquí, ya que el archivo .js no las reconoce -->
         <script>
                 const rolUsuario = "@(HttpContext.Session.GetString("Rol") ?? "")";
                 const usuarioSesion = "@(HttpContext.Session.GetString("Usuario") ?? "")";
+                const nombreSesion = "@(HttpContext.Session.GetString("NombreCompleto") ?? "")";
                 const fechaReporteActual = "@(Model.FechaReporte?.ToString("dd-MM-yyyy"))";
 
-                const labelsSistemas = [
-                            @Html.Raw(string.Join(",", concentradoSistemas.Select(s => $"'{s.Sistema}'")))
-                        ];
-                const dataTotales = [
-                            @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.Total)))
-                        ];
-                const dataTiempoForma = [
-                            @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.TiempoForma)))
-                        ];
-                const dataCerradosAtrasados = [
-                            @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.CerradosAtrasados)))
-                        ];
-                const dataEnCurso = [
-                            @Html.Raw(string.Join(",", concentradoSistemas.Select(s => s.EnCurso)))
-                        ];
+                const labelsSistemas = @Json.Serialize(concentradoSistemas.Select(s => s.Sistema));
+                const dataTotales = @Json.Serialize(concentradoSistemas.Select(s => s.Total));
+                const dataTiempoForma = @Json.Serialize(concentradoSistemas.Select(s => s.TiempoForma));
+                const dataCerradosAtrasados = @Json.Serialize(concentradoSistemas.Select(s => s.CerradosAtrasados));
+                const dataEnCurso = @Json.Serialize(concentradoSistemas.Select(s => s.EnCurso));
         </script>
     <script src="~/js/Actividades/reporte-tickets.js" asp-append-version="true"></script>
 }

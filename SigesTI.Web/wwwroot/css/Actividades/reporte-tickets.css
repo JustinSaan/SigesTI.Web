@@ -63,7 +63,6 @@
 .actividades-container canvas {
     max-width: 100% !important;
     max-height: 100% !important;
-    filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.35));
 }
 
 /* ==========================================================================
@@ -205,124 +204,429 @@
 }
 
 /* ==========================================================================
-   INSIGNIAS / HIGHLIGHTS POR SISTEMA
+   PALETA DE SISTEMAS Y ESTATUS (ÚNICA FUENTE DE COLORES)
+   La usan las insignias, los selects, las gráficas, el PDF y el Excel.
    ========================================================================== */
 
-.actividades-container .badge-sistema-dia,
-.tabla-sigest .badge-sistema-dia,
-select.badge-sistema-dia {
-    background-color: #25B3EB !important;
-    color: #ffffff !important;
-    border: 1px solid #60C9FA !important;
+:root {
+    --sis-dia: #008BBF;
+    --sis-dia-texto: #ffffff;
+    --sis-diaweb: #8FE5FF;
+    --sis-diaweb-texto: #0f172a;
+    --sis-sita: #EA580C;
+    --sis-sita-texto: #ffffff;
+    --sis-med: #704332;
+    --sis-med-texto: #ffffff;
+    --sis-vucem: #1D4ED8;
+    --sis-vucem-texto: #ffffff;
+    --sis-diaenlinea: #B6FF82;
+    --sis-diaenlinea-texto: #0f172a;
+    --sis-coa: #15803D;
+    --sis-coa-texto: #ffffff;
+    --sis-admin: #C9A227;
+    --sis-admin-texto: #0f172a;
+    --sis-otro: #64748B;
+    --sis-otro-texto: #ffffff;
+
+    --estatus-tiempo: #34D399;
+    --estatus-tiempo-texto: #0f172a;
+    --estatus-atrasado: #818CF8;
+    --estatus-atrasado-texto: #0f172a;
+    --estatus-encurso: #F59E0B;
+    --estatus-encurso-texto: #0f172a;
+
+    /* En la gráfica de barras En curso no usa el dorado para no confundirse con ADMIN */
+    --grafica-encurso: #C8956B;
+    --grafica-encurso-texto: #0f172a;
+    --estatus-escalado: #F87171;
 }
 
-.actividades-container .badge-sistema-diaweb,
-.tabla-sigest .badge-sistema-diaweb,
-select.badge-sistema-diaweb {
-    background-color: #0284c7 !important;
-    color: #ffffff !important;
-    border: 1px solid #38bdf8 !important;
+.badge-sistema-dia { --sis-color: var(--sis-dia); --sis-texto: var(--sis-dia-texto); }
+.badge-sistema-diaweb { --sis-color: var(--sis-diaweb); --sis-texto: var(--sis-diaweb-texto); }
+.badge-sistema-sita { --sis-color: var(--sis-sita); --sis-texto: var(--sis-sita-texto); }
+.badge-sistema-med { --sis-color: var(--sis-med); --sis-texto: var(--sis-med-texto); }
+.badge-sistema-vucem { --sis-color: var(--sis-vucem); --sis-texto: var(--sis-vucem-texto); }
+.badge-sistema-diaenlinea { --sis-color: var(--sis-diaenlinea); --sis-texto: var(--sis-diaenlinea-texto); }
+.badge-sistema-coa { --sis-color: var(--sis-coa); --sis-texto: var(--sis-coa-texto); }
+.badge-sistema-admin { --sis-color: var(--sis-admin); --sis-texto: var(--sis-admin-texto); }
+.badge-sistema-otro { --sis-color: var(--sis-otro); --sis-texto: var(--sis-otro-texto); }
+
+.actividades-container .badge[class*="badge-sistema-"],
+.modal-content .badge[class*="badge-sistema-"],
+select.form-select[class*="badge-sistema-"] {
+    background-color: var(--sis-color) !important;
+    color: var(--sis-texto) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
 }
 
-.actividades-container .badge-sistema-med,
-.tabla-sigest .badge-sistema-med,
-select.badge-sistema-med {
-    background-color: #704332 !important;
-    color: #ffffff !important;
-    border: 1px solid #9a5e47 !important;
+/* Insignias de estatus: fondo translúcido con el color de la gráfica */
+.actividades-container .badge.estatus-tiempo { --estatus-color: var(--estatus-tiempo); }
+.actividades-container .badge.estatus-atrasado { --estatus-color: var(--estatus-atrasado); }
+.actividades-container .badge.estatus-encurso { --estatus-color: var(--estatus-encurso); }
+
+.actividades-container .badge[class*="estatus-"] {
+    background-color: color-mix(in srgb, var(--estatus-color) 16%, transparent) !important;
+    color: var(--estatus-color) !important;
+    border: 1px solid color-mix(in srgb, var(--estatus-color) 45%, transparent) !important;
+    border-radius: 999px !important;
+    padding: 3px 10px !important;
+    min-width: 32px;
+    box-shadow: none !important;
 }
 
-.actividades-container .badge-sistema-sita,
-.tabla-sigest .badge-sistema-sita,
-select.badge-sistema-sita {
-    background-color: #ea580c !important;
-    color: #ffffff !important;
-    border: 1px solid #fb923c !important;
+/* Píldoras de estado en el Detalle */
+.pill-estado {
+    --estatus-color: var(--estatus-encurso);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--estatus-color);
+    background-color: color-mix(in srgb, var(--estatus-color) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--estatus-color) 40%, transparent);
 }
 
-.actividades-container .badge-sistema-vucem,
-.tabla-sigest .badge-sistema-vucem,
-select.badge-sistema-vucem {
-    background-color: #1d4ed8 !important;
-    color: #ffffff !important;
-    border: 1px solid #60a5fa !important;
-}
+    .pill-estado::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: currentColor;
+        box-shadow: 0 0 6px currentColor;
+    }
 
-.actividades-container .badge-sistema-diaenlinea,
-.tabla-sigest .badge-sistema-diaenlinea,
-select.badge-sistema-diaenlinea {
-    background-color: #16a34a !important;
-    color: #ffffff !important;
-    border: 1px solid #4ade80 !important;
-}
-
-.actividades-container .badge-sistema-coa,
-.tabla-sigest .badge-sistema-coa,
-select.badge-sistema-coa {
-    background-color: #15803d !important;
-    color: #ffffff !important;
-    border: 1px solid #22c55e !important;
-}
-
-.actividades-container .badge-sistema-admin,
-.tabla-sigest .badge-sistema-admin,
-select.badge-sistema-admin {
-    background-color: #0f172a !important;
-    color: #38bdf8 !important;
-    border: 1px solid rgba(56, 189, 248, 0.3) !important;
-}
+    .pill-estado.estado-cerrado { --estatus-color: var(--estatus-tiempo); }
+    .pill-estado.estado-encurso { --estatus-color: var(--estatus-encurso); }
+    .pill-estado.estado-escalado { --estatus-color: var(--estatus-escalado); }
 
 /* ==========================================================================
-   COLOR DINÁMICO PARA SELECT DE SISTEMA
+   CONCENTRADO DEL DÍA POR SISTEMA
    ========================================================================== */
 
-select.form-select.badge-sistema-dia {
-    background-color: #25B3EB !important;
-    color: #ffffff !important;
-    border-color: #60C9FA !important;
+.tarjeta-grafica {
+    background: rgba(15, 23, 42, 0.55);
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 12px;
+    padding: 14px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-select.form-select.badge-sistema-diaweb {
-    background-color: #0284c7 !important;
-    color: #ffffff !important;
-    border-color: #38bdf8 !important;
+.tarjeta-grafica-titulo {
+    color: #38bdf8;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    text-align: center;
 }
 
-select.form-select.badge-sistema-med {
-    background-color: #704332 !important;
-    color: #ffffff !important;
-    border-color: #9a5e47 !important;
+.tarjeta-grafica .chart-container-box {
+    height: 260px;
 }
 
-select.form-select.badge-sistema-sita {
-    background-color: #ea580c !important;
-    color: #ffffff !important;
-    border-color: #fb923c !important;
+.grafica-vacia {
+    height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 0.85rem;
 }
 
-select.form-select.badge-sistema-vucem {
-    background-color: #1d4ed8 !important;
-    color: #ffffff !important;
-    border-color: #60a5fa !important;
+    .grafica-vacia i {
+        font-size: 2rem;
+        margin-bottom: 6px;
+    }
+
+/* ==========================================================================
+   TABLAS DEL CONCENTRADO Y DEL DETALLE (SOLO PANTALLA)
+   ========================================================================== */
+
+.tabla-contenedor {
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 12px;
+    background: rgba(11, 19, 43, 0.55);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-select.form-select.badge-sistema-diaenlinea {
-    background-color: #16a34a !important;
-    color: #ffffff !important;
-    border-color: #4ade80 !important;
+.tabla-detalle-scroll {
+    max-height: 560px;
+    overflow: auto !important;
 }
 
-select.form-select.badge-sistema-coa {
-    background-color: #15803d !important;
-    color: #ffffff !important;
-    border-color: #22c55e !important;
+.tabla-sigest.tabla-concentrado thead th,
+.tabla-sigest.tabla-detalle thead th {
+    background: linear-gradient(180deg, #14294d 0%, #0f1d38 100%) !important;
+    color: #7dd3fc !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 0.9px !important;
+    padding: 11px 12px !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.25) !important;
 }
 
-select.form-select.badge-sistema-admin {
-    background-color: #0f172a !important;
-    color: #38bdf8 !important;
-    border-color: rgba(56, 189, 248, 0.5) !important;
+.tabla-sigest.tabla-detalle thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
+
+.tabla-sigest.tabla-concentrado tbody td,
+.tabla-sigest.tabla-detalle tbody td,
+.tabla-sigest#tablaIndicadores tbody td {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.08) !important;
+    padding: 10px 12px !important;
+    font-variant-numeric: tabular-nums;
+    transition: background-color 0.15s ease;
+}
+
+.tabla-sigest.tabla-concentrado tbody tr:nth-child(even) td,
+.tabla-sigest.tabla-detalle tbody tr:nth-child(even) td,
+.tabla-sigest#tablaIndicadores tbody tr:nth-child(even) td {
+    background: rgba(148, 163, 184, 0.035) !important;
+}
+
+.tabla-sigest.tabla-concentrado tbody tr:hover td,
+.tabla-sigest.tabla-detalle tbody tr:hover td,
+.tabla-sigest#tablaIndicadores tbody tr:hover td {
+    background: rgba(56, 189, 248, 0.08) !important;
+}
+
+    .tabla-sigest.tabla-concentrado tbody tr:hover td:first-child,
+    .tabla-sigest.tabla-detalle tbody tr:hover td:first-child,
+    .tabla-sigest#tablaIndicadores tbody tr:hover td:first-child,
+    .tabla-sigest.tabla-concentrado .fila-concentrado.activa td:first-child {
+        box-shadow: inset 3px 0 0 #38bdf8;
+    }
+
+/* Concentrado: grupos Tipo / Origen / Estatus separados y con subrayado */
+.tabla-concentrado thead tr:first-child th:nth-child(n+3):nth-child(-n+5) {
+    color: #e2e8f0 !important;
+    border-bottom: 2px solid rgba(56, 189, 248, 0.55) !important;
+}
+
+.tabla-concentrado thead tr:first-child th:nth-child(n+3):nth-child(-n+6),
+.tabla-concentrado thead tr:nth-child(2) th:nth-child(1),
+.tabla-concentrado thead tr:nth-child(2) th:nth-child(4),
+.tabla-concentrado thead tr:nth-child(2) th:nth-child(7),
+.tabla-concentrado tbody td:nth-child(3),
+.tabla-concentrado tbody td:nth-child(6),
+.tabla-concentrado tbody td:nth-child(9),
+.tabla-concentrado tbody td:nth-child(12),
+.tabla-concentrado tfoot td:nth-child(3),
+.tabla-concentrado tfoot td:nth-child(6),
+.tabla-concentrado tfoot td:nth-child(9),
+.tabla-concentrado tfoot td:nth-child(12) {
+    border-left: 1px solid rgba(56, 189, 248, 0.16) !important;
+}
+
+/* Indicadores: separadores entre grupos (Tipo, Sistemas, Origen, Escalados, Estatus) */
+#tablaIndicadores tbody td:nth-child(3),
+#tablaIndicadores tbody td:nth-child(7),
+#tablaIndicadores tbody td:nth-child(14),
+#tablaIndicadores tbody td:nth-child(15),
+#tablaIndicadores tbody td:nth-child(17),
+#tablaIndicadores tbody td:nth-child(21) {
+    border-left: 1px solid rgba(56, 189, 248, 0.16) !important;
+}
+
+.tabla-sigest#tablaIndicadores tbody td:nth-child(2),
+.tabla-concentrado tbody td:nth-child(2) {
+    color: #ffffff !important;
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+}
+
+.tabla-concentrado .fila-concentrado {
+    cursor: pointer;
+}
+
+    .tabla-sigest.tabla-concentrado .fila-concentrado.activa td {
+        background: rgba(56, 189, 248, 0.16) !important;
+    }
+
+.tabla-concentrado .valor-cero,
+.tabla-detalle .texto-tenue {
+    color: #475569;
+}
+
+.tabla-concentrado .bi-info-circle {
+    cursor: help;
+    opacity: 0.7;
+}
+
+.tabla-concentrado tfoot td {
+    padding: 11px 12px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    background: linear-gradient(180deg, #14294d 0%, #0f1d38 100%) !important;
+    border: none !important;
+    border-top: 1px solid rgba(56, 189, 248, 0.45) !important;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+    .tabla-concentrado tfoot td:first-child {
+        color: #7dd3fc !important;
+        letter-spacing: 0.9px;
+        border-bottom-left-radius: 11px;
+    }
+
+    .tabla-concentrado tfoot td:last-child {
+        border-bottom-right-radius: 11px;
+    }
+
+/* Detalle: folio, ejecutivo y textos largos */
+.tabla-detalle tbody tr[data-id] {
+    cursor: pointer;
+}
+
+.ticket-folio {
+    display: inline-block;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #7dd3fc;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 6px;
+    padding: 2px 8px;
+}
+
+.tabla-sigest.tabla-detalle tbody td.col-corta {
+    text-align: left !important;
+    color: #cbd5e1 !important;
+}
+
+/* "451-0 KENWORTH MEXICANA": la clave en celeste antes del nombre */
+.clave-cliente {
+    color: #7dd3fc;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.aviso-busqueda {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fbbf24;
+}
+
+/* Buscador de tickets: lupa dentro del campo, indicador de carga y botón para limpiar */
+.buscador-ticket {
+    position: relative;
+}
+
+    .actividades-container .buscador-ticket input.form-control {
+        padding-left: 32px;
+        padding-right: 32px;
+        border-radius: 999px !important;
+        background-color: rgba(15, 23, 42, 0.85) !important;
+        border: 1px solid rgba(56, 189, 248, 0.3) !important;
+        color: #e2e8f0 !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .actividades-container .buscador-ticket input.form-control:focus {
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18) !important;
+        }
+
+        .actividades-container .buscador-ticket input.form-control::placeholder {
+            color: #64748b !important;
+        }
+
+.buscador-icono {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7dd3fc;
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+
+.buscador-cargando,
+.buscador-limpiar {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.buscador-cargando {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+    color: #38bdf8;
+}
+
+.buscador-limpiar {
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    padding: 2px 4px;
+    line-height: 1;
+}
+
+    .buscador-limpiar:hover {
+        color: #ffffff;
+    }
+
+.tabla-sigest.tabla-detalle tbody td.celda-cliente {
+    text-align: center !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.tabla-sigest.tabla-detalle tbody td.celda-fecha {
+    color: #94a3b8 !important;
+}
+
+.barra-tiempo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 90px;
+}
+
+.barra-tiempo-pista {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(148, 163, 184, 0.2);
+    overflow: hidden;
+}
+
+.barra-tiempo-relleno {
+    height: 100%;
+    background: var(--estatus-tiempo);
+}
+
+.barra-tiempo span {
+    font-size: 0.75rem;
+    min-width: 34px;
+    text-align: right;
+}
+
+.chip-filtro-sistema {
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+    .actividades-container .badge.chip-filtro-sistema.d-none {
+        display: none !important;
+    }
 
 select.form-select option {
     background-color: #0f172a !important;
@@ -519,10 +823,289 @@ select.form-select option {
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
 }
 
+.modal-content.modal-ticket {
+    background: linear-gradient(160deg, #13233f 0%, #0b132b 55%) !important;
+    border-radius: 18px !important;
+    overflow: hidden;
+}
+
 .modal-header {
     background: #0f172a !important;
     border-bottom: 1px solid rgba(56, 189, 248, 0.25) !important;
     color: #38bdf8 !important;
+}
+
+.modal-fullscreen .modal-content.modal-ticket {
+    border-radius: 0 !important;
+    border: none !important;
+}
+
+.modal-ticket .modal-header {
+    padding: 16px 22px !important;
+    background: linear-gradient(180deg, #14294d 0%, #0f1d38 100%) !important;
+}
+
+/* Desenfoque del fondo al abrir un modal */
+.modal-backdrop.show {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    background-color: rgba(2, 6, 23, 0.55);
+    opacity: 1;
+}
+
+/* Botón X para cerrar los modales (mismo diseño que Tareas Generales, Plan de Respaldos y Campaña) */
+.btn-cerrar-modal {
+    margin-left: auto;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+    /* Al pasar el cursor: rojo con icono blanco */
+    .btn-cerrar-modal:hover {
+        color: #ffffff;
+        background: #dc2626;
+        border-color: #f87171;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+
+    /* Al presionarlo: rojo más oscuro y se "hunde" un poco */
+    .btn-cerrar-modal:active {
+        color: #ffffff;
+        background: #991b1b;
+        border-color: #dc2626;
+        transform: scale(0.92);
+    }
+
+    .btn-cerrar-modal:focus-visible {
+        outline: 2px solid #38bdf8;
+        outline-offset: 2px;
+    }
+
+/* Icono cuadrado junto al título del modal */
+.modal-icono {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    flex-shrink: 0;
+}
+
+.modal-subtitulo {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+/* Secciones dentro del modal (Datos del ticket, Cliente, Clasificación, Descripción) */
+.modal-seccion {
+    background: rgba(30, 41, 59, 0.35);
+    border: 1px solid rgba(148, 163, 184, 0.12);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.modal-seccion-titulo {
+    color: #38bdf8;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+}
+
+    .modal-seccion-titulo i {
+        margin-right: 8px;
+    }
+
+/* Ícono del reloj junto al campo de hora */
+.modal-content .input-group-text {
+    background-color: #0f172a !important;
+    color: #7dd3fc !important;
+    border: 1px solid #334155 !important;
+    border-right: none !important;
+}
+
+/* Anchos de los campos de Clasificación y atención según su contenido */
+.modal-ticket .campo-xs { width: 120px; }
+.modal-ticket .campo-sm { width: 160px; }
+.modal-ticket .campo-md { width: 180px; }
+.modal-ticket .campo-lg { width: 260px; }
+
+.modal-ticket [class*="campo-"] {
+    max-width: 100%;
+}
+
+/* Combos con búsqueda (Tom Select) con el tema oscuro del sistema */
+.modal-content .ts-wrapper .ts-control,
+.modal-content .ts-wrapper.single.input-active .ts-control {
+    background-color: #172a45 !important;
+    border: 1px solid #334155 !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    font-size: 0.88rem !important;
+    min-height: 31px;
+    padding: 4px 30px 4px 10px !important;
+    box-shadow: none !important;
+}
+
+.modal-content .ts-wrapper.focus .ts-control {
+    background-color: #1e293b !important;
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+}
+
+.modal-content .ts-wrapper .ts-control input {
+    color: #ffffff !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 0.88rem !important;
+}
+
+    .modal-content .ts-wrapper .ts-control input::placeholder {
+        color: #94a3b8 !important;
+    }
+
+.modal-content .ts-wrapper.disabled .ts-control {
+    opacity: 0.6;
+}
+
+.ts-dropdown {
+    z-index: 2000 !important;
+    background: #0f172a !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+    border-radius: 10px !important;
+    color: #e2e8f0 !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55) !important;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+    .ts-dropdown .option,
+    .ts-dropdown .create,
+    .ts-dropdown .no-results {
+        padding: 7px 12px !important;
+        font-size: 0.85rem;
+        color: #e2e8f0 !important;
+    }
+
+        .ts-dropdown .option.active,
+        .ts-dropdown .create.active {
+            background: rgba(56, 189, 248, 0.18) !important;
+            color: #ffffff !important;
+        }
+
+    .ts-dropdown .selected {
+        background: rgba(56, 189, 248, 0.1) !important;
+        color: #7dd3fc !important;
+    }
+
+    .ts-dropdown .highlight {
+        background: rgba(250, 204, 21, 0.3) !important;
+        color: inherit !important;
+        border-radius: 2px;
+    }
+
+    .ts-dropdown .no-results {
+        color: #94a3b8 !important;
+    }
+
+    .ts-dropdown .ts-dropdown-content::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .ts-dropdown .ts-dropdown-content::-webkit-scrollbar-track {
+        background: #0f172a;
+    }
+
+    .ts-dropdown .ts-dropdown-content::-webkit-scrollbar-thumb {
+        background: #1e293b;
+        border-radius: 4px;
+        border: 1px solid #38bdf8;
+    }
+
+/* Campos desactivados (Fecha de Solución mientras no esté Cerrado) */
+.modal-content input:disabled {
+    background-color: #0f172a !important;
+    border-style: dashed !important;
+    opacity: 0.5;
+}
+
+/* Vista previa: la hoja del reporte sobre un fondo oscuro */
+.vista-previa-fondo {
+    background: #111c33;
+    padding: 28px 24px !important;
+    overflow-x: auto !important;
+}
+
+/* La hoja siempre mide lo de una oficio horizontal (1300px útiles + su margen interno),
+   así las columnas tienen el mismo ancho que en el PDF; en pantallas chicas se desplaza de lado */
+.hoja-reporte {
+    width: calc(1300px + 3rem);
+    margin: 0 auto;
+    border-radius: 6px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+
+/* Botones de cancelar y guardar de los modales */
+.btn-cancelar,
+.btn-guardar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.btn-cancelar {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 4px 14px rgba(138, 138, 138, 0.4);
+}
+
+    .btn-cancelar:hover {
+        background: #334155 !important;
+        box-shadow: 0 6px 20px rgba(191, 191, 191, 0.55);
+        transform: translateY(-1px);
+    }
+
+.btn-guardar {
+    color: #ffffff;
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    border: 1px solid #38bdf8;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+}
+
+    .btn-guardar:hover {
+        color: #ffffff;
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.55);
+        transform: translateY(-1px);
+    }
+
+.btn-cancelar:active,
+.btn-guardar:active {
+    transform: scale(0.96);
 }
 
 .modal-title {
@@ -579,6 +1162,11 @@ select.form-select option {
     background-color: #0f172a !important;
 }
 
+.modal-ticket .modal-footer {
+    padding: 14px 22px !important;
+    gap: 8px;
+}
+
 
 /* Barras de Desplazamiento Sincronizadas */
 .wrapper-scroll-top {
@@ -595,6 +1183,7 @@ select.form-select option {
     height: 12px;
 }
 
+.modal-ticket .modal-body::-webkit-scrollbar,
 .table-responsive::-webkit-scrollbar,
 .wrapper-scroll-top::-webkit-scrollbar,
 .box-historial-comentarios::-webkit-scrollbar {
@@ -602,12 +1191,14 @@ select.form-select option {
     width: 8px;
 }
 
+.modal-ticket .modal-body::-webkit-scrollbar-track,
 .table-responsive::-webkit-scrollbar-track,
 .wrapper-scroll-top::-webkit-scrollbar-track,
 .box-historial-comentarios::-webkit-scrollbar-track {
     background: #0f172a;
 }
 
+.modal-ticket .modal-body::-webkit-scrollbar-thumb,
 .table-responsive::-webkit-scrollbar-thumb,
 .wrapper-scroll-top::-webkit-scrollbar-thumb,
 .box-historial-comentarios::-webkit-scrollbar-thumb {
@@ -616,6 +1207,7 @@ select.form-select option {
     border: 1px solid #38bdf8;
 }
 
+    .modal-ticket .modal-body::-webkit-scrollbar-thumb:hover,
     .table-responsive::-webkit-scrollbar-thumb:hover,
     .wrapper-scroll-top::-webkit-scrollbar-thumb:hover,
     .box-historial-comentarios::-webkit-scrollbar-thumb:hover {
@@ -659,61 +1251,33 @@ select.form-select option {
         border-radius: 4px !important;
     }
 
-    /* FORZAR COLOR ESTRUCTURAL DE INSIGNIAS DE SISTEMA EN IMPRESIÓN Y VISTA PREVIA */
-    #seccionImpresion .badge.badge-sistema-med {
-        background-color: #704332 !important;
-        color: #ffffff !important;
-        border: 1px solid #9a5e47 !important;
-        padding: 3px 2px !important;
+    /* Insignias de sistema en impresión y vista previa: mismos colores de la paleta */
+    #seccionImpresion .badge[class*="badge-sistema-"] {
+        background-color: var(--sis-color) !important;
+        color: var(--sis-texto) !important;
+        border: 1px solid rgba(0, 0, 0, 0.15) !important;
+        padding: 3px 4px !important;
+        border-radius: 4px !important;
+        display: inline-block !important;
+        max-width: 100%;
+        white-space: normal !important;
+        overflow-wrap: break-word;
+        line-height: 1.15 !important;
     }
 
-    #seccionImpresion .badge.badge-sistema-vucem {
-        background-color: #1d4ed8 !important;
-        color: #ffffff !important;
-        border: 1px solid #60a5fa !important;
-        padding: 3px 2px !important;
+    /* Detalle impreso: insignia compacta y centrada en su celda */
+    #seccionImpresion .badge.badge-print-sistema {
+        font-size: 6pt !important;
+        padding: 2px 2px !important;
     }
 
-    #seccionImpresion .badge.badge-sistema-diaweb {
-        background-color: #0284c7 !important;
-        color: #ffffff !important;
-        border: 1px solid #38bdf8 !important;
-        padding: 3px 2px !important;
+    /* Concentrado impreso: la columna Sistema necesita más espacio que en el detalle */
+    .tabla-print-detalle.tabla-print-concentrado th.col-sistema {
+        width: 17% !important;
     }
 
-    #seccionImpresion .badge.badge-sistema-diaenlinea {
-        background-color: #16a34a !important;
-        color: #ffffff !important;
-        border: 1px solid #4ade80 !important;
-        padding: 3px 2px !important;
-    }
-
-    #seccionImpresion .badge.badge-sistema-sita {
-        background-color: #ea580c !important;
-        color: #ffffff !important;
-        border: 1px solid #fb923c !important;
-        padding: 3px 2px !important;
-    }
-
-    #seccionImpresion .badge.badge-sistema-coa {
-        background-color: #15803d !important;
-        color: #ffffff !important;
-        border: 1px solid #22c55e !important;
-        padding: 3px 2px !important;
-    }
-
-    #seccionImpresion .badge.badge-sistema-admin {
-        background-color: #0f172a !important;
-        color: #38bdf8 !important;
-        border: 1px solid rgba(56, 189, 248, 0.3) !important;
-        padding: 3px 2px !important;
-    }
-
-    #seccionImpresion .badge.badge-sistema-dia {
-        background-color: #25B3EB !important;
-        color: #ffffff !important;
-        border: 1px solid #60C9FA !important;
-        padding: 3px 2px !important;
+    .tabla-print-concentrado th {
+        font-size: 6pt !important;
     }
 
 
@@ -837,53 +1401,102 @@ select.form-select option {
             word-break: break-word !important;
         }
 
-    /* DISTRIBUCIÓN PROPORCIONAL DE ANCHOS PARA TICKETS (SUMA = 100%) */
+    /* Detalle impreso con 17 columnas: letra más chica y sin cortar palabras en las columnas cortas */
+    #tablaDetallePrint th {
+        font-size: 5.8pt !important;
+        letter-spacing: 0 !important;
+        padding: 4px 2px !important;
+        word-wrap: normal !important;
+        overflow-wrap: normal !important;
+        word-break: normal !important;
+    }
+
+    #tablaDetallePrint td {
+        font-size: 6.5pt !important;
+        padding: 3px 2px !important;
+        word-wrap: normal !important;
+        overflow-wrap: normal !important;
+        word-break: normal !important;
+    }
+
+        #tablaDetallePrint td.col-texto-largo {
+            overflow-wrap: break-word !important;
+            word-break: break-word !important;
+        }
+
+    #tablaDetallePrint .badge-print-cerrado,
+    #tablaDetallePrint .badge-print-encurso {
+        font-size: 6pt !important;
+        padding: 1px 3px !important;
+    }
+
+    /* DISTRIBUCIÓN DE ANCHOS DEL DETALLE IMPRESO (MISMO ORDEN QUE EL EXCEL ANTERIOR, SUMA = 100%) */
     .tabla-print-detalle th.col-fecha {
-        width: 6.5% !important;
+        width: 4% !important;
+    }
+
+    .tabla-print-detalle th.col-fechasol {
+        width: 4% !important;
     }
 
     .tabla-print-detalle th.col-hora {
-        width: 4.5% !important;
-    }
-
-    .tabla-print-detalle th.col-ticket {
-        width: 5% !important;
+        width: 3% !important;
     }
 
     .tabla-print-detalle th.col-cliente {
-        width: 8.5% !important;
+        width: 6.5% !important;
+    }
+
+    .tabla-print-detalle th.col-nocliente {
+        width: 3% !important;
     }
 
     .tabla-print-detalle th.col-ejecutivo {
-        width: 6.5% !important;
+        width: 3.5% !important;
     }
 
-    .tabla-print-detalle th.col-reporto {
-        width: 6.5% !important;
+    .tabla-print-detalle th.col-ticket {
+        width: 2.5% !important;
     }
 
     .tabla-print-detalle th.col-estatus {
-        width: 5.5% !important;
+        width: 3.5% !important;
+    }
+
+    .tabla-print-detalle th.col-reporto {
+        width: 3.5% !important;
     }
 
     .tabla-print-detalle th.col-sistema {
-        width: 6.5% !important;
+        width: 5% !important;
+    }
+
+    .tabla-print-detalle th.col-entrada {
+        width: 3% !important;
     }
 
     .tabla-print-detalle th.col-tipo {
-        width: 4.5% !important;
+        width: 3.5% !important;
     }
 
     .tabla-print-detalle th.col-descripcion {
-        width: 18.5% !important;
+        width: 15.83% !important;
     }
 
     .tabla-print-detalle th.col-comentarios {
-        width: 13.5% !important;
+        width: 15.83% !important;
     }
 
     .tabla-print-detalle th.col-solucion {
-        width: 13.5% !important;
+        width: 15.83% !important;
+    }
+
+    .tabla-print-detalle th.col-escalado {
+        width: 3.5% !important;
+    }
+
+    .tabla-print-detalle th.col-area {
+        width: 4% !important;
     }
 
     /* DISTRIBUCIÓN PROPORCIONAL PARA TAREAS PROGRAMADAS */
@@ -931,9 +1544,9 @@ select.form-select option {
 }
 
 .badge-print-atrasado {
-    background-color: #dbeafe !important;
-    color: #1e40af !important;
-    border: 1px solid #bfdbfe !important;
+    background-color: #e0e7ff !important;
+    color: #3730a3 !important;
+    border: 1px solid #c7d2fe !important;
     padding: 1px 4px !important;
     border-radius: 3px !important;
     font-weight: bold !important;
@@ -964,8 +1577,9 @@ select.form-select option {
 }
 
 @media print {
+    /* Oficio horizontal: el detalle tiene 17 columnas y las de texto necesitan espacio */
     @page {
-        size: landscape;
+        size: legal landscape;
         margin: 6mm;
     }
 
@@ -992,6 +1606,9 @@ select.form-select option {
         margin: 0 !important;
         padding: 0 !important;
         background: transparent !important;
+        max-width: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
     }
 
     .salto-pagina-print {
