@@ -110,7 +110,7 @@ $(document).ready(function () {
 
         if (total === 0) {
             $("#contenedorControlesPagina").empty();
-            $("#infoPaginacion").text("0 registros");
+            $("#infoPaginacion").text("No se encontraron solicitudes");
             return;
         }
 
@@ -121,33 +121,36 @@ $(document).ready(function () {
         var fin = Math.min(inicio + filasPorPagina, total);
 
         $coincidencias.slice(inicio, fin).removeClass("d-none");
-        $("#infoPaginacion").text(`${inicio + 1}-${fin} de ${total} registros`);
+        $("#infoPaginacion").text(`Mostrando ${inicio + 1} a ${fin} de ${total} solicitudes`);
 
         dibujarPaginacion(totalPaginas);
     }
 
+    /* Botones de página iguales a los de Control de Acceso; con una sola página no se muestran */
     function dibujarPaginacion(totalPaginas) {
         var $contenedor = $("#contenedorControlesPagina").empty();
+        if (totalPaginas <= 1) return;
 
-        function boton(pagina, contenido, clase) {
-            $contenedor.append(`<li class="page-item ${clase}"><a class="page-link" data-page="${pagina}" href="#">${contenido}</a></li>`);
+        function boton(contenido, pagina, deshabilitado, activo, etiqueta) {
+            $("<button type='button'>")
+                .html(contenido)
+                .prop("disabled", deshabilitado)
+                .toggleClass("active", activo)
+                .attr("aria-label", etiqueta)
+                .on("click", function () {
+                    if (activo) return;
+                    paginaActual = pagina;
+                    aplicarPaginacionYFiltro();
+                })
+                .appendTo($contenedor);
         }
 
-        boton(paginaActual - 1, '<i class="bi bi-chevron-left"></i>', paginaActual === 1 ? "disabled" : "");
+        boton('<i class="bi bi-chevron-left"></i>', paginaActual - 1, paginaActual === 1, false, "Página anterior");
         for (var i = 1; i <= totalPaginas; i++) {
-            boton(i, i, i === paginaActual ? "active" : "");
+            boton(i, i, false, i === paginaActual, "Página " + i);
         }
-        boton(paginaActual + 1, '<i class="bi bi-chevron-right"></i>', paginaActual === totalPaginas ? "disabled" : "");
+        boton('<i class="bi bi-chevron-right"></i>', paginaActual + 1, paginaActual === totalPaginas, false, "Página siguiente");
     }
-
-    $(document).on("click", "#contenedorControlesPagina .page-link", function (e) {
-        e.preventDefault();
-        var $item = $(this).parent();
-        if ($item.hasClass("disabled") || $item.hasClass("active")) return;
-
-        paginaActual = parseInt($(this).data("page"));
-        aplicarPaginacionYFiltro();
-    });
 
     $("#itemsPorPagina").on("change", function () {
         paginaActual = 1;
@@ -167,58 +170,59 @@ $(document).ready(function () {
 
     /* ---------- Reporte ---------- */
 
-    $("#btnGenerarReporteSolicitudes").on("click", function () {
-        var params = new URLSearchParams();
-
-        var filtros = {
-            fechaInicio: $("#reporteFechaInicio").val(),
-            fechaFin: $("#reporteFechaFin").val(),
-            area: $("#reporteArea").val(),
-            solicitante: $("#reporteSolicitante").val(),
-            estatus: $("#reporteEstatus").val()
-        };
-
-        $.each(filtros, function (nombre, valor) {
-            if (valor) params.append(nombre, valor);
-        });
-
-        document.activeElement.blur();
+    /* El formulario carga Solicitudes/ReporteSolicitudes en el iframe (target) y se muestra la vista previa */
+    $("#formReporteSolicitudes").on("submit", function () {
         $("#modalExportarSolicitudes").modal("hide");
-
-        $("#reporteLoading").css("display", "flex");
-        $("#iframeReporteSolicitudes").css("display", "none").removeAttr("srcdoc");
         $("#modalVistaReporte").modal("show");
-
-        fetch("/Solicitudes/Consultar?handler=ReporteSolicitudes&" + params.toString())
-            .then(response => {
-                var tipo = response.headers.get("content-type") || "";
-                if (response.ok && tipo.includes("text/html")) return response.text();
-
-                // Sin permiso o error: el servidor responde JSON con el mensaje
-                return response.json()
-                    .catch(() => ({}))
-                    .then(data => { throw new Error(data.message || "No se pudo generar el reporte."); });
-            })
-            .then(html => {
-                $("#iframeReporteSolicitudes").attr("srcdoc", html).css("display", "block");
-                $("#reporteLoading").css("display", "none");
-            })
-            .catch(error => {
-                $("#modalVistaReporte").modal("hide");
-                mostrarError(escaparHtml(error.message));
-            });
     });
 
-    $("#modalVistaReporte").on("hidden.bs.modal", function () {
-        $("#iframeReporteSolicitudes").removeAttr("srcdoc").css("display", "none");
-        $("#reporteLoading").css("display", "flex");
+    // Descarga el PDF que arma el servidor (ReporteSolicitudesPdf.cs) con los mismos filtros del modal
+    $("#btnDescargarPdf").on("click", function () {
+        var filtros = new URLSearchParams(new FormData(document.getElementById("formReporteSolicitudes")));
+        filtros.set("handler", "Pdf");
+
+        window.location.href = "/Solicitudes/ReporteSolicitudes?" + filtros.toString();
+    });
+
+    // "Cambiar filtros" cierra la vista previa para no encimar los dos modales
+    $("#modalExportarSolicitudes").on("show.bs.modal", function () {
+        $("#modalVistaReporte").modal("hide");
+    });
+
+    // El título se usa como nombre si en la ventana de impresión eligen "Guardar como PDF"
+    $("#btnImprimirReporte").on("click", function () {
+        var iframe = document.getElementById("iframeReporteSolicitudes");
+        var ahora = new Date();
+        var dos = valor => String(valor).padStart(2, "0");
+
+        iframe.contentDocument.title = "ReporteSolicitudes_" +
+            dos(ahora.getDate()) + dos(ahora.getMonth() + 1) + ahora.getFullYear() +
+            dos(ahora.getHours()) + dos(ahora.getMinutes()) + dos(ahora.getSeconds());
+
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
     });
 
     /* ---------- Modal de detalle / edición ---------- */
 
+    var estatusActual = "";
+
+    // "Por autorizar" no se elige aquí: se muestra un aviso en lugar de los botones de estatus
     function marcarEstatusModal(estatus) {
+        var porAutorizar = estatus === "Por autorizar";
+
+        $("input[name='modal_Estatus']").prop("checked", false);
         $("input[name='modal_Estatus'][value='" + estatus + "']").prop("checked", true);
+
+        $("#modal_SegmentosEstatus").toggleClass("d-none", porAutorizar);
+        $("#modal_AvisoAutorizacion").toggleClass("d-none", !porAutorizar);
     }
+
+    $("#btnVerFormato").on("click", function () {
+        var idSolicitud = $("#modal_IdSolicitud").val();
+        $("#modalSolicitud").modal("hide");
+        abrirVistaRequerimiento(idSolicitud);
+    });
 
     function cargarPersonalModal(area, idSeleccionado) {
         var $combo = $("#modal_IdPersonal");
@@ -275,7 +279,13 @@ $(document).ready(function () {
                 $("#modal_Folio").text("#" + String(data.idSolicitud).padStart(4, "0"));
                 $("#modal_FechaIngreso").val(data.fechaIngreso);
                 $("#modal_FechaEntrega").val(data.fechaEntrega || "");
+
+                estatusActual = data.estatus;
                 marcarEstatusModal(data.estatus);
+                $("#modal_AvisoAutorizador").text(data.autorizaAdmin);
+                $("#modal_AutorizadoPor").text(data.autorizadoPor);
+                $("#modal_FechaAutorizacion").text(data.fechaAutorizacion);
+                $("#modal_InfoAutorizacion").toggleClass("d-none", !data.fechaAutorizacion);
                 $("#modal_Area").val(data.area);
                 $("#modal_Puesto").val(data.puesto);
                 $("#modal_Correo").val(data.correo);
@@ -374,7 +384,7 @@ $(document).ready(function () {
             idSolicitud: parseInt($("#modal_IdSolicitud").val()),
             fechaIngreso: $("#modal_FechaIngreso").val(),
             fechaEntrega: $("#modal_FechaEntrega").val() || null,
-            estatus: $("input[name='modal_Estatus']:checked").val(),
+            estatus: estatusActual === "Por autorizar" ? estatusActual : $("input[name='modal_Estatus']:checked").val(),
             idPersonal: parseInt($("#modal_IdPersonal").val()) || 0,
             puestoSolicitante: $("#modal_Puesto").val(),
             correoSolicitante: $("#modal_Correo").val(),
@@ -466,7 +476,7 @@ $(document).ready(function () {
 
     if (!$("#formSolicitud").length) return;
 
-    /* La fecha de entrega solo se captura cuando la solicitud se marca como resuelta */
+    /* La fecha de realización solo se captura cuando la solicitud se marca como resuelta */
     function actualizarFechaEntrega() {
         var $fechaEntrega = $("#txtFechaEntrega");
 
@@ -500,8 +510,25 @@ $(document).ready(function () {
         })
             .done(function (response) {
                 if (response.success) {
-                    mostrarExito("La solicitud se registró correctamente.", "¡Solicitud guardada!")
-                        .then(() => { window.location.href = "/Solicitudes/Consultar"; });
+                    var irAConsultar = () => { window.location.href = "/Solicitudes/Consultar"; };
+
+                    if (!response.autorizador) {
+                        mostrarExito("La solicitud se registró correctamente.", "¡Solicitud generada!").then(irAConsultar);
+                    } else if (response.administradorNotificado) {
+                        mostrarExito(
+                            "Se ha enviado la autorización a <b>" + escaparHtml(response.autorizador) +
+                            "</b> para que autorice el requerimiento.",
+                            "¡Solicitud generada!"
+                        ).then(irAConsultar);
+                    } else {
+                        // El administrador elegido no tiene usuario ligado en Administración de Personal
+                        mostrarAlerta(
+                            "warning",
+                            "Solicitud generada",
+                            "La solicitud quedó pendiente por autorizar, pero <b>" + escaparHtml(response.autorizador) +
+                            "</b> no tiene un usuario del sistema ligado en Administración de Personal y no se le pudo enviar la notificación."
+                        ).then(irAConsultar);
+                    }
                 } else {
                     mostrarError(escaparHtml(response.message || "No se pudo guardar la solicitud."));
                 }

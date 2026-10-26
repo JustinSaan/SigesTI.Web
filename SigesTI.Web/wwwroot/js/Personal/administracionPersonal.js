@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // 2. MODAL REGISTRAR / EDITAR
 // ==========================================
 function abrirModalNuevoPersonal() {
-    llenarModalPersonal({ id: 0, nombre: '', area: '', puesto: '', correo: '', activo: 'true', responsable: 'false' });
+    llenarModalPersonal({ id: 0, nombre: '', area: '', puesto: '', correo: '', activo: 'true', responsable: 'false', usuario: '' });
 
     document.getElementById('tituloModalPersonal').textContent = 'Registrar Personal';
     document.getElementById('subtituloModalPersonal').textContent = 'Nuevo integrante del personal';
@@ -65,6 +65,7 @@ function llenarModalPersonal(datos) {
     document.getElementById('txtCorreo').value = datos.correo;
     document.getElementById('selectActivo').value = datos.activo;
     document.getElementById('chkResponsable').checked = datos.responsable === 'true';
+    document.getElementById('selectUsuario').value = datos.usuario || '';
 }
 
 async function guardarPersonal() {
@@ -75,7 +76,8 @@ async function guardarPersonal() {
         puesto: document.getElementById('txtPuesto').value.trim(),
         correo: document.getElementById('txtCorreo').value.trim(),
         activo: document.getElementById('selectActivo').value === 'true',
-        esResponsable: document.getElementById('chkResponsable').checked
+        esResponsable: document.getElementById('chkResponsable').checked,
+        idUsuario: parseInt(document.getElementById('selectUsuario').value) || null
     };
 
     if (!datos.nombre || !datos.area || !datos.puesto || !datos.correo) {

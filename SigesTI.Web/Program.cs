@@ -17,6 +17,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<PermisosService>();
 builder.Services.AddScoped<SesionService>();
+builder.Services.AddScoped<NotificacionesService>();
+builder.Services.AddHostedService<RecordatoriosAutorizacion>();
 
 // Razor Pages (cada handler pasa por el filtro de permisos)
 builder.Services.AddRazorPages()

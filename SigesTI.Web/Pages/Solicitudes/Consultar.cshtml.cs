@@ -8,8 +8,6 @@ using SigesTI.Web.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Net;
 
 namespace SigesTI.Web.Pages.Solicitudes
 {
@@ -18,11 +16,13 @@ namespace SigesTI.Web.Pages.Solicitudes
     {
         private readonly ApplicationDbContext _context;
         private readonly PermisosService _permisos;
+        private readonly NotificacionesService _notificaciones;
 
-        public ConsultarModel(ApplicationDbContext context, PermisosService permisos)
+        public ConsultarModel(ApplicationDbContext context, PermisosService permisos, NotificacionesService notificaciones)
         {
             _context = context;
             _permisos = permisos;
+            _notificaciones = notificaciones;
         }
 
         public List<Solicitud> Solicitudes { get; set; } = new();
@@ -43,7 +43,6 @@ namespace SigesTI.Web.Pages.Solicitudes
         public List<SelectListItem> ListaPersonalFiltro { get; set; } = new();
         public List<SelectListItem> SoporteOptions { get; set; } = new();
         public List<SelectListItem> AdminOptions { get; set; } = new();
-        public List<SelectListItem> EstatusOptions { get; set; } = new();
 
         public void OnGet()
         {
@@ -87,7 +86,6 @@ namespace SigesTI.Web.Pages.Solicitudes
                 new SelectListItem { Value = "Cobranza", Text = "Cobranza" }
             };
 
-            // Corrección Crítica: Mapeo correcto utilizando p.Id del modelo Personal
             ListaPersonalFiltro = _context.Personal
                 .Select(p => new SelectListItem { Value = p.Id.ToString(), Text = p.Nombre })
                 .ToList();
@@ -101,180 +99,6 @@ namespace SigesTI.Web.Pages.Solicitudes
                 .Where(p => p.Area == "Administración")
                 .Select(p => new SelectListItem { Value = p.Nombre, Text = p.Nombre })
                 .ToList();
-
-            EstatusOptions = new List<SelectListItem>
-            {
-                new SelectListItem { Value = "Pendiente", Text = "Pendiente" },
-                new SelectListItem { Value = "Resuelto", Text = "Resuelto" }
-            };
-        }
-
-        [Permiso(Accion.Exportar)]
-        public IActionResult OnGetReporteSolicitudes(DateTime? fechaInicio, DateTime? fechaFin, string? area, int? solicitante, string? estatus)
-        {
-            var query = _context.Solicitudes
-                .Include(s => s.Personal)
-                .AsQueryable();
-
-            if (fechaInicio.HasValue)
-            {
-                var inicio = fechaInicio.Value.Date;
-                query = query.Where(s => s.FechaIngreso >= inicio);
-            }
-
-            if (fechaFin.HasValue)
-            {
-                var fin = fechaFin.Value.Date.AddDays(1);
-                query = query.Where(s => s.FechaIngreso < fin);
-            }
-
-            if (!string.IsNullOrWhiteSpace(area))
-            {
-                query = query.Where(s => s.Personal != null && s.Personal.Area == area);
-            }
-
-            if (solicitante.HasValue)
-            {
-                query = query.Where(s => s.IdPersonal == solicitante.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(estatus))
-            {
-                query = query.Where(s => s.Estatus == estatus);
-            }
-
-            const int maximoReporte = 500;
-            int totalEncontradas = query.Count();
-
-            var solicitudesReporte = query
-                .AsNoTracking()
-                .OrderByDescending(s => s.FechaIngreso)
-                .Take(maximoReporte)
-                .ToList();
-
-            string textoTotal = totalEncontradas > maximoReporte
-                ? $"{totalEncontradas} solicitudes (se muestran las {maximoReporte} más recientes)"
-                : $"{totalEncontradas} solicitudes";
-
-            var html = new StringBuilder();
-
-            string nombreSolicitanteReporte = "Todos";
-
-            if (solicitante.HasValue)
-            {
-                nombreSolicitanteReporte = _context.Personal
-                    .Where(p => p.Id == solicitante.Value)
-                    .Select(p => p.Nombre)
-                    .FirstOrDefault() ?? solicitante.Value.ToString();
-            }
-
-            html.Append(@"
-<!DOCTYPE html>
-<html lang='es'>
-<head>
-    <meta charset='UTF-8'>
-    <title>Reporte de Solicitudes</title>
-    <link rel='stylesheet' href='/css/Reportes/reporte-solicitudes.css' />
-</head>
-<body>
-    <div class='hoja'>
-
-        <div class='acciones'>
-            <button class='btn-imprimir' onclick='window.print()'>
-                Descargar / Imprimir
-            </button>
-        </div>
-
-        <div class='encabezado-reporte'>
-            <div>
-                <div class='logo-reporte'>SigesTI</div>
-                <div class='descripcion-reporte'>Sistema de Gestión de Solicitudes TI</div>
-            </div>
-
-            <div class='fecha-reporte'>
-                <strong>Generado:</strong> " + DateTime.Now.ToString("dd/MM/yyyy hh:mm tt") + @"
-            </div>
-        </div>
-
-        <div class='titulo-reporte'>
-            Reporte General de Solicitudes
-        </div>
-");
-
-            html.Append(@"
-        <div class='filtros-reporte'>
-            <div>
-                <strong>Fecha inicial:</strong> " + (fechaInicio.HasValue ? fechaInicio.Value.ToString("dd/MM/yyyy") : "Todas") + @"
-            </div>
-            <div>
-                <strong>Fecha final:</strong> " + (fechaFin.HasValue ? fechaFin.Value.ToString("dd/MM/yyyy") : "Todas") + @"
-            </div>
-            <div>
-                <strong>Área:</strong> " + WebUtility.HtmlEncode(string.IsNullOrWhiteSpace(area) ? "Todas" : area) + @"
-            </div>
-            <div>
-                <strong>Solicitante:</strong> " + WebUtility.HtmlEncode(nombreSolicitanteReporte) + @"
-            </div>
-            <div>
-                <strong>Estatus:</strong> " + WebUtility.HtmlEncode(string.IsNullOrWhiteSpace(estatus) ? "Todos" : estatus) + @"
-            </div>
-            <div>
-                <strong>Total:</strong> " + textoTotal + @"
-            </div>
-        </div>
-");
-
-            html.Append(@"
-        <table class='tabla-reporte'>
-            <thead>
-                <tr>
-                    <th>No.</th>
-                    <th>Solicitante</th>
-                    <th>Área</th>
-                    <th>Fecha Ingreso</th>
-                    <th>Fecha Entrega</th>
-                    <th>Ejecutivo</th>
-                    <th>Estatus</th>
-                </tr>
-            </thead>
-            <tbody>
-");
-
-            foreach (var item in solicitudesReporte)
-            {
-                DateTime fEntrega = Convert.ToDateTime(item.FechaEntrega);
-                string fechaEntregaTexto = (fEntrega.Year <= 1901 || item.Estatus == "Pendiente") ? "S/A" : fEntrega.ToString("dd/MM/yyyy");
-                string claseEstatus = item.Estatus == "Pendiente" ? "pendiente" : "resuelto";
-
-                html.Append("<tr>");
-                html.Append("<td class='text-center folio-reporte'>" + item.IdSolicitud.ToString("D4") + "</td>");
-                html.Append("<td>" + WebUtility.HtmlEncode(item.Personal?.Nombre ?? "N/A") + "</td>");
-                html.Append("<td>" + WebUtility.HtmlEncode(item.Personal?.Area ?? "N/A") + "</td>");
-                html.Append("<td class='text-center'>" + item.FechaIngreso.ToString("dd/MM/yyyy") + "</td>");
-                html.Append("<td class='text-center'>" + fechaEntregaTexto + "</td>");
-                html.Append("<td>" + WebUtility.HtmlEncode(string.IsNullOrEmpty(item.EjecutivoAsignado) ? "Sin asignar" : item.EjecutivoAsignado) + "</td>");
-                html.Append("<td class='text-center " + claseEstatus + "'>" + WebUtility.HtmlEncode(item.Estatus) + "</td>");
-                html.Append("</tr>");
-            }
-
-            if (!solicitudesReporte.Any())
-            {
-                html.Append("<tr><td colspan='7' class='text-center'>No existen solicitudes con los filtros seleccionados.</td></tr>");
-            }
-
-            html.Append(@"
-            </tbody>
-        </table>
-
-        <div class='pie-reporte'>
-            Sistema SigesTI · Reporte generado automáticamente
-        </div>
-    </div>
-</body>
-</html>
-");
-
-            return Content(html.ToString(), "text/html");
         }
 
         public JsonResult OnGetDetalleSolicitud(int id)
@@ -289,18 +113,15 @@ namespace SigesTI.Web.Pages.Solicitudes
             var jefe = _context.Personal
                 .FirstOrDefault(p => p.Area == areaNombre && p.EsResponsable);
 
-            DateTime fIngreso = Convert.ToDateTime(sol.FechaIngreso);
-            DateTime fEntrega = Convert.ToDateTime(sol.FechaEntrega);
-
-            string fEntregaStr = (fEntrega == DateTime.MinValue || fEntrega.Year == 1 || sol.Estatus == "Pendiente")
-                ? ""
-                : fEntrega.ToString("yyyy-MM-dd");
+            bool tieneEntrega = sol.Estatus == EstatusSolicitud.Resuelto
+                                && sol.FechaEntrega.HasValue
+                                && sol.FechaEntrega.Value.Year > 1901;
 
             return new JsonResult(new
             {
                 idSolicitud = sol.IdSolicitud,
-                fechaIngreso = fIngreso.ToString("yyyy-MM-dd"),
-                fechaEntrega = fEntregaStr,
+                fechaIngreso = sol.FechaIngreso.ToString("yyyy-MM-dd"),
+                fechaEntrega = tieneEntrega ? sol.FechaEntrega!.Value.ToString("yyyy-MM-dd") : "",
                 estatus = sol.Estatus,
                 area = sol.Personal?.Area ?? "",
                 idPersonal = sol.IdPersonal,
@@ -316,14 +137,16 @@ namespace SigesTI.Web.Pages.Solicitudes
                 descripcionProblema = sol.DescripcionProblema ?? "",
                 ejecutivoAsignado = sol.EjecutivoAsignado ?? "",
                 autorizaAdmin = sol.AutorizaAdmin ?? "",
+                autorizadoPor = sol.AutorizadoPor ?? "",
+                fechaAutorizacion = sol.FechaAutorizacion?.ToString("dd/MM/yyyy hh:mm tt") ?? "",
                 puedeEditar = PuedeEditar(sol)
             });
         }
 
-        // Admin edita cualquier solicitud; los demás roles solo las pendientes
+        // Admin edita cualquier solicitud; los demás roles solo las que no están resueltas
         private bool PuedeEditar(Solicitud sol)
         {
-            return sol.Estatus == "Pendiente" || _permisos.EsAdmin;
+            return sol.Estatus != EstatusSolicitud.Resuelto || _permisos.EsAdmin;
         }
 
         private JsonResult Error(string mensaje)
@@ -336,18 +159,29 @@ namespace SigesTI.Web.Pages.Solicitudes
         {
             if (modelo == null) return Error("Datos inválidos.");
 
-            if (modelo.Estatus != "Pendiente" && modelo.Estatus != "Resuelto")
-            {
-                return Error("El estatus seleccionado no es válido.");
-            }
+            var sol = _context.Solicitudes
+                .Include(s => s.Personal)
+                .FirstOrDefault(s => s.IdSolicitud == modelo.IdSolicitud);
 
-            var sol = _context.Solicitudes.FirstOrDefault(s => s.IdSolicitud == modelo.IdSolicitud);
             if (sol == null) return Error("Solicitud no encontrada.");
 
             if (!PuedeEditar(sol))
             {
                 return Error("Solo un administrador puede modificar una solicitud resuelta.");
             }
+
+            bool estabaPorAutorizar = sol.Estatus == EstatusSolicitud.PorAutorizar;
+
+            // Mientras espera autorización el estatus no se cambia desde aquí
+            if (!estabaPorAutorizar &&
+                modelo.Estatus != EstatusSolicitud.Pendiente && modelo.Estatus != EstatusSolicitud.Resuelto)
+            {
+                return Error("El estatus seleccionado no es válido.");
+            }
+
+            string? ejecutivoAnterior = sol.EjecutivoAsignado;
+            string? autorizadorAnterior = sol.AutorizaAdmin;
+            string estatusAnterior = sol.Estatus;
 
             if (modelo.IdPersonal > 0 && modelo.IdPersonal != sol.IdPersonal)
             {
@@ -362,10 +196,22 @@ namespace SigesTI.Web.Pages.Solicitudes
             }
 
             sol.FechaIngreso = modelo.FechaIngreso;
-            sol.Estatus = modelo.Estatus;
+            sol.AutorizaAdmin = modelo.AutorizaAdmin;
 
-            // La fecha de entrega solo aplica cuando la solicitud ya está resuelta
-            if (sol.Estatus == "Pendiente")
+            if (estabaPorAutorizar)
+            {
+                // Si le quitan a quien autoriza, la solicitud pasa directo a pendiente
+                sol.Estatus = string.IsNullOrWhiteSpace(sol.AutorizaAdmin)
+                    ? EstatusSolicitud.Pendiente
+                    : EstatusSolicitud.PorAutorizar;
+            }
+            else
+            {
+                sol.Estatus = modelo.Estatus!;
+            }
+
+            // La fecha de realización solo aplica cuando la solicitud ya está resuelta
+            if (sol.Estatus != EstatusSolicitud.Resuelto)
             {
                 sol.FechaEntrega = null;
             }
@@ -375,7 +221,7 @@ namespace SigesTI.Web.Pages.Solicitudes
 
                 if (sol.FechaEntrega.Value.Date < sol.FechaIngreso.Date)
                 {
-                    return Error("La fecha de entrega no puede ser anterior a la fecha de ingreso.");
+                    return Error("La fecha de realización no puede ser anterior a la fecha de ingreso.");
                 }
 
                 if (!string.IsNullOrWhiteSpace(modelo.NuevaUnidadRed))
@@ -390,11 +236,7 @@ namespace SigesTI.Web.Pages.Solicitudes
 
             if (!string.IsNullOrWhiteSpace(nuevoApunte) && nuevoApunte != historialPrevio)
             {
-                string usuario = HttpContext.Session.GetString("NombreCompleto")
-                              ?? HttpContext.Session.GetString("NombreUsuario")
-                              ?? "Sistema";
-
-                sol.DescripcionProblema = Solicitud.AgregarComentario(historialPrevio, usuario, nuevoApunte);
+                sol.DescripcionProblema = Solicitud.AgregarComentario(historialPrevio, NombreUsuarioSesion(), nuevoApunte);
             }
 
             sol.TieneImpresoraConfigurada = modelo.TieneImpresoraConfigurada;
@@ -404,8 +246,36 @@ namespace SigesTI.Web.Pages.Solicitudes
             sol.OtrosSistemas = modelo.ReqSistemas ? modelo.OtrosSistemas : null;
             sol.NuevaUnidadRed = modelo.NuevaUnidadRed;
             sol.EjecutivoAsignado = modelo.EjecutivoAsignado;
-            sol.AutorizaAdmin = modelo.AutorizaAdmin;
 
+            _context.SaveChanges();
+
+            // Notificaciones: aviso de autorización al administrador nuevo, aviso de resuelto al
+            // solicitante y conteo de pendientes de soporte
+            var solicitante = _context.Personal.FirstOrDefault(p => p.Id == sol.IdPersonal);
+
+            if (estabaPorAutorizar && sol.AutorizaAdmin != autorizadorAnterior)
+            {
+                _notificaciones.CancelarSolicitudAutorizacion(sol.IdSolicitud);
+
+                if (sol.Estatus == EstatusSolicitud.PorAutorizar)
+                {
+                    _notificaciones.SolicitarAutorizacion(sol, solicitante?.Nombre ?? "N/A");
+                }
+            }
+
+            if (estatusAnterior != EstatusSolicitud.Resuelto && sol.Estatus == EstatusSolicitud.Resuelto)
+            {
+                _notificaciones.NotificarResuelto(sol, solicitante);
+            }
+
+            bool cambioEjecutivo = sol.EjecutivoAsignado != ejecutivoAnterior;
+
+            if (cambioEjecutivo)
+            {
+                _notificaciones.ActualizarPendientesSoporte(ejecutivoAnterior, avisar: false);
+            }
+
+            _notificaciones.ActualizarPendientesSoporte(sol.EjecutivoAsignado, avisar: cambioEjecutivo);
             _context.SaveChanges();
 
             return new JsonResult(new { success = true });
@@ -415,9 +285,15 @@ namespace SigesTI.Web.Pages.Solicitudes
         public IActionResult OnPostEliminarSolicitud(int id)
         {
             var sol = _context.Solicitudes.FirstOrDefault(s => s.IdSolicitud == id);
-            if (sol == null) return new JsonResult(new { success = false, message = "La solicitud ya no existe." });
+            if (sol == null) return Error("La solicitud ya no existe.");
 
+            string? ejecutivo = sol.EjecutivoAsignado;
+
+            // Sus notificaciones se borran solas en la base (ON DELETE CASCADE)
             _context.Solicitudes.Remove(sol);
+            _context.SaveChanges();
+
+            _notificaciones.ActualizarPendientesSoporte(ejecutivo, avisar: false);
             _context.SaveChanges();
 
             return new JsonResult(new { success = true });
@@ -425,7 +301,6 @@ namespace SigesTI.Web.Pages.Solicitudes
 
         public JsonResult OnGetFiltrarPersonal(string area)
         {
-            // Corrección Crítica: id = p.Id del modelo Personal mapeado correctamente para el select dinámico JSON
             var listaPersonal = _context.Personal
                 .Where(p => p.Area == area)
                 .Select(p => new {
@@ -437,6 +312,13 @@ namespace SigesTI.Web.Pages.Solicitudes
                 }).ToList();
 
             return new JsonResult(listaPersonal);
+        }
+
+        private string NombreUsuarioSesion()
+        {
+            return HttpContext.Session.GetString("NombreCompleto")
+                ?? HttpContext.Session.GetString("NombreUsuario")
+                ?? "Sistema";
         }
     }
 

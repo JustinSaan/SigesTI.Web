@@ -15,10 +15,12 @@ namespace SigesTI.Web.Pages.Solicitudes
     public class GenerarModel : PageModel
     {
         private readonly ApplicationDbContext _context;
+        private readonly NotificacionesService _notificaciones;
 
-        public GenerarModel(ApplicationDbContext context)
+        public GenerarModel(ApplicationDbContext context, NotificacionesService notificaciones)
         {
             _context = context;
+            _notificaciones = notificaciones;
         }
 
         [BindProperty]
@@ -102,7 +104,7 @@ namespace SigesTI.Web.Pages.Solicitudes
                 return Error("Seleccione un solicitante válido.");
             }
 
-            // La fecha de entrega solo aplica cuando la solicitud ya está resuelta
+            // La fecha de realización solo aplica cuando la solicitud ya está resuelta
             if (NuevaSolicitud.Estatus == "Pendiente")
             {
                 NuevaSolicitud.FechaEntrega = null;
@@ -113,7 +115,7 @@ namespace SigesTI.Web.Pages.Solicitudes
 
                 if (NuevaSolicitud.FechaEntrega.Value.Date < NuevaSolicitud.FechaIngreso.Date)
                 {
-                    return Error("La fecha de entrega no puede ser anterior a la fecha de ingreso.");
+                    return Error("La fecha de realización no puede ser anterior a la fecha de ingreso.");
                 }
 
                 if (!string.IsNullOrWhiteSpace(NuevaSolicitud.NuevaUnidadRed))
@@ -132,10 +134,35 @@ namespace SigesTI.Web.Pages.Solicitudes
             NuevaSolicitud.DescripcionProblema =
                 Solicitud.AgregarComentario(null, NombreUsuarioSesion(), NuevaSolicitud.DescripcionProblema);
 
+            // Si se eligió quién autoriza, la solicitud espera su autorización antes de quedar pendiente
+            bool pideAutorizacion = NuevaSolicitud.Estatus == EstatusSolicitud.Pendiente
+                                    && !string.IsNullOrWhiteSpace(NuevaSolicitud.AutorizaAdmin);
+
+            if (pideAutorizacion)
+            {
+                NuevaSolicitud.Estatus = EstatusSolicitud.PorAutorizar;
+            }
+
             _context.Solicitudes.Add(NuevaSolicitud);
             _context.SaveChanges();
 
-            return new JsonResult(new { success = true });
+            bool administradorNotificado = pideAutorizacion
+                && _notificaciones.SolicitarAutorizacion(NuevaSolicitud, personal.Nombre);
+
+            if (NuevaSolicitud.Estatus == EstatusSolicitud.Resuelto)
+            {
+                _notificaciones.NotificarResuelto(NuevaSolicitud, personal);
+            }
+
+            _notificaciones.ActualizarPendientesSoporte(NuevaSolicitud.EjecutivoAsignado, avisar: true);
+            _context.SaveChanges();
+
+            return new JsonResult(new
+            {
+                success = true,
+                autorizador = pideAutorizacion ? NuevaSolicitud.AutorizaAdmin : null,
+                administradorNotificado
+            });
         }
 
         private string NombreUsuarioSesion()

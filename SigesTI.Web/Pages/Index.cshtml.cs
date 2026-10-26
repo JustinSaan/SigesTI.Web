@@ -176,7 +176,7 @@ namespace SigesTI.Web.Pages
             }
 
             int solicitudesAnterioresPendientes = _context.Solicitudes
-                .Count(s => s.FechaIngreso.Date < hoy && (s.Estatus == "Pendiente" || s.Estatus == "En Curso"));
+                .Count(s => s.FechaIngreso.Date < hoy && (s.Estatus == "Pendiente" || s.Estatus == "En Curso" || s.Estatus == "Por autorizar"));
 
             if (solicitudesAnterioresPendientes > 0)
             {

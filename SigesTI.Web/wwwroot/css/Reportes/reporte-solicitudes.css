@@ -1,219 +1,525 @@
-﻿* {
+﻿/* ==========================================================================
+   REPORTE DE SOLICITUDES Y FORMATO DE REQUERIMIENTO
+   Mismo diseño que el reporte de Bitácora: en pantalla se ve como una hoja
+   carta sobre fondo gris; al imprimir ocupa la hoja completa.
+   ========================================================================== */
+
+:root {
+    --azul-oscuro: #0f2a52;
+    --azul: #2563eb;
+    --texto: #0f172a;
+    --texto-suave: #475569;
+    --texto-tenue: #94a3b8;
+    --linea: #e2e8f0;
+    --fondo-suave: #f8fafc;
+    --verde: #15803d;
+    --ambar: #b45309;
+    --morado: #7e22ce;
+    --celeste: #0369a1;
+}
+
+* {
     box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
 }
 
 html,
 body {
     margin: 0;
     padding: 0;
+    color: var(--texto);
     font-family: "Segoe UI", Arial, sans-serif;
-    color: #0f172a;
+    font-size: 12px;
+    line-height: 1.4;
     background: #e5e7eb;
 }
 
 body {
-    padding: 28px;
+    padding: 24px;
 }
 
+/* --------------------------------------------------------------------------
+   1. HOJA
+   -------------------------------------------------------------------------- */
 .hoja {
-    max-width: 1120px;
+    max-width: 216mm;
+    min-height: 279mm;
     margin: 0 auto;
+    padding: 16mm 14mm;
     background: #ffffff;
-    border-radius: 14px;
-    padding: 34px 36px;
-    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22);
+    border-radius: 6px;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
 }
 
-.acciones {
+/* --------------------------------------------------------------------------
+   2. ENCABEZADO
+   -------------------------------------------------------------------------- */
+.encabezado {
     display: flex;
-    justify-content: flex-end;
-    margin-bottom: 18px;
-}
-
-.btn-imprimir {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    color: #ffffff;
-    border: none;
-    border-radius: 9px;
-    padding: 11px 20px;
-    font-weight: 800;
-    font-size: 14px;
-    cursor: pointer;
-    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
-}
-
-.encabezado-reporte {
-    display: flex;
-    justify-content: space-between;
     align-items: flex-end;
-    gap: 20px;
-    border-bottom: 4px solid #2563eb;
-    padding-bottom: 16px;
-    margin-bottom: 22px;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 14px;
+    border-bottom: 3px solid var(--azul-oscuro);
+    position: relative;
 }
 
-.logo-reporte {
-    color: #1d4ed8;
-    font-size: 38px;
-    font-weight: 900;
-    letter-spacing: -0.7px;
+    /* Segunda línea azul debajo del borde oscuro */
+    .encabezado::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        bottom: -6px;
+        left: 0;
+        height: 2px;
+        background: var(--azul);
+    }
+
+.encabezado-sistema {
+    margin: 0 0 4px;
+    color: var(--azul);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
 }
 
-.descripcion-reporte {
-    color: #64748b;
-    font-size: 13px;
-    font-weight: 600;
-    margin-top: 2px;
+.encabezado h1 {
+    margin: 0;
+    color: var(--azul-oscuro);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
 }
 
-.fecha-reporte {
-    color: #111827;
-    font-size: 14px;
+.encabezado-descripcion {
+    margin: 4px 0 0;
+    color: var(--texto-suave);
+    font-size: 12px;
+}
+
+.encabezado-datos {
+    display: grid;
+    gap: 4px;
+    margin: 0;
     text-align: right;
-    white-space: nowrap;
 }
 
-.titulo-reporte {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    color: #ffffff;
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 18px;
+    .encabezado-datos div {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .encabezado-datos dt {
+        color: var(--texto-tenue);
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+
+    .encabezado-datos dd {
+        margin: 0;
+        color: var(--texto);
+        font-weight: 600;
+    }
+
+/* Filtros aplicados al reporte */
+.filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 18px 0 0;
+    color: var(--texto-suave);
+    font-size: 11px;
+}
+
+    .filtros strong {
+        color: var(--texto);
+    }
+
+/* --------------------------------------------------------------------------
+   3. RESUMEN
+   -------------------------------------------------------------------------- */
+.resumen {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0 22px;
+}
+
+.resumen-dato {
+    flex: 1;
+    --color: var(--azul-oscuro);
+    padding: 10px 12px;
+    background: var(--fondo-suave);
+    border: 1px solid var(--linea);
+    border-top: 3px solid var(--color);
+    border-radius: 6px;
+}
+
+    .resumen-dato.por-autorizar { --color: var(--morado); }
+    .resumen-dato.pendiente { --color: var(--ambar); }
+    .resumen-dato.resuelto { --color: var(--verde); }
+
+.resumen-valor {
+    display: block;
+    color: var(--color);
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.resumen-titulo {
+    color: var(--texto-suave);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+/* --------------------------------------------------------------------------
+   4. TABLA DEL REPORTE
+   -------------------------------------------------------------------------- */
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .tabla thead th {
+        padding: 8px 10px;
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 700;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        background: var(--azul-oscuro);
+    }
+
+        .tabla thead th:first-child {
+            border-top-left-radius: 6px;
+        }
+
+        .tabla thead th:last-child {
+            border-top-right-radius: 6px;
+        }
+
+    .tabla td {
+        padding: 7px 10px;
+        vertical-align: top;
+        border-bottom: 1px solid var(--linea);
+    }
+
+    .tabla tbody tr:not(.dia-titulo):nth-child(odd) td {
+        background: var(--fondo-suave);
+    }
+
+/* Separador de cada día */
+.dia-titulo td {
+    padding: 14px 10px 6px;
+    background: #ffffff !important;
+    border-bottom: 2px solid var(--azul);
+}
+
+.dia-fecha {
+    color: var(--azul-oscuro);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.dia-cantidad {
+    margin-left: 8px;
+    color: var(--texto-tenue);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.col-folio {
+    width: 60px;
     text-align: center;
-    font-size: 17px;
-    font-weight: 900;
-    letter-spacing: 0.3px;
+    color: var(--azul);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
 }
 
-.filtros-reporte {
+.col-area {
+    width: 110px;
+    text-align: center;
+}
+
+/* Fechas de ingreso y realización, una en cada renglón con su etiqueta */
+.col-fecha {
+    width: 145px;
+    color: var(--texto-suave);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.fecha-renglon {
+    display: block;
+}
+
+.fecha-etiqueta {
+    display: inline-block;
+    width: 72px;
+    color: var(--texto-tenue);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.col-estatus {
+    width: 150px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.persona-nombre {
+    display: block;
+    font-weight: 700;
+}
+
+.persona-correo {
+    color: var(--texto-tenue);
+    font-size: 10px;
+}
+
+.texto-tenue {
+    color: var(--texto-tenue);
+}
+
+/* Estatus: texto de color con un punto a la izquierda */
+.estatus {
+    --color: var(--ambar);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color);
+    font-weight: 700;
+}
+
+    .estatus::before {
+        content: "";
+        flex-shrink: 0;
+        width: 7px;
+        height: 7px;
+        background: var(--color);
+        border-radius: 50%;
+    }
+
+    .estatus.por-autorizar { --color: var(--morado); }
+    .estatus.pendiente { --color: var(--ambar); }
+    .estatus.resuelto { --color: var(--verde); }
+
+.sin-registros {
+    display: grid;
+    gap: 4px;
+    padding: 36px;
+    color: var(--texto-suave);
+    text-align: center;
+    background: var(--fondo-suave);
+    border: 1px dashed var(--linea);
+    border-radius: 8px;
+}
+
+    .sin-registros strong {
+        color: var(--azul-oscuro);
+        font-size: 14px;
+    }
+
+/* --------------------------------------------------------------------------
+   5. FORMATO DE UN REQUERIMIENTO
+   -------------------------------------------------------------------------- */
+.seccion {
+    margin-top: 22px;
+    break-inside: avoid;
+}
+
+.seccion-titulo {
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    color: var(--azul-oscuro);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 2px solid var(--azul);
+}
+
+/* Datos en recuadros de 3 columnas */
+.ficha {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px 16px;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    border-left: 6px solid #2563eb;
-    border-radius: 10px;
-    padding: 14px 16px;
-    margin-bottom: 22px;
-    font-size: 13px;
+    gap: 8px;
+    margin: 0;
 }
 
-    .filtros-reporte strong {
-        color: #1d4ed8;
+    .ficha div {
+        padding: 8px 10px;
+        background: var(--fondo-suave);
+        border: 1px solid var(--linea);
+        border-radius: 6px;
     }
 
-.tabla-reporte {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 12.5px;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    overflow: hidden;
+    .ficha dt {
+        color: var(--texto-tenue);
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+
+    .ficha dd {
+        margin: 2px 0 0;
+        color: var(--texto);
+        font-weight: 600;
+        word-break: break-word;
+    }
+
+/* Sistemas requeridos */
+.etiquetas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
-    .tabla-reporte th {
-        background: #1d4ed8;
-        color: #ffffff;
-        padding: 11px 9px;
-        text-align: center;
-        font-weight: 900;
-        border-right: 1px solid rgba(255, 255, 255, 0.25);
+    .etiquetas + .ficha {
+        margin-top: 10px;
     }
 
-        .tabla-reporte th:last-child {
-            border-right: none;
-        }
-
-    .tabla-reporte td {
-        padding: 10px 9px;
-        border-right: 1px solid #cbd5e1;
-        border-bottom: 1px solid #cbd5e1;
-        vertical-align: middle;
-    }
-
-        .tabla-reporte td:last-child {
-            border-right: none;
-        }
-
-    .tabla-reporte tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    .tabla-reporte tbody tr:nth-child(odd) td {
-        background: #ffffff;
-    }
-
-    .tabla-reporte tbody tr:nth-child(even) td {
-        background: #f8fafc;
-    }
-
-.text-center {
-    text-align: center;
-}
-
-.folio-reporte {
-    color: #1d4ed8;
-    font-weight: 900;
-}
-
-.pendiente {
-    color: #dc2626;
-    font-weight: 900;
-}
-
-.resuelto {
-    color: #16a34a;
-    font-weight: 900;
-}
-
-.pie-reporte {
-    margin-top: 24px;
-    padding-top: 12px;
-    border-top: 1px solid #cbd5e1;
-    color: #64748b;
+.etiqueta {
+    padding: 3px 10px;
+    color: var(--azul-oscuro);
     font-size: 11px;
-    text-align: right;
+    font-weight: 700;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+}
+
+/* Historial de comentarios */
+.comentario {
+    padding: 8px 12px;
+    background: var(--fondo-suave);
+    border: 1px solid var(--linea);
+    border-left: 3px solid var(--azul);
+    border-radius: 6px;
+    break-inside: avoid;
+}
+
+    .comentario + .comentario {
+        margin-top: 8px;
+    }
+
+.comentario-cabecera {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+    font-size: 10px;
+}
+
+.comentario-autor {
+    color: var(--azul-oscuro);
+    font-weight: 700;
+}
+
+.comentario-fecha {
+    color: var(--texto-tenue);
+}
+
+.comentario-texto {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Firmas */
+.firmas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    margin-top: 56px;
+    break-inside: avoid;
+}
+
+.firma {
+    padding-top: 8px;
+    text-align: center;
+    border-top: 1px solid var(--texto-suave);
+}
+
+    .firma strong {
+        display: block;
+        font-size: 11px;
+    }
+
+    .firma span {
+        color: var(--texto-tenue);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+
+/* --------------------------------------------------------------------------
+   6. PIE
+   -------------------------------------------------------------------------- */
+.pie {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 18px;
+    padding-top: 8px;
+    color: var(--texto-tenue);
+    font-size: 10px;
+    border-top: 1px solid var(--linea);
+}
+
+/* --------------------------------------------------------------------------
+   7. IMPRESIÓN
+   -------------------------------------------------------------------------- */
+@page {
+    size: letter;
+    margin: 12mm 12mm 16mm;
+
+    /* Número de página abajo a la derecha (Chrome y Edge) */
+    @bottom-right {
+        content: "Página " counter(page) " de " counter(pages);
+        color: #94a3b8;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 9px;
+    }
 }
 
 @media print {
     html,
     body {
-        background: #ffffff !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-
-    body {
-        padding: 18px !important;
+        padding: 0;
+        background: #ffffff;
     }
 
     .hoja {
-        max-width: 1120px !important;
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        padding: 24px !important;
+        max-width: none;
+        min-height: 0;
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
     }
 
-    .acciones {
-        display: none !important;
+    /* El encabezado de la tabla se repite en cada hoja */
+    .tabla thead {
+        display: table-header-group;
     }
 
-    .titulo-reporte,
-    .tabla-reporte th {
-        background: #1d4ed8 !important;
-        color: #ffffff !important;
+    .tabla tr,
+    .resumen,
+    .encabezado {
+        break-inside: avoid;
     }
 
-    .tabla-reporte tbody tr:nth-child(even) td,
-    .filtros-reporte {
-        background: #f8fafc !important;
-    }
-
-    @page {
-        size: landscape;
-        margin: 12mm;
+    /* El título de un día no queda solo al final de una hoja */
+    .dia-titulo {
+        break-after: avoid;
     }
 }

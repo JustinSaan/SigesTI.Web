@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/notificaciones.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SigesTI.Web.styles.css" asp-append-version="true" />
 
     @await RenderSectionAsync("Styles", required: false)</head><body class="layout-body">
@@ -175,7 +176,35 @@
 
                 </div>
 
-                <!-- Usuario y menú desplegable (Derecha) -->
+                <!-- Notificaciones y usuario (Derecha) -->
+                <div class="layout-derecha">
+
+                <!-- Notificaciones (notificaciones.js) -->
+                <div class="dropdown notif-dropdown">
+                    <button type="button"
+                            class="notif-boton"
+                            id="btnNotificaciones"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
+                            aria-expanded="false"
+                            aria-label="Notificaciones"
+                            title="Notificaciones">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="notif-contador d-none" id="contadorNotificaciones">0</span>
+                    </button>
+
+                    <div class="dropdown-menu dropdown-menu-end notif-menu" aria-labelledby="btnNotificaciones">
+                        <div class="notif-menu-encabezado">
+                            <span><i class="bi bi-bell me-2"></i>Notificaciones</span>
+                            <button type="button" class="notif-leer-todas" id="btnLeerTodas">Marcar todas como leídas</button>
+                        </div>
+                        <div class="notif-lista" id="listaNotificaciones">
+                            <div class="notif-vacio"><i class="bi bi-bell-slash"></i>No tienes notificaciones.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usuario y menú desplegable -->
                 <div class="dropdown layout-user-dropdown">
 
                     <button type="button"
@@ -234,6 +263,8 @@
 
                 </div>
 
+                </div>
+
             </div>
 
         </nav>
@@ -245,6 +276,39 @@
             @RenderBody()
         </div>
     </main>
+
+    <!-- Vista previa de un requerimiento (se abre desde las notificaciones y desde Consultar) -->
+    <div class="modal fade modal-notificacion" id="modalVistaRequerimiento" tabindex="-1" aria-labelledby="tituloVistaRequerimiento" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-fullscreen-lg-down">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="notif-modal-icono"><i class="bi bi-file-earmark-richtext"></i></div>
+                        <div>
+                            <h5 class="modal-title mb-0" id="tituloVistaRequerimiento">Requerimiento</h5>
+                            <small class="notif-modal-subtitulo" id="subtituloVistaRequerimiento"></small>
+                        </div>
+                    </div>
+
+                    <div class="notif-modal-acciones">
+                        <button type="button" class="notif-btn-imprimir" id="btnImprimirRequerimiento">
+                            <i class="bi bi-printer me-1"></i> Imprimir
+                        </button>
+                        <button type="button" class="notif-btn-autorizar d-none" id="btnAutorizarRequerimiento">
+                            <i class="bi bi-patch-check-fill me-1"></i> Autorizar requerimiento
+                        </button>
+                        <button type="button" class="notif-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                </div>
+
+                <div class="modal-body notif-vista-previa">
+                    <iframe id="iframeVistaRequerimiento" title="Vista previa del requerimiento"></iframe>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <footer class="layout-footer">
         <div class="container-fluid px-4">
@@ -265,5 +329,6 @@
     <script src="~/js/alertas.js" asp-append-version="true"></script>
     <script src="~/js/modales.js" asp-append-version="true"></script>
     <script src="~/js/logout.js" asp-append-version="true"></script>
+    <script src="~/js/notificaciones.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)</body></html>

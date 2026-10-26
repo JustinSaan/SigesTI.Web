@@ -1,0 +1,166 @@
+@page
+@model SigesTI.Web.Pages.Solicitudes.FormatoModel
+@using System.Globalization
+@using SigesTI.Web.Models
+
+@{
+    Layout = null;
+
+    var cultura = new CultureInfo("es-MX");
+    var sol = Model.Solicitud;
+    string folio = sol.IdSolicitud.ToString("D4");
+
+    bool tieneEntrega = sol.Estatus == EstatusSolicitud.Resuelto
+                        && sol.FechaEntrega.HasValue
+                        && sol.FechaEntrega.Value.Year > 1901;
+
+    var sistemas = (sol.SistemasDetalle ?? "")
+        .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+        .Where(s => s != "Otros")
+        .ToList();
+
+    if (!string.IsNullOrWhiteSpace(sol.OtrosSistemas))
+    {
+        sistemas.Add(sol.OtrosSistemas);
+    }
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Requerimiento_@(folio)_@Model.FechaGeneracion.ToString("ddMMyyyyHHmm")</title>
+    <link rel="stylesheet" href="~/css/Reportes/reporte-solicitudes.css" asp-append-version="true" />
+</head>
+
+<body>
+    <main class="hoja">
+
+        <!-- Encabezado -->
+        <header class="encabezado">
+            <div>
+                <p class="encabezado-sistema">Sistema de Gestión de Soporte Técnico</p>
+                <h1>Requerimiento #@folio</h1>
+                <p class="encabezado-descripcion">Formato de requerimientos de Soporte Técnico</p>
+            </div>
+
+            <dl class="encabezado-datos">
+                <div>
+                    <dt>Ingreso</dt>
+                    <dd>@sol.FechaIngreso.ToString("dd/MM/yyyy")</dd>
+                </div>
+                <div>
+                    <dt>Estatus</dt>
+                    <dd><span class="estatus @ReporteSolicitudesModel.ClaseEstatus(sol.Estatus)">@EstatusSolicitud.Texto(sol.Estatus)</span></dd>
+                </div>
+            </dl>
+        </header>
+
+        <!-- Solicitante -->
+        <section class="seccion">
+            <h2 class="seccion-titulo">Datos del solicitante</h2>
+            <dl class="ficha">
+                <div><dt>Nombre</dt><dd>@(sol.Personal?.Nombre ?? "N/A")</dd></div>
+                <div><dt>Área</dt><dd>@(sol.Personal?.Area ?? "N/A")</dd></div>
+                <div><dt>Puesto</dt><dd>@(sol.PuestoSolicitante ?? "—")</dd></div>
+                <div><dt>Correo electrónico</dt><dd>@(sol.CorreoSolicitante ?? "—")</dd></div>
+                <div><dt>Responsable del área</dt><dd>@Model.ResponsableArea</dd></div>
+                <div><dt>Impresora configurada</dt><dd>@(sol.TieneImpresoraConfigurada == "Si" ? "Sí" : "No")</dd></div>
+            </dl>
+        </section>
+
+        <!-- Control y asignación -->
+        <section class="seccion">
+            <h2 class="seccion-titulo">Control y asignación</h2>
+            <dl class="ficha">
+                <div><dt>Fecha de ingreso</dt><dd>@sol.FechaIngreso.ToString("dd/MM/yyyy")</dd></div>
+                <div><dt>Fecha de realización</dt><dd>@(tieneEntrega ? sol.FechaEntrega!.Value.ToString("dd/MM/yyyy") : "En proceso")</dd></div>
+                <div><dt>Ejecutivo de soporte</dt><dd>@(string.IsNullOrEmpty(sol.EjecutivoAsignado) ? "Sin asignar" : sol.EjecutivoAsignado)</dd></div>
+                <div><dt>Autoriza (Administración)</dt><dd>@(string.IsNullOrEmpty(sol.AutorizaAdmin) ? "No requiere" : sol.AutorizaAdmin)</dd></div>
+                <div>
+                    <dt>Autorización</dt>
+                    <dd>
+                        @if (sol.FechaAutorizacion.HasValue)
+                        {
+                            @($"{sol.AutorizadoPor} · {sol.FechaAutorizacion.Value.ToString("dd/MM/yyyy hh:mm tt", cultura)}")
+                        }
+                        else if (sol.Estatus == EstatusSolicitud.PorAutorizar)
+                        {
+                            <span class="texto-tenue">En espera</span>
+                        }
+                        else
+                        {
+                            <span class="texto-tenue">—</span>
+                        }
+                    </dd>
+                </div>
+                <div><dt>Sistemas requeridos</dt><dd>@(sol.ReqSistemas ? "Sí" : "No")</dd></div>
+            </dl>
+        </section>
+
+        <!-- Sistemas y configuraciones -->
+        <section class="seccion">
+            <h2 class="seccion-titulo">Sistemas y configuraciones</h2>
+            @if (sol.ReqSistemas && sistemas.Any())
+            {
+                <div class="etiquetas">
+                    @foreach (var sistema in sistemas)
+                    {
+                        <span class="etiqueta">@sistema</span>
+                    }
+                </div>
+            }
+            <dl class="ficha">
+                <div><dt>Nueva unidad de red</dt><dd>@(string.IsNullOrWhiteSpace(sol.NuevaUnidadRed) ? "No requiere" : sol.NuevaUnidadRed)</dd></div>
+                <div><dt>Configurar impresora</dt><dd>@(string.IsNullOrWhiteSpace(sol.DetalleImpresora) ? "No requiere" : sol.DetalleImpresora)</dd></div>
+            </dl>
+        </section>
+
+        <!-- Historial -->
+        <section class="seccion">
+            <h2 class="seccion-titulo">Historial de comentarios</h2>
+            @if (!Model.Historial.Any())
+            {
+                <div class="sin-registros"><span>No hay comentarios registrados.</span></div>
+            }
+            @foreach (var comentario in Model.Historial)
+            {
+                <div class="comentario">
+                    @if (comentario.Autor != null)
+                    {
+                        <div class="comentario-cabecera">
+                            <span class="comentario-autor">@comentario.Autor</span>
+                            <span class="comentario-fecha">@comentario.Fecha</span>
+                        </div>
+                    }
+                    <div class="comentario-texto">@comentario.Texto</div>
+                </div>
+            }
+        </section>
+
+        <!-- Firmas -->
+        <section class="firmas">
+            <div class="firma">
+                <strong>@(sol.Personal?.Nombre ?? " ")</strong>
+                <span>Solicitante</span>
+            </div>
+            <div class="firma">
+                <strong>@(string.IsNullOrEmpty(sol.AutorizaAdmin) ? " " : sol.AutorizaAdmin)</strong>
+                <span>Autoriza</span>
+            </div>
+            <div class="firma">
+                <strong>@(string.IsNullOrEmpty(sol.EjecutivoAsignado) ? " " : sol.EjecutivoAsignado)</strong>
+                <span>Ejecutivo de soporte</span>
+            </div>
+        </section>
+
+        <!-- Pie -->
+        <footer class="pie">
+            <span>SigesST · Formato de requerimiento</span>
+            <span>Generado el @Model.FechaGeneracion.ToString("dd/MM/yyyy · hh:mm tt", cultura)</span>
+        </footer>
+
+    </main>
+</body>
+</html>

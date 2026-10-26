@@ -18,8 +18,8 @@
             </div>
         </div>
         <div class="sol-acciones">
-            <a href="/Solicitudes/Consultar" class="sol-btn-secundario">
-                <i class="bi bi-collection"></i> Ver solicitudes
+            <a href="/Solicitudes/Consultar" class="btn btn-primary-sigest">
+                <i class="bi bi-collection me-1"></i> Ver solicitudes
             </a>
         </div>
     </div>
@@ -154,7 +154,7 @@
                             <label for="estatusResuelto"><i class="bi bi-check2-circle"></i> Resuelto</label>
                         </div>
 
-                        <label class="form-label" for="txtFechaEntrega">Fecha de entrega</label>
+                        <label class="form-label" for="txtFechaEntrega">Fecha de realización</label>
                         <input type="date" asp-for="NuevaSolicitud.FechaEntrega" id="txtFechaEntrega" class="form-control" />
                         <div class="form-text text-secondary small mt-1">Solo aplica cuando la solicitud está resuelta.</div>
                     </div>
@@ -171,12 +171,16 @@
                         <select asp-for="NuevaSolicitud.AutorizaAdmin" asp-items="Model.AdminOptions" id="ddlAutoriza" class="form-select">
                             <option value="">Sin autorización</option>
                         </select>
+                        <div class="sol-ayuda">
+                            <i class="bi bi-info-circle"></i>
+                            Si eliges a alguien, la solicitud queda pendiente por autorizar y le llega una notificación.
+                        </div>
                     </div>
 
                     @if (await Permisos.PuedeAsync(Modulos.GenerarSolicitud, Accion.Crear))
                     {
-                        <button type="submit" class="sol-btn-principal sol-btn-guardar">
-                            <i class="bi bi-save"></i> Guardar solicitud
+                        <button type="submit" class="btn btn-guardar sol-btn-generar">
+                            <i class="bi bi-save"></i> Generar solicitud
                         </button>
                     }
                 </div>

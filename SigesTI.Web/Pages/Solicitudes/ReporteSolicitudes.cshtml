@@ -1,0 +1,159 @@
+@page
+@model SigesTI.Web.Pages.Solicitudes.ReporteSolicitudesModel
+@using System.Globalization
+@using Microsoft.AspNetCore.Http
+@using SigesTI.Web.Models
+
+@{
+    Layout = null;
+
+    var cultura = new CultureInfo("es-MX");
+    string nombreReporte = $"ReporteSolicitudes_{Model.FechaGeneracion:ddMMyyyyHHmm}";
+    string generadoPor = HttpContext.Session.GetString("NombreCompleto") ?? "—";
+
+    int porAutorizar = Model.Registros.Count(s => s.Estatus == EstatusSolicitud.PorAutorizar);
+    int pendientes = Model.Registros.Count(s => s.Estatus == EstatusSolicitud.Pendiente);
+    int resueltas = Model.Registros.Count(s => s.Estatus == EstatusSolicitud.Resuelto);
+
+    // Las solicitudes se agrupan por día de ingreso para la tabla
+    var solicitudesPorDia = Model.Registros.GroupBy(s => s.FechaIngreso.Date);
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@nombreReporte</title>
+    <link rel="stylesheet" href="~/css/Reportes/reporte-solicitudes.css" asp-append-version="true" />
+</head>
+
+<body>
+    <main class="hoja">
+
+        <!-- Encabezado -->
+        <header class="encabezado">
+            <div>
+                <p class="encabezado-sistema">Sistema de Gestión de Soporte Técnico</p>
+                <h1>Reporte de solicitudes</h1>
+                <p class="encabezado-descripcion">Requerimientos de Soporte Técnico registrados en el sistema</p>
+            </div>
+
+            <dl class="encabezado-datos">
+                <div>
+                    <dt>Generado</dt>
+                    <dd>@Model.FechaGeneracion.ToString("dd/MM/yyyy · hh:mm tt", cultura)</dd>
+                </div>
+                <div>
+                    <dt>Por</dt>
+                    <dd>@generadoPor</dd>
+                </div>
+            </dl>
+        </header>
+
+        <!-- Filtros aplicados -->
+        <p class="filtros">
+            <span><strong>Periodo:</strong> @Model.Periodo</span>
+            <span><strong>Área:</strong> @Model.TextoArea</span>
+            <span><strong>Solicitante:</strong> @Model.NombreSolicitante</span>
+            <span><strong>Estatus:</strong> @Model.TextoEstatus</span>
+        </p>
+
+        <!-- Resumen -->
+        <section class="resumen">
+            <div class="resumen-dato total">
+                <span class="resumen-valor">@Model.Registros.Count</span>
+                <span class="resumen-titulo">Solicitudes</span>
+            </div>
+            <div class="resumen-dato por-autorizar">
+                <span class="resumen-valor">@porAutorizar</span>
+                <span class="resumen-titulo">Por autorizar</span>
+            </div>
+            <div class="resumen-dato pendiente">
+                <span class="resumen-valor">@pendientes</span>
+                <span class="resumen-titulo">Pendientes</span>
+            </div>
+            <div class="resumen-dato resuelto">
+                <span class="resumen-valor">@resueltas</span>
+                <span class="resumen-titulo">Resueltas</span>
+            </div>
+        </section>
+
+        <!-- Detalle agrupado por día -->
+        @if (Model.Registros.Any())
+        {
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th class="col-folio">Folio</th>
+                        <th>Solicitante</th>
+                        <th class="col-area">Área</th>
+                        <th>Ejecutivo asignado</th>
+                        <th class="col-fecha">Ingreso y realización</th>
+                        <th class="col-estatus">Estatus</th>
+                    </tr>
+                </thead>
+
+                @foreach (var dia in solicitudesPorDia)
+                {
+                    <tbody class="dia">
+                        <tr class="dia-titulo">
+                            <td colspan="6">
+                                <span class="dia-fecha">@ReporteSolicitudesModel.TituloDia(dia.Key)</span>
+                                <span class="dia-cantidad">@dia.Count() @(dia.Count() == 1 ? "solicitud" : "solicitudes")</span>
+                            </td>
+                        </tr>
+
+                        @foreach (var item in dia)
+                        {
+                            bool tieneEntrega = item.Estatus == EstatusSolicitud.Resuelto
+                                                && item.FechaEntrega.HasValue
+                                                && item.FechaEntrega.Value.Year > 1901;
+
+                            <tr>
+                                <td class="col-folio">@item.IdSolicitud.ToString("D4")</td>
+                                <td>
+                                    <span class="persona-nombre">@(item.Personal?.Nombre ?? "N/A")</span>
+                                    <span class="persona-correo">@(item.CorreoSolicitante ?? "—")</span>
+                                </td>
+                                <td class="col-area">@(item.Personal?.Area ?? "N/A")</td>
+                                <td>
+                                    @if (string.IsNullOrEmpty(item.EjecutivoAsignado))
+                                    {
+                                        <span class="texto-tenue">Sin asignar</span>
+                                    }
+                                    else
+                                    {
+                                        @item.EjecutivoAsignado
+                                    }
+                                </td>
+                                <td class="col-fecha">
+                                    <span class="fecha-renglon"><span class="fecha-etiqueta">Ingreso</span>@item.FechaIngreso.ToString("dd/MM/yyyy")</span>
+                                    <span class="fecha-renglon"><span class="fecha-etiqueta">Realización</span>@(tieneEntrega ? item.FechaEntrega!.Value.ToString("dd/MM/yyyy") : "En proceso")</span>
+                                </td>
+                                <td class="col-estatus">
+                                    <span class="estatus @ReporteSolicitudesModel.ClaseEstatus(item.Estatus)">@EstatusSolicitud.Texto(item.Estatus)</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                }
+            </table>
+        }
+        else
+        {
+            <div class="sin-registros">
+                <strong>Sin solicitudes</strong>
+                <span>No hay solicitudes que coincidan con el periodo y los filtros seleccionados.</span>
+            </div>
+        }
+
+        <!-- Pie -->
+        <footer class="pie">
+            <span>SigesST · Reporte de solicitudes</span>
+            <span>Fin del reporte · @Model.Registros.Count solicitudes</span>
+        </footer>
+
+    </main>
+</body>
+</html>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace SigesTI.Web.Models
 {
@@ -40,6 +41,10 @@ namespace SigesTI.Web.Models
         [Required]
         public string Estatus { get; set; } = "Pendiente"; // Valor predeterminado
 
+        // Quién autorizó el requerimiento y cuándo (solo si se pidió autorización)
+        public string? AutorizadoPor { get; set; }
+        public DateTime? FechaAutorizacion { get; set; }
+
         // Propiedad de navegación opcional
         public Personal? Personal { get; set; }
 
@@ -53,6 +58,48 @@ namespace SigesTI.Web.Models
             return string.IsNullOrWhiteSpace(historial)
                 ? bloque
                 : bloque + "\n\n" + historial;
+        }
+
+        /*
+         * Separa el historial en comentarios para mostrarlos como tarjetas (igual que solicitudes.js).
+         * Las solicitudes viejas usan "Entrado el:" y líneas decorativas, que aquí se quitan.
+         */
+        public static List<ComentarioHistorial> LeerHistorial(string? historial)
+        {
+            string limpio = Regex.Replace(historial ?? "", "📌 SOLICITUD INICIAL", "");
+            limpio = Regex.Replace(limpio, @"^[ \t]*[─═]+[ \t]*$", "", RegexOptions.Multiline);
+
+            var comentarios = new List<ComentarioHistorial>();
+
+            foreach (string bloque in Regex.Split(limpio, "(?=(?:Agregado|Entrado) el: )"))
+            {
+                string texto = bloque.Trim();
+                if (texto == "") continue;
+
+                var partes = Regex.Match(texto, @"^(?:Agregado|Entrado) el: (.+?) Por: (.*)\n?([\s\S]*)$");
+
+                comentarios.Add(partes.Success
+                    ? new ComentarioHistorial(partes.Groups[2].Value.Trim(), partes.Groups[1].Value, Regex.Replace(partes.Groups[3].Value.Trim(), @"\n[ \t]+", "\n"))
+                    : new ComentarioHistorial(null, null, texto));
+            }
+
+            return comentarios;
+        }
+    }
+
+    public record ComentarioHistorial(string? Autor, string? Fecha, string Texto);
+
+    public static class EstatusSolicitud
+    {
+        // Se eligió quién la autoriza y todavía no lo hace
+        public const string PorAutorizar = "Por autorizar";
+        public const string Pendiente = "Pendiente";
+        public const string Resuelto = "Resuelto";
+
+        // Texto que se muestra en pantalla y en los reportes
+        public static string Texto(string estatus)
+        {
+            return estatus == PorAutorizar ? "Pendiente por autorizar" : estatus;
         }
     }
 }

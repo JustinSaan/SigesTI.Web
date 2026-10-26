@@ -188,6 +188,43 @@
     color: #94a3b8;
 }
 
+/* Usuario del sistema ligado a la persona */
+.badge-usuario-ligado {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    color: #bae6fd;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    border-radius: 8px;
+}
+
+    .badge-usuario-ligado i {
+        color: #38bdf8;
+    }
+
+.texto-sin-usuario {
+    color: #64748b;
+    font-size: 0.78rem;
+    font-style: italic;
+}
+
+.texto-ayuda-usuario {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    line-height: 1.35;
+}
+
+    .texto-ayuda-usuario i {
+        color: #38bdf8;
+    }
+
 /* Fila de personal inactivo (apagada) */
 .tabla-personal tr.fila-inactiva td {
     opacity: 0.4 !important;

@@ -14,6 +14,7 @@ namespace SigesTI.Web.Data
         public DbSet<BitacoraUsuario> BitacoraUsuarios { get; set; }
         public DbSet<PermisoRol> PermisosRol { get; set; }
         public DbSet<Solicitud> Solicitudes { get; set; }
+        public DbSet<Notificacion> Notificaciones { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<SigesTI.Web.Models.Personal> Personal { get; set; }
         public DbSet<Cliente> Clientes { get; set; }

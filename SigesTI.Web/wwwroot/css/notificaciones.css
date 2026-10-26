@@ -1,0 +1,382 @@
+/* ==========================================================================
+   NOTIFICACIONES (campana del layout y vista previa de un requerimiento)
+   Todo empieza con "notif-" o con .modal-notificacion porque se carga en
+   todas las páginas.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. CAMPANA
+   -------------------------------------------------------------------------- */
+.notif-boton {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    color: #38bdf8;
+    font-size: 1.25rem;
+    background: rgba(15, 23, 42, 0.55);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 16px;
+    transition: all 0.25s ease;
+}
+
+    .notif-boton:hover,
+    .notif-boton[aria-expanded="true"] {
+        color: #ffffff;
+        background: rgba(30, 41, 59, 0.85);
+        border-color: rgba(56, 189, 248, 0.55);
+        box-shadow: 0 0 22px rgba(56, 189, 248, 0.18);
+    }
+
+    /* La campana se mueve cuando hay notificaciones sin leer */
+    .notif-boton.con-avisos i {
+        animation: notif-campana 2.4s ease-in-out infinite;
+    }
+
+.notif-contador {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 21px;
+    height: 21px;
+    padding: 0 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    border: 2px solid #0f172a;
+    border-radius: 999px;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.55);
+}
+
+@keyframes notif-campana {
+    0%, 70%, 100% { transform: rotate(0); }
+    75% { transform: rotate(14deg); }
+    80% { transform: rotate(-12deg); }
+    85% { transform: rotate(8deg); }
+    90% { transform: rotate(-4deg); }
+}
+
+/* --------------------------------------------------------------------------
+   2. LISTA DESPLEGABLE
+   -------------------------------------------------------------------------- */
+.notif-menu {
+    width: 380px;
+    max-width: calc(100vw - 24px);
+    padding: 0 !important;
+    margin-top: 10px !important;
+    overflow: hidden;
+    color: #e2e8f0;
+    background: #0f172a !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 15px rgba(56, 189, 248, 0.15) !important;
+}
+
+.notif-menu-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 16px;
+    color: #38bdf8;
+    font-size: 0.9rem;
+    font-weight: 700;
+    background: rgba(11, 19, 43, 0.9);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.notif-leer-todas {
+    padding: 0;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: none;
+    border: none;
+}
+
+    .notif-leer-todas:hover {
+        color: #ffffff;
+        text-decoration: underline;
+    }
+
+.notif-lista {
+    max-height: 420px;
+    overflow-y: auto;
+    padding: 6px;
+}
+
+.notif-item {
+    position: relative;
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 12px;
+    color: #cbd5e1;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    transition: all 0.18s ease;
+}
+
+    .notif-item:hover {
+        background: rgba(56, 189, 248, 0.08);
+        border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .notif-item + .notif-item {
+        margin-top: 4px;
+    }
+
+    /* Sin leer: fondo un poco más claro y punto celeste */
+    .notif-item.no-leida {
+        color: #ffffff;
+        background: rgba(56, 189, 248, 0.06);
+    }
+
+        .notif-item.no-leida::after {
+            content: "";
+            position: absolute;
+            top: 14px;
+            right: 12px;
+            width: 8px;
+            height: 8px;
+            background: #38bdf8;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+        }
+
+.notif-item-icono {
+    --color: #38bdf8;
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    color: var(--color);
+    font-size: 1rem;
+    background: color-mix(in srgb, var(--color) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color) 45%, transparent);
+    border-radius: 10px;
+}
+
+    .notif-item-icono.autorizacion { --color: #c084fc; }
+    .notif-item-icono.atendida { --color: #4ade80; }
+    .notif-item-icono.pendientes { --color: #fbbf24; }
+    .notif-item-icono.autorizado { --color: #2dd4bf; }
+    .notif-item-icono.recordatorio { --color: #f87171; }
+
+.notif-item-texto {
+    flex: 1;
+    min-width: 0;
+    padding-right: 14px;
+}
+
+.notif-item-mensaje {
+    display: block;
+    font-size: 0.83rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.notif-item-fecha {
+    color: #64748b;
+    font-size: 0.72rem;
+}
+
+.notif-vacio {
+    padding: 30px 16px;
+    color: #64748b;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+    .notif-vacio i {
+        display: block;
+        margin-bottom: 6px;
+        color: #334155;
+        font-size: 1.8rem;
+    }
+
+/* --------------------------------------------------------------------------
+   3. MODAL DE VISTA PREVIA (mismo diseño que la vista previa de Bitácora)
+   -------------------------------------------------------------------------- */
+.modal-notificacion .modal-content {
+    color: #e2e8f0;
+    background: linear-gradient(160deg, #0f1d3a, #0b132b) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    border-radius: 18px !important;
+    overflow: hidden;
+}
+
+.modal-notificacion .modal-header {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 22px;
+    background: #0b132b;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.modal-notificacion .modal-title {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.notif-modal-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    color: #38bdf8;
+    font-size: 1.25rem;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 12px;
+}
+
+.notif-modal-subtitulo {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+.notif-modal-acciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.notif-btn-imprimir,
+.notif-btn-autorizar {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    border-radius: 14px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Imprimir: verde azulado, igual que en Control de acceso */
+.notif-btn-imprimir {
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.16), rgba(15, 23, 42, 0.8));
+    border: 1px solid rgba(45, 212, 191, 0.55);
+    box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+}
+
+    .notif-btn-imprimir i {
+        color: #2dd4bf;
+    }
+
+    .notif-btn-imprimir:hover {
+        background: linear-gradient(135deg, #0f766e, #115e59);
+        border-color: #5eead4;
+        box-shadow: 0 6px 18px rgba(45, 212, 191, 0.45);
+        transform: translateY(-1px);
+    }
+
+        .notif-btn-imprimir:hover i {
+            color: #ffffff;
+        }
+
+/* Autorizar: verde */
+.notif-btn-autorizar {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    border: 1px solid #4ade80;
+    box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4);
+}
+
+    .notif-btn-autorizar:hover {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        box-shadow: 0 6px 20px rgba(74, 222, 128, 0.55);
+        transform: translateY(-1px);
+    }
+
+.notif-btn-cerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    margin-left: 4px;
+    color: #38bdf8;
+    font-size: 1rem;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+    .notif-btn-cerrar:hover {
+        color: #ffffff;
+        background: #dc2626;
+        border-color: #f87171;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+
+.notif-vista-previa {
+    height: min(78vh, 900px);
+    padding: 14px !important;
+    background: #1e293b;
+}
+
+    .notif-vista-previa iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #ffffff;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
+    }
+
+/* --------------------------------------------------------------------------
+   4. SCROLLBAR (mismo estilo que Control de acceso y Tareas)
+   -------------------------------------------------------------------------- */
+.notif-lista::-webkit-scrollbar {
+    width: 8px;
+}
+
+.notif-lista::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+.notif-lista::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border: 1px solid #38bdf8;
+    border-radius: 4px;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    .notif-lista {
+        scrollbar-color: #1e293b #0f172a;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .notif-vista-previa {
+        height: auto;
+    }
+
+    .notif-modal-acciones {
+        width: 100%;
+    }
+
+        .notif-btn-imprimir,
+        .notif-btn-autorizar {
+            flex: 1;
+            justify-content: center;
+        }
+}

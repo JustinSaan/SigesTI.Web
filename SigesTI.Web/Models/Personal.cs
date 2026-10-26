@@ -32,6 +32,9 @@ namespace SigesTI.Web.Models
 
         public int Orden { get; set; }
 
+        // Usuario del sistema de la persona (a él le llegan las notificaciones de solicitudes)
+        public int? IdUsuario { get; set; }
+
         // Agrega una unidad de red a la lista separada por comas, sin repetirla
         public void AgregarUnidadRed(string unidad)
         {

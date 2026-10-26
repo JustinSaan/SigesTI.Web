@@ -40,7 +40,7 @@
                     <tr>
                         <th rowspan="2" style="width: 40px;"></th>
                         <th colspan="4" class="th-grupo">Información del Personal</th>
-                        <th class="th-grupo">Estado del Personal</th>
+                        <th colspan="2" class="th-grupo">Estado del Personal</th>
                         <th class="th-grupo">Gestión</th>
                     </tr>
                     <tr>
@@ -48,6 +48,7 @@
                         <th>Área</th>
                         <th>Puesto</th>
                         <th>Correo Electrónico</th>
+                        <th>Usuario del sistema</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
@@ -56,7 +57,7 @@
                     @if (!Model.ListaPersonal.Any())
                     {
                         <tr>
-                            <td colspan="7" class="text-muted py-4">No hay personal registrado todavía.</td>
+                            <td colspan="8" class="text-muted py-4">No hay personal registrado todavía.</td>
                         </tr>
                     }
                     else
@@ -70,7 +71,8 @@
                                 data-puesto="@persona.Puesto"
                                 data-correo="@persona.Correo"
                                 data-activo="@persona.Activo.ToString().ToLower()"
-                                data-responsable="@persona.EsResponsable.ToString().ToLower()">
+                                data-responsable="@persona.EsResponsable.ToString().ToLower()"
+                                data-usuario="@persona.IdUsuario">
 
                                 <td class="drag-handle" title="Arrastra para reordenar"><i class="bi bi-grip-vertical fs-5"></i></td>
 
@@ -80,6 +82,18 @@
                                 </td>
                                 <td class="celda-puesto">@persona.Puesto</td>
                                 <td><span class="texto-correo">@persona.Correo</span></td>
+                                <td>
+                                    @if (persona.IdUsuario.HasValue && Model.Usuarios.TryGetValue(persona.IdUsuario.Value, out var usuario))
+                                    {
+                                        <span class="badge-usuario-ligado" title="Le llegan las notificaciones de solicitudes">
+                                            <i class="bi bi-person-check-fill"></i>@usuario.NombreUsuario
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="texto-sin-usuario">Sin usuario</span>
+                                    }
+                                </td>
                                 <td>
                                     @if (persona.Activo)
                                     {
@@ -169,6 +183,22 @@
                                 <label class="form-check-label" for="chkResponsable">Responsable del Área</label>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="mer-tarjeta mt-3">
+                    <div class="mer-tarjeta-titulo"><i class="bi bi-person-badge"></i> Usuario del sistema</div>
+                    <label class="form-label" for="selectUsuario">Usuario</label>
+                    <select class="form-select" id="selectUsuario">
+                        <option value="">Sin usuario</option>
+                        @foreach (var usuario in Model.Usuarios.Values.OrderBy(u => u.NombreUsuario))
+                        {
+                            <option value="@usuario.IdUsuario">@usuario.NombreUsuario · @usuario.NombreCompleto@(usuario.Activo ? "" : " (inactivo)")</option>
+                        }
+                    </select>
+                    <div class="texto-ayuda-usuario">
+                        <i class="bi bi-info-circle"></i>
+                        A este usuario le llegan las notificaciones de solicitudes cuando la persona es solicitante, autoriza o es el ejecutivo de soporte.
                     </div>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 ﻿@page
 @model SigesTI.Web.Pages.Solicitudes.ConsultarModel
+@using SigesTI.Web.Models
 @{
     ViewData["Title"] = "Consultar Solicitudes";
 
@@ -8,8 +9,9 @@
     bool permisoEliminar = await Permisos.PuedeAsync(Modulos.ConsultarSolicitudes, Accion.Eliminar);
     bool permisoExportar = await Permisos.PuedeAsync(Modulos.ConsultarSolicitudes, Accion.Exportar);
 
-    int totalPendientes = Model.Solicitudes.Count(s => s.Estatus == "Pendiente");
-    int totalResueltas = Model.Solicitudes.Count - totalPendientes;
+    int totalPorAutorizar = Model.Solicitudes.Count(s => s.Estatus == EstatusSolicitud.PorAutorizar);
+    int totalPendientes = Model.Solicitudes.Count(s => s.Estatus == EstatusSolicitud.Pendiente);
+    int totalResueltas = Model.Solicitudes.Count(s => s.Estatus == EstatusSolicitud.Resuelto);
 
     string[] sistemas = { "Encuentro.NET", "ADMIN", "BDD", "SITA", "COA", "DNLP", "VUCEM", "ADCO" };
 }
@@ -27,14 +29,6 @@
             "Soporte Técnico" or "Soporte" => "area-soporte",
             _ => ""
         };
-    }
-
-    static string Iniciales(string? nombre)
-    {
-        var partes = (nombre ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (partes.Length == 0) return "?";
-        if (partes.Length == 1) return partes[0][..1].ToUpper();
-        return (partes[0][..1] + partes[1][..1]).ToUpper();
     }
 }
 
@@ -63,21 +57,21 @@
         <div class="sol-acciones">
             @if (permisoExportar)
             {
-                <button type="button" class="sol-btn-secundario" data-bs-toggle="modal" data-bs-target="#modalExportarSolicitudes">
-                    <i class="bi bi-file-earmark-text"></i> Exportar
+                <button type="button" class="btn btn-imprimir-sigest" data-bs-toggle="modal" data-bs-target="#modalExportarSolicitudes">
+                    <i class="bi bi-printer me-1"></i> Exportar
                 </button>
             }
             @if (permisoCrear)
             {
-                <a href="/Solicitudes/Generar" class="sol-btn-principal">
-                    <i class="bi bi-plus-circle-fill"></i> Nueva solicitud
+                <a href="/Solicitudes/Generar" class="btn btn-primary-sigest">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Nueva solicitud
                 </a>
             }
         </div>
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-sm-4">
+        <div class="col-sm-6 col-xl-3">
             <div class="sol-indicador">
                 <div class="sol-icono"><i class="bi bi-inboxes"></i></div>
                 <div>
@@ -86,7 +80,16 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="sol-indicador por-autorizar">
+                <div class="sol-icono"><i class="bi bi-shield-exclamation"></i></div>
+                <div>
+                    <div class="sol-indicador-valor">@totalPorAutorizar</div>
+                    <div class="sol-indicador-texto">Por autorizar</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
             <div class="sol-indicador pendiente">
                 <div class="sol-icono"><i class="bi bi-hourglass-split"></i></div>
                 <div>
@@ -95,7 +98,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-sm-4">
+        <div class="col-sm-6 col-xl-3">
             <div class="sol-indicador resuelto">
                 <div class="sol-icono"><i class="bi bi-check2-circle"></i></div>
                 <div>
@@ -108,104 +111,114 @@
 
     <div class="sol-panel overflow-hidden">
 
-        <form method="get" id="formFiltros" class="sol-filtros">
-            <div class="row g-3 align-items-end">
-                <div class="col-lg-4">
-                    <label class="form-label" for="inputFiltroReactivo">Búsqueda</label>
-                    <div class="sol-input-icono">
-                        <i class="bi bi-search"></i>
-                        <input type="text" id="inputFiltroReactivo" class="form-control" placeholder="Folio, solicitante, ejecutivo..." />
-                    </div>
+        <div class="sol-panel-encabezado">
+            <span><i class="bi bi-collection me-2"></i>Solicitudes de requerimientos</span>
+
+            <div class="sol-herramientas">
+                <div class="sol-buscador">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <input type="search" id="inputFiltroReactivo" class="form-control"
+                           placeholder="Buscar por folio, solicitante, ejecutivo..." aria-label="Buscar solicitud" autocomplete="off" />
                 </div>
-                <div class="col-sm-6 col-lg-2">
-                    <label class="form-label">Área</label>
-                    <select asp-for="FiltrarArea" asp-items="Model.ListaAreas" class="form-select filtro-servidor-auto">
-                        <option value="">Todas</option>
+
+                <div class="sol-cantidad">
+                    <label for="itemsPorPagina">Mostrar</label>
+                    <select id="itemsPorPagina" class="form-select">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
                     </select>
-                </div>
-                <div class="col-sm-6 col-lg-2">
-                    <label class="form-label">Solicitante</label>
-                    <select asp-for="FiltrarSolicitante" asp-items="Model.ListaPersonalFiltro" class="form-select filtro-servidor-auto">
-                        <option value="">Todos</option>
-                    </select>
-                </div>
-                <div class="col-sm-6 col-lg-2">
-                    <label class="form-label">Fecha de ingreso</label>
-                    <input type="date" asp-for="FiltrarFecha" class="form-control filtro-servidor-auto" />
-                </div>
-                <div class="col-sm-6 col-lg-2">
-                    <label class="form-label">Estatus</label>
-                    <div class="d-flex gap-2">
-                        <select asp-for="FiltrarEstatus" class="form-select filtro-servidor-auto">
-                            <option value="">Todos</option>
-                            <option value="Pendiente">Pendiente</option>
-                            <option value="Resuelto">Resuelto</option>
-                        </select>
-                        <a href="/Solicitudes/Consultar" class="sol-btn-fantasma px-3" title="Limpiar filtros">
-                            <i class="bi bi-arrow-counterclockwise"></i>
-                        </a>
-                    </div>
                 </div>
             </div>
+        </div>
+
+        <form method="get" id="formFiltros" class="sol-filtros">
+            <div class="sol-filtro">
+                <label>Área</label>
+                <select asp-for="FiltrarArea" asp-items="Model.ListaAreas" class="form-select filtro-servidor-auto">
+                    <option value="">Todas</option>
+                </select>
+            </div>
+            <div class="sol-filtro">
+                <label>Solicitante</label>
+                <select asp-for="FiltrarSolicitante" asp-items="Model.ListaPersonalFiltro" class="form-select filtro-servidor-auto">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+            <div class="sol-filtro">
+                <label>Fecha de ingreso</label>
+                <input type="date" asp-for="FiltrarFecha" class="form-control filtro-servidor-auto" />
+            </div>
+            <div class="sol-filtro">
+                <label>Estatus</label>
+                <select asp-for="FiltrarEstatus" class="form-select filtro-servidor-auto">
+                    <option value="">Todos</option>
+                    <option value="Por autorizar">Pendiente por autorizar</option>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="Resuelto">Resuelto</option>
+                </select>
+            </div>
+            <a href="/Solicitudes/Consultar" class="btn btn-limpiar-filtros">
+                <i class="bi bi-eraser me-1"></i> Limpiar filtros
+            </a>
         </form>
 
-        <div class="table-responsive">
-            <table class="sol-tabla" id="tablaBitacoraPrincipal">
+        <div class="table-responsive sol-tabla-contenedor">
+            <table class="sol-tabla align-middle text-center text-nowrap mb-0" id="tablaBitacoraPrincipal">
                 <thead>
                     <tr>
-                        <th class="text-center">Folio</th>
-                        <th>Solicitante</th>
-                        <th class="text-center">Área</th>
-                        <th>Ingreso → Entrega</th>
+                        <th colspan="2" class="th-grupo">Solicitud</th>
+                        <th colspan="5" class="th-grupo">Atención</th>
+                        <th class="th-grupo">Gestión</th>
+                    </tr>
+                    <tr>
+                        <th>Folio</th>
+                        <th>Solicitante y correo</th>
+                        <th>Área</th>
+                        <th>Ingreso</th>
+                        <th>Realización</th>
                         <th>Ejecutivo asignado</th>
-                        <th class="text-center">Estatus</th>
-                        <th class="text-center">Acciones</th>
+                        <th>Estatus</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (!Model.Solicitudes.Any())
                     {
                         <tr class="sol-fila-vacia">
-                            <td colspan="7" class="sol-vacio">
+                            <td colspan="8" class="sol-vacio">
                                 <i class="bi bi-inbox"></i>
-                                Ninguna solicitud coincide con los filtros aplicados.
+                                <span>Ninguna solicitud coincide con los filtros aplicados.</span>
                             </td>
                         </tr>
                     }
                     @foreach (var item in Model.Solicitudes)
                     {
-                        // Admin edita cualquier solicitud; los demás roles solo las pendientes
-                        bool esPendiente = item.Estatus == "Pendiente";
-                        bool puedeEditar = Permisos.EsAdmin || esPendiente;
-                        bool tieneEntrega = !esPendiente && item.FechaEntrega.HasValue && item.FechaEntrega.Value.Year > 1901;
+                        // Admin edita cualquier solicitud; los demás roles solo las que no están resueltas
+                        bool esResuelta = item.Estatus == EstatusSolicitud.Resuelto;
+                        bool puedeEditar = Permisos.EsAdmin || !esResuelta;
+                        bool tieneEntrega = esResuelta && item.FechaEntrega.HasValue && item.FechaEntrega.Value.Year > 1901;
 
                         <tr>
-                            <td class="text-center"><span class="sol-folio">@item.IdSolicitud.ToString("D4")</span></td>
+                            <td><span class="sol-folio">@item.IdSolicitud.ToString("D4")</span></td>
                             <td>
-                                <div class="sol-persona">
-                                    <div class="sol-avatar">@Iniciales(item.Personal?.Nombre)</div>
-                                    <div>
-                                        <div class="sol-persona-nombre">@(item.Personal?.Nombre ?? "N/A")</div>
-                                        <div class="sol-persona-correo">@item.CorreoSolicitante</div>
-                                    </div>
-                                </div>
+                                <span class="sol-persona-nombre d-block">@(item.Personal?.Nombre ?? "N/A")</span>
+                                <span class="sol-persona-correo">@item.CorreoSolicitante</span>
                             </td>
-                            <td class="text-center">
+                            <td>
                                 <span class="sol-area @ClaseArea(item.Personal?.Area)">@(item.Personal?.Area ?? "N/A")</span>
                             </td>
+                            <td><span class="sol-texto-fecha">@item.FechaIngreso.ToString("dd/MM/yyyy")</span></td>
                             <td>
-                                <div class="sol-fechas">
-                                    @item.FechaIngreso.ToString("dd/MM/yyyy")
-                                    <i class="bi bi-arrow-right"></i>
-                                    @if (tieneEntrega)
-                                    {
-                                        @item.FechaEntrega!.Value.ToString("dd/MM/yyyy")
-                                    }
-                                    else
-                                    {
-                                        <span class="sol-texto-tenue">En proceso</span>
-                                    }
-                                </div>
+                                @if (tieneEntrega)
+                                {
+                                    <span class="sol-texto-fecha">@item.FechaEntrega!.Value.ToString("dd/MM/yyyy")</span>
+                                }
+                                else
+                                {
+                                    <span class="sol-texto-tenue">En proceso</span>
+                                }
                             </td>
                             <td>
                                 @if (string.IsNullOrEmpty(item.EjecutivoAsignado))
@@ -214,37 +227,55 @@
                                 }
                                 else
                                 {
-                                    @item.EjecutivoAsignado
+                                    <span class="sol-celda-nombre">@item.EjecutivoAsignado</span>
                                 }
                             </td>
-                            <td class="text-center">
-                                <span class="sol-estatus @(esPendiente ? "pendiente" : "resuelto")">@item.Estatus</span>
+                            <td>
+                                @switch (item.Estatus)
+                                {
+                                    case EstatusSolicitud.PorAutorizar:
+                                        <span class="sol-estatus por-autorizar" title="Espera la autorización de @item.AutorizaAdmin">
+                                            <i class="bi bi-shield-exclamation"></i>Pendiente por autorizar
+                                        </span>
+                                        break;
+                                    case EstatusSolicitud.Resuelto:
+                                        <span class="sol-estatus resuelto"><i class="bi bi-check2"></i>Resuelto</span>
+                                        break;
+                                    default:
+                                        <span class="sol-estatus pendiente"><i class="bi bi-hourglass-split"></i>Pendiente</span>
+                                        break;
+                                }
                             </td>
-                            <td class="text-center text-nowrap">
-                                <button type="button" class="sol-btn-icono ver btn-visualizar" data-id="@item.IdSolicitud" title="Ver solicitud">
-                                    <i class="bi bi-eye-fill"></i>
-                                </button>
-                                @if (permisoEditar)
-                                {
-                                    <button type="button" class="sol-btn-icono editar btn-editar-directo" data-id="@item.IdSolicitud"
-                                            title="@(puedeEditar ? "Editar solicitud" : "La solicitud ya está resuelta")" disabled="@(!puedeEditar)">
-                                        <i class="bi bi-pencil-square"></i>
+                            <td>
+                                <div class="d-flex justify-content-center gap-1">
+                                    <button type="button" class="btn btn-accion-tabla btn-ver btn-visualizar" data-id="@item.IdSolicitud"
+                                            title="Ver solicitud" aria-label="Ver la solicitud @item.IdSolicitud.ToString("D4")">
+                                        <i class="bi bi-eye"></i>
                                     </button>
-                                }
-                                @if (permisoEliminar)
-                                {
-                                    <button type="button" class="sol-btn-icono eliminar btn-eliminar" data-id="@item.IdSolicitud" title="Eliminar solicitud">
-                                        <i class="bi bi-trash-fill"></i>
-                                    </button>
-                                }
+                                    @if (permisoEditar)
+                                    {
+                                        <button type="button" class="btn btn-accion-tabla btn-editar btn-editar-directo" data-id="@item.IdSolicitud"
+                                                title="@(puedeEditar ? "Editar solicitud" : "La solicitud ya está resuelta")" disabled="@(!puedeEditar)"
+                                                aria-label="Editar la solicitud @item.IdSolicitud.ToString("D4")">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                    }
+                                    @if (permisoEliminar)
+                                    {
+                                        <button type="button" class="btn btn-accion-tabla btn-eliminar" data-id="@item.IdSolicitud"
+                                                title="Eliminar solicitud" aria-label="Eliminar la solicitud @item.IdSolicitud.ToString("D4")">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }
 
                     <tr id="filaSinCoincidencias" class="sol-fila-vacia d-none">
-                        <td colspan="7" class="sol-vacio">
+                        <td colspan="8" class="sol-vacio">
                             <i class="bi bi-search"></i>
-                            No hay coincidencias con "<span id="filterQueryValue"></span>"
+                            <span>Ninguna solicitud coincide con "<span id="filterQueryValue"></span>".</span>
                         </td>
                     </tr>
                 </tbody>
@@ -252,19 +283,8 @@
         </div>
 
         <div class="sol-pie-tabla">
-            <div class="d-flex align-items-center gap-2">
-                <span>Mostrar</span>
-                <select id="itemsPorPagina" class="form-select form-select-sm">
-                    <option value="5">5</option>
-                    <option value="10" selected>10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                </select>
-                <span id="infoPaginacion">Mostrando 0-0 de 0 registros</span>
-            </div>
-            <nav>
-                <ul class="sol-paginacion" id="contenedorControlesPagina"></ul>
-            </nav>
+            <span id="infoPaginacion">Mostrando 0 solicitudes</span>
+            <nav id="contenedorControlesPagina" class="sol-paginacion" aria-label="Paginación de solicitudes"></nav>
         </div>
     </div>
 </div>
@@ -276,13 +296,13 @@
 
             <div class="modal-header">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="sol-icono sol-icono-chico"><i class="bi bi-file-earmark-text"></i></div>
+                    <div class="mer-icono"><i class="bi bi-file-earmark-text"></i></div>
                     <div>
                         <h5 class="modal-title mb-0" id="modalSolicitudLabel">Solicitud <span id="modal_Folio"></span></h5>
-                        <div class="sol-modal-subtitulo" id="modal_Subtitulo">Modo lectura</div>
+                        <small class="mer-subtitulo" id="modal_Subtitulo">Modo lectura</small>
                     </div>
                 </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
 
             <div class="modal-body">
@@ -405,14 +425,21 @@
                             <input type="date" id="modal_FechaIngreso" class="form-control ctrl-modal mb-3" />
 
                             <label class="form-label d-block">Estatus</label>
-                            <div class="sol-segmentos mb-3">
+
+                            <!-- Mientras espera autorización el estatus no se puede cambiar -->
+                            <div id="modal_AvisoAutorizacion" class="sol-aviso-autorizacion mb-3 d-none">
+                                <i class="bi bi-shield-exclamation"></i>
+                                <span>Pendiente por autorizar por <strong id="modal_AvisoAutorizador"></strong></span>
+                            </div>
+
+                            <div id="modal_SegmentosEstatus" class="sol-segmentos mb-3">
                                 <input type="radio" name="modal_Estatus" id="modal_EstatusPendiente" value="Pendiente" class="ctrl-modal seg-pendiente">
                                 <label for="modal_EstatusPendiente"><i class="bi bi-hourglass-split"></i> Pendiente</label>
                                 <input type="radio" name="modal_Estatus" id="modal_EstatusResuelto" value="Resuelto" class="ctrl-modal seg-resuelto">
                                 <label for="modal_EstatusResuelto"><i class="bi bi-check2-circle"></i> Resuelto</label>
                             </div>
 
-                            <label class="form-label" for="modal_FechaEntrega">Fecha de entrega</label>
+                            <label class="form-label" for="modal_FechaEntrega">Fecha de realización</label>
                             <input type="date" id="modal_FechaEntrega" class="form-control ctrl-modal" />
                         </div>
 
@@ -436,20 +463,30 @@
                                     <option value="@admin.Value">@admin.Text</option>
                                 }
                             </select>
+
+                            <div id="modal_InfoAutorizacion" class="sol-info-autorizacion mt-3 d-none">
+                                <i class="bi bi-patch-check-fill"></i>
+                                <span>Autorizado por <strong id="modal_AutorizadoPor"></strong><br /><small id="modal_FechaAutorizacion"></small></span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="modal-footer">
+                <button type="button" id="btnVerFormato" class="btn btn-imprimir-sigest me-auto">
+                    <i class="bi bi-file-earmark-richtext me-1"></i> Ver formato
+                </button>
                 @if (permisoEditar)
                 {
-                    <button type="button" id="btnLiberarEdicion" class="sol-btn-secundario me-auto">
-                        <i class="bi bi-unlock-fill"></i> Habilitar edición
+                    <button type="button" id="btnLiberarEdicion" class="btn btn-filtros-sigest">
+                        <i class="bi bi-unlock-fill me-1"></i> Habilitar edición
                     </button>
                 }
-                <button type="button" class="sol-btn-fantasma" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" id="btnGuardarCambiosModal" class="sol-btn-principal d-none">
+                <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cerrar
+                </button>
+                <button type="button" id="btnGuardarCambiosModal" class="btn btn-guardar px-4 d-none">
                     <i class="bi bi-save"></i> Guardar cambios
                 </button>
             </div>
@@ -458,90 +495,130 @@
     </div>
 </div>
 
-<!-- Filtros del reporte -->
-<div class="modal fade modal-solicitud" id="modalExportarSolicitudes" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="sol-icono sol-icono-chico"><i class="bi bi-file-earmark-text"></i></div>
-                    <div>
-                        <h5 class="modal-title mb-0">Exportar solicitudes</h5>
-                        <div class="sol-modal-subtitulo">Deje un filtro vacío para incluir todo</div>
-                    </div>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
+@if (permisoExportar)
+{
+    <!-- Filtros del reporte (mismo diseño que Imprimir bitácora) -->
+    <div class="modal fade modal-solicitud" id="modalExportarSolicitudes" tabindex="-1" aria-labelledby="tituloExportarSolicitudes" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
 
-            <div class="modal-body">
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label" for="reporteFechaInicio">Fecha inicial</label>
-                        <input type="date" id="reporteFechaInicio" class="form-control" />
+                <div class="modal-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="mer-icono"><i class="bi bi-file-earmark-text"></i></div>
+                        <div>
+                            <h5 class="modal-title mb-0" id="tituloExportarSolicitudes">Exportar solicitudes</h5>
+                            <small class="mer-subtitulo">Deja un filtro vacío para incluir todas las solicitudes</small>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="reporteFechaFin">Fecha final</label>
-                        <input type="date" id="reporteFechaFin" class="form-control" />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="reporteArea">Área</label>
-                        <select id="reporteArea" class="form-select">
-                            <option value="">Todas</option>
-                            @foreach (var area in Model.ListaAreas)
-                            {
-                                <option value="@area.Value">@area.Text</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="reporteSolicitante">Solicitante</label>
-                        <select id="reporteSolicitante" class="form-select">
-                            <option value="">Todos</option>
-                            @foreach (var persona in Model.ListaPersonalFiltro)
-                            {
-                                <option value="@persona.Value">@persona.Text</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="reporteEstatus">Estatus</label>
-                        <select id="reporteEstatus" class="form-select">
-                            <option value="">Todos</option>
-                            <option value="Pendiente">Pendiente</option>
-                            <option value="Resuelto">Resuelto</option>
-                        </select>
-                    </div>
+                    <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
                 </div>
-            </div>
 
-            <div class="modal-footer">
-                <button type="button" class="sol-btn-fantasma" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="sol-btn-principal" id="btnGenerarReporteSolicitudes">
-                    <i class="bi bi-file-earmark-check"></i> Generar reporte
-                </button>
+                <div class="modal-body">
+                    <form id="formReporteSolicitudes" method="get" action="/Solicitudes/ReporteSolicitudes" target="iframeReporteSolicitudes">
+
+                        <div class="sol-tarjeta">
+                            <div class="sol-tarjeta-titulo"><i class="bi bi-calendar-range"></i> Periodo</div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="reporteFechaInicio">Fecha inicial</label>
+                                    <input type="date" id="reporteFechaInicio" name="FechaInicio" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="reporteFechaFin">Fecha final</label>
+                                    <input type="date" id="reporteFechaFin" name="FechaFin" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sol-tarjeta mb-0">
+                            <div class="sol-tarjeta-titulo"><i class="bi bi-funnel"></i> Filtros</div>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label" for="reporteArea">Área</label>
+                                    <select id="reporteArea" name="Area" class="form-select">
+                                        <option value="">Todas</option>
+                                        @foreach (var area in Model.ListaAreas)
+                                        {
+                                            <option value="@area.Value">@area.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="reporteSolicitante">Solicitante</label>
+                                    <select id="reporteSolicitante" name="Solicitante" class="form-select">
+                                        <option value="">Todos</option>
+                                        @foreach (var persona in Model.ListaPersonalFiltro)
+                                        {
+                                            <option value="@persona.Value">@persona.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="reporteEstatus">Estatus</label>
+                                    <select id="reporteEstatus" name="Estatus" class="form-select">
+                                        <option value="">Todos</option>
+                                        <option value="Por autorizar">Pendiente por autorizar</option>
+                                        <option value="Pendiente">Pendiente</option>
+                                        <option value="Resuelto">Resuelto</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="submit" form="formReporteSolicitudes" class="btn btn-guardar px-4">
+                        <i class="bi bi-eye"></i> Ver vista previa
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
-</div>
 
-<!-- Vista previa del reporte -->
-<div class="modal fade modal-solicitud" id="modalVistaReporte" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title mb-0"><i class="bi bi-eye-fill me-2 text-info"></i>Vista previa del reporte</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body sol-reporte-cuerpo">
-                <div id="reporteLoading" class="sol-reporte-cargando">
-                    <div class="spinner-border text-primary mb-3" role="status"></div>
-                    <h6 class="fw-bold">Generando reporte...</h6>
+    <!-- Vista previa del reporte (mismo diseño que la de Bitácora) -->
+    <div class="modal fade modal-solicitud" id="modalVistaReporte" tabindex="-1" aria-labelledby="tituloVistaReporte" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-fullscreen-lg-down">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="mer-icono"><i class="bi bi-file-earmark-richtext"></i></div>
+                        <div>
+                            <h5 class="modal-title mb-0" id="tituloVistaReporte">Vista previa del reporte</h5>
+                            <small class="mer-subtitulo">Revisa el reporte antes de imprimirlo o guardarlo en PDF</small>
+                        </div>
+                    </div>
+
+                    <div class="sol-vista-acciones">
+                        <button type="button" class="btn btn-filtros-sigest" data-bs-toggle="modal" data-bs-target="#modalExportarSolicitudes">
+                            <i class="bi bi-sliders me-1"></i> Cambiar filtros
+                        </button>
+                        <button type="button" class="btn btn-imprimir-sigest" id="btnImprimirReporte">
+                            <i class="bi bi-printer me-1"></i> Imprimir
+                        </button>
+                        <button type="button" class="btn btn-pdf-sigest" id="btnDescargarPdf">
+                            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Descargar PDF
+                        </button>
+                        <button type="button" class="mer-btn-cerrar ms-1" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                    </div>
                 </div>
-                <iframe id="iframeReporteSolicitudes" class="sol-reporte-iframe"></iframe>
+
+                <div class="modal-body sol-vista-previa">
+                    <iframe id="iframeReporteSolicitudes"
+                            name="iframeReporteSolicitudes"
+                            title="Vista previa del reporte de solicitudes"></iframe>
+                </div>
+
             </div>
         </div>
     </div>
-</div>
+}
 
 @section Scripts {
     <script src="~/js/solicitudes.js" asp-append-version="true"></script>

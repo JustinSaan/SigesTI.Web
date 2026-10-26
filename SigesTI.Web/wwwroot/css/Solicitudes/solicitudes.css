@@ -16,6 +16,7 @@
     --sol-acento: #38bdf8;
     --sol-texto: #f1f5f9;
     --sol-tenue: #94a3b8;
+    --sol-por-autorizar: #c084fc;
     --sol-pendiente: #fbbf24;
     --sol-resuelto: #34d399;
     color: var(--sol-texto);
@@ -25,13 +26,6 @@
         background-color: rgba(56, 189, 248, 0.3);
         color: #ffffff;
     }
-
-/* Barras de desplazamiento oscuras (tabla y modales) */
-.solicitudes-container *,
-.modal-solicitud * {
-    scrollbar-width: thin;
-    scrollbar-color: #1e3a5f #0b132b;
-}
 
 /* --------------------------------------------------------------------------
    1. ENCABEZADO DE LA PÁGINA
@@ -225,24 +219,6 @@
     cursor: default;
 }
 
-/* Input con icono a la izquierda (buscador) */
-.sol-input-icono {
-    position: relative;
-}
-
-    .sol-input-icono i {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--sol-tenue);
-        pointer-events: none;
-    }
-
-    .sol-input-icono .form-control {
-        padding-left: 36px;
-    }
-
 /* Interruptores */
 .solicitudes-container .form-switch .form-check-input,
 .modal-solicitud .form-switch .form-check-input {
@@ -414,117 +390,205 @@
     }
 
 /* --------------------------------------------------------------------------
-   6. BOTONES
+   6. BOTONES (mismos que Control de acceso)
    -------------------------------------------------------------------------- */
-.sol-btn-principal,
-.sol-btn-secundario,
-.sol-btn-fantasma {
+.btn-primary-sigest,
+.btn-imprimir-sigest,
+.btn-pdf-sigest,
+.btn-filtros-sigest {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-weight: 700 !important;
-    font-size: 0.85rem !important;
-    border-radius: 12px !important;
-    padding: 9px 18px !important;
-    transition: all 0.2s ease !important;
-    text-decoration: none;
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    border-radius: 14px;
+    transition: all 0.2s ease-in-out;
 }
 
-.sol-btn-principal {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
-    border: 1px solid #38bdf8 !important;
-    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3) !important;
-}
-
-    .sol-btn-principal:hover {
-        background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
-        box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4) !important;
-        transform: translateY(-1px);
-    }
-
-.sol-btn-secundario {
+/* Nueva solicitud / Ver solicitudes: celeste */
+.btn-primary-sigest {
     color: #ffffff !important;
     background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(15, 23, 42, 0.8)) !important;
     border: 1px solid #0284c7 !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
 }
 
-    .sol-btn-secundario:hover {
+    .btn-primary-sigest:hover {
         background: linear-gradient(135deg, #0284c7, #0369a1) !important;
         border-color: #38bdf8 !important;
+        box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4);
         transform: translateY(-1px);
     }
 
-.sol-btn-fantasma {
-    color: #cbd5e1 !important;
-    background: transparent !important;
-    border: 1px solid #334155 !important;
+/* Exportar / Imprimir / Ver formato: verde azulado */
+.btn-imprimir-sigest {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.16), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid rgba(45, 212, 191, 0.55) !important;
+    box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
 }
 
-    .sol-btn-fantasma:hover {
-        color: #ffffff !important;
-        background: #1e293b !important;
-        border-color: #475569 !important;
+    .btn-imprimir-sigest i {
+        color: #2dd4bf;
     }
 
-.sol-btn-guardar {
-    width: 100%;
-    padding: 12px 18px !important;
-    font-size: 0.95rem !important;
+    .btn-imprimir-sigest:hover {
+        background: linear-gradient(135deg, #0f766e, #115e59) !important;
+        border-color: #5eead4 !important;
+        box-shadow: 0 6px 18px rgba(45, 212, 191, 0.45);
+        transform: translateY(-1px);
+    }
+
+        .btn-imprimir-sigest:hover i {
+            color: #ffffff;
+        }
+
+/* Descargar PDF: rojo */
+.btn-pdf-sigest {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid rgba(248, 113, 113, 0.5) !important;
+    border-radius: 15px;
+    box-shadow: 0 4px 18px rgba(220, 38, 38, 0.35);
 }
 
-/* Botones de acción de la tabla */
-.sol-btn-icono {
-    width: 34px;
-    height: 34px;
+    .btn-pdf-sigest:hover:not(:disabled) {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #991b1b, #7f1d1d) !important;
+        border-color: #f87171 !important;
+        box-shadow: 0 0 22px rgba(248, 113, 113, 0.5);
+        transform: translateY(-2px);
+    }
+
+/* Cambiar filtros / Habilitar edición: ámbar */
+.btn-filtros-sigest {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid rgba(251, 191, 36, 0.5) !important;
+    border-radius: 15px;
+    box-shadow: 0 4px 18px rgba(217, 119, 6, 0.35);
+}
+
+    .btn-filtros-sigest:hover {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #b45309, #92400e) !important;
+        border-color: #fbbf24 !important;
+        box-shadow: 0 0 22px rgba(251, 191, 36, 0.5);
+        transform: translateY(-2px);
+    }
+
+/* Botones Cancelar y Guardar de los modales */
+.btn-cancelar,
+.btn-guardar {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
-    border: 1px solid transparent;
-    font-size: 0.95rem;
-    transition: all 0.15s ease;
+    gap: 8px;
+    padding: 9px 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 12px;
+    transition: all 0.2s ease;
 }
 
-    .sol-btn-icono.ver {
-        color: #38bdf8;
-        background: rgba(56, 189, 248, 0.1);
-        border-color: rgba(56, 189, 248, 0.3);
+.btn-cancelar {
+    color: #e2e8f0 !important;
+    background: linear-gradient(135deg, rgba(148, 163, 184, 0.14), rgba(15, 23, 42, 0.85)) !important;
+    border: 1px solid rgba(148, 163, 184, 0.45) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+    .btn-cancelar i {
+        color: #94a3b8;
     }
 
-    .sol-btn-icono.editar {
-        color: #fbbf24;
-        background: rgba(251, 191, 36, 0.1);
-        border-color: rgba(251, 191, 36, 0.3);
-    }
-
-    .sol-btn-icono.eliminar {
-        color: #f87171;
-        background: rgba(248, 113, 113, 0.1);
-        border-color: rgba(248, 113, 113, 0.3);
-    }
-
-    .sol-btn-icono:hover:not(:disabled) {
-        color: #ffffff;
+    .btn-cancelar:hover {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #475569, #334155) !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 6px 16px rgba(148, 163, 184, 0.3);
         transform: translateY(-1px);
     }
 
-    .sol-btn-icono.ver:hover {
-        background: #0284c7;
+        .btn-cancelar:hover i {
+            color: #ffffff;
+        }
+
+.btn-guardar {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    border: 1px solid #38bdf8 !important;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+}
+
+    .btn-guardar:hover {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.55);
+        transform: translateY(-1px);
     }
 
-    .sol-btn-icono.editar:hover:not(:disabled) {
-        background: #d97706;
+    .btn-cancelar:active,
+    .btn-guardar:active {
+        transform: scale(0.96);
     }
 
-    .sol-btn-icono.eliminar:hover {
+/* Generar solicitud: botón ancho al final de la columna lateral */
+.sol-btn-generar {
+    width: 100%;
+    padding: 12px 18px;
+    font-size: 0.95rem;
+}
+
+/* Botón X para cerrar los modales */
+.mer-btn-cerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    margin-left: auto;
+    color: #38bdf8;
+    font-size: 1rem;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+    .mer-btn-cerrar:hover {
+        color: #ffffff;
         background: #dc2626;
+        border-color: #f87171;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
     }
 
-    .sol-btn-icono:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
+/* Limpiar filtros */
+.btn-limpiar-filtros {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 16px;
+    color: #e2e8f0 !important;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+    background: linear-gradient(180deg, #1e293b, #0f172a) !important;
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+    .btn-limpiar-filtros i {
+        color: #38bdf8;
+    }
+
+    .btn-limpiar-filtros:hover {
+        color: #ffffff !important;
+        border-color: #38bdf8 !important;
+        transform: translateY(-1px);
     }
 
 /* --------------------------------------------------------------------------
@@ -561,6 +625,12 @@
     letter-spacing: 0.4px;
 }
 
+.sol-indicador.por-autorizar .sol-icono {
+    color: var(--sol-por-autorizar);
+    background: rgba(192, 132, 252, 0.12);
+    border-color: rgba(192, 132, 252, 0.35);
+}
+
 .sol-indicador.pendiente .sol-icono {
     color: var(--sol-pendiente);
     background: rgba(251, 191, 36, 0.12);
@@ -574,274 +644,342 @@
 }
 
 /* --------------------------------------------------------------------------
-   8. TABLA DE SOLICITUDES
+   8. TABLA DE SOLICITUDES (mismo diseño que Usuarios de Control de Acceso)
    -------------------------------------------------------------------------- */
 .sol-panel-encabezado {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     padding: 14px 20px;
-    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
     color: var(--sol-acento);
     font-weight: 700;
-    font-size: 0.92rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+    background: rgba(15, 23, 42, 0.85);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.3);
 }
 
+.sol-herramientas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.sol-buscador {
+    position: relative;
+    width: 320px;
+}
+
+    .sol-buscador i {
+        position: absolute;
+        top: 50%;
+        left: 12px;
+        color: #64748b;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .solicitudes-container .sol-buscador .form-control {
+        padding-left: 36px;
+    }
+
+.sol-cantidad {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .sol-cantidad label {
+        color: var(--sol-tenue);
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .sol-cantidad .form-select {
+        width: 80px;
+    }
+
+/* Filtros del servidor: se acomodan solos en varias filas */
 .sol-filtros {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--sol-borde-suave);
-    background: rgba(11, 19, 43, 0.45);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    padding: 14px 20px 2px;
+}
+
+.sol-filtro {
+    flex: 1 1 170px;
+}
+
+    .sol-filtro label {
+        display: block;
+        color: var(--sol-tenue);
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-bottom: 5px;
+    }
+
+.sol-tabla-contenedor {
+    margin: 12px;
+    background: rgba(11, 19, 43, 0.55);
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 12px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .sol-tabla {
+    --linea-vertical: rgba(56, 189, 248, 0.16);
+    --linea-horizontal: rgba(148, 163, 184, 0.12);
     width: 100%;
-    margin: 0;
     border-collapse: separate;
     border-spacing: 0;
 }
 
     .sol-tabla thead th {
-        padding: 12px 14px;
-        color: #38bdf8;
-        font-size: 0.72rem;
+        padding: 11px 10px;
+        color: #7dd3fc;
+        font-size: 0.68rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.6px;
+        letter-spacing: 0.9px;
         white-space: nowrap;
-        background: #0b132b;
+        background: linear-gradient(180deg, #14294d 0%, #0f1d38 100%);
+        border-left: 1px solid var(--linea-vertical);
         border-bottom: 1px solid rgba(56, 189, 248, 0.25);
     }
 
+        .sol-tabla thead th:first-child {
+            border-left: none;
+        }
+
+        /* Títulos de grupo en blanco y subrayados */
+        .sol-tabla thead th.th-grupo {
+            color: #e2e8f0;
+            border-bottom: 2px solid rgba(56, 189, 248, 0.55);
+        }
+
     .sol-tabla tbody td {
-        padding: 12px 14px;
+        padding: 10px;
         color: #f1f5f9;
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         vertical-align: middle;
+        border-left: 1px solid var(--linea-vertical);
+        border-bottom: 1px solid var(--linea-horizontal);
+        transition: background-color 0.15s ease;
+    }
+
+        .sol-tabla tbody td:first-child {
+            border-left: none;
+        }
+
+    .sol-tabla tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .sol-tabla tbody tr:nth-child(even) td {
+        background: rgba(148, 163, 184, 0.035);
+    }
+
+    .sol-tabla tbody tr:hover td {
+        background: rgba(56, 189, 248, 0.08);
+    }
+
+        .sol-tabla tbody tr:hover td:first-child {
+            box-shadow: inset 3px 0 0 var(--sol-acento);
+        }
+
+    .sol-tabla tbody tr.sol-fila-vacia td {
         background: transparent;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        box-shadow: none;
     }
-
-    .sol-tabla tbody tr {
-        transition: background 0.15s ease;
-    }
-
-        .sol-tabla tbody tr:hover td {
-            background: rgba(56, 189, 248, 0.07);
-        }
-
-        .sol-tabla tbody tr.sol-fila-vacia:hover td {
-            background: transparent;
-        }
 
 .sol-folio {
-    font-family: Consolas, monospace;
+    color: var(--sol-acento);
+    font-family: "Cascadia Mono", Consolas, monospace;
     font-weight: 700;
-    color: #38bdf8;
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.25);
-    padding: 3px 9px;
-    border-radius: 8px;
-    font-size: 0.82rem;
 }
 
-.sol-persona {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.sol-avatar {
-    width: 34px;
-    height: 34px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.78rem;
-    font-weight: 800;
-    color: #e0f2fe;
-    background: linear-gradient(135deg, #1e3a8a, #0369a1);
-    border: 1px solid rgba(56, 189, 248, 0.35);
-}
-
-.sol-persona-nombre {
-    font-weight: 700;
+.sol-persona-nombre,
+.sol-celda-nombre {
     color: #ffffff;
-    line-height: 1.2;
+    font-weight: 700;
 }
 
 .sol-persona-correo {
-    font-size: 0.76rem;
     color: var(--sol-tenue);
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 0.76rem;
 }
 
-.sol-fechas {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-family: Consolas, monospace;
-    font-size: 0.8rem;
-    white-space: nowrap;
+.sol-texto-fecha {
+    color: #cbd5e1;
+    font-variant-numeric: tabular-nums;
 }
-
-    .sol-fechas i {
-        color: #475569;
-    }
 
 .sol-texto-tenue {
     color: #64748b;
-    font-style: italic;
+    font-size: 0.78rem;
 }
 
 .sol-vacio {
-    padding: 48px 16px !important;
-    text-align: center;
-    color: var(--sol-tenue) !important;
+    padding: 36px 12px !important;
+    color: #64748b !important;
 }
 
     .sol-vacio i {
         display: block;
+        margin-bottom: 8px;
         font-size: 2rem;
         color: #334155;
-        margin-bottom: 8px;
     }
 
-/* Estatus */
+/* Insignias de área y estatus (mismo estilo que rol y estado de Usuarios) */
+.sol-area,
 .sol-estatus {
+    --color: #94a3b8;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 12px;
-    border-radius: 999px;
-    font-size: 0.76rem;
+    padding: 5px 12px;
+    color: color-mix(in srgb, var(--color) 35%, #ffffff);
+    font-size: 0.72rem;
     font-weight: 700;
+    letter-spacing: 0.3px;
     white-space: nowrap;
-}
-
-    .sol-estatus::before {
-        content: "";
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: currentColor;
-    }
-
-    .sol-estatus.pendiente {
-        color: #fbbf24;
-        background: rgba(251, 191, 36, 0.12);
-        border: 1px solid rgba(251, 191, 36, 0.35);
-    }
-
-    .sol-estatus.resuelto {
-        color: #34d399;
-        background: rgba(52, 211, 153, 0.12);
-        border: 1px solid rgba(52, 211, 153, 0.35);
-    }
-
-/* Badges de área (mismos colores que Plan de Respaldos) */
-.sol-area {
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 4px 12px;
+    background: color-mix(in srgb, var(--color) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color) 55%, transparent);
     border-radius: 8px;
-    white-space: nowrap;
-    color: #e5e7eb;
-    background-color: #1f2937;
-    border: 1px solid #4b5563;
 }
 
-    .sol-area.area-administracion {
-        background-color: #451a03;
-        color: #fef3c7;
-        border-color: #b45309;
+    .sol-area.area-administracion { --color: #f59e0b; }
+    .sol-area.area-cobranza { --color: #f87171; }
+    .sol-area.area-ventas { --color: #38bdf8; }
+    .sol-area.area-consultoria { --color: #fb923c; }
+    .sol-area.area-soporte { --color: #f472b6; }
+
+    .sol-estatus i {
+        font-size: 0.75rem;
     }
 
-    .sol-area.area-cobranza {
-        background-color: #450a0a;
-        color: #fee2e2;
-        border-color: #991b1b;
+    .sol-estatus.por-autorizar { --color: #c084fc; }
+    .sol-estatus.pendiente { --color: #fbbf24; }
+    .sol-estatus.resuelto { --color: #4ade80; }
+
+/* Botones de acciones de la tabla (mismos que Usuarios, Personal y Tareas) */
+.btn-accion-tabla {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: #ffffff !important;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    transition: all 0.2s ease;
+}
+
+    .btn-accion-tabla:hover:not(:disabled) {
+        transform: translateY(-1px);
     }
 
-    .sol-area.area-ventas {
-        background-color: #0c4a6e;
-        color: #e0f2fe;
-        border-color: #0369a1;
+    .btn-accion-tabla:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        pointer-events: auto;
     }
 
-    .sol-area.area-consultoria {
-        background-color: #431407;
-        color: #ffedd5;
-        border-color: #9a3412;
+    .btn-accion-tabla.btn-ver {
+        background-color: #134e4a;
+        border: 1px solid #0f766e;
     }
 
-    .sol-area.area-soporte {
-        background-color: #500724;
-        color: #fce7f3;
-        border-color: #831843;
+        .btn-accion-tabla.btn-ver:hover {
+            background-color: #0d9488;
+            border-color: #2dd4bf;
+            box-shadow: 0 0 8px rgba(45, 212, 191, 0.5);
+        }
+
+    .btn-accion-tabla.btn-editar {
+        background-color: #0f3d61;
+        border: 1px solid #1d6fa5;
     }
+
+        .btn-accion-tabla.btn-editar:hover:not(:disabled) {
+            background-color: #0284c7;
+            border-color: #38bdf8;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+        }
+
+    .btn-accion-tabla.btn-eliminar {
+        background-color: #61131b;
+        border: 1px solid #a82431;
+    }
+
+        .btn-accion-tabla.btn-eliminar:hover {
+            background-color: #b91c1c;
+            border-color: #f87171;
+            box-shadow: 0 0 8px rgba(248, 113, 113, 0.5);
+        }
 
 /* Pie de la tabla y paginación */
 .sol-pie-tabla {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
     flex-wrap: wrap;
-    gap: 12px;
-    padding: 14px 20px;
-    border-top: 1px solid var(--sol-borde-suave);
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 18px 16px;
     color: var(--sol-tenue);
-    font-size: 0.8rem;
+    font-size: 0.82rem;
 }
-
-    .sol-pie-tabla .form-select {
-        width: auto;
-        padding: 4px 30px 4px 10px;
-        font-size: 0.8rem !important;
-    }
 
 .sol-paginacion {
     display: flex;
-    gap: 4px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
-    .sol-paginacion .page-link {
-        min-width: 32px;
-        height: 32px;
-        display: flex;
+    .sol-paginacion button {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 8px !important;
-        font-size: 0.8rem;
-        font-weight: 700;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 10px;
         color: #cbd5e1;
-        background: #0b132b;
-        border: 1px solid #1e3a5f;
-        text-decoration: none;
-        transition: all 0.15s ease;
+        font-size: 0.82rem;
+        font-weight: 700;
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 9px;
+        transition: all 0.18s ease;
     }
 
-        .sol-paginacion .page-link:hover {
+        .sol-paginacion button:hover:not(:disabled):not(.active) {
             color: #ffffff;
-            border-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.16);
+            border-color: rgba(56, 189, 248, 0.55);
         }
 
-    .sol-paginacion .page-item.active .page-link {
-        color: #ffffff;
-        background: linear-gradient(135deg, #0284c7, #0369a1);
-        border-color: #38bdf8;
-    }
+        .sol-paginacion button.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            border-color: #38bdf8;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+        }
 
-    .sol-paginacion .page-item.disabled .page-link {
-        opacity: 0.35;
-        pointer-events: none;
-    }
+        .sol-paginacion button:disabled {
+            cursor: not-allowed;
+            opacity: 0.35;
+        }
 
 /* Pantalla de carga */
 .sol-cargando {
@@ -887,6 +1025,8 @@
 }
 
 .modal-solicitud .modal-header {
+    flex-wrap: wrap;
+    gap: 12px;
     background: #0b132b !important;
     border-bottom: 1px solid rgba(56, 189, 248, 0.2) !important;
     padding: 16px 22px !important;
@@ -905,11 +1045,6 @@
     background: #0b132b !important;
     border-top: 1px solid rgba(56, 189, 248, 0.15) !important;
     padding: 12px 22px !important;
-}
-
-.sol-modal-subtitulo {
-    color: #94a3b8;
-    font-size: 0.8rem;
 }
 
 /* Historial de comentarios (mismo diseño que Tareas Programadas) */
@@ -959,25 +1094,151 @@
     word-break: break-word;
 }
 
-/* Vista previa del reporte */
-.sol-reporte-cuerpo {
-    height: 80vh;
-    padding: 0 !important;
-    background: #ffffff;
-}
-
-.sol-reporte-cargando {
-    height: 100%;
+/* Icono y subtítulo del encabezado de los modales (mismos que Control de acceso) */
+.mer-icono {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #0f172a;
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    color: #38bdf8;
+    font-size: 1.25rem;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 12px;
 }
 
-.sol-reporte-iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-    display: none;
+.mer-subtitulo {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+/* Aviso de autorización en el modal de detalle */
+.sol-aviso-autorizacion,
+.sol-info-autorizacion {
+    --color: #c084fc;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    color: #e2e8f0;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    background: color-mix(in srgb, var(--color) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color) 45%, transparent);
+    border-radius: 10px;
+}
+
+    .sol-aviso-autorizacion i,
+    .sol-info-autorizacion i {
+        color: var(--color);
+        font-size: 1.05rem;
+    }
+
+    .sol-aviso-autorizacion strong,
+    .sol-info-autorizacion strong {
+        color: #ffffff;
+    }
+
+.sol-info-autorizacion {
+    --color: #4ade80;
+}
+
+    .sol-info-autorizacion small {
+        color: #94a3b8;
+    }
+
+/* Texto de ayuda debajo de un campo */
+.sol-ayuda {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    line-height: 1.35;
+}
+
+    .sol-ayuda i {
+        color: #38bdf8;
+    }
+
+/* Vista previa del reporte (mismo diseño que la de Bitácora) */
+.sol-vista-acciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.sol-vista-previa {
+    height: min(78vh, 900px);
+    padding: 14px !important;
+    background: #1e293b;
+}
+
+    .sol-vista-previa iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #ffffff;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
+    }
+
+/* --------------------------------------------------------------------------
+   10. SCROLLBAR (mismo estilo que Control de acceso y Tareas)
+   -------------------------------------------------------------------------- */
+.sol-tabla-contenedor::-webkit-scrollbar,
+.modal-solicitud .modal-body::-webkit-scrollbar,
+.box-historial-comentarios::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.sol-tabla-contenedor::-webkit-scrollbar-track,
+.modal-solicitud .modal-body::-webkit-scrollbar-track,
+.box-historial-comentarios::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+.sol-tabla-contenedor::-webkit-scrollbar-thumb,
+.modal-solicitud .modal-body::-webkit-scrollbar-thumb,
+.box-historial-comentarios::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border: 1px solid #38bdf8;
+    border-radius: 4px;
+}
+
+    .sol-tabla-contenedor::-webkit-scrollbar-thumb:hover,
+    .modal-solicitud .modal-body::-webkit-scrollbar-thumb:hover,
+    .box-historial-comentarios::-webkit-scrollbar-thumb:hover {
+        background: #0284c7;
+    }
+
+@supports not selector(::-webkit-scrollbar) {
+    .sol-tabla-contenedor,
+    .modal-solicitud .modal-body,
+    .box-historial-comentarios {
+        scrollbar-color: #1e293b #0f172a;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   11. TABLETA Y CELULAR
+   -------------------------------------------------------------------------- */
+@media (max-width: 991.98px) {
+    .sol-vista-previa {
+        height: auto;
+    }
+
+    .sol-vista-acciones {
+        width: 100%;
+    }
+
+        .sol-vista-acciones .btn {
+            flex: 1;
+            justify-content: center;
+        }
 }

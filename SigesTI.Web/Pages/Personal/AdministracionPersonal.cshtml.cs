@@ -30,11 +30,19 @@ namespace SigesTI.Web.Pages.Personal
         public List<Models.Personal> ListaPersonal { get; set; } = new();
         public List<string> Areas { get; set; } = new();
 
+        // Usuarios del sistema para ligarlos con una persona (IdUsuario -> usuario)
+        public Dictionary<int, Models.UsuarioSistema> Usuarios { get; set; } = new();
+
         public async Task OnGetAsync()
         {
             ListaPersonal = await _context.Personal
                 .OrderBy(p => p.Orden)
                 .ToListAsync();
+
+            Usuarios = await _context.UsuariosSistema
+                .AsNoTracking()
+                .OrderBy(u => u.NombreUsuario)
+                .ToDictionaryAsync(u => u.IdUsuario);
 
             Areas = AreasBase
                 .Union(ListaPersonal.Select(p => p.Area).Where(a => !string.IsNullOrWhiteSpace(a)))
@@ -68,6 +76,25 @@ namespace SigesTI.Web.Pages.Personal
             if (!new EmailAddressAttribute().IsValid(dto.Correo))
             {
                 return new JsonResult(new { success = false, message = "El correo electrónico no es válido." });
+            }
+
+            if (dto.IdUsuario.HasValue)
+            {
+                if (!await _context.UsuariosSistema.AnyAsync(u => u.IdUsuario == dto.IdUsuario))
+                {
+                    return new JsonResult(new { success = false, message = "El usuario del sistema ya no existe." });
+                }
+
+                // Un usuario solo puede estar ligado a una persona
+                var ligadoA = await _context.Personal
+                    .Where(p => p.IdUsuario == dto.IdUsuario && p.Id != dto.Id)
+                    .Select(p => p.Nombre)
+                    .FirstOrDefaultAsync();
+
+                if (ligadoA != null)
+                {
+                    return new JsonResult(new { success = false, message = $"Ese usuario ya está ligado a {ligadoA}." });
+                }
             }
 
             Models.Personal? persona;
@@ -106,6 +133,7 @@ namespace SigesTI.Web.Pages.Personal
             persona.Correo = dto.Correo;
             persona.Activo = dto.Activo;
             persona.EsResponsable = dto.EsResponsable;
+            persona.IdUsuario = dto.IdUsuario;
 
             await _context.SaveChangesAsync();
             return new JsonResult(new { success = true });
@@ -188,5 +216,6 @@ namespace SigesTI.Web.Pages.Personal
         public string Correo { get; set; } = string.Empty;
         public bool Activo { get; set; }
         public bool EsResponsable { get; set; }
+        public int? IdUsuario { get; set; }
     }
 }
