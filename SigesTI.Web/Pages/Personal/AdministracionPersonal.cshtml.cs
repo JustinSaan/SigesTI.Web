@@ -1,134 +1,146 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SigesTI.Web.Data;
-using SigesTI.Web.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using SigesTI.Web.Seguridad;
 
 namespace SigesTI.Web.Pages.Personal
 {
-    public class IndexModel : PageModel
+    [Modulo(Modulos.Personal)]
+    public class AdministracionPersonalModel : PageModel
     {
         private readonly ApplicationDbContext _context;
 
-        public IndexModel(ApplicationDbContext context)
+        // Áreas que siempre aparecen en el modal (se agregan también las que ya existan en la base de datos)
+        private static readonly string[] AreasBase =
+        {
+            "Dirección General", "Sistemas", "Desarrollo", "Ventas",
+            "Administración", "Soporte Técnico", "Consultoría", "Cobranza"
+        };
+
+        private readonly PermisosService _permisos;
+
+        public AdministracionPersonalModel(ApplicationDbContext context, PermisosService permisos)
         {
             _context = context;
+            _permisos = permisos;
         }
 
         public List<Models.Personal> ListaPersonal { get; set; } = new();
+        public List<string> Areas { get; set; } = new();
 
         public async Task OnGetAsync()
         {
-            // Trae todo el personal de la tabla ordenado por la propiedad 'Orden'
             ListaPersonal = await _context.Personal
                 .OrderBy(p => p.Orden)
                 .ToListAsync();
+
+            Areas = AreasBase
+                .Union(ListaPersonal.Select(p => p.Area).Where(a => !string.IsNullOrWhiteSpace(a)))
+                .ToList();
         }
 
-        public async Task<IActionResult> OnPostRegistrarEmpleadoAsync([FromBody] EmpleadoEditarDTO dto)
+        // Registra (Id = 0) o actualiza (Id > 0) a una persona
+        public async Task<IActionResult> OnPostGuardarAsync([FromBody] PersonalDTO dto)
         {
-            if (dto == null || string.IsNullOrWhiteSpace(dto.Nombre))
+            if (dto == null)
             {
                 return new JsonResult(new { success = false, message = "Datos inválidos." });
             }
 
-            if (dto.EsResponsable)
+            var accion = dto.Id == 0 ? Accion.Crear : Accion.Editar;
+            if (!await _permisos.PuedeAsync(Modulos.Personal, accion))
             {
-                var jefesAnteriores = await _context.Personal
-                    .Where(p => p.Area == dto.Area && p.EsResponsable)
-                    .ToListAsync();
+                return PermisosFilter.RespuestaSinPermiso(HttpContext);
+            }
 
-                foreach (var jefe in jefesAnteriores)
+            dto.Nombre = dto.Nombre?.Trim() ?? "";
+            dto.Area = dto.Area?.Trim() ?? "";
+            dto.Puesto = dto.Puesto?.Trim() ?? "";
+            dto.Correo = dto.Correo?.Trim().ToLower() ?? "";
+
+            if (dto.Nombre == "" || dto.Area == "" || dto.Puesto == "" || dto.Correo == "")
+            {
+                return new JsonResult(new { success = false, message = "Nombre, área, puesto y correo son obligatorios." });
+            }
+
+            if (!new EmailAddressAttribute().IsValid(dto.Correo))
+            {
+                return new JsonResult(new { success = false, message = "El correo electrónico no es válido." });
+            }
+
+            Models.Personal? persona;
+
+            if (dto.Id == 0)
+            {
+                int maxOrden = await _context.Personal.MaxAsync(p => (int?)p.Orden) ?? 0;
+                persona = new Models.Personal { Orden = maxOrden + 1 };
+                _context.Personal.Add(persona);
+            }
+            else
+            {
+                persona = await _context.Personal.FindAsync(dto.Id);
+                if (persona == null)
                 {
-                    jefe.EsResponsable = false;
+                    return new JsonResult(new { success = false, message = "La persona ya no existe." });
                 }
             }
 
-            int maxOrden = await _context.Personal.AnyAsync()
-                ? await _context.Personal.MaxAsync(p => p.Orden)
-                : 0;
-
-            var empleado = new SigesTI.Web.Models.Personal
-            {
-                Nombre = dto.Nombre,
-                Area = dto.Area,
-                Puesto = dto.Puesto,
-                Correo = dto.Correo,
-                Activo = dto.Activo,
-                EsResponsable = dto.EsResponsable,
-                Orden = maxOrden + 1
-            };
-
-            _context.Personal.Add(empleado);
-            await _context.SaveChangesAsync();
-
-            return new JsonResult(new { success = true });
-        }
-
-        // Handler AJAX para obtener los detalles del empleado a editar
-        public async Task<IActionResult> OnGetDetalleEmpleadoAsync(int id)
-        {
-            // Si tu modelo usa 'Id' o 'IdEmpleado', asegúrate de usar el campo correcto aquí:
-            var empleado = await _context.Personal.FirstOrDefaultAsync(p => p.Id == id);
-            if (empleado == null)
-            {
-                return NotFound();
-            }
-
-            // Retornar JSON limpio sin UnidadesRed
-            return new JsonResult(new
-            {
-                id = empleado.Id,
-                nombre = empleado.Nombre, // o empleado.NombreCompleto si así se llama en tu modelo
-                area = empleado.Area,
-                puesto = empleado.Puesto,
-                correo = empleado.Correo, // o empleado.CorreoElectronico
-                activo = empleado.Activo,
-                esResponsable = empleado.EsResponsable
-            });
-        }
-
-        // Handler AJAX para guardar los cambios editados
-        public async Task<IActionResult> OnPostGuardarCambiosAsync([FromBody] EmpleadoEditarDTO dto)
-        {
-            if (dto == null || string.IsNullOrWhiteSpace(dto.Nombre))
-            {
-                return new JsonResult(new { success = false, message = "Datos inválidos." });
-            }
-
-            var empleado = await _context.Personal.FirstOrDefaultAsync(p => p.Id == dto.Id);
-            if (empleado == null)
-            {
-                return new JsonResult(new { success = false, message = "El empleado ya no existe." });
-            }
-
+            // Solo puede haber un responsable por área
             if (dto.EsResponsable)
             {
-                var jefesAnteriores = await _context.Personal
+                var responsablesAnteriores = await _context.Personal
                     .Where(p => p.Area == dto.Area && p.EsResponsable && p.Id != dto.Id)
                     .ToListAsync();
-                foreach (var j in jefesAnteriores)
+
+                foreach (var r in responsablesAnteriores)
                 {
-                    j.EsResponsable = false;
+                    r.EsResponsable = false;
                 }
             }
 
-            empleado.Nombre = dto.Nombre;
-            empleado.Area = dto.Area;
-            empleado.Puesto = dto.Puesto;
-            empleado.Correo = dto.Correo;
-            empleado.EsResponsable = dto.EsResponsable;
-            empleado.Activo = dto.Activo;
+            persona.Nombre = dto.Nombre;
+            persona.Area = dto.Area;
+            persona.Puesto = dto.Puesto;
+            persona.Correo = dto.Correo;
+            persona.Activo = dto.Activo;
+            persona.EsResponsable = dto.EsResponsable;
 
             await _context.SaveChangesAsync();
             return new JsonResult(new { success = true });
         }
 
-        // Handler AJAX para reordenar las filas mediante Drag and Drop
+        [Permiso(Accion.Eliminar)]
+        public async Task<IActionResult> OnPostEliminarAsync(int id)
+        {
+            var persona = await _context.Personal.FindAsync(id);
+            if (persona == null)
+            {
+                return new JsonResult(new { success = false, message = "La persona ya no existe." });
+            }
+
+            // Si la persona está ligada a otros registros no se borra (la base de datos lo impediría)
+            bool tieneTareas = await _context.TareasProgramadas.AnyAsync(t => t.PersonaAsignadaId == id);
+            bool tieneSolicitudes = await _context.Solicitudes.AnyAsync(s => s.IdPersonal == id);
+            bool tieneEquipos = await _context.EquiposRespaldo.AnyAsync(e => e.PersonalId == id);
+
+            if (tieneTareas || tieneSolicitudes || tieneEquipos)
+            {
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = "No se puede eliminar porque tiene tareas, solicitudes o equipos de respaldo asignados. Puedes marcarla como Inactiva."
+                });
+            }
+
+            _context.Personal.Remove(persona);
+            await _context.SaveChangesAsync();
+            return new JsonResult(new { success = true });
+        }
+
+        // Guarda el orden de las filas después del drag and drop
+        [Permiso(Accion.Editar)]
         public async Task<IActionResult> OnPostGuardarOrdenAsync([FromBody] List<int> idsOrdenados)
         {
             if (idsOrdenados == null || idsOrdenados.Count == 0)
@@ -136,32 +148,44 @@ namespace SigesTI.Web.Pages.Personal
                 return new JsonResult(new { success = false, message = "Lista de IDs vacía." });
             }
 
-            var empleados = await _context.Personal.ToListAsync();
+            var personas = await _context.Personal
+                .Where(p => idsOrdenados.Contains(p.Id))
+                .ToListAsync();
 
-            for (int i = 0; i < idsOrdenados.Count; i++)
+            foreach (var persona in personas)
             {
-                int id = idsOrdenados[i];
-                var emp = empleados.FirstOrDefault(p => p.Id == id);
-                if (emp != null)
-                {
-                    emp.Orden = i + 1;
-                }
+                persona.Orden = idsOrdenados.IndexOf(persona.Id) + 1;
             }
 
             await _context.SaveChangesAsync();
             return new JsonResult(new { success = true });
         }
+
+        // Clase de color del área (mismos colores que Plan de Respaldos)
+        public static string ClaseArea(string? area)
+        {
+            string a = (area ?? "").ToLower();
+
+            if (a.Contains("direcc")) return "area-direccion-general";
+            if (a.Contains("ventas")) return "area-ventas";
+            if (a.Contains("cobranza")) return "area-cobranza";
+            if (a.Contains("consultor")) return "area-consultoria";
+            if (a.Contains("desarrollo")) return "area-desarrollo";
+            if (a.Contains("sistemas") || a == "ti") return "area-sistemas";
+            if (a.Contains("soporte")) return "area-soporte";
+            if (a.Contains("admin") || a.Contains("capital")) return "area-administracion";
+            if (a.Contains("conta") || a.Contains("finanz")) return "area-contabilidad";
+            return "area-general";
+        }
     }
 
-    // DTO auxiliar para recibir los datos desde el modal en crudo
-    public class EmpleadoEditarDTO
+    public class PersonalDTO
     {
         public int Id { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public string Area { get; set; } = string.Empty;
         public string Puesto { get; set; } = string.Empty;
         public string Correo { get; set; } = string.Empty;
-        public string UnidadesRed { get; set; } = string.Empty;
         public bool Activo { get; set; }
         public bool EsResponsable { get; set; }
     }

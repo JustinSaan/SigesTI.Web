@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
 using SigesTI.Web.Data;
+using SigesTI.Web.Seguridad;
 
 QuestPDF.Settings.License = LicenseType.Community;
 
@@ -11,8 +12,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Razor Pages
-builder.Services.AddRazorPages();
+// Permisos por rol
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<PermisosService>();
+builder.Services.AddScoped<SesionService>();
+
+// Razor Pages (cada handler pasa por el filtro de permisos)
+builder.Services.AddRazorPages()
+    .AddMvcOptions(options => options.Filters.Add<PermisosFilter>());
 
 // Sesiones del sistema
 builder.Services.AddDistributedMemoryCache();
@@ -60,6 +68,18 @@ app.Use(async (context, next) =>
     {
         context.Response.Redirect("/InicioSesion/Login");
         return;
+    }
+
+    // Con sesión abierta se revisa que el usuario siga activo y con el mismo rol
+    if (tieneSesion && !esInicioSesion && !esArchivoEstatico)
+    {
+        var sesion = context.RequestServices.GetRequiredService<SesionService>();
+
+        if (!await sesion.ValidarSesionAsync(context))
+        {
+            context.Response.Redirect("/InicioSesion/Login");
+            return;
+        }
     }
 
     await next();

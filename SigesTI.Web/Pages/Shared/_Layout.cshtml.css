@@ -180,7 +180,7 @@ html, body {
    COLORES DE SOMBREADO E ÍCONOS POR SECCIÓN (ALTA ESPECIFICIDAD)
    ========================================================================== */
 
-/* 1. Azul Cian (Tickets / Consultas / Administrar Cuenta) */
+/* 1. Azul Cian (Tickets / Consultas / Control de acceso) */
 .layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-cyan:hover,
 .layout-header .layout-navbar .custom-dropdown-menu a.dropdown-item.item-cyan:focus {
     color: #ffffff !important;

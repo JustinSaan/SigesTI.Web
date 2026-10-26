@@ -41,6 +41,12 @@
         {
             @foreach (var item in Model.ListaActividades)
             {
+                // Solo se muestran las tarjetas de las secciones que el rol puede ver
+                if (!await Permisos.PuedeAsync(item.Modulo, Accion.Ver))
+                {
+                    continue;
+                }
+
                 <div class="col">
                     <div class="card activity-card @item.BadgeClass h-100 p-3 rounded-4 d-flex flex-column justify-content-between">
                         

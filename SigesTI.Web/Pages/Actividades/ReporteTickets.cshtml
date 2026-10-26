@@ -4,6 +4,10 @@
     ViewData["Title"] = "Reporte Diario de Tickets";
     var concentradoSistemas = Model.ConcentradoSistemas;
 
+    bool puedeCrear = await Permisos.PuedeAsync(Modulos.ReporteTickets, Accion.Crear);
+    bool puedeEditar = await Permisos.PuedeAsync(Modulos.ReporteTickets, Accion.Editar);
+    bool puedeExportar = await Permisos.PuedeAsync(Modulos.ReporteTickets, Accion.Exportar);
+
     // Los ceros se muestran tenues para que destaquen los valores reales
     void Celda(int valor)
     {
@@ -100,17 +104,23 @@
 
         <!-- Botones de Acción -->
         <div class="col-md-6 d-flex justify-content-end gap-2 ms-auto">
-            <button class="btn btn-primary-sigest px-3 fw-bold" id="btnGenerarReporte" type="button">
-                <i class="bi bi-file-earmark-pdf-fill me-1 text-white"></i> Generar Reporte
-            </button>
+            @if (puedeExportar)
+            {
+                <button class="btn btn-primary-sigest px-3 fw-bold" id="btnGenerarReporte" type="button">
+                    <i class="bi bi-file-earmark-pdf-fill me-1 text-white"></i> Generar Reporte
+                </button>
 
-            <button class="btn btn-secondary-sigest px-3 fw-bold" id="btnExportarExcel" type="button">
-                <i class="bi bi-filetype-xlsx me-1 text-white"></i> Exportar Excel
-            </button>
+                <button class="btn btn-secondary-sigest px-3 fw-bold" id="btnExportarExcel" type="button">
+                    <i class="bi bi-filetype-xlsx me-1 text-white"></i> Exportar Excel
+                </button>
+            }
 
-            <button class="btn btn-third-sigest px-3 fw-bold" id="btnNuevoTicket" type="button" data-bs-toggle="modal" data-bs-target="#modalNuevoTicket">
-                <i class="bi bi-plus-circle-fill me-1"></i> Nuevo Ticket
-            </button>
+            @if (puedeCrear)
+            {
+                <button class="btn btn-third-sigest px-3 fw-bold" id="btnNuevoTicket" type="button" data-bs-toggle="modal" data-bs-target="#modalNuevoTicket">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Nuevo Ticket
+                </button>
+            }
         </div>
     </form>
 </div>
@@ -1060,6 +1070,7 @@
         <!-- Mantenemos SOLO las variables de C# (Razor) aquí, ya que el archivo .js no las reconoce -->
         <script>
                 const rolUsuario = "@(HttpContext.Session.GetString("Rol") ?? "")";
+                const permisoEditarTickets = @Json.Serialize(puedeEditar);
                 const usuarioSesion = "@(HttpContext.Session.GetString("Usuario") ?? "")";
                 const nombreSesion = "@(HttpContext.Session.GetString("NombreCompleto") ?? "")";
                 const fechaReporteActual = "@(Model.FechaReporte?.ToString("dd-MM-yyyy"))";

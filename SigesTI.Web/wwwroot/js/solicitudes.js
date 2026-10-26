@@ -1,396 +1,396 @@
 ﻿/* ==========================================================================
-   MÓDULO CONSULTA DE SOLICITUDES
+   MÓDULO DE SOLICITUDES
+   Las alertas usan las funciones generales de alertas.js
+   (mostrarExito, mostrarError, mostrarAdvertencia, mostrarConfirmacion).
+   ========================================================================== */
+
+/* Mismo token antifalsificación para todas las peticiones POST */
+function tokenSolicitudes() {
+    return $('input:hidden[name="__RequestVerificationToken"]').val();
+}
+
+/* Llena un combo de personal con los datos que devuelve FiltrarPersonal */
+function llenarComboPersonal($combo, personal, idSeleccionado) {
+    var jefe = "";
+
+    $.each(personal, function (i, item) {
+        if (item.esResponsable) jefe = item.nombre;
+
+        $("<option>")
+            .val(item.id)
+            .text(item.nombre)
+            .attr("data-correo", item.correo || "")
+            .attr("data-puesto", item.puesto || "")
+            .prop("selected", item.id == idSeleccionado)
+            .appendTo($combo);
+    });
+
+    return jefe || "Sin jefe asignado";
+}
+
+/* Pinta el historial como tarjetas, igual que en Tareas Programadas.
+   Cada comentario empieza con "Agregado el: {fecha} Por: {usuario}" seguido del texto.
+   Las solicitudes viejas usan "Entrado el:" y líneas decorativas, que aquí se quitan. */
+function renderizarHistorial(contenedor, texto) {
+    contenedor.innerHTML = '';
+
+    var limpio = (texto || '')
+        .replace(/📌 SOLICITUD INICIAL/g, '')
+        .replace(/^[ \t]*[─═]+[ \t]*$/gm, '');
+
+    if (limpio.trim() === '') {
+        contenedor.innerHTML = '<span class="text-muted small fst-italic">No hay comentarios registrados.</span>';
+        return;
+    }
+
+    var bloques = limpio.split(/(?=(?:Agregado|Entrado) el: )/).map(b => b.trim()).filter(b => b !== '');
+
+    bloques.forEach(bloque => {
+        var item = document.createElement('div');
+        item.className = 'comentario-item';
+
+        var cuerpo = bloque;
+        var partes = bloque.match(/^(?:Agregado|Entrado) el: (.+?) Por: (.*)\n?([\s\S]*)$/);
+
+        if (partes) {
+            var cabecera = document.createElement('div');
+            cabecera.className = 'comentario-cabecera';
+
+            var autor = document.createElement('span');
+            autor.className = 'comentario-autor';
+            autor.innerHTML = '<i class="bi bi-person-circle me-1"></i>';
+            autor.append(partes[2].trim() || 'Sin usuario');
+
+            var fecha = document.createElement('span');
+            fecha.className = 'comentario-fecha';
+            fecha.textContent = partes[1];
+
+            cabecera.append(autor, fecha);
+            item.appendChild(cabecera);
+            cuerpo = partes[3].replace(/^\s+|\s+$/g, '').replace(/\n[ \t]+/g, '\n');
+        }
+
+        var textoComentario = document.createElement('div');
+        textoComentario.className = 'comentario-texto';
+        textoComentario.textContent = cuerpo;
+        item.appendChild(textoComentario);
+
+        contenedor.appendChild(item);
+    });
+}
+
+/* ==========================================================================
+   CONSULTAR SOLICITUDES
    ========================================================================== */
 
 $(document).ready(function () {
 
+    if (!$("#tablaBitacoraPrincipal").length) return;
+
     var historialCompletoGuardado = "";
-    let paginaActual = 1;
-    let filasPorPagina = parseInt($("#itemsPorPagina").val());
+    var puedeEditarActual = false;
+    var paginaActual = 1;
+
+    /* ---------- Búsqueda y paginación en el navegador ---------- */
 
     function aplicarPaginacionYFiltro() {
-        filasPorPagina = parseInt($("#itemsPorPagina").val());
-        var filterValue = $("#inputFiltroReactivo").val().trim().toLowerCase();
-        var $rows = $("#tablaBitacoraPrincipal tbody tr").not(".no-data-fallback, #angularNoDataRow");
+        var filasPorPagina = parseInt($("#itemsPorPagina").val());
+        var textoBuscado = $("#inputFiltroReactivo").val().trim().toLowerCase();
+        var $filas = $("#tablaBitacoraPrincipal tbody tr").not(".sol-fila-vacia");
 
-        $rows.each(function () {
-            var rowText = $(this).text().toLowerCase();
-            if (filterValue === "" || rowText.indexOf(filterValue) > -1) {
-                $(this).addClass("coincide-con-busqueda");
-            } else {
-                $(this).removeClass("coincide-con-busqueda").addClass("d-none");
-            }
+        var $coincidencias = $filas.filter(function () {
+            return textoBuscado === "" || $(this).text().toLowerCase().indexOf(textoBuscado) > -1;
         });
 
-        var $filasFiltradas = $("#tablaBitacoraPrincipal tbody tr.coincide-con-busqueda");
-        var totalRegistros = $filasFiltradas.length;
+        $filas.addClass("d-none");
 
-        if (totalRegistros === 0) {
-            if (filterValue !== "") {
-                $("#filterQueryValue").text($("#inputFiltroReactivo").val());
-                $("#angularNoDataRow").removeClass("d-none");
-            }
+        var total = $coincidencias.length;
+        $("#filaSinCoincidencias").toggleClass("d-none", total > 0 || textoBuscado === "");
+        $("#filterQueryValue").text($("#inputFiltroReactivo").val());
+
+        if (total === 0) {
             $("#contenedorControlesPagina").empty();
-            $("#infoPaginacion").text("Mostrando 0-0 de 0 registros");
+            $("#infoPaginacion").text("0 registros");
             return;
-        } else {
-            $("#angularNoDataRow").addClass("d-none");
         }
 
-        var totalPaginas = Math.ceil(totalRegistros / filasPorPagina);
-        if (paginaActual > totalPaginas) paginaActual = totalPaginas;
-        if (paginaActual < 1) paginaActual = 1;
+        var totalPaginas = Math.ceil(total / filasPorPagina);
+        paginaActual = Math.min(Math.max(paginaActual, 1), totalPaginas);
 
-        var indiceInicial = (paginaActual - 1) * filasPorPagina;
-        var indiceFinal = indiceInicial + filasPorPagina;
+        var inicio = (paginaActual - 1) * filasPorPagina;
+        var fin = Math.min(inicio + filasPorPagina, total);
 
-        $rows.addClass("d-none");
-        $filasFiltradas.slice(indiceInicial, indiceFinal).removeClass("d-none");
+        $coincidencias.slice(inicio, fin).removeClass("d-none");
+        $("#infoPaginacion").text(`${inicio + 1}-${fin} de ${total} registros`);
 
-        var registroHasta = indiceFinal > totalRegistros ? totalRegistros : indiceFinal;
-        $("#infoPaginacion").text(`Mostrando ${indiceInicial + 1}-${registroHasta} de ${totalRegistros} registros`);
-
-        dibujarBotonesNavegacion(totalPaginas);
+        dibujarPaginacion(totalPaginas);
     }
 
-    function dibujarBotonesNavegacion(totalPaginas) {
-        var $contenedor = $("#contenedorControlesPagina");
-        $contenedor.empty();
+    function dibujarPaginacion(totalPaginas) {
+        var $contenedor = $("#contenedorControlesPagina").empty();
 
-        var deshabilitadoAnt = (paginaActual === 1) ? "disabled" : "";
-        $contenedor.append(`<li class="page-item ${deshabilitadoAnt}"><a class="page-link" data-page="${paginaActual - 1}" href="#"><i class="bi bi-arrow-left"></i></a></li>`);
-
-        for (var i = 1; i <= totalPaginas; i++) {
-            var activoNum = (i === paginaActual) ? "active" : "";
-            $contenedor.append(`<li class="page-item ${activoNum}"><a class="page-link" data-page="${i}" href="#">${i}</a></li>`);
+        function boton(pagina, contenido, clase) {
+            $contenedor.append(`<li class="page-item ${clase}"><a class="page-link" data-page="${pagina}" href="#">${contenido}</a></li>`);
         }
 
-        var deshabilitadoSig = (paginaActual === totalPaginas) ? "disabled" : "";
-        $contenedor.append(`<li class="page-item ${deshabilitadoSig}"><a class="page-link" data-page="${paginaActual + 1}" href="#"><i class="bi bi-arrow-right"></i></a></li>`);
+        boton(paginaActual - 1, '<i class="bi bi-chevron-left"></i>', paginaActual === 1 ? "disabled" : "");
+        for (var i = 1; i <= totalPaginas; i++) {
+            boton(i, i, i === paginaActual ? "active" : "");
+        }
+        boton(paginaActual + 1, '<i class="bi bi-chevron-right"></i>', paginaActual === totalPaginas ? "disabled" : "");
     }
 
     $(document).on("click", "#contenedorControlesPagina .page-link", function (e) {
         e.preventDefault();
-        var targetPage = $(this).data("page");
-        if (targetPage && !$(this).parent().hasClass("disabled") && !$(this).parent().hasClass("active")) {
-            paginaActual = parseInt(targetPage);
-            aplicarPaginacionYFiltro();
-        }
+        var $item = $(this).parent();
+        if ($item.hasClass("disabled") || $item.hasClass("active")) return;
+
+        paginaActual = parseInt($(this).data("page"));
+        aplicarPaginacionYFiltro();
     });
 
-    $("#itemsPorPagina").change(function () {
+    $("#itemsPorPagina").on("change", function () {
         paginaActual = 1;
         aplicarPaginacionYFiltro();
     });
 
-    $("#inputFiltroReactivo").on("keyup", function () {
+    $("#inputFiltroReactivo").on("input", function () {
         paginaActual = 1;
         aplicarPaginacionYFiltro();
     });
 
-    $("#formFiltros").on("submit", function () {
-        $("#loaderFiltro").removeClass("d-none");
-    });
-
+    /* Filtros que se resuelven en el servidor */
     $(".filtro-servidor-auto").on("change", function () {
         $("#loaderFiltro").removeClass("d-none");
         $("#formFiltros").submit();
     });
 
+    /* ---------- Reporte ---------- */
+
     $("#btnGenerarReporteSolicitudes").on("click", function () {
-        const params = new URLSearchParams();
+        var params = new URLSearchParams();
 
-        const fechaInicio = $("#reporteFechaInicio").val();
-        const fechaFin = $("#reporteFechaFin").val();
-        const area = $("#reporteArea").val();
-        const solicitante = $("#reporteSolicitante").val();
-        const estatus = $("#reporteEstatus").val();
+        var filtros = {
+            fechaInicio: $("#reporteFechaInicio").val(),
+            fechaFin: $("#reporteFechaFin").val(),
+            area: $("#reporteArea").val(),
+            solicitante: $("#reporteSolicitante").val(),
+            estatus: $("#reporteEstatus").val()
+        };
 
-        if (fechaInicio) params.append("fechaInicio", fechaInicio);
-        if (fechaFin) params.append("fechaFin", fechaFin);
-        if (area) params.append("area", area);
-        if (solicitante) params.append("solicitante", solicitante);
-        if (estatus) params.append("estatus", estatus);
-
-        const urlReporte = "/Solicitudes/Consultar?handler=ReporteSolicitudes&" + params.toString();
+        $.each(filtros, function (nombre, valor) {
+            if (valor) params.append(nombre, valor);
+        });
 
         document.activeElement.blur();
-
         $("#modalExportarSolicitudes").modal("hide");
 
         $("#reporteLoading").css("display", "flex");
-        $("#iframeReporteSolicitudes").css("display", "none").removeAttr("src").removeAttr("srcdoc");
-
+        $("#iframeReporteSolicitudes").css("display", "none").removeAttr("srcdoc");
         $("#modalVistaReporte").modal("show");
 
-        fetch(urlReporte)
-            .then(response => response.text())
-            .then(html => {
-                $("#iframeReporteSolicitudes").attr("srcdoc", html);
+        fetch("/Solicitudes/Consultar?handler=ReporteSolicitudes&" + params.toString())
+            .then(response => {
+                var tipo = response.headers.get("content-type") || "";
+                if (response.ok && tipo.includes("text/html")) return response.text();
 
+                // Sin permiso o error: el servidor responde JSON con el mensaje
+                return response.json()
+                    .catch(() => ({}))
+                    .then(data => { throw new Error(data.message || "No se pudo generar el reporte."); });
+            })
+            .then(html => {
+                $("#iframeReporteSolicitudes").attr("srcdoc", html).css("display", "block");
                 $("#reporteLoading").css("display", "none");
-                $("#iframeReporteSolicitudes").css("display", "block");
+            })
+            .catch(error => {
+                $("#modalVistaReporte").modal("hide");
+                mostrarError(escaparHtml(error.message));
             });
     });
 
     $("#modalVistaReporte").on("hidden.bs.modal", function () {
-        $("#iframeReporteSolicitudes").removeAttr("src").removeAttr("srcdoc").css("display", "none");
+        $("#iframeReporteSolicitudes").removeAttr("srcdoc").css("display", "none");
         $("#reporteLoading").css("display", "flex");
     });
 
-    function actualizarColorEstatusModal() {
-        const $estatus = $("#modal_Estatus");
+    /* ---------- Modal de detalle / edición ---------- */
 
-        $estatus.removeClass("estatus-pendiente estatus-resuelto");
-
-        if ($estatus.val() === "Pendiente") {
-            $estatus.addClass("estatus-pendiente");
-        }
-        else if ($estatus.val() === "Resuelto") {
-            $estatus.addClass("estatus-resuelto");
-        }
+    function marcarEstatusModal(estatus) {
+        $("input[name='modal_Estatus'][value='" + estatus + "']").prop("checked", true);
     }
-    $("#modal_Estatus").change(actualizarColorEstatusModal);
 
-    $(".btn-visualizar, .btn-editar-directo").on("click", function () {
-        var idSol = $(this).data("id");
-        var esModoEdicionDirecta = $(this).hasClass("btn-editar-directo");
+    function cargarPersonalModal(area, idSeleccionado) {
+        var $combo = $("#modal_IdPersonal");
+        $combo.empty().append('<option value="">Seleccione personal</option>');
+        if (!area) return;
 
-        $("#loaderFiltro").removeClass("d-none");
-
-        $.ajax({
-            type: "GET",
-            url: "?handler=DetalleSolicitud",
-            data: { id: idSol },
-            success: function (data) {
-                $("#loaderFiltro").addClass("d-none");
-                if (!data) {
-                    Swal.fire("Error", "No se encontraron los datos de la solicitud.", "error");
-                    return;
-                }
-
-                historialCompletoGuardado = data.descripcionProblema || "";
-
-                $("#modal_IdSolicitud").val(data.idSolicitud);
-                $("#modal_FechaIngreso").val(data.fechaIngreso);
-                $("#modal_FechaEntrega").val(data.fechaEntrega ? data.fechaEntrega : "");
-                $("#modal_Estatus").val(data.estatus);
-                $("#modal_Area").val(data.area);
-                $("#modal_Puesto").val(data.puesto);
-                $("#modal_Correo").val(data.correo);
-                $("#modal_Responsable").val(data.responsableArea);
-                $("#modal_UnidadesRed").val(data.unidadesRed);
-                $("#modal_EjecutivoAsignado").val(data.ejecutivoAsignado);
-                $("#modal_AutorizaAdmin").val(data.autorizaAdmin);
-
-                cargarPersonalModal(data.area, data.idPersonal);
-
-                $(".chk-modal-impresora-grupo").prop("checked", false);
-                if (data.impresoraConfigurada === "Si") {
-                    $("#modal_config_si").prop("checked", true);
-                } else {
-                    $("#modal_config_no").prop("checked", true);
-                }
-
-                if (data.reqSistemas) {
-                    $("#modal_chkReqSistemas").prop("checked", true);
-                    $("#modal_seccionSistemas").removeClass("d-none");
-                    $("#modal_bloque_global_sistemas").removeClass("d-none");
-
-                    $(".custom-modal-sistemas-chk").prop("checked", false);
-                    if (data.sistemasDetalle) {
-                        var arreglosSistemas = data.sistemasDetalle.split(", ");
-                        $.each(arreglosSistemas, function (i, val) {
-                            $(".custom-modal-sistemas-chk[value='" + val + "']").prop("checked", true);
-                        });
-                    }
-                } else {
-                    $("#modal_chkReqSistemas").prop("checked", false);
-                    $("#modal_seccionSistemas").addClass("d-none");
-                    if (!esModoEdicionDirecta) $("#modal_bloque_global_sistemas").addClass("d-none");
-                }
-
-                if (data.otrosSistemas) {
-                    $("#modal_chkOtros").prop("checked", true);
-                    $("#modal_txtOtrosSistemas").removeClass("d-none").val(data.otrosSistemas);
-                } else {
-                    $("#modal_chkOtros").prop("checked", false);
-                    $("#modal_txtOtrosSistemas").addClass("d-none").val('');
-                }
-
-                if (data.nuevaUnidadRed) {
-                    $("#modal_chkHabilitarRed").prop("checked", true);
-                    $("#modal_divContenedorRed").removeClass("d-none");
-                    $("#modal_txtDetalleRed").val(data.nuevaUnidadRed);
-                } else {
-                    $("#modal_chkHabilitarRed").prop("checked", false);
-                    $("#modal_divContenedorRed").addClass("d-none");
-                    $("#modal_txtDetalleRed").val("");
-                }
-
-                if (data.detalleImpresora && $.trim(data.detalleImpresora) !== "") {
-                    $("#modal_chkConfigurarImpresora").prop("checked", true);
-                    $("#modal_divContenedorImpresora").removeClass("d-none");
-                    $("#modal_txtDetalleImpresora").val(data.detalleImpresora);
-                    $("#modal_bloque_impresora").removeClass("d-none");
-                } else {
-                    $("#modal_chkConfigurarImpresora").prop("checked", false);
-                    $("#modal_divContenedorImpresora").addClass("d-none").find('input').val('');
-                    if (!esModoEdicionDirecta) $("#modal_bloque_impresora").addClass("d-none");
-                }
-
-                actualizarColorEstatusModal();
-
-                if (esModoEdicionDirecta) {
-                    activarEdicionModal();
-                } else {
-                    $("#modal_DescripcionProblema").val(historialCompletoGuardado);
-                    $("#lblDescripcionModal").text("Historial Acumulativo de Revisiones (Modo Lectura):");
-                    bloquearCamposModal();
-                }
-
-                $("#modalSolicitud").modal("show");
-            },
-            error: function () {
-                $("#loaderFiltro").addClass("d-none");
-                Swal.fire("Error", "Error crítico al comunicar con el servidor de bases de datos.", "error");
-            }
+        $.getJSON("/Solicitudes/Consultar?handler=FiltrarPersonal", { area: area }, function (personal) {
+            var jefe = llenarComboPersonal($combo, personal, idSeleccionado);
+            $("#modal_Responsable").val(jefe);
         });
-    });
+    }
+
+    function mostrarDesplegable($check, $contenedor) {
+        $contenedor.toggleClass("d-none", !$check.is(":checked"));
+    }
 
     function bloquearCamposModal() {
         $(".ctrl-modal").prop("disabled", true);
-        $("#btnLiberarEdicion").removeClass("d-none");
+        $("#modal_bloque_apunte").addClass("d-none");
+        $("#btnLiberarEdicion").toggleClass("d-none", !puedeEditarActual);
         $("#btnGuardarCambiosModal").addClass("d-none");
+        $("#modal_Subtitulo").text("Modo lectura");
     }
 
     function activarEdicionModal() {
         $(".ctrl-modal").prop("disabled", false);
+        $("#modal_DescripcionProblema").val("");
+        $("#modal_bloque_apunte").removeClass("d-none");
+        $("#modal_bloque_global_sistemas, #modal_tarjeta_config, #modal_bloque_red, #modal_bloque_impresora").removeClass("d-none");
         $("#btnLiberarEdicion").addClass("d-none");
         $("#btnGuardarCambiosModal").removeClass("d-none");
-
-        $("#modal_DescripcionProblema").val('').attr("placeholder", "Escriba aquí el nuevo apunte o relatoría técnica (se agregará arriba del historial previo)...");
-        $("#lblDescripcionModal").html('<i class="bi bi-pencil-fill text-success"></i> Agregar nueva actualización al Historial:');
-
-        $("#modal_bloque_global_sistemas, #modal_bloque_red, #modal_bloque_impresora").removeClass("d-none");
+        $("#modal_Subtitulo").text("Editando solicitud");
     }
 
-    $("#btnLiberarEdicion").on("click", function () {
-        activarEdicionModal();
+    $(".btn-visualizar, .btn-editar-directo").on("click", function () {
+        var idSolicitud = $(this).data("id");
+        var abrirEnEdicion = $(this).hasClass("btn-editar-directo");
+
+        $("#loaderFiltro").removeClass("d-none");
+
+        $.getJSON("/Solicitudes/Consultar?handler=DetalleSolicitud", { id: idSolicitud })
+            .done(function (data) {
+                $("#loaderFiltro").addClass("d-none");
+
+                if (!data) {
+                    mostrarError("No se encontraron los datos de la solicitud.");
+                    return;
+                }
+
+                historialCompletoGuardado = data.descripcionProblema || "";
+                puedeEditarActual = data.puedeEditar === true;
+
+                $("#modal_IdSolicitud").val(data.idSolicitud);
+                $("#modal_Folio").text("#" + String(data.idSolicitud).padStart(4, "0"));
+                $("#modal_FechaIngreso").val(data.fechaIngreso);
+                $("#modal_FechaEntrega").val(data.fechaEntrega || "");
+                marcarEstatusModal(data.estatus);
+                $("#modal_Area").val(data.area);
+                $("#modal_Puesto").val(data.puesto);
+                $("#modal_Correo").val(data.correo);
+                $("#modal_Responsable").val(data.responsableArea);
+                $("#modal_EjecutivoAsignado").val(data.ejecutivoAsignado);
+                $("#modal_AutorizaAdmin").val(data.autorizaAdmin);
+                renderizarHistorial(document.getElementById("modal_Historial"), historialCompletoGuardado);
+
+                cargarPersonalModal(data.area, data.idPersonal);
+
+                $(data.impresoraConfigurada === "Si" ? "#modal_config_si" : "#modal_config_no").prop("checked", true);
+
+                // Sistemas
+                var sistemas = data.sistemasDetalle ? data.sistemasDetalle.split(", ") : [];
+                $(".custom-modal-sistemas-chk").each(function () {
+                    $(this).prop("checked", sistemas.indexOf($(this).val()) > -1);
+                });
+                if (data.otrosSistemas) $("#modal_chkOtros").prop("checked", true);
+                $("#modal_txtOtrosSistemas").val(data.otrosSistemas).toggleClass("d-none", !data.otrosSistemas);
+                $("#modal_chkReqSistemas").prop("checked", data.reqSistemas);
+                $("#modal_seccionSistemas").toggleClass("d-none", !data.reqSistemas);
+                $("#modal_bloque_global_sistemas").toggleClass("d-none", !data.reqSistemas);
+
+                // Unidad de red e impresora
+                $("#modal_chkHabilitarRed").prop("checked", !!data.nuevaUnidadRed);
+                $("#modal_txtDetalleRed").val(data.nuevaUnidadRed);
+                mostrarDesplegable($("#modal_chkHabilitarRed"), $("#modal_divContenedorRed"));
+
+                var tieneImpresora = $.trim(data.detalleImpresora) !== "";
+                $("#modal_chkConfigurarImpresora").prop("checked", tieneImpresora);
+                $("#modal_txtDetalleImpresora").val(data.detalleImpresora);
+                mostrarDesplegable($("#modal_chkConfigurarImpresora"), $("#modal_divContenedorImpresora"));
+                $("#modal_bloque_red").toggleClass("d-none", !data.nuevaUnidadRed);
+                $("#modal_bloque_impresora").toggleClass("d-none", !tieneImpresora);
+                $("#modal_tarjeta_config").toggleClass("d-none", !data.nuevaUnidadRed && !tieneImpresora);
+
+                bloquearCamposModal();
+                if (abrirEnEdicion && puedeEditarActual) activarEdicionModal();
+
+                $("#modalSolicitud").modal("show");
+            })
+            .fail(function () {
+                $("#loaderFiltro").addClass("d-none");
+                mostrarError("No se pudo comunicar con el servidor.");
+            });
     });
 
-    function cargarPersonalModal(areaName, idSeleccionar) {
-        var $ddl = $("#modal_IdPersonal");
-        $ddl.empty().append('<option value="">-- Seleccione Personal --</option>');
+    $("#btnLiberarEdicion").on("click", function () {
+        if (puedeEditarActual) activarEdicionModal();
+    });
 
-        if (areaName) {
-            $.getJSON('?handler=FiltrarPersonal', { area: areaName }, function (data) {
-                var jefe = "";
-                $.each(data, function (i, item) {
-                    if (item.esResponsable) jefe = item.nombre;
-                    var selected = (item.id == idSeleccionar) ? "selected" : "";
-                    $ddl.append('<option value="' + item.id + '" data-correo="' + item.correo + '" data-puesto="' + item.puesto + '" ' + selected + '>' + item.nombre + '</option>');
-                });
-                if (jefe) $("#modal_Responsable").val(jefe);
-            });
-        }
-    }
-
-    $("#modal_Area").change(function () {
-        $("#modal_Puesto, #modal_Correo, #modal_Responsable").val('');
+    $("#modal_Area").on("change", function () {
+        $("#modal_Puesto, #modal_Correo, #modal_Responsable").val("");
         cargarPersonalModal($(this).val(), 0);
     });
 
-    $("#modal_IdPersonal").change(function () {
-        var $opt = $(this).find('option:selected');
-        if ($(this).val()) {
-            $("#modal_Correo").val($opt.data('correo'));
-            $("#modal_Puesto").val($opt.data('puesto'));
+    $("#modal_IdPersonal").on("change", function () {
+        var $opcion = $(this).find("option:selected");
+        $("#modal_Correo").val($opcion.data("correo") || "");
+        $("#modal_Puesto").val($opcion.data("puesto") || "");
+    });
+
+    $("#modal_chkReqSistemas").on("change", function () {
+        if ($(this).is(":checked")) {
+            $("#modal_seccionSistemas").removeClass("d-none");
         } else {
-            $("#modal_Correo, #modal_Puesto").val('');
+            $("#modal_seccionSistemas").addClass("d-none").find("input:checkbox").prop("checked", false);
+            $("#modal_txtOtrosSistemas").addClass("d-none").val("");
         }
     });
 
-    $(".chk-modal-impresora-grupo").change(function () {
-        $(".chk-modal-impresora-grupo").not(this).prop('checked', false);
-        if ($(".chk-modal-impresora-grupo:checked").length == 0) $("#modal_config_no").prop('checked', true);
+    $("#modal_chkOtros").on("change", function () {
+        var marcado = $(this).is(":checked");
+        $("#modal_txtOtrosSistemas").toggleClass("d-none", !marcado);
+        if (marcado) $("#modal_txtOtrosSistemas").focus();
+        else $("#modal_txtOtrosSistemas").val("");
     });
 
-    $("#modal_chkReqSistemas").change(function () {
-        if ($(this).is(':checked')) {
-            $("#modal_seccionSistemas").removeClass('d-none');
-        } else {
-            $("#modal_seccionSistemas").addClass('d-none').find("input:checkbox").prop('checked', false);
-            $("#modal_txtOtrosSistemas").addClass('d-none').val('');
-        }
+    $("#modal_chkHabilitarRed").on("change", function () {
+        mostrarDesplegable($(this), $("#modal_divContenedorRed"));
     });
 
-    $("#modal_chkOtros").change(function () {
-        if ($(this).is(':checked')) $("#modal_txtOtrosSistemas").removeClass('d-none').focus();
-        else $("#modal_txtOtrosSistemas").addClass('d-none').val('');
-    });
-
-    $("#modal_chkHabilitarRed").change(function () {
-        if ($(this).is(':checked')) {
-            $("#modal_divContenedorRed").removeClass('d-none').find('input').focus();
-        } else {
-            $("#modal_divContenedorRed").addClass('d-none');
-        }
-    });
-
-    $("#modal_chkConfigurarImpresora").change(function () {
-        if ($(this).is(':checked')) $("#modal_divContenedorImpresora").removeClass('d-none').find('input').focus();
-        else $("#modal_divContenedorImpresora").addClass('d-none').find('input').val('');
+    $("#modal_chkConfigurarImpresora").on("change", function () {
+        mostrarDesplegable($(this), $("#modal_divContenedorImpresora"));
+        if (!$(this).is(":checked")) $("#modal_txtDetalleImpresora").val("");
     });
 
     $("#btnGuardarCambiosModal").on("click", function () {
-        var sistemasArr = [];
-        $(".custom-modal-sistemas-chk:checked").each(function () {
-            sistemasArr.push($(this).val());
-        });
+        var sistemas = $(".custom-modal-sistemas-chk:checked").map(function () {
+            return $(this).val();
+        }).get();
 
-        var tieneImpresoraVal = $("#modal_config_si").is(":checked") ? "Si" : "No";
-        var detalleImpresoraVal = null;
-
-        if ($("#modal_chkConfigurarImpresora").is(":checked")) {
-            detalleImpresoraVal = $("#modal_txtDetalleImpresora").val();
-        }
-
-        var nuevoApunteIngresado = $("#modal_DescripcionProblema").val();
-        var stringProblemaFinal = $.trim(nuevoApunteIngresado) === "" ? historialCompletoGuardado : nuevoApunteIngresado;
-
-        var fEntregaVal = $("#modal_FechaEntrega").val();
-        if ($.trim(fEntregaVal) === "") fEntregaVal = null;
-
-        var unidadesRedFinal = null;
-        if ($("#modal_chkHabilitarRed").is(":checked")) {
-            unidadesRedFinal = $("#modal_txtDetalleRed").val();
-        } else {
-            unidadesRedFinal = $("#modal_txtDetalleRed").val() || null;
-        }
+        var nuevoApunte = $.trim($("#modal_DescripcionProblema").val());
 
         var dto = {
             idSolicitud: parseInt($("#modal_IdSolicitud").val()),
             fechaIngreso: $("#modal_FechaIngreso").val(),
-            fechaEntrega: fEntregaVal,
-            estatus: $("#modal_Estatus").val(),
+            fechaEntrega: $("#modal_FechaEntrega").val() || null,
+            estatus: $("input[name='modal_Estatus']:checked").val(),
             idPersonal: parseInt($("#modal_IdPersonal").val()) || 0,
             puestoSolicitante: $("#modal_Puesto").val(),
             correoSolicitante: $("#modal_Correo").val(),
-            unidadesRed: unidadesRedFinal,
             nuevaUnidadRed: $("#modal_chkHabilitarRed").is(":checked") ? $("#modal_txtDetalleRed").val() : null,
-            tieneImpresoraConfigurada: tieneImpresoraVal,
+            tieneImpresoraConfigurada: $("#modal_config_si").is(":checked") ? "Si" : "No",
             detalleImpresora: $("#modal_chkConfigurarImpresora").is(":checked") ? $("#modal_txtDetalleImpresora").val() : null,
             reqSistemas: $("#modal_chkReqSistemas").is(":checked"),
-            sistemasDetalle: sistemasArr.length > 0 ? sistemasArr.join(", ") : null,
+            sistemasDetalle: sistemas.length > 0 ? sistemas.join(", ") : null,
             otrosSistemas: $("#modal_chkOtros").is(":checked") ? $("#modal_txtOtrosSistemas").val() : null,
-            descripcionProblema: stringProblemaFinal,
+            descripcionProblema: nuevoApunte === "" ? historialCompletoGuardado : nuevoApunte,
             ejecutivoAsignado: $("#modal_EjecutivoAsignado").val(),
             autorizaAdmin: $("#modal_AutorizaAdmin").val()
         };
 
-        if (!dto.fechaIngreso || !dto.descripcionProblema) {
-            Swal.fire("Atención", "Por favor completa la descripción de la falla obligatoriamente.", "warning");
+        if (!dto.fechaIngreso) {
+            mostrarAdvertencia("Capture la fecha de ingreso.");
             return;
         }
 
@@ -401,246 +401,167 @@ $(document).ready(function () {
             type: "POST",
             url: "/Solicitudes/Consultar?handler=EditarSolicitud",
             contentType: "application/json; charset=utf-8",
-            headers: { "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val() },
-            data: JSON.stringify(dto),
-            success: function (response) {
+            headers: { "RequestVerificationToken": tokenSolicitudes() },
+            data: JSON.stringify(dto)
+        })
+            .done(function (response) {
                 $("#loaderFiltro").addClass("d-none");
                 if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        iconColor: '#34d399',
-                        title: '¡Solicitud Modificada!',
-                        text: 'Cambios realizados con éxito en el sistema.',
-                        customClass: {
-                            popup: 'swal-dark-custom',
-                            title: 'swal-dark-custom',
-                            htmlContainer: 'swal-dark-custom'
-                        },
-                        confirmButtonText: 'Aceptar'
-                    }).then(() => { window.location.reload(); });
+                    mostrarExito("Los cambios se guardaron correctamente.", "Solicitud actualizada")
+                        .then(() => window.location.reload());
                 } else {
-                    Swal.fire("Error", "Hubo un problema de validación: " + (response.message || ""), "error");
+                    mostrarError(escaparHtml(response.message));
                 }
-            },
-            error: function (xhr) {
+            })
+            .fail(function () {
                 $("#loaderFiltro").addClass("d-none");
-                Swal.fire("Error", "No se pudo actualizar el registro. Revise consola de Red (F12).", "error");
-            }
-        });
+                mostrarError("No se pudo actualizar la solicitud.");
+            });
     });
+
+    /* ---------- Eliminar ---------- */
 
     $(".btn-eliminar").on("click", function () {
         var idEliminar = $(this).data("id");
 
-        Swal.fire({
-            title: '¿Está seguro de eliminar?',
-            text: "Esta acción borrará definitivamente el folio " + idEliminar + " de SQL Server.",
-            icon: 'warning',
-            iconColor: '#fbbf24',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar',
-            customClass: {
-                popup: 'swal-dark-custom',
-                title: 'swal-dark-custom',
-                htmlContainer: 'swal-dark-custom'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
+        mostrarConfirmacion({
+            icono: "warning",
+            titulo: "¿Eliminar solicitud?",
+            mensaje: "Se borrará definitivamente el folio <b>" + String(idEliminar).padStart(4, "0") + "</b>.",
+            textoConfirmar: "Sí, eliminar",
+            alConfirmar: function () {
                 $("#loaderFiltro").removeClass("d-none");
 
                 $.ajax({
                     type: "POST",
                     url: "/Solicitudes/Consultar?handler=EliminarSolicitud",
-                    headers: { "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val() },
-                    data: { id: idEliminar },
-                    success: function (response) {
+                    headers: { "RequestVerificationToken": tokenSolicitudes() },
+                    data: { id: idEliminar }
+                })
+                    .done(function (response) {
                         $("#loaderFiltro").addClass("d-none");
                         if (response.success) {
-                            Swal.fire('¡Eliminado!', 'El folio fue removido de la bitácora.', 'success')
-                                .then(() => { window.location.reload(); });
+                            mostrarExito("La solicitud fue eliminada.", "Eliminada")
+                                .then(() => window.location.reload());
                         } else {
-                            Swal.fire('Error', response.message, 'error');
+                            mostrarError(escaparHtml(response.message));
                         }
-                    },
-                    error: function () {
+                    })
+                    .fail(function () {
                         $("#loaderFiltro").addClass("d-none");
-                        Swal.fire('Error', 'Error de enlace. Comuníquese con el administrador del sistema.', 'error');
-                    }
-                });
+                        mostrarError("No se pudo eliminar la solicitud.");
+                    });
             }
         });
     });
 
     aplicarPaginacionYFiltro();
-
 });
 
 /* ==========================================================================
-   MÓDULO SOLICITUDES: FORMULARIO DE CAPTURA Y EDICIÓN
+   GENERAR SOLICITUD
    ========================================================================== */
 
 $(document).ready(function () {
 
-    // ========================================================
-    // INTERACTIVIDAD: ACTUALIZACIÓN DINÁMICA DE COLOR DE ESTATUS
-    // ========================================================
-    function actualizarColorEstatus() {
-        var valor = $("#estatusCombo").val();
-        if (valor === "Pendiente") {
-            // Rojo vivo de alta visibilidad con fondo suave
-            $("#estatusCombo").css({ "color": "#e01b2f", "background-color": "#fff2f3", "border-color": "#ffb6bc" });
-        } else if (valor === "Resuelto") {
-            // Verde vivo brillante con fondo suave
-            $("#estatusCombo").css({ "color": "#129e3b", "background-color": "#f1faf3", "border-color": "#a1e4b4" });
+    if (!$("#formSolicitud").length) return;
+
+    /* La fecha de entrega solo se captura cuando la solicitud se marca como resuelta */
+    function actualizarFechaEntrega() {
+        var $fechaEntrega = $("#txtFechaEntrega");
+
+        if ($("#estatusResuelto").is(":checked")) {
+            $fechaEntrega.prop("disabled", false);
+            if (!$fechaEntrega.val()) $fechaEntrega.val(new Date().toLocaleDateString("en-CA"));
         } else {
-            $("#estatusCombo").css({ "color": "#212529", "background-color": "#fff", "border-color": "#ced4da" });
+            $fechaEntrega.prop("disabled", true).val("");
         }
     }
 
-    // Ejecutar al iniciar la pantalla y al cambiar selección
-    actualizarColorEstatus();
-    $("#estatusCombo").change(actualizarColorEstatus);
-
-
-    // ==========================================
-    // TU INTERCEPTOR AJAX ORIGINAL PARA SWEETALERT2
-    // ==========================================
+    actualizarFechaEntrega();
+    $("input[name='NuevaSolicitud.Estatus']").on("change", actualizarFechaEntrega);
     $("#formSolicitud").on("submit", function (e) {
         e.preventDefault();
 
-        var form = $(this);
-        var url = form.attr('action') || window.location.href;
-        var formData = form.serialize();
-
         Swal.fire({
-            title: 'Procesando Solicitud',
-            text: 'Guardando datos en la bitácora...',
+            title: "Guardando solicitud",
+            text: "Registrando los datos...",
+            background: "#0f172a",
+            color: "#f8fafc",
+            customClass: { popup: "swal-dark-blue" },
             allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
+            didOpen: () => Swal.showLoading()
         });
 
         $.ajax({
             type: "POST",
-            url: url,
-            data: formData,
-            success: function (response) {
+            url: window.location.pathname,
+            data: $(this).serialize()
+        })
+            .done(function (response) {
                 if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Solicitud Guardada con Éxito!',
-                        text: 'El folio y tiempos se registraron correctamente.',
-                        confirmButtonText: 'Aceptar',
-                        confirmButtonColor: '#129e3b',
-                        allowOutsideClick: false
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = "https://localhost:7160/Solicitudes/Consultar";
-                        }
-                    });
+                    mostrarExito("La solicitud se registró correctamente.", "¡Solicitud guardada!")
+                        .then(() => { window.location.href = "/Solicitudes/Consultar"; });
+                } else {
+                    mostrarError(escaparHtml(response.message || "No se pudo guardar la solicitud."));
                 }
-            },
-            error: function (xhr) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error al procesar el formulario',
-                    text: xhr.responseText || 'Verifica que las llaves foráneas de Personal correspondan con IDs válidos.',
-                    confirmButtonColor: '#e01b2f'
-                });
-            }
+            })
+            .fail(function () {
+                mostrarError("No se pudo comunicar con el servidor.");
+            });
+    });
+
+    $("#ddlArea").on("change", function () {
+        var area = $(this).val();
+        var $combo = $("#ddlPersonal");
+
+        $("#txtCorreo, #txtPuesto, #txtResponsable").val("");
+
+        if (!area) {
+            $combo.empty().append('<option value="">Primero seleccione un área</option>');
+            return;
+        }
+
+        $combo.empty().append('<option value="">Seleccione personal</option>');
+        $.getJSON(window.location.pathname + "?handler=FiltrarPersonal", { area: area }, function (personal) {
+            var jefe = llenarComboPersonal($combo, personal, 0);
+            $("#txtResponsable").val(jefe);
         });
     });
 
-    // Tu lógica original de filtrado de Personal por Área
-    $("#ddlArea").change(function () {
-        var areaSeleccionada = $(this).val();
-        var $ddlPersonal = $("#ddlPersonal");
-
-        $ddlPersonal.empty().append('<option value="">-- Seleccione Personal --</option>');
-        $("#txtCorreo").val('');
-        $("#txtPuesto").val('');
-        $("#txtResponsable").val('');
-
-        if (areaSeleccionada) {
-            $.getJSON('?handler=FiltrarPersonal', { area: areaSeleccionada }, function (data) {
-                var jefeDelArea = "";
-                $.each(data, function (i, item) {
-                    if (item.esResponsable === true) {
-                        jefeDelArea = item.nombre;
-                    }
-
-                    $ddlPersonal.append(
-                        '<option value="' + item.id +
-                        '" data-correo="' + item.correo +
-                        '" data-puesto="' + item.puesto +
-                        '" data-unidades="' + (item.unidadesRed || '') +
-                        '">' + item.nombre + '</option>');
-                });
-
-                if (jefeDelArea !== "") {
-                    $("#txtResponsable").val(jefeDelArea);
-                } else {
-                    $("#txtResponsable").val("Sin jefe asignado");
-                }
-            });
-        }
+    $("#ddlPersonal").on("change", function () {
+        var $opcion = $(this).find("option:selected");
+        $("#txtCorreo").val($opcion.data("correo") || "");
+        $("#txtPuesto").val($opcion.data("puesto") || "");
     });
 
-    $("#ddlPersonal").change(function () {
-        var $opcionSeleccionada = $(this).find('option:selected');
-        if ($(this).val()) {
-            $("#txtCorreo").val($opcionSeleccionada.data('correo'));
-            $("#txtPuesto").val($opcionSeleccionada.data('puesto'));
-            $("#txtUnidadesRed").val($opcionSeleccionada.data('unidades'));
+    $("#chkReqSistemas").on("change", function () {
+        if ($(this).is(":checked")) {
+            $("#seccionSistemas").removeClass("d-none");
         } else {
-            $("#txtCorreo").val('');
-            $("#txtPuesto").val('');
-            $("#txtUnidadesRed").val('');
+            $("#seccionSistemas").addClass("d-none").find("input:checkbox").prop("checked", false);
+            $("#txtOtrosSistemas").addClass("d-none").val("");
         }
     });
 
-    $(".chk-impresora-grupo").change(function () {
-        $(".chk-impresora-grupo").not(this).prop('checked', false);
-        if ($(".chk-impresora-grupo:checked").length == 0) {
-            $("#config_no").prop('checked', true);
-        }
+    $("#chkOtros").on("change", function () {
+        var marcado = $(this).is(":checked");
+        $("#txtOtrosSistemas").toggleClass("d-none", !marcado);
+        if (marcado) $("#txtOtrosSistemas").focus();
+        else $("#txtOtrosSistemas").val("");
     });
 
-    $("#chkReqSistemas").change(function () {
-        if ($(this).is(':checked')) {
-            $("#seccionSistemas").removeClass('d-none');
-        } else {
-            $("#seccionSistemas").addClass('d-none');
-            $("#seccionSistemas input:checkbox").prop('checked', false);
-            $("#txtOtrosSistemas").addClass('d-none').val('');
-        }
+    $("#chkHabilitarRed").on("change", function () {
+        var marcado = $(this).is(":checked");
+        $("#divContenedorRed").toggleClass("d-none", !marcado);
+        if (marcado) $("#txtDetalleRed").focus();
+        else $("#txtDetalleRed").val("");
     });
 
-    $("#chkOtros").change(function () {
-        if ($(this).is(':checked')) {
-            $("#txtOtrosSistemas").removeClass('d-none').focus();
-        } else {
-            $("#txtOtrosSistemas").addClass('d-none').val('');
-        }
-    });
-
-    $("#chkHabilitarRed").change(function () {
-        if ($(this).is(':checked')) {
-            $("#divContenedorRed").removeClass('d-none');
-            $("#txtDetalleRed").focus();
-        } else {
-            $("#divContenedorRed").addClass('d-none').find('input').val('');
-        }
-    });
-
-    $("#chkConfigurarImpresora").change(function () {
-        if ($(this).is(':checked')) {
-            $("#divContenedorImpresora").removeClass('d-none');
-            $("#txtDetalleImpresora").focus();
-        } else {
-            $("#divContenedorImpresora").addClass('d-none').find('input').val('');
-        }
+    $("#chkConfigurarImpresora").on("change", function () {
+        var marcado = $(this).is(":checked");
+        $("#divContenedorImpresora").toggleClass("d-none", !marcado);
+        if (marcado) $("#txtDetalleImpresora").focus();
+        else $("#txtDetalleImpresora").val("");
     });
 });

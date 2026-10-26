@@ -3,6 +3,10 @@
 @{
     ViewData["Title"] = "Plan de Respaldos";
     string[] mesesEs = new string[] { "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" };
+
+    bool puedeCrear = await Permisos.PuedeAsync(Modulos.PlanRespaldos, Accion.Crear);
+    bool puedeEditar = await Permisos.PuedeAsync(Modulos.PlanRespaldos, Accion.Editar);
+    bool puedeEliminar = await Permisos.PuedeAsync(Modulos.PlanRespaldos, Accion.Eliminar);
 }
 @Html.AntiForgeryToken()
 
@@ -22,9 +26,12 @@
             <button class="btn btn-third-sigest shadow-sm px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalConsultarRespaldos">
                 <i class="bi bi-search me-1"></i> Consultar respaldos realizados
             </button>
-            <button class="btn btn-primary-sigest shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#modalNuevoRespaldo">
-                <i class="bi bi-plus-circle-fill me-1"></i> Agregar Equipo / Respaldo
-            </button>
+            @if (puedeCrear)
+            {
+                <button class="btn btn-primary-sigest shadow-sm px-3" data-bs-toggle="modal" data-bs-target="#modalNuevoRespaldo">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Agregar Equipo / Respaldo
+                </button>
+            }
         </div>
     </div>
 
@@ -338,9 +345,12 @@
                                     <option value="false">Inactivo</option>
                                 </select>
                             </div>
-                            <button type="button" class="btn mer-btn-principal w-100" onclick="guardarEdicionEquipo()">
-                                <i class="bi bi-check2-circle me-1"></i> Actualizar Datos de Equipo
-                            </button>
+                            @if (puedeEditar)
+                            {
+                                <button type="button" class="btn mer-btn-principal w-100" onclick="guardarEdicionEquipo()">
+                                    <i class="bi bi-check2-circle me-1"></i> Actualizar Datos de Equipo
+                                </button>
+                            }
                         </div>
                     </div>
 
@@ -358,7 +368,10 @@
                                 <label class="form-label">Corregir Fecha Seleccionada</label>
                                 <div class="input-group">
                                     <input type="date" class="form-control" id="txtModificarFechaInput" />
-                                    <button type="button" class="btn mer-btn-secundario" onclick="guardarCambioFechaIndividual()">Guardar</button>
+                                    @if (puedeEditar)
+                                    {
+                                        <button type="button" class="btn mer-btn-secundario" onclick="guardarCambioFechaIndividual()">Guardar</button>
+                                    }
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -373,25 +386,35 @@
                                 <label class="form-label">Observaciones (Requerido para En Curso)</label>
                                 <textarea class="form-control" id="txtObservaciones" rows="2" placeholder="Razón por la que el respaldo está en curso..."></textarea>
                             </div>
-                            <button type="button" class="btn mer-btn-principal w-100" onclick="guardarEstatusRespaldo()">
-                                <i class="bi bi-check-circle me-1"></i> Guardar Estatus de Respaldo
-                            </button>
+                            @if (puedeEditar)
+                            {
+                                <button type="button" class="btn mer-btn-principal w-100" onclick="guardarEstatusRespaldo()">
+                                    <i class="bi bi-check-circle me-1"></i> Guardar Estatus de Respaldo
+                                </button>
 
-                            <div class="mer-separador"></div>
+                                <div class="mer-separador"></div>
 
-                            <label class="form-label">Añadir Nueva Fecha a este Equipo</label>
-                            <div class="input-group">
-                                <input type="date" class="form-control" id="txtNuevaFechaEditar" />
-                                <button type="button" class="btn mer-btn-secundario" onclick="agregarFechaAEquipoExistente()"><i class="bi bi-plus-lg"></i> Añadir</button>
-                            </div>
+                                <label class="form-label">Añadir Nueva Fecha a este Equipo</label>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" id="txtNuevaFechaEditar" />
+                                    <button type="button" class="btn mer-btn-secundario" onclick="agregarFechaAEquipoExistente()"><i class="bi bi-plus-lg"></i> Añadir</button>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer justify-content-between">
-                <button type="button" class="btn mer-btn-eliminar" onclick="eliminarEquipo()">
-                    <i class="bi bi-trash3 me-1"></i> Eliminar Equipo
-                </button>
+                @if (puedeEliminar)
+                {
+                    <button type="button" class="btn mer-btn-eliminar" onclick="eliminarEquipo()">
+                        <i class="bi bi-trash3 me-1"></i> Eliminar Equipo
+                    </button>
+                }
+                else
+                {
+                    <span></span>
+                }
                 <button type="button" class="btn btn-cancelar-sigest" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
@@ -484,6 +507,10 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    @* Sin permiso de editar no se carga Sortable, así no se pueden reordenar las filas *@
+    @if (puedeEditar)
+    {
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    }
     <script src="~/js/Actividades/planRespaldos.js" asp-append-version="true"></script>
 }

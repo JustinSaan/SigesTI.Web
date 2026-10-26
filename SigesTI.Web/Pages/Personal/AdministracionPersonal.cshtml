@@ -1,84 +1,109 @@
 ﻿@page
-@model SigesTI.Web.Pages.Personal.IndexModel
+@model SigesTI.Web.Pages.Personal.AdministracionPersonalModel
 @{
-    ViewData["Title"] = "Lista de Personal";
-}
+    ViewData["Title"] = "Administración de Personal";
 
-<div class="container-fluid px-4 mt-2 mb-4">
-    <div class="header-modulo d-flex justify-content-between align-items-center mb-3">
+    bool puedeCrear = await Permisos.PuedeAsync(Modulos.Personal, Accion.Crear);
+    bool puedeEditar = await Permisos.PuedeAsync(Modulos.Personal, Accion.Editar);
+    bool puedeEliminar = await Permisos.PuedeAsync(Modulos.Personal, Accion.Eliminar);
+}
+@Html.AntiForgeryToken()
+
+<link rel="stylesheet" href="~/css/Personal/administracionPersonal.css" asp-append-version="true" />
+
+<div class="actividades-container px-4 py-3">
+    <!-- Encabezado y Acciones -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="titulo-modulo m-0">Administración de Personal</h2>
-            <small class="text-muted-custom">Gestión y control de usuarios del sistema</small>
+            <h3 class="fw-bold text-white mb-1">
+                <i class="bi bi-people-fill me-2 text-info"></i>Administración de Personal
+            </h3>
+            <p class="text-muted small mb-0">Gestión y control del personal de la empresa.</p>
         </div>
-        <button type="button"
-                class="btn-registrar-custom"
-                onclick="abrirModalRegistrar()">
-            <i class="bi bi-person-plus-fill"></i>
-            <span>Registrar Personal</span>
-        </button>
+        @if (puedeCrear)
+        {
+            <button type="button" class="btn btn-primary-sigest shadow-sm px-3" onclick="abrirModalNuevoPersonal()">
+                <i class="bi bi-person-plus-fill me-1"></i> Registrar Personal
+            </button>
+        }
     </div>
 
-    <div class="panel-personal card-principal">
-        <div class="table-responsive">
-            <table class="table tabla-sigesti m-0">
+    <!-- Tabla de Personal -->
+    <div class="glass-panel mb-4 overflow-hidden">
+        <div class="glass-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-people me-2"></i>Lista de Personal (Arrastra <i class="bi bi-grip-vertical"></i> para reordenar)</span>
+            <span class="badge bg-primary px-3 py-2 rounded-pill">Personal Registrado: @Model.ListaPersonal.Count</span>
+        </div>
+        <div class="table-responsive tabla-contenedor-personal">
+            <table class="tabla-sigest tabla-personal align-middle text-center text-nowrap mb-0 small">
                 <thead>
                     <tr>
-                        <th class="text-center" style="width: 40px;"></th>
-                        <th class="text-center">Nombre</th>
-                        <th class="text-center">Área</th>
-                        <th class="text-center">Puesto</th>
-                        <th class="text-center">Correo Electrónico</th>
-                        <th class="text-center">Acciones</th>
+                        <th rowspan="2" style="width: 40px;"></th>
+                        <th colspan="4" class="th-grupo">Información del Personal</th>
+                        <th class="th-grupo">Estado del Personal</th>
+                        <th class="th-grupo">Gestión</th>
+                    </tr>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Área</th>
+                        <th>Puesto</th>
+                        <th>Correo Electrónico</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @if (Model.ListaPersonal == null || Model.ListaPersonal.Count == 0)
+                <tbody id="tablaPersonalBody">
+                    @if (!Model.ListaPersonal.Any())
                     {
                         <tr>
-                            <td colspan="6" class="text-center py-5 text-muted-custom">
-                                <i class="bi bi-people text-muted d-block mb-2 fs-3"></i>
-                                No hay personal registrado todavía en la base de datos.
-                            </td>
+                            <td colspan="7" class="text-muted py-4">No hay personal registrado todavía.</td>
                         </tr>
                     }
                     else
                     {
                         @foreach (var persona in Model.ListaPersonal)
                         {
-                            var claseArea = persona.Area?.ToLower()
-                                .Replace(" ", "-")
-                                .Replace("é", "e")
-                                .Replace("í", "i")
-                                .Replace("ó", "o") ?? "";
+                            <tr class="@(!persona.Activo ? "fila-inactiva" : "")"
+                                data-id="@persona.Id"
+                                data-nombre="@persona.Nombre"
+                                data-area="@persona.Area"
+                                data-puesto="@persona.Puesto"
+                                data-correo="@persona.Correo"
+                                data-activo="@persona.Activo.ToString().ToLower()"
+                                data-responsable="@persona.EsResponsable.ToString().ToLower()">
 
-                            <tr data-id="@persona.Id">
-                                <td class="text-center drag-handle" title="Arrastrar para reordenar">
-                                    <i class="bi bi-grip-vertical text-muted"></i>
+                                <td class="drag-handle" title="Arrastra para reordenar"><i class="bi bi-grip-vertical fs-5"></i></td>
+
+                                <td class="celda-nombre">@persona.Nombre</td>
+                                <td>
+                                    <span class="badge-area-sigest @AdministracionPersonalModel.ClaseArea(persona.Area)">@persona.Area</span>
                                 </td>
-                                <td class="text-center fw-bold text-bright font-accent">@persona.Nombre</td>
-                                <td class="text-center">
-                                    <span class="badge-area @claseArea">
-                                        @persona.Area
-                                    </span>
+                                <td class="celda-puesto">@persona.Puesto</td>
+                                <td><span class="texto-correo">@persona.Correo</span></td>
+                                <td>
+                                    @if (persona.Activo)
+                                    {
+                                        <span class="badge bg-success"><i class="bi bi-circle-fill me-1 small"></i>Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary"><i class="bi bi-dash-circle me-1 small"></i>Inactivo</span>
+                                    }
                                 </td>
-                                <td class="text-center">@persona.Puesto</td>
-                                <td class="text-center text-lowercase text-muted-custom">@persona.Correo</td>
-
-                                <td class="text-center">
-                                    <div class="acciones-personal">
-                                        <button type="button"
-                                                class="btn-accion-tabla btn-editar"
-                                                title="Editar"
-                                                onclick="editarEmpleado(@persona.Id)">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-
-                                        <button type="button"
-                                                class="btn-accion-tabla btn-eliminar"
-                                                title="Eliminar"
-                                                onclick="eliminarEmpleado(@persona.Id, '@persona.Nombre')">
-                                            <i class="bi bi-trash-fill"></i>
-                                        </button>
+                                <td>
+                                    <div class="d-flex justify-content-center gap-1">
+                                        @if (puedeEditar)
+                                        {
+                                            <button type="button" class="btn btn-accion-tabla btn-editar" title="Editar" onclick="abrirModalEditarPersonal(this)">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                        }
+                                        @if (puedeEliminar)
+                                        {
+                                            <button type="button" class="btn btn-accion-tabla btn-eliminar" title="Eliminar" onclick="eliminarPersonal(this)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        }
                                     </div>
                                 </td>
                             </tr>
@@ -90,143 +115,80 @@
     </div>
 </div>
 
-@Html.AntiForgeryToken()
-
-<!-- Modal Registrar Personal -->
-<div class="modal fade" id="modalRegistrar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content modal-dark">
+<!-- Modal Registrar / Editar Personal (el mismo modal sirve para ambos) -->
+<div class="modal fade modal-personal" id="modalPersonal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-person-plus-fill me-2 text-info"></i>
-                    Registrar Nuevo Personal
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-white fw-bold">Nombre Completo</label>
-                        <input id="regNombre" class="form-control" placeholder="Ej. Juan Pérez" />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-white fw-bold">Área</label>
-                        <select id="regArea" class="form-select">
-                            <option value="">-- Selecciona un Área --</option>
-                            <option value="Dirección General">Dirección General</option>
-                            <option value="Sistemas">Sistemas</option>
-                            <option value="Desarrollo">Desarrollo</option>
-                            <option value="Ventas">Ventas</option>
-                            <option value="Administración">Administración</option>
-                            <option value="Soporte Técnico">Soporte Técnico</option>
-                            <option value="Consultoría">Consultoría</option>
-                            <option value="Cobranza">Cobranza</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-white fw-bold">Puesto</label>
-                        <input id="regPuesto" class="form-control" placeholder="Ej. Gerente, Auxiliar, Coordinador" />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-white fw-bold">Correo Electrónico</label>
-                        <input id="regCorreo" type="email" class="form-control" placeholder="ejemplo@sigesti.com" />
+                <div class="d-flex align-items-center gap-3">
+                    <div class="mer-icono"><i class="bi bi-person-plus-fill" id="iconoModalPersonal"></i></div>
+                    <div>
+                        <h5 class="modal-title mb-0" id="tituloModalPersonal">Registrar Personal</h5>
+                        <small class="mer-subtitulo" id="subtituloModalPersonal">Nuevo integrante del personal</small>
                     </div>
                 </div>
-                <div class="row mt-2">
-                    <div class="col-md-6 mb-3">
-                        <div class="form-check pt-1">
-                            <input id="regActivo" class="form-check-input custom-checkbox" type="checkbox" checked />
-                            <label class="form-check-label text-white ms-1" for="regActivo">Personal Activo</label>
+                <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtPersonalId" value="0" />
+                <div class="mer-tarjeta">
+                    <div class="mer-tarjeta-titulo"><i class="bi bi-person-vcard"></i> Datos del Personal</div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="txtNombre">Nombre Completo</label>
+                            <input type="text" class="form-control" id="txtNombre" maxlength="150" placeholder="Ej. Juan Pérez" />
                         </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="form-check pt-1">
-                            <input id="regResponsable" class="form-check-input custom-checkbox" type="checkbox" />
-                            <label class="form-check-label text-white fw-bold ms-1" for="regResponsable">Responsable del Área</label>
+                        <div class="col-md-6">
+                            <label class="form-label" for="selectArea">Área</label>
+                            <select class="form-select" id="selectArea">
+                                <option value="">-- Selecciona un Área --</option>
+                                @foreach (var area in Model.Areas)
+                                {
+                                    <option value="@area">@area</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="txtPuesto">Puesto</label>
+                            <input type="text" class="form-control" id="txtPuesto" maxlength="100" placeholder="Ej. Gerente, Auxiliar, Coordinador" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="txtCorreo">Correo Electrónico</label>
+                            <input type="email" class="form-control" id="txtCorreo" maxlength="150" placeholder="ejemplo@sigesti.com" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="selectActivo">Estado</label>
+                            <select class="form-select" id="selectActivo">
+                                <option value="true">Activo</option>
+                                <option value="false">Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" role="switch" id="chkResponsable" />
+                                <label class="form-check-label" for="chkResponsable">Responsable del Área</label>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-cancelar-modal" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
                 </button>
-                <button type="button" class="btn-guardar-modal" onclick="guardarRegistro()">
-                    <i class="bi bi-check-circle-fill me-1"></i> Guardar Registro
+                <button type="button" class="btn btn-guardar px-4" id="btnGuardarPersonal" onclick="guardarPersonal()">
+                    <i class="bi bi-save"></i> Guardar
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Editar Personal -->
-<div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content modal-dark">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-pencil-square me-2 text-info"></i>
-                    Editar Personal
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="editId" />
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-white fw-bold">Nombre Completo</label>
-                        <input id="editNombre" class="form-control" placeholder="Ej. Juan Pérez" />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-white fw-bold">Área</label>
-                        <select id="editArea" class="form-select">
-                            <option value="">-- Selecciona un Área --</option>
-                            <option value="Dirección General">Dirección General</option>
-                            <option value="Sistemas">Sistemas</option>
-                            <option value="Desarrollo">Desarrollo</option>
-                            <option value="Ventas">Ventas</option>
-                            <option value="Administración">Administración</option>
-                            <option value="Soporte Técnico">Soporte Técnico</option>
-                            <option value="Consultoría">Consultoría</option>
-                            <option value="Cobranza">Cobranza</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-white fw-bold">Puesto</label>
-                        <input id="editPuesto" class="form-control" placeholder="Ej. Gerente, Auxiliar, Coordinador" />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label text-white fw-bold">Correo Electrónico</label>
-                        <input id="editCorreo" type="email" class="form-control" placeholder="ejemplo@sigesti.com" />
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-md-6 mb-3">
-                        <div class="form-check pt-1">
-                            <input id="editActivo" class="form-check-input custom-checkbox" type="checkbox" />
-                            <label class="form-check-label text-white ms-1" for="editActivo">Personal Activo</label>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="form-check pt-1">
-                            <input id="editResponsable" class="form-check-input custom-checkbox" type="checkbox" />
-                            <label class="form-check-label text-white fw-bold ms-1" for="editResponsable">Responsable del Área</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-cancelar-modal" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i> Cancelar
-                </button>
-                <button type="button" class="btn-guardar-modal" onclick="guardarCambios()">
-                    <i class="bi bi-check-circle-fill me-1"></i> Guardar Cambios
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="~/js/modales.js" asp-append-version="true"></script>
-<script src="~/js/personal-dragdrop.js" asp-append-version="true"></script>
+@section Scripts {
+    @* Sin permiso de editar no se carga Sortable, así no se pueden reordenar las filas *@
+    @if (puedeEditar)
+    {
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    }
+    <script src="~/js/Personal/administracionPersonal.js" asp-append-version="true"></script>
+}

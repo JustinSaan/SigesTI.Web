@@ -2,10 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SigesTI.Web.Data;
+using SigesTI.Web.Seguridad;
 using SigesTI.Web.Models;
 
 namespace SigesTI.Web.Pages.Actividades
 {
+    [Modulo(Modulos.PlanRespaldos)]
     public class PlanRespaldosModel : PageModel
     {
         private readonly ApplicationDbContext _context;
@@ -116,6 +118,7 @@ namespace SigesTI.Web.Pages.Actividades
         }
         // ===== FIN NUEVO =====
 
+        [Permiso(Accion.Crear)]
         public async Task<IActionResult> OnPostGuardarEquipoAsync([FromBody] CrearEquipoRequest request)
         {
             if (request == null) return BadRequest("Petición inválida.");
@@ -157,6 +160,7 @@ namespace SigesTI.Web.Pages.Actividades
             return new JsonResult(new { success = true });
         }
 
+        [Permiso(Accion.Editar)]
         public async Task<IActionResult> OnPostActualizarEquipoAsync([FromBody] EditarEquipoRequest request)
         {
             var equipo = await _context.EquiposRespaldo
@@ -191,6 +195,7 @@ namespace SigesTI.Web.Pages.Actividades
             return new JsonResult(new { success = true });
         }
 
+        [Permiso(Accion.Editar)]
         public async Task<IActionResult> OnPostCambiarEstadoRespaldoAsync([FromBody] CambiarEstadoRequest request)
         {
             var prog = await _context.ProgramacionRespaldos.FindAsync(request.ProgramacionId);
@@ -208,6 +213,7 @@ namespace SigesTI.Web.Pages.Actividades
         }
 
         // Nuevo handler para modificar una fecha individual asignada
+        [Permiso(Accion.Editar)]
         public async Task<IActionResult> OnPostEditarFechaProgramadaAsync([FromBody] EditarFechaRequest request)
         {
             var prog = await _context.ProgramacionRespaldos.FindAsync(request.ProgramacionId);
@@ -219,6 +225,7 @@ namespace SigesTI.Web.Pages.Actividades
         }
 
         // ===== NUEVO (Plan de Respaldos): eliminar un equipo junto con todas sus fechas programadas =====
+        [Permiso(Accion.Eliminar)]
         public async Task<IActionResult> OnPostEliminarEquipoAsync([FromBody] EliminarEquipoRequest request)
         {
             var equipo = await _context.EquiposRespaldo
@@ -299,6 +306,7 @@ namespace SigesTI.Web.Pages.Actividades
         }
         // ===== FIN NUEVO =====
 
+        [Permiso(Accion.Editar)]
         public async Task<IActionResult> OnPostGuardarOrdenAsync([FromBody] List<int> ordenIds)
         {
             if (ordenIds == null || !ordenIds.Any()) return BadRequest();

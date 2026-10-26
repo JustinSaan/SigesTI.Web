@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SigesTI.Web.Data;
+using SigesTI.Web.Seguridad;
 using SigesTI.Web.Models;
 using System;
 using System.Collections.Generic;
@@ -12,13 +13,16 @@ using System.Threading.Tasks;
 
 namespace SigesTI.Web.Pages.Actividades
 {
+    [Modulo(Modulos.TareasGenerales)]
     public class TareasProgramadasModel : PageModel
     {
         private readonly ApplicationDbContext _context;
+        private readonly PermisosService _permisos;
 
-        public TareasProgramadasModel(ApplicationDbContext context)
+        public TareasProgramadasModel(ApplicationDbContext context, PermisosService permisos)
         {
             _context = context;
+            _permisos = permisos;
         }
 
         public List<TareaProgramada> ListaTareas { get; set; } = new();
@@ -214,6 +218,13 @@ namespace SigesTI.Web.Pages.Actividades
                 });
             }
 
+            // Id = 0 es una tarea nueva; si no, es una edición
+            var accion = TareaInput.Id == 0 ? Accion.Crear : Accion.Editar;
+            if (!await _permisos.PuedeAsync(Modulos.TareasGenerales, accion))
+            {
+                return PermisosFilter.RespuestaSinPermiso(HttpContext);
+            }
+
             if (TareaInput.TipoTareaId == -1 && string.IsNullOrWhiteSpace(TareaInput.NuevoTipo))
             {
                 return new JsonResult(new { success = false, message = "Escribe el nombre del nuevo tipo de tarea." });
@@ -352,6 +363,7 @@ namespace SigesTI.Web.Pages.Actividades
             });
         }
 
+        [Permiso(Accion.Editar)]
         public async Task<IActionResult> OnPostCambiarEstatusAsync(int id, string nuevoEstatus)
         {
             var (usuarioId, _, _) = ObtenerUsuarioSesion();
@@ -395,6 +407,7 @@ namespace SigesTI.Web.Pages.Actividades
             }
         }
 
+        [Permiso(Accion.Eliminar)]
         public async Task<IActionResult> OnPostEliminarTareaAsync(int id)
         {
             var (usuarioId, _, rol) = ObtenerUsuarioSesion();
@@ -408,7 +421,7 @@ namespace SigesTI.Web.Pages.Actividades
                 var tarea = await _context.TareasProgramadas.FindAsync(id);
                 if (tarea == null) return NotFound();
 
-                if (tarea.Estatus == "Resuelta" && !rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+                if (tarea.Estatus == "Resuelta" && rol != Roles.Admin)
                 {
                     return new JsonResult(new { success = false, message = "No tienes permisos para eliminar tareas marcadas como resueltas." });
                 }

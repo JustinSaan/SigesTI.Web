@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SigesTI.Web.Data;
+using SigesTI.Web.Seguridad;
 using System.Globalization;
 
 namespace SigesTI.Web.Pages
@@ -13,6 +14,7 @@ namespace SigesTI.Web.Pages
         public string Titulo { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
         public string UrlDetalle { get; set; } = string.Empty;
+        public string Modulo { get; set; } = string.Empty;
     }
 
     public class IndexModel : PageModel
@@ -86,7 +88,8 @@ namespace SigesTI.Web.Pages
                     Icono = "bi-check-circle-fill",
                     Titulo = $"Ticket #{numTicket} Resuelto",
                     Descripcion = $"{usuarioEjecuto} ha cerrado o resuelto el Ticket #{numTicket} el día de hoy.",
-                    UrlDetalle = "/Actividades/ReporteTickets"
+                    UrlDetalle = "/Actividades/ReporteTickets",
+                    Modulo = Modulos.ReporteTickets
                 });
             }
 
@@ -113,7 +116,8 @@ namespace SigesTI.Web.Pages
                     Icono = "bi-ticket-perforated-fill",
                     Titulo = $"Nuevo Ticket #{numTicket}",
                     Descripcion = $"{usuarioEjecuto} ha generado el Ticket #{numTicket} y se encuentra en estado '{ticket.Estatus}'.",
-                    UrlDetalle = "/Actividades/ReporteTickets"
+                    UrlDetalle = "/Actividades/ReporteTickets",
+                    Modulo = Modulos.ReporteTickets
                 });
             }
 
@@ -140,7 +144,8 @@ namespace SigesTI.Web.Pages
                     Icono = "bi-clock-history",
                     Titulo = "Tickets Pendientes",
                     Descripcion = $"{usuarioTexto} tiene {ticketsAnterioresPendientes.Count} ticket(s) en curso pendientes de días anteriores.",
-                    UrlDetalle = "/Actividades/ReporteTickets"
+                    UrlDetalle = "/Actividades/ReporteTickets",
+                    Modulo = Modulos.ReporteTickets
                 });
             }
 
@@ -165,7 +170,8 @@ namespace SigesTI.Web.Pages
                     Icono = sol.Estatus == "Resuelto" ? "bi-check-circle-fill" : "bi-file-earmark-text-fill",
                     Titulo = $"Solicitud #{sol.IdSolicitud}",
                     Descripcion = $"{usuarioEjecuto} gestionó la Solicitud #{sol.IdSolicitud} (Estatus: {sol.Estatus}).",
-                    UrlDetalle = "/Solicitudes/Consultar"
+                    UrlDetalle = "/Solicitudes/Consultar",
+                    Modulo = Modulos.ConsultarSolicitudes
                 });
             }
 
@@ -181,7 +187,8 @@ namespace SigesTI.Web.Pages
                     Icono = "bi-exclamation-triangle-fill",
                     Titulo = "Requerimientos Pendientes",
                     Descripcion = $"Hay {solicitudesAnterioresPendientes} solicitud(es) de requerimientos pendiente(s) por resolver.",
-                    UrlDetalle = "/Solicitudes/Consultar"
+                    UrlDetalle = "/Solicitudes/Consultar",
+                    Modulo = Modulos.ConsultarSolicitudes
                 });
             }
 
@@ -200,7 +207,8 @@ namespace SigesTI.Web.Pages
                     Icono = "bi-shield-lock-fill",
                     Titulo = "Seguridad del Sistema",
                     Descripcion = $"Hay {usuariosCambioPassword} usuario(s) pendiente(s) por cambiar su contraseña en el sistema.",
-                    UrlDetalle = "/Cuenta/AdminVista"
+                    UrlDetalle = "/Cuenta/ControlAcceso",
+                    Modulo = Modulos.Cuenta
                 });
             }
 
@@ -211,7 +219,8 @@ namespace SigesTI.Web.Pages
                 Icono = "bi-hdd-network-fill",
                 Titulo = "Plan de Respaldos",
                 Descripcion = "El respaldo del área de Soporte Técnico y Base de Datos está programado dentro de las actividades.",
-                UrlDetalle = "/Actividades/PlanRespaldos"
+                UrlDetalle = "/Actividades/PlanRespaldos",
+                Modulo = Modulos.PlanRespaldos
             });
         }
     }

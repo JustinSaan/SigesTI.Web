@@ -2,182 +2,190 @@
 @model SigesTI.Web.Pages.Solicitudes.GenerarModel
 @{
     ViewData["Title"] = "Nueva Solicitud";
+    string[] sistemas = { "Encuentro.NET", "ADMIN", "BDD", "SITA", "COA", "DNLP", "VUCEM", "ADCO" };
 }
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="~/css/Solicitudes/solicitudes.css" asp-append-version="true" />
 
-<div class="container mt-4 mb-5">
-    <div class="card shadow-lg border-0 custom-card">
-        <div class="card-header bg-gradient-primary-modern text-white py-3 shadow-sm">
-            <h4 class="mb-0 fw-bold"><i class="bi bi-file-earmark-text"></i> Formato de Requerimientos de Soporte Técnico</h4>
+<div class="solicitudes-container">
+
+    <div class="sol-encabezado">
+        <div class="sol-encabezado-titulo">
+            <div class="sol-icono"><i class="bi bi-file-earmark-plus"></i></div>
+            <div>
+                <h3>Nueva solicitud</h3>
+                <p>Formato de requerimientos de Soporte Técnico</p>
+            </div>
         </div>
-        <div class="card-body p-4 bg-light-modern">
-            <form method="post" id="formSolicitud">
-
-                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-clock-history"></i> Control de Tiempos y Estado</h5>
-                <div class="row g-3 mb-4 Flyout-fechas p-3 rounded border bg-white shadow-sm section-hover">
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold text-dark">Fecha de Ingreso:</label>
-                        <input type="date" asp-for="NuevaSolicitud.FechaIngreso" class="form-control custom-input" required />
-                        <span asp-validation-for="NuevaSolicitud.FechaIngreso" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold text-dark">Fecha de Entrega:</label>
-                        <input type="date" asp-for="NuevaSolicitud.FechaEntrega" class="form-control custom-input" required />
-                        <span asp-validation-for="NuevaSolicitud.FechaEntrega" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold text-dark">Estatus de la Solicitud:</label>
-                        <select asp-for="NuevaSolicitud.Estatus" asp-items="Model.EstatusOptions" id="estatusCombo" class="form-select custom-input select-estatus-bold">
-                        </select>
-                        <span asp-validation-for="NuevaSolicitud.Estatus" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-person-badge"></i> Datos del Solicitante</h5>
-                <div class="row g-3 mb-4 p-3 rounded border bg-white shadow-sm section-hover">
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Área:</label>
-                        <select asp-for="AreaAuxiliar" asp-items="Model.AreasOptions" id="ddlArea" class="form-select custom-input" required>
-                            <option value="">-- Seleccione Área --</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Nombre del Solicitante:</label>
-                        <select asp-for="NuevaSolicitud.IdPersonal" id="ddlPersonal" class="form-select custom-input" required>
-                            <option value="">-- Seleccione Personal --</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Puesto:</label>
-                        <input type="text" asp-for="NuevaSolicitud.PuestoSolicitante" id="txtPuesto" class="form-control custom-input input-readonly" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Correo Electrónico:</label>
-                        <input type="email" asp-for="NuevaSolicitud.CorreoSolicitante" id="txtCorreo" class="form-control custom-input input-readonly" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Responsable del Área (Jefe):</label>
-                        <input type="text" asp-for="NuevaSolicitud.ResponsableArea" id="txtResponsable" class="form-control custom-input input-readonly" readonly />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Unidades de red compartidas:</label>
-                        <input type="text"
-                               id="txtUnidadesRed"
-                               class="form-control custom-input input-readonly"
-                               readonly />
-                    </div>
-                    <div class="col-md-4 mt-4 d-flex flex-column justify-content-center">
-                        <label class="form-label fw-bold d-block mb-2">¿Tiene impresora configurada?</label>
-                        <div>
-                            <div class="form-check form-check-inline custom-checkbox-wrapper">
-                                <input class="form-check-input chk-impresora-grupo custom-cb" type="checkbox" name="ImpresoraConfiguradaAux" id="config_si" value="Si">
-                                <label class="form-check-label fw-semibold" for="config_si">Sí</label>
-                            </div>
-                            <div class="form-check form-check-inline custom-checkbox-wrapper">
-                                <input class="form-check-input chk-impresora-grupo custom-cb" type="checkbox" name="ImpresoraConfiguradaAux" id="config_no" value="No" checked>
-                                <label class="form-check-label fw-semibold" for="config_no">No</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-cpu"></i> Sistemas Requeridos</h5>
-                <div class="row mb-4 p-3 rounded border bg-white shadow-sm section-hover">
-                    <div class="col-12 mb-2">
-                        <div class="form-check form-switch custom-switch-wrapper">
-                            <input class="form-check-input custom-switch-input" type="checkbox" asp-for="NuevaSolicitud.ReqSistemas" id="chkReqSistemas">
-                            <label class="form-check-label fw-bold text-dark" for="chkReqSistemas">¿Requiere Acceso/Soporte a Sistemas?</label>
-                        </div>
-                    </div>
-
-                    <div class="col-12 ps-4 d-none toggle-animation" id="seccionSistemas">
-                        <div class="row g-2 p-2 rounded bg-light">
-                            @foreach (var sistema in new[] { "Encuentro.NET", "ADMIN", "BDD", "SITA", "COA", "DNLP", "VUCEM", "ADCO" })
-                            {
-                                <div class="col-md-3">
-                                    <div class="form-check custom-checkbox-wrapper py-1">
-                                        <input class="form-check-input custom-cb" type="checkbox" name="SistemasSeleccionados" value="@sistema" id="chk_@sistema">
-                                        <label class="form-check-label fw-semibold" for="chk_@sistema">@sistema</label>
-                                    </div>
-                                </div>
-                            }
-                            <div class="col-md-6 d-flex align-items-center mt-2">
-                                <div class="form-check me-2 custom-checkbox-wrapper">
-                                    <input class="form-check-input custom-cb" type="checkbox" name="SistemasSeleccionados" value="Otros" id="chkOtros">
-                                    <label class="form-check-label fw-bold" for="chkOtros">Otros:</label>
-                                </div>
-                                <input type="text" asp-for="NuevaSolicitud.OtrosSistemas" id="txtOtrosSistemas" class="form-control form-control-sm custom-input d-none scale-in" placeholder="Especifique el sistema" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-gear-widg-select"></i> Otras Configuraciones</h5>
-                <div class="row g-3 mb-4 p-3 rounded border bg-white shadow-sm section-hover">
-                    <div class="col-md-6">
-                        <div class="form-check mb-2 custom-checkbox-wrapper">
-                            <input class="form-check-input custom-cb" type="checkbox" id="chkHabilitarRed">
-                            <label class="form-check-label fw-bold" for="chkHabilitarRed">Habilitar unidad de red</label>
-                        </div>
-                        <div id="divContenedorRed" class="d-none scale-in">
-                            <input type="text"
-                                   asp-for="NuevaSolicitud.NuevaUnidadRed"
-                                   id="txtDetalleRed"
-                                   class="form-control custom-input"
-                                   placeholder="Escribe la nueva unidad de red..." />
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-check mb-2 custom-checkbox-wrapper">
-                            <input class="form-check-input custom-cb" type="checkbox" id="chkConfigurarImpresora">
-                            <label class="form-check-label fw-bold" for="chkConfigurarImpresora">Configurar impresora</label>
-                        </div>
-                        <div id="divContenedorImpresora" class="d-none scale-in">
-                            <input type="text"
-                                   asp-for="NuevaSolicitud.DetalleImpresora"
-                                   id="txtDetalleImpresora"
-                                   class="form-control custom-input"
-                                   placeholder="Escribe el modelo o detalles de la impresora..." />
-                        </div>
-                    </div>
-                </div>
-
-                <h5 class="text-custom-gradient border-bottom pb-2 fw-bold"><i class="bi bi-tools"></i> Detalles del Servicio</h5>
-                <div class="row g-3 mb-4 p-3 rounded border bg-white shadow-sm section-hover">
-                    <div class="col-12">
-                        <label class="form-label fw-bold">Descripción del Problema o Requerimiento:</label>
-                        <textarea asp-for="NuevaSolicitud.DescripcionProblema" class="form-control custom-input" rows="3" placeholder="Escriba aquí la relatoría detallada de la solicitud..."></textarea>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Ejecutivo de Soporte Asignado:</label>
-                        <select asp-for="NuevaSolicitud.EjecutivoAsignado" asp-items="Model.SoporteOptions" class="form-select custom-input">
-                            <option value="">-- Seleccione Técnico --</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Autorización (Administración):</label>
-                        <select asp-for="NuevaSolicitud.AutorizaAdmin" asp-items="Model.AdminOptions" class="form-select custom-input">
-                            <option value="">-- Seleccione Administrador --</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-end border-top pt-3">
-                    <button type="submit" class="btn btn-modern-success btn-lg px-5 shadow">
-                        <i class="bi bi-save"></i> Guardar Solicitud
-                    </button>
-                </div>
-
-            </form>
+        <div class="sol-acciones">
+            <a href="/Solicitudes/Consultar" class="sol-btn-secundario">
+                <i class="bi bi-collection"></i> Ver solicitudes
+            </a>
         </div>
     </div>
+
+    <form method="post" id="formSolicitud">
+        <div class="row g-4">
+
+            <div class="col-lg-8">
+
+                <div class="sol-tarjeta">
+                    <div class="sol-tarjeta-titulo"><span class="sol-paso">1</span> Datos del solicitante</div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="ddlArea">Área</label>
+                            <select asp-for="AreaAuxiliar" asp-items="Model.AreasOptions" id="ddlArea" class="form-select" required>
+                                <option value="">Seleccione un área</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="ddlPersonal">Nombre del solicitante</label>
+                            <select asp-for="NuevaSolicitud.IdPersonal" id="ddlPersonal" class="form-select" required>
+                                <option value="">Primero seleccione un área</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="txtPuesto">Puesto</label>
+                            <input type="text" asp-for="NuevaSolicitud.PuestoSolicitante" id="txtPuesto" class="form-control sol-dato" placeholder="—" readonly />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="txtCorreo">Correo electrónico</label>
+                            <input type="email" asp-for="NuevaSolicitud.CorreoSolicitante" id="txtCorreo" class="form-control sol-dato" placeholder="—" readonly />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="txtResponsable">Responsable del área</label>
+                            <input type="text" asp-for="NuevaSolicitud.ResponsableArea" id="txtResponsable" class="form-control sol-dato" placeholder="—" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label d-block">¿Tiene impresora configurada?</label>
+                            <div class="sol-segmentos">
+                                <input type="radio" name="ImpresoraConfiguradaAux" id="config_si" value="Si">
+                                <label for="config_si">Sí</label>
+                                <input type="radio" name="ImpresoraConfiguradaAux" id="config_no" value="No" checked>
+                                <label for="config_no">No</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sol-tarjeta">
+                    <div class="sol-tarjeta-titulo"><span class="sol-paso">2</span> Requerimiento</div>
+
+                    <label class="form-label" for="txtDescripcion">Descripción del problema o requerimiento</label>
+                    <textarea asp-for="NuevaSolicitud.DescripcionProblema" id="txtDescripcion" class="form-control" rows="5" required
+                              placeholder="Describa con detalle lo que necesita el solicitante..."></textarea>
+
+                    <div class="sol-separador"></div>
+
+                    <label class="sol-switch" for="chkReqSistemas">
+                        <span class="sol-switch-texto">
+                            <strong>Requiere acceso o soporte a sistemas</strong>
+                            <span>Marque los sistemas involucrados en la solicitud</span>
+                        </span>
+                        <span class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" asp-for="NuevaSolicitud.ReqSistemas" id="chkReqSistemas">
+                        </span>
+                    </label>
+
+                    <div id="seccionSistemas" class="sol-desplegable d-none">
+                        <div class="sol-chips">
+                            @foreach (var sistema in sistemas)
+                            {
+                                <input type="checkbox" name="SistemasSeleccionados" value="@sistema" id="chk_@sistema">
+                                <label for="chk_@sistema">@sistema</label>
+                            }
+                            <input type="checkbox" name="SistemasSeleccionados" value="Otros" id="chkOtros">
+                            <label for="chkOtros">Otros</label>
+                        </div>
+                        <input type="text" asp-for="NuevaSolicitud.OtrosSistemas" id="txtOtrosSistemas" class="form-control mt-3 d-none" placeholder="Especifique el otro sistema" />
+                    </div>
+                </div>
+
+                <div class="sol-tarjeta">
+                    <div class="sol-tarjeta-titulo"><span class="sol-paso">3</span> Configuraciones adicionales</div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="sol-switch" for="chkHabilitarRed">
+                                <span class="sol-switch-texto">
+                                    <strong>Habilitar unidad de red</strong>
+                                    <span>Dar acceso a una carpeta compartida</span>
+                                </span>
+                                <span class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="chkHabilitarRed">
+                                </span>
+                            </label>
+                            <div id="divContenedorRed" class="sol-desplegable d-none">
+                                <input type="text" asp-for="NuevaSolicitud.NuevaUnidadRed" id="txtDetalleRed" class="form-control" placeholder="Nombre de la unidad de red" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="sol-switch" for="chkConfigurarImpresora">
+                                <span class="sol-switch-texto">
+                                    <strong>Configurar impresora</strong>
+                                    <span>Instalar o configurar un equipo de impresión</span>
+                                </span>
+                                <span class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="chkConfigurarImpresora">
+                                </span>
+                            </label>
+                            <div id="divContenedorImpresora" class="sol-desplegable d-none">
+                                <input type="text" asp-for="NuevaSolicitud.DetalleImpresora" id="txtDetalleImpresora" class="form-control" placeholder="Modelo o detalles de la impresora" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+                <div class="sol-lateral">
+
+                    <div class="sol-tarjeta">
+                        <div class="sol-tarjeta-titulo"><i class="bi bi-clock-history"></i> Control de tiempos</div>
+
+                        <label class="form-label" for="txtFechaIngreso">Fecha de ingreso</label>
+                        <input type="date" asp-for="NuevaSolicitud.FechaIngreso" id="txtFechaIngreso" class="form-control mb-3" required />
+
+                        <label class="form-label d-block">Estatus</label>
+                        <div class="sol-segmentos mb-3">
+                            <input type="radio" asp-for="NuevaSolicitud.Estatus" value="Pendiente" id="estatusPendiente" class="seg-pendiente">
+                            <label for="estatusPendiente"><i class="bi bi-hourglass-split"></i> Pendiente</label>
+                            <input type="radio" asp-for="NuevaSolicitud.Estatus" value="Resuelto" id="estatusResuelto" class="seg-resuelto">
+                            <label for="estatusResuelto"><i class="bi bi-check2-circle"></i> Resuelto</label>
+                        </div>
+
+                        <label class="form-label" for="txtFechaEntrega">Fecha de entrega</label>
+                        <input type="date" asp-for="NuevaSolicitud.FechaEntrega" id="txtFechaEntrega" class="form-control" />
+                        <div class="form-text text-secondary small mt-1">Solo aplica cuando la solicitud está resuelta.</div>
+                    </div>
+
+                    <div class="sol-tarjeta">
+                        <div class="sol-tarjeta-titulo"><i class="bi bi-person-gear"></i> Asignación</div>
+
+                        <label class="form-label" for="ddlEjecutivo">Ejecutivo de soporte</label>
+                        <select asp-for="NuevaSolicitud.EjecutivoAsignado" asp-items="Model.SoporteOptions" id="ddlEjecutivo" class="form-select mb-3">
+                            <option value="">Sin asignar</option>
+                        </select>
+
+                        <label class="form-label" for="ddlAutoriza">Autorización (Administración)</label>
+                        <select asp-for="NuevaSolicitud.AutorizaAdmin" asp-items="Model.AdminOptions" id="ddlAutoriza" class="form-select">
+                            <option value="">Sin autorización</option>
+                        </select>
+                    </div>
+
+                    @if (await Permisos.PuedeAsync(Modulos.GenerarSolicitud, Accion.Crear))
+                    {
+                        <button type="submit" class="sol-btn-principal sol-btn-guardar">
+                            <i class="bi bi-save"></i> Guardar solicitud
+                        </button>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </form>
 </div>
 
 @section Scripts {
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
- <!-- Solicitudes -->
- <script src="~/js/solicitudes.js"
-         asp-append-version="true"></script>
+    <script src="~/js/solicitudes.js" asp-append-version="true"></script>
 }

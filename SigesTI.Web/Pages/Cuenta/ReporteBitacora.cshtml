@@ -1,205 +1,141 @@
 ﻿@page
 @model SigesTI.Web.Pages.Cuenta.ReporteBitacoraModel
+@using System.Globalization
+@using Microsoft.AspNetCore.Http
 
 @{
     Layout = null;
 
-    string nombreReporte =
-        $"ReporteBitacora_{Model.FechaGeneracion:ddMMyyyyHHmm}";
+    var cultura = new CultureInfo("es-MX");
+    string nombreReporte = $"ReporteBitacora_{Model.FechaGeneracion:ddMMyyyyHHmm}";
+    string generadoPor = HttpContext.Session.GetString("NombreCompleto") ?? "—";
 
-    ViewData["Title"] = nombreReporte;
+    // Cuántos registros hay de cada tipo de acción (para los recuadros del resumen)
+    int creaciones = Model.Registros.Count(r => ReporteBitacoraModel.ObtenerClaseAccion(r.Accion) == "creacion");
+    int ediciones = Model.Registros.Count(r => ReporteBitacoraModel.ObtenerClaseAccion(r.Accion) == "edicion");
+    int eliminaciones = Model.Registros.Count(r => ReporteBitacoraModel.ObtenerClaseAccion(r.Accion) == "eliminacion");
+    int otros = Model.Registros.Count - creaciones - ediciones - eliminaciones;
+
+    // Los registros se agrupan por día para la tabla
+    var registrosPorDia = Model.Registros.GroupBy(r => r.FechaHora.Date);
 }
 
 <!DOCTYPE html>
-
 <html lang="es">
-
 <head>
     <meta charset="utf-8" />
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@nombreReporte</title>
-
-    <link rel="stylesheet"
-          href="~/css/reportes.css"
-          asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/Reportes/reporte-bitacora.css" asp-append-version="true" />
 </head>
 
-<body class="reporte-body reporte-bitacora">
-    <main class="reporte-hoja">
+<body>
+    <main class="hoja">
 
         <!-- Encabezado -->
-        <header class="reporte-encabezado">
-
-            <div class="reporte-logo-contenedor">
-
-                <img src="~/titulo2.png"
-                     alt="SigesST"
-                     class="reporte-logo" />
+        <header class="encabezado">
+            <div>
+                <p class="encabezado-sistema">Sistema de Gestión de Soporte Técnico</p>
+                <h1>Bitácora de actividades</h1>
+                <p class="encabezado-descripcion">Registro de movimientos realizados en Control de acceso</p>
             </div>
 
-            <div class="reporte-generado">
-
-                <strong>Generado:</strong>
-
-                @Model.FechaGeneracion.ToString(
-                    "dd/MM/yyyy hh:mm tt")
-
-            </div>
-
+            <dl class="encabezado-datos">
+                <div>
+                    <dt>Generado</dt>
+                    <dd>@Model.FechaGeneracion.ToString("dd/MM/yyyy · hh:mm tt", cultura)</dd>
+                </div>
+                <div>
+                    <dt>Por</dt>
+                    <dd>@generadoPor</dd>
+                </div>
+            </dl>
         </header>
 
-        <div class="reporte-linea"></div>
-
-        <!-- Título -->
-        <section class="reporte-titulo">
-            Reporte de Bitácora de Actividades
+        <!-- Resumen -->
+        <section class="resumen">
+            <div class="resumen-dato total">
+                <span class="resumen-valor">@Model.Registros.Count</span>
+                <span class="resumen-titulo">Registros</span>
+            </div>
+            <div class="resumen-dato creacion">
+                <span class="resumen-valor">@creaciones</span>
+                <span class="resumen-titulo">Creaciones</span>
+            </div>
+            <div class="resumen-dato edicion">
+                <span class="resumen-valor">@ediciones</span>
+                <span class="resumen-titulo">Ediciones</span>
+            </div>
+            <div class="resumen-dato eliminacion">
+                <span class="resumen-valor">@eliminaciones</span>
+                <span class="resumen-titulo">Eliminaciones</span>
+            </div>
+            @if (otros > 0)
+            {
+                <div class="resumen-dato acceso">
+                    <span class="resumen-valor">@otros</span>
+                    <span class="resumen-titulo">Otros</span>
+                </div>
+            }
         </section>
 
-        <!-- Resumen de filtros -->
-        <section class="reporte-resumen">
-
-            <div>
-                <strong>Fecha inicial:</strong>
-
-                @Model.MostrarFecha(Model.FechaInicio)
-            </div>
-
-            <div>
-                <strong>Fecha final:</strong>
-
-                @Model.MostrarFecha(Model.FechaFin)
-            </div>
-
-            <div>
-                <strong>Nombre:</strong>
-
-                @Model.MostrarTexto(
-                    Model.FiltroNombre,
-                    "Todos")
-            </div>
-
-            <div>
-                <strong>Correo:</strong>
-
-                @Model.MostrarTexto(
-                    Model.FiltroCorreo,
-                    "Todos")
-            </div>
-
-            <div>
-                <strong>Módulo:</strong>
-
-                @Model.MostrarTexto(
-                    Model.FiltroModulo,
-                    "Todos")
-            </div>
-
-            <div>
-                <strong>Acción:</strong>
-
-                @Model.MostrarTexto(
-                    Model.FiltroAccion,
-                    "Todas")
-            </div>
-
-            <div>
-                <strong>Total:</strong>
-
-                @Model.Registros.Count registros
-            </div>
-
-        </section>
-
-        <!-- Tabla del reporte -->
-        <section class="reporte-tabla-contenedor">
-
-            <table class="reporte-tabla">
-
+        <!-- Detalle agrupado por día -->
+        @if (Model.Registros.Any())
+        {
+            <table class="tabla">
                 <thead>
                     <tr>
-                        <th>No.</th>
-                        <th>Fecha y hora</th>
-                        <th>Nombre</th>
-                        <th>Correo</th>
-                        <th>Módulo</th>
-                        <th>Acción</th>
+                        <th class="col-hora">Hora</th>
+                        <th class="col-usuario">Realizado por</th>
+                        <th class="col-modulo">Módulo</th>
+                        <th class="col-accion">Acción</th>
                         <th>Descripción</th>
                     </tr>
                 </thead>
 
-                <tbody>
-
-                    @if (Model.Registros.Any())
-                    {
-                        int numero = 1;
-
-                        @foreach (var item in Model.Registros)
-                        {
-                            <tr>
-                                <td>@numero</td>
-
-                                <td>
-                                    @item.FechaHora.ToString(
-                                        "dd/MM/yyyy hh:mm tt")
-                                </td>
-
-                                <td>
-                                    @(item.NombreCompleto
-                                        ?? "Sin nombre")
-                                </td>
-
-                                <td>
-                                    @(item.Correo
-                                        ?? "Sin correo")
-                                </td>
-
-                                <td>@item.Modulo</td>
-
-                                <td>
-                                    <span class="reporte-tag @Model.ObtenerClaseAccion(item.Accion)">
-                                        @item.Accion
-                                    </span>
-                                </td>
-
-                                <td>@item.Descripcion</td>
-                            </tr>
-
-                            numero++;
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="7"
-                                class="reporte-sin-registros">
-
-                                No existen registros para los filtros seleccionados.
+                @foreach (var dia in registrosPorDia)
+                {
+                    <tbody class="dia">
+                        <tr class="dia-titulo">
+                            <td colspan="5">
+                                <span class="dia-fecha">@ReporteBitacoraModel.TituloDia(dia.Key)</span>
+                                <span class="dia-cantidad">@dia.Count() @(dia.Count() == 1 ? "movimiento" : "movimientos")</span>
                             </td>
                         </tr>
-                    }
 
-                </tbody>
-
+                        @foreach (var item in dia)
+                        {
+                            <tr>
+                                <td class="col-hora">@item.FechaHora.ToString("hh:mm tt", cultura)</td>
+                                <td class="col-usuario">
+                                    <span class="usuario-nombre">@(item.NombreCompleto ?? "Usuario eliminado")</span>
+                                    <span class="usuario-correo">@(item.Correo ?? "—")</span>
+                                </td>
+                                <td class="col-modulo">@item.Modulo</td>
+                                <td class="col-accion">
+                                    <span class="accion @ReporteBitacoraModel.ObtenerClaseAccion(item.Accion)">@item.Accion</span>
+                                </td>
+                                <td>@item.Descripcion</td>
+                            </tr>
+                        }
+                    </tbody>
+                }
             </table>
+        }
+        else
+        {
+            <div class="sin-registros">
+                <strong>Sin registros</strong>
+                <span>No hay movimientos que coincidan con el periodo y los filtros seleccionados.</span>
+            </div>
+        }
 
-        </section>
-
-        <!-- Pie del reporte -->
-        <footer class="reporte-pie">
-
-            <span>Sistema SigesST</span>
-
-            <span>
-                Reporte generado automáticamente
-            </span>
-
+        <!-- Pie -->
+        <footer class="pie">
+            <span>SigesST · Bitácora de actividades</span>
+            <span>Fin del reporte · @Model.Registros.Count registros</span>
         </footer>
 
     </main>
-
 </body>
-
 </html>

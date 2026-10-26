@@ -123,6 +123,16 @@ function quitarEtiquetasHtml(texto) {
 }
 
 /**
+ * Convierte un texto en HTML seguro (evita que un nombre como
+ * "<img onerror=...>" se ejecute dentro de una alerta).
+ */
+function escaparHtml(texto) {
+    const div = document.createElement("div");
+    div.textContent = texto || "";
+    return div.innerHTML;
+}
+
+/**
  * Lee mensajes enviados desde TempData y los muestra.
  */
 function mostrarMensajesServidor() {
@@ -135,10 +145,10 @@ function mostrarMensajesServidor() {
     const passwordGenerado =
         document.getElementById("passwordGenerado");
 
-    const exito = mensajeExito ? mensajeExito.value : "";
-    const error = mensajeError ? mensajeError.value : "";
+    const exito = mensajeExito ? escaparHtml(mensajeExito.value) : "";
+    const error = mensajeError ? escaparHtml(mensajeError.value) : "";
     const password = passwordGenerado
-        ? passwordGenerado.value
+        ? escaparHtml(passwordGenerado.value)
         : "";
 
     if (exito) {

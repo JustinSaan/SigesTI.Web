@@ -42,5 +42,17 @@ namespace SigesTI.Web.Models
 
         // Propiedad de navegación opcional
         public Personal? Personal { get; set; }
+
+        // Agrega un comentario al historial con el mismo formato que Tareas Programadas;
+        // los nuevos se ponen arriba de los anteriores
+        public static string AgregarComentario(string? historial, string usuario, string texto)
+        {
+            string fechaHora = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt");
+            string bloque = $"Agregado el: {fechaHora} Por: {usuario}\n\n{texto.Trim()}";
+
+            return string.IsNullOrWhiteSpace(historial)
+                ? bloque
+                : bloque + "\n\n" + historial;
+        }
     }
 }

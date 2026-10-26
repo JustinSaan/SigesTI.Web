@@ -3,10 +3,15 @@
 @{
     ViewData["Title"] = "Tareas Programadas Generales";
     var meses = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat;
+
+    bool puedeCrear = await Permisos.PuedeAsync(Modulos.TareasGenerales, Accion.Crear);
+    bool puedeEditar = await Permisos.PuedeAsync(Modulos.TareasGenerales, Accion.Editar);
+    bool puedeEliminar = await Permisos.PuedeAsync(Modulos.TareasGenerales, Accion.Eliminar);
+    bool puedeExportar = await Permisos.PuedeAsync(Modulos.TareasGenerales, Accion.Exportar);
 }
 <link rel="stylesheet" href="~/css/Actividades/tareasg.css" asp-append-version="true" />
 
-<div class="actividades-container px-4 py-3" data-rol-usuario="@Model.RolUsuario"> 
+<div class="actividades-container px-4 py-3" data-rol-usuario="@Model.RolUsuario" data-puede-editar="@puedeEditar.ToString().ToLower()">
     <!-- Encabezado y Acciones Principal -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -65,12 +70,18 @@
                 </div>
 
                 <div class="col d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-imprimir-reporte shadow-sm px-3 fw-bold" id="btnImprimirReporte">
-                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Generar Reporte
-                    </button>
-                    <button type="button" class="btn btn-primary-sigest shadow-sm px-3" id="btnNuevaTarea">
-                        <i class="bi bi-plus-circle-fill me-1"></i> Nueva Tarea
-                    </button>
+                    @if (puedeExportar)
+                    {
+                        <button type="button" class="btn btn-imprimir-reporte shadow-sm px-3 fw-bold" id="btnImprimirReporte">
+                            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Generar Reporte
+                        </button>
+                    }
+                    @if (puedeCrear)
+                    {
+                        <button type="button" class="btn btn-primary-sigest shadow-sm px-3" id="btnNuevaTarea">
+                            <i class="bi bi-plus-circle-fill me-1"></i> Nueva Tarea
+                        </button>
+                    }
                 </div>
             </div>
         </form>
@@ -260,7 +271,7 @@
                                     </div>
                                 </td>
                                 <td class="text-center text-estatus align-middle celda-sin-recorte" onclick="event.stopPropagation();">
-                                    <select class="form-select form-select-sm ddl-estatus-tabla text-center fw-bold py-1 px-2" data-id="@item.Id">
+                                    <select class="form-select form-select-sm ddl-estatus-tabla text-center fw-bold py-1 px-2" data-id="@item.Id" disabled="@(!puedeEditar)">
                                         <!option value="Pendiente" @(item.Estatus == "Pendiente" ? "selected" : "")>Pendiente</!option>
                                         <!option value="En Curso" @(item.Estatus == "En Curso" ? "selected" : "")>En Curso</!option>
                                         <!option value="Resuelta" @(item.Estatus == "Resuelta" ? "selected" : "")>Resuelta</!option>
@@ -268,12 +279,18 @@
                                 </td>
                                 <td class="text-center align-middle celda-sin-recorte" onclick="event.stopPropagation();">
                                     <div class="d-flex justify-content-center gap-1">
-                                        <button class="btn btn-accion-tabla btn-editar btn-editar-tarea" data-id="@item.Id" title="Editar">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                        <button class="btn btn-accion-tabla btn-eliminar btn-eliminar-tarea" data-id="@item.Id" title="Eliminar">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        @if (puedeEditar)
+                                        {
+                                            <button class="btn btn-accion-tabla btn-editar btn-editar-tarea" data-id="@item.Id" title="Editar">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                        }
+                                        @if (puedeEliminar)
+                                        {
+                                            <button class="btn btn-accion-tabla btn-eliminar btn-eliminar-tarea" data-id="@item.Id" title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        }
                                     </div>
                                 </td>
                             </tr>
@@ -404,7 +421,7 @@
                 </div>
                 <div class="modal-footer border-0 bg-transparent pt-0">
                     <button type="button" class="btn btn-sm btn-cancelar px-3" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cancelar</button>
-                    <button type="submit" class="btn btn-sm btn-guardar px-3" data-bs-dismiss="modal"><i class="bi bi-save"></i> Guardar Tarea</button>
+                    <button type="submit" id="btnGuardarTarea" class="btn btn-sm btn-guardar px-3" data-bs-dismiss="modal"><i class="bi bi-save"></i> Guardar Tarea</button>
                 </div>
             </form>
         </div>

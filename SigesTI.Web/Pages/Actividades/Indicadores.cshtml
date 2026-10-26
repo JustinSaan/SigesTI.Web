@@ -17,11 +17,14 @@
                 <strong class="text-info">Período de Evaluación:</strong> @Model.FechaInicio?.ToString("dd/MM/yyyy") - @Model.FechaFin?.ToString("dd/MM/yyyy")
             </p>
         </div>
-        <div class="d-print-none">
-            <button class="btn btn-secondary-sigest btn-sm shadow-sm px-3" onclick="imprimirReporte()">
-                <i class="bi bi-printer me-1"></i> Imprimir / Guardar PDF
-            </button>
-        </div>
+        @if (await Permisos.PuedeAsync(Modulos.Indicadores, Accion.Exportar))
+        {
+            <div class="d-print-none">
+                <button class="btn btn-secondary-sigest btn-sm shadow-sm px-3" onclick="imprimirReporte()">
+                    <i class="bi bi-printer me-1"></i> Imprimir / Guardar PDF
+                </button>
+            </div>
+        }
     </div>
 
     <!-- Barra de Filtros -->

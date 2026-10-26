@@ -5,9 +5,11 @@ using System.Globalization;
 using ClosedXML.Excel;
 using SigesTI.Web.Models;
 using SigesTI.Web.Data;
+using SigesTI.Web.Seguridad;
 
 namespace SigesTI.Web.Pages
 {
+    [Modulo(Modulos.CampanaRenovacion)]
     public class CampañaRModel : PageModel
     {
         private readonly ApplicationDbContext _context;
@@ -170,6 +172,7 @@ namespace SigesTI.Web.Pages
         /// combinando el sistema correspondiente. Se respeta la estructura (título en fila 1,
         /// encabezados en fila 2 y datos desde la fila 3) para que el archivo se pueda volver a cargar.
         /// </summary>
+        [Permiso(Accion.Exportar)]
         public async Task<IActionResult> OnGetExportarExcelAsync(int mes, int anio)
         {
             var campana = await _context.CampanaRenovacion
@@ -528,6 +531,7 @@ namespace SigesTI.Web.Pages
         /// <summary>
         /// Descarga el layout (plantilla) de la campaña que se cargó previamente.
         /// </summary>
+        [Permiso(Accion.Crear)]
         public IActionResult OnGetDescargarLayout()
         {
             if (!System.IO.File.Exists(RutaLayout))
@@ -540,6 +544,7 @@ namespace SigesTI.Web.Pages
         /// <summary>
         /// Guarda (o reemplaza) el layout de la campaña. Se valida que tenga los encabezados correctos.
         /// </summary>
+        [Permiso(Accion.Crear)]
         public async Task<IActionResult> OnPostCargarLayoutAsync(IFormFile? archivo)
         {
             if (archivo == null || archivo.Length == 0)
@@ -605,6 +610,7 @@ namespace SigesTI.Web.Pages
                 .Replace("ing.", "").Replace("lic.", "").Replace("ing ", "").Replace("lic ", "").Trim();
         }
 
+        [Permiso(Accion.Crear)]
         public async Task<IActionResult> OnPostCargarExcelAsync([FromForm] CargaCampanaInput input)
         {
             if (input.Archivo == null || input.Archivo.Length == 0)
@@ -783,6 +789,7 @@ namespace SigesTI.Web.Pages
             }
         }
 
+        [Permiso(Accion.Editar)]
         public async Task<IActionResult> OnPostEditarRegistroAsync([FromForm] CampanaRenovacionDetalle model)
         {
             var registro = await _context.CampanaRenovacionDetalle.FindAsync(model.Id);
@@ -811,6 +818,7 @@ namespace SigesTI.Web.Pages
             return new JsonResult(new { exito = true, mensaje = "Registro actualizado correctamente." });
         }
 
+        [Permiso(Accion.Editar)]
         public async Task<IActionResult> OnPostGuardarComentarioAsync(int id, string? nuevoSeguimiento, string? nuevoEstatus, string? nuevoTicket)
         {
             var detalle = await _context.CampanaRenovacionDetalle.FindAsync(id);

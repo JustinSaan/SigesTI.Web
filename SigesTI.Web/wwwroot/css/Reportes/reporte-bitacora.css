@@ -1,0 +1,359 @@
+/* ==========================================================================
+   REPORTE DE BITÁCORA DE ACTIVIDADES
+   En pantalla se ve como una hoja carta sobre fondo gris; al imprimir
+   ocupa la hoja completa y el encabezado de la tabla se repite en cada página.
+   ========================================================================== */
+
+:root {
+    --azul-oscuro: #0f2a52;
+    --azul: #2563eb;
+    --texto: #0f172a;
+    --texto-suave: #475569;
+    --texto-tenue: #94a3b8;
+    --linea: #e2e8f0;
+    --fondo-suave: #f8fafc;
+    --verde: #15803d;
+    --ambar: #b45309;
+    --rojo: #b91c1c;
+    --celeste: #0369a1;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    color: var(--texto);
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    background: #e5e7eb;
+}
+
+body {
+    padding: 24px;
+}
+
+/* --------------------------------------------------------------------------
+   1. HOJA
+   -------------------------------------------------------------------------- */
+.hoja {
+    max-width: 216mm;
+    min-height: 279mm;
+    margin: 0 auto;
+    padding: 16mm 14mm;
+    background: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+}
+
+/* --------------------------------------------------------------------------
+   2. ENCABEZADO
+   -------------------------------------------------------------------------- */
+.encabezado {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 14px;
+    border-bottom: 3px solid var(--azul-oscuro);
+    position: relative;
+}
+
+    /* Segunda línea azul debajo del borde oscuro */
+    .encabezado::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        bottom: -6px;
+        left: 0;
+        height: 2px;
+        background: var(--azul);
+    }
+
+.encabezado-sistema {
+    margin: 0 0 4px;
+    color: var(--azul);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+}
+
+.encabezado h1 {
+    margin: 0;
+    color: var(--azul-oscuro);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+}
+
+.encabezado-descripcion {
+    margin: 4px 0 0;
+    color: var(--texto-suave);
+    font-size: 12px;
+}
+
+.encabezado-datos {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    text-align: right;
+}
+
+    .encabezado-datos div {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .encabezado-datos dt {
+        color: var(--texto-tenue);
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+
+    .encabezado-datos dd {
+        margin: 0;
+        color: var(--texto);
+        font-weight: 600;
+    }
+
+/* --------------------------------------------------------------------------
+   3. RESUMEN
+   -------------------------------------------------------------------------- */
+/* Los recuadros se reparten el ancho por igual */
+.resumen {
+    display: flex;
+    gap: 10px;
+    margin: 24px 0 22px;
+}
+
+.resumen-dato {
+    flex: 1;
+    --color: var(--azul-oscuro);
+    padding: 10px 12px;
+    background: var(--fondo-suave);
+    border: 1px solid var(--linea);
+    border-top: 3px solid var(--color);
+    border-radius: 6px;
+}
+
+    .resumen-dato.creacion { --color: var(--verde); }
+    .resumen-dato.edicion { --color: var(--ambar); }
+    .resumen-dato.eliminacion { --color: var(--rojo); }
+    .resumen-dato.acceso { --color: var(--celeste); }
+
+.resumen-valor {
+    display: block;
+    color: var(--color);
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.resumen-titulo {
+    color: var(--texto-suave);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+/* --------------------------------------------------------------------------
+   4. TABLA
+   -------------------------------------------------------------------------- */
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .tabla thead th {
+        padding: 8px 10px;
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 700;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        background: var(--azul-oscuro);
+    }
+
+        .tabla thead th:first-child {
+            border-top-left-radius: 6px;
+        }
+
+        .tabla thead th:last-child {
+            border-top-right-radius: 6px;
+        }
+
+    .tabla td {
+        padding: 7px 10px;
+        vertical-align: top;
+        border-bottom: 1px solid var(--linea);
+    }
+
+    .tabla tbody tr:not(.dia-titulo):nth-child(odd) td {
+        background: var(--fondo-suave);
+    }
+
+/* Separador de cada día */
+.dia-titulo td {
+    padding: 14px 10px 6px;
+    background: #ffffff !important;
+    border-bottom: 2px solid var(--azul);
+}
+
+.dia-fecha {
+    color: var(--azul-oscuro);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.dia-cantidad {
+    margin-left: 8px;
+    color: var(--texto-tenue);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.col-hora {
+    width: 70px;
+    text-align: center;
+    color: var(--texto-suave);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.col-usuario {
+    width: 170px;
+}
+
+.col-modulo {
+    width: 70px;
+    text-align: center;
+}
+
+.col-accion {
+    width: 165px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.usuario-nombre {
+    display: block;
+    font-weight: 700;
+}
+
+.usuario-correo {
+    color: var(--texto-tenue);
+    font-size: 10px;
+}
+
+/* Acción: texto de color con un punto a la izquierda */
+.accion {
+    --color: var(--celeste);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color);
+    font-weight: 700;
+}
+
+    .accion::before {
+        content: "";
+        flex-shrink: 0;
+        width: 7px;
+        height: 7px;
+        background: var(--color);
+        border-radius: 50%;
+    }
+
+    .accion.creacion { --color: var(--verde); }
+    .accion.edicion { --color: var(--ambar); }
+    .accion.eliminacion { --color: var(--rojo); }
+    .accion.acceso { --color: var(--celeste); }
+
+.sin-registros {
+    display: grid;
+    gap: 4px;
+    padding: 36px;
+    color: var(--texto-suave);
+    text-align: center;
+    background: var(--fondo-suave);
+    border: 1px dashed var(--linea);
+    border-radius: 8px;
+}
+
+    .sin-registros strong {
+        color: var(--azul-oscuro);
+        font-size: 14px;
+    }
+
+/* --------------------------------------------------------------------------
+   5. PIE
+   -------------------------------------------------------------------------- */
+.pie {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 18px;
+    padding-top: 8px;
+    color: var(--texto-tenue);
+    font-size: 10px;
+    border-top: 1px solid var(--linea);
+}
+
+/* --------------------------------------------------------------------------
+   6. IMPRESIÓN
+   -------------------------------------------------------------------------- */
+@page {
+    size: letter;
+    margin: 12mm 12mm 16mm;
+
+    /* Número de página abajo a la derecha (Chrome y Edge) */
+    @bottom-right {
+        content: "Página " counter(page) " de " counter(pages);
+        color: #94a3b8;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 9px;
+    }
+}
+
+@media print {
+    html,
+    body {
+        padding: 0;
+        background: #ffffff;
+    }
+
+    .hoja {
+        max-width: none;
+        min-height: 0;
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    /* El encabezado de la tabla se repite en cada hoja */
+    .tabla thead {
+        display: table-header-group;
+    }
+
+    .tabla tr,
+    .resumen,
+    .encabezado {
+        break-inside: avoid;
+    }
+
+    /* El título de un día no queda solo al final de una hoja */
+    .dia-titulo {
+        break-after: avoid;
+    }
+}

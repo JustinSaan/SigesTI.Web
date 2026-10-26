@@ -528,7 +528,7 @@ function abrirModalDetalleDesdeFila(filaElem) {
     document.getElementById("txtDetalleComentarios").value = comentarios || "";
     document.getElementById("txtDetalleSolucion").value = solucion || "";
 
-    const esAdmin = (typeof rolUsuario !== 'undefined' && rolUsuario === "Administrador");
+    const esAdmin = (typeof rolUsuario !== 'undefined' && rolUsuario === "Admin");
     const ejecutivoMinus = (ejecutivo || "").toLowerCase();
     const esMio = (typeof usuarioSesion !== 'undefined' && ejecutivoMinus === usuarioSesion.toLowerCase())
         || (typeof nombreSesion !== 'undefined' && nombreSesion !== "" && ejecutivoMinus === nombreSesion.toLowerCase());
@@ -542,7 +542,10 @@ function abrirModalDetalleDesdeFila(filaElem) {
 
     const btnGuardar = document.getElementById("btnGuardarCambios");
 
-    if (esAdmin || (estaAbierto && esMio)) {
+    // Sin el permiso "Editar" del rol el ticket solo se puede consultar
+    const editable = permisoEditarTickets && (esAdmin || (estaAbierto && esMio));
+
+    if (editable) {
         campos.forEach(idCampo => {
             const el = document.getElementById(idCampo);
             if (el) {
@@ -564,7 +567,6 @@ function abrirModalDetalleDesdeFila(filaElem) {
     }
 
     // Los combos con búsqueda se activan o bloquean junto con el resto de campos
-    const editable = esAdmin || (estaAbierto && esMio);
     [comboEditCliente, comboEditReporto].forEach(combo => {
         if (combo) editable ? combo.enable() : combo.disable();
     });

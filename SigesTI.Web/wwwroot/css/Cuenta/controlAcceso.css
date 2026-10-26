@@ -1,0 +1,1349 @@
+/* ==========================================================================
+   CONTROL DE ACCESO
+   Mismo diseño que Administración de Personal y Plan de Respaldos:
+   paneles glass, tabla con encabezados agrupados y modales con tarjetas.
+   ========================================================================== */
+
+/* Colores de la sección: cámbialos aquí y se actualiza toda la página */
+.cuenta-admin,
+.modal-cuenta {
+    --fondo: #0b132b;
+    --panel: #0f172a;
+    --borde: rgba(56, 189, 248, 0.25);
+    --borde-suave: rgba(148, 163, 184, 0.15);
+    --celeste: #38bdf8;
+    --celeste-fuerte: #0284c7;
+    --texto: #e2e8f0;
+    --texto-suave: #94a3b8;
+    --texto-tenue: #64748b;
+    --verde: #4ade80;
+    --ambar: #fbbf24;
+    --rojo: #f87171;
+    --morado: #c084fc;
+}
+
+/* --------------------------------------------------------------------------
+   1. CONTENEDOR, PANELES Y BOTONES PRINCIPALES
+   -------------------------------------------------------------------------- */
+.actividades-container {
+    padding: 24px;
+    background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.25), transparent 40%), radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.15), transparent 35%), #0b132b !important;
+    min-height: calc(100vh - 120px);
+    color: var(--texto);
+}
+
+    .actividades-container .text-muted {
+        color: var(--texto-suave) !important;
+    }
+
+.glass-panel {
+    background: linear-gradient(145deg, #172a45, #0f172a) !important;
+    border: 1px solid rgba(56, 189, 248, 0.28) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.glass-header {
+    background: rgba(15, 23, 42, 0.85) !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.3) !important;
+    padding: 14px 20px !important;
+    color: var(--celeste) !important;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+}
+
+.cuenta-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.btn-primary-sigest,
+.btn-permisos-sigest,
+.btn-imprimir-sigest,
+.btn-pdf-sigest,
+.btn-filtros-sigest {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    border-radius: 14px;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary-sigest {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid var(--celeste-fuerte) !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+}
+
+    .btn-primary-sigest:hover {
+        background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+        border-color: var(--celeste) !important;
+        box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4);
+        transform: translateY(-1px);
+    }
+
+/* Roles y permisos: morado, como el aviso del rol Admin */
+.btn-permisos-sigest {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid rgba(192, 132, 252, 0.6) !important;
+    box-shadow: 0 4px 14px rgba(147, 51, 234, 0.25);
+}
+
+    .btn-permisos-sigest i {
+        color: var(--morado);
+    }
+
+    .btn-permisos-sigest:hover {
+        background: linear-gradient(135deg, #7e22ce, #6b21a8) !important;
+        border-color: #d8b4fe !important;
+        box-shadow: 0 6px 18px rgba(168, 85, 247, 0.45);
+        transform: translateY(-1px);
+    }
+
+        .btn-permisos-sigest:hover i {
+            color: #ffffff;
+        }
+
+/* Imprimir bitácora / Imprimir: verde azulado */
+.btn-imprimir-sigest {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.16), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid rgba(45, 212, 191, 0.55) !important;
+    box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+}
+
+    .btn-imprimir-sigest i {
+        color: #2dd4bf;
+    }
+
+    .btn-imprimir-sigest:hover {
+        background: linear-gradient(135deg, #0f766e, #115e59) !important;
+        border-color: #5eead4 !important;
+        box-shadow: 0 6px 18px rgba(45, 212, 191, 0.45);
+        transform: translateY(-1px);
+    }
+
+        .btn-imprimir-sigest:hover i {
+            color: #ffffff;
+        }
+
+/* Descargar PDF: igual que "Generar Reporte" de Reporte de Tickets */
+.btn-pdf-sigest {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid rgba(248, 113, 113, 0.5) !important;
+    border-radius: 15px;
+    box-shadow: 0 4px 18px rgba(220, 38, 38, 0.35);
+}
+
+    .btn-pdf-sigest:hover:not(:disabled) {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #991b1b, #7f1d1d) !important;
+        border-color: var(--rojo) !important;
+        box-shadow: 0 0 22px rgba(248, 113, 113, 0.5);
+        transform: translateY(-2px);
+    }
+
+/* Cambiar filtros: mismo estilo que Descargar PDF, en ámbar */
+.btn-filtros-sigest {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid rgba(251, 191, 36, 0.5) !important;
+    border-radius: 15px;
+    box-shadow: 0 4px 18px rgba(217, 119, 6, 0.35);
+}
+
+    .btn-filtros-sigest:hover {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #b45309, #92400e) !important;
+        border-color: var(--ambar) !important;
+        box-shadow: 0 0 22px rgba(251, 191, 36, 0.5);
+        transform: translateY(-2px);
+    }
+
+/* --------------------------------------------------------------------------
+   2. TARJETAS DE RESUMEN
+   -------------------------------------------------------------------------- */
+.cuenta-resumen {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.cuenta-stat {
+    --color: var(--celeste);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    overflow: hidden;
+    background: linear-gradient(145deg, #172a45, #0f172a);
+    border: 1px solid var(--borde-suave);
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+
+    /* Franja de color a la izquierda */
+    .cuenta-stat::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 4px;
+        background: var(--color);
+    }
+
+    .cuenta-stat.stat-azul { --color: var(--celeste); }
+    .cuenta-stat.stat-verde { --color: var(--verde); }
+    .cuenta-stat.stat-gris { --color: var(--texto-suave); }
+    .cuenta-stat.stat-ambar { --color: var(--ambar); }
+
+.cuenta-stat-icono {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    font-size: 1.3rem;
+    color: var(--color);
+    background: color-mix(in srgb, var(--color) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color) 40%, transparent);
+    border-radius: 12px;
+}
+
+.cuenta-stat-valor {
+    display: block;
+    color: #ffffff;
+    font-size: 1.7rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.cuenta-stat-titulo {
+    display: block;
+    color: var(--texto-suave);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   3. HERRAMIENTAS (buscador, cantidad y filtros)
+   -------------------------------------------------------------------------- */
+.cuenta-panel-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.cuenta-herramientas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.cuenta-buscador {
+    position: relative;
+    width: 320px;
+}
+
+    .cuenta-buscador i {
+        position: absolute;
+        top: 50%;
+        left: 12px;
+        color: var(--texto-tenue);
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .cuenta-buscador .form-control {
+        padding-left: 36px !important;
+    }
+
+.cuenta-cantidad {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .cuenta-cantidad label {
+        color: var(--texto-suave);
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .cuenta-cantidad .form-select {
+        width: 80px;
+    }
+
+/* Los filtros se acomodan solos en varias filas cuando no caben */
+.cuenta-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 14px 16px 4px;
+}
+
+.cuenta-filtro {
+    flex: 1 1 130px;
+}
+
+    .cuenta-filtro.cuenta-filtro-chico {
+        flex: 0 0 90px;
+    }
+
+.cuenta-filtro label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--texto-suave);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+/* Campos oscuros de la página y de los modales */
+.cuenta-admin .form-control,
+.cuenta-admin .form-select,
+.modal-cuenta .form-control,
+.modal-cuenta .form-select {
+    height: 40px;
+    padding: 8px 12px;
+    color: #ffffff !important;
+    font-size: 0.86rem;
+    background-color: var(--fondo) !important;
+    border: 1px solid #1e3a5f !important;
+    border-radius: 10px !important;
+    color-scheme: dark;
+}
+
+    .cuenta-admin .form-control::placeholder,
+    .modal-cuenta .form-control::placeholder {
+        color: var(--texto-tenue) !important;
+    }
+
+    .cuenta-admin .form-control:focus,
+    .cuenta-admin .form-select:focus,
+    .modal-cuenta .form-control:focus,
+    .modal-cuenta .form-select:focus {
+        border-color: var(--celeste) !important;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+    }
+
+    .cuenta-admin .form-control:disabled,
+    .cuenta-admin .form-select:disabled,
+    .modal-cuenta .form-control:disabled,
+    .modal-cuenta .form-select:disabled {
+        color: var(--texto-tenue) !important;
+        background-color: rgba(15, 23, 42, 0.5) !important;
+        cursor: not-allowed;
+    }
+
+    .cuenta-admin .form-select option,
+    .modal-cuenta .form-select option {
+        color: #ffffff;
+        background-color: var(--panel);
+    }
+
+.btn-limpiar-filtros {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 16px;
+    color: var(--texto) !important;
+    font-size: 0.82rem;
+    font-weight: 700;
+    background: linear-gradient(180deg, #1e293b, #0f172a) !important;
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+    .btn-limpiar-filtros i {
+        color: var(--celeste);
+    }
+
+    .btn-limpiar-filtros:hover {
+        color: #ffffff !important;
+        border-color: var(--celeste) !important;
+        transform: translateY(-1px);
+    }
+
+/* --------------------------------------------------------------------------
+   4. TABLAS (mismo diseño que Personal y Plan de Respaldos)
+   -------------------------------------------------------------------------- */
+.tabla-sigest {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.tabla-cuenta {
+    --linea-vertical: rgba(56, 189, 248, 0.16);
+    --linea-horizontal: rgba(148, 163, 184, 0.12);
+}
+
+.tabla-contenedor-cuenta {
+    margin: 12px;
+    background: rgba(11, 19, 43, 0.55);
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 12px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.tabla-cuenta thead th {
+    padding: 11px 10px;
+    color: #7dd3fc;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    white-space: nowrap;
+    background: linear-gradient(180deg, #14294d 0%, #0f1d38 100%);
+    border-left: 1px solid var(--linea-vertical);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+    .tabla-cuenta thead th:first-child {
+        border-left: none;
+    }
+
+    /* Títulos de grupo en blanco y subrayados */
+    .tabla-cuenta thead th.th-grupo {
+        color: var(--texto);
+        border-bottom: 2px solid rgba(56, 189, 248, 0.55);
+    }
+
+.tabla-cuenta tbody td {
+    padding: 10px;
+    color: #f1f5f9;
+    font-size: 0.82rem;
+    vertical-align: middle;
+    border-left: 1px solid var(--linea-vertical);
+    border-bottom: 1px solid var(--linea-horizontal);
+    transition: background-color 0.15s ease;
+}
+
+    .tabla-cuenta tbody td:first-child {
+        border-left: none;
+    }
+
+.tabla-cuenta tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tabla-cuenta tbody tr:nth-child(even) td {
+    background: rgba(148, 163, 184, 0.035);
+}
+
+.tabla-cuenta tbody tr:hover td {
+    background: rgba(56, 189, 248, 0.08);
+}
+
+    .tabla-cuenta tbody tr:hover td:first-child {
+        box-shadow: inset 3px 0 0 var(--celeste);
+    }
+
+.celda-nombre {
+    color: #ffffff !important;
+    font-weight: 700;
+}
+
+.celda-descripcion {
+    min-width: 260px;
+    color: #cbd5e1 !important;
+    white-space: normal;
+}
+
+.texto-correo {
+    color: var(--texto-suave);
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 0.76rem;
+}
+
+.texto-fecha {
+    color: #cbd5e1;
+    font-variant-numeric: tabular-nums;
+}
+
+.texto-tenue {
+    color: var(--texto-tenue);
+    font-size: 0.78rem;
+}
+
+/* Cuenta inactiva: fila apagada */
+.tabla-cuenta tr.fila-inactiva td {
+    opacity: 0.45;
+    filter: grayscale(70%);
+}
+
+.tabla-cuenta tr.fila-inactiva:hover td {
+    opacity: 0.75;
+}
+
+/* Mensaje cuando la tabla está vacía o no hay coincidencias */
+.cuenta-vacio {
+    padding: 36px 12px !important;
+    color: var(--texto-tenue) !important;
+}
+
+    .cuenta-vacio i {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 2rem;
+        color: #334155;
+    }
+
+.cuenta-tabla-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 18px 16px;
+    color: var(--texto-suave);
+    font-size: 0.82rem;
+}
+
+/* Usuario con círculo de iniciales */
+.cuenta-usuario {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.cuenta-usuario-nombre {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.cuenta-avatar {
+    --color: var(--texto-suave);
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    color: var(--color);
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: color-mix(in srgb, var(--color) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color) 45%, transparent);
+    border-radius: 50%;
+}
+
+    .cuenta-avatar.avatar-admin { --color: var(--morado); }
+    .cuenta-avatar.avatar-administracion { --color: #60a5fa; }
+    .cuenta-avatar.avatar-soporte { --color: var(--celeste); }
+    .cuenta-avatar.avatar-usuario { --color: var(--texto-suave); }
+
+.cuenta-tu {
+    padding: 2px 8px;
+    color: var(--celeste);
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    border-radius: 999px;
+}
+
+/* --------------------------------------------------------------------------
+   5. INSIGNIAS (rol, estado, contraseña y acciones de bitácora)
+   -------------------------------------------------------------------------- */
+.badge-rol,
+.badge-estado,
+.badge-password,
+.badge-contador,
+.tag {
+    --color: var(--texto-suave);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    color: color-mix(in srgb, var(--color) 35%, #ffffff);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    background: color-mix(in srgb, var(--color) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color) 55%, transparent);
+    border-radius: 8px;
+}
+
+    .badge-estado i,
+    .badge-password i {
+        font-size: 0.6rem;
+    }
+
+    .badge-password i {
+        font-size: 0.75rem;
+    }
+
+.badge-rol.admin { --color: var(--morado); }
+.badge-rol.administracion { --color: #60a5fa; }
+.badge-rol.soporte { --color: var(--celeste); }
+.badge-rol.usuario { --color: var(--texto-suave); }
+
+.badge-estado.activo { --color: var(--verde); }
+.badge-estado.inactivo { --color: var(--texto-tenue); }
+
+.badge-password.pendiente { --color: var(--ambar); }
+.badge-password.ok { --color: var(--verde); }
+
+.badge-contador {
+    --color: var(--celeste);
+    border-radius: 999px;
+}
+
+.tag.creacion { --color: var(--verde); }
+.tag.edicion { --color: var(--ambar); }
+.tag.eliminacion { --color: var(--rojo); }
+.tag.acceso { --color: var(--celeste); }
+
+/* --------------------------------------------------------------------------
+   6. BOTONES DE ACCIONES DE LA TABLA (mismos que Personal y Tareas)
+   -------------------------------------------------------------------------- */
+.btn-accion-tabla {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: #ffffff !important;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    transition: all 0.2s ease;
+}
+
+    .btn-accion-tabla:hover {
+        transform: translateY(-1px);
+    }
+
+    .btn-accion-tabla.btn-editar {
+        background-color: #0f3d61;
+        border: 1px solid #1d6fa5;
+    }
+
+        .btn-accion-tabla.btn-editar:hover {
+            background-color: var(--celeste-fuerte);
+            border-color: var(--celeste);
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+        }
+
+    .btn-accion-tabla.btn-llave {
+        background-color: #5a3a07;
+        border: 1px solid #a16207;
+    }
+
+        .btn-accion-tabla.btn-llave:hover {
+            background-color: #b45309;
+            border-color: var(--ambar);
+            box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+        }
+
+    .btn-accion-tabla.btn-eliminar {
+        background-color: #61131b;
+        border: 1px solid #a82431;
+    }
+
+        .btn-accion-tabla.btn-eliminar:hover {
+            background-color: #b91c1c;
+            border-color: var(--rojo);
+            box-shadow: 0 0 8px rgba(248, 113, 113, 0.5);
+        }
+
+/* --------------------------------------------------------------------------
+   7. PAGINACIÓN
+   -------------------------------------------------------------------------- */
+.paginacion-tabla {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+    .paginacion-tabla button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 10px;
+        color: #cbd5e1;
+        font-size: 0.82rem;
+        font-weight: 700;
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 9px;
+        transition: all 0.18s ease;
+    }
+
+        .paginacion-tabla button:hover:not(:disabled):not(.active) {
+            color: #ffffff;
+            background: rgba(56, 189, 248, 0.16);
+            border-color: rgba(56, 189, 248, 0.55);
+        }
+
+        .paginacion-tabla button.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--celeste-fuerte), #0369a1);
+            border-color: var(--celeste);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+        }
+
+        .paginacion-tabla button:disabled {
+            cursor: not-allowed;
+            opacity: 0.35;
+        }
+
+/* --------------------------------------------------------------------------
+   8. MODALES (mismo diseño que los modales de Personal y Plan de Respaldos)
+   -------------------------------------------------------------------------- */
+.modal-cuenta .modal-content {
+    color: var(--texto);
+    background: linear-gradient(160deg, #0f1d3a, #0b132b) !important;
+    border: 1px solid var(--borde) !important;
+    border-radius: 18px !important;
+    overflow: hidden;
+}
+
+.modal-cuenta .modal-header {
+    gap: 12px;
+    padding: 16px 22px;
+    background: var(--fondo);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.modal-cuenta .modal-title {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.modal-cuenta .modal-body {
+    padding: 20px 22px;
+}
+
+.modal-cuenta .modal-footer {
+    padding: 12px 22px;
+    background: var(--fondo);
+    border-top: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.mer-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    color: var(--celeste);
+    font-size: 1.25rem;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 12px;
+}
+
+.mer-subtitulo {
+    color: var(--texto-suave);
+    font-size: 0.8rem;
+}
+
+.mer-tarjeta {
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--borde-suave);
+    border-radius: 14px;
+}
+
+.mer-tarjeta-titulo {
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+    color: var(--celeste);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+    .mer-tarjeta-titulo i {
+        margin-right: 6px;
+    }
+
+.modal-cuenta .form-label {
+    margin-bottom: 4px;
+    color: var(--texto-suave);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.modal-cuenta .form-switch .form-check-input {
+    width: 2.5em;
+    height: 1.25em;
+    cursor: pointer;
+    background-color: #334155;
+    border-color: #475569;
+}
+
+    .modal-cuenta .form-switch .form-check-input:checked {
+        background-color: var(--celeste);
+        border-color: var(--celeste);
+    }
+
+.modal-cuenta .form-check-label {
+    margin-left: 6px;
+    color: var(--texto);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Campo de contraseña con botón de ojo */
+.cuenta-password {
+    position: relative;
+}
+
+    .cuenta-password .form-control {
+        padding-right: 44px;
+    }
+
+    .cuenta-password button {
+        position: absolute;
+        top: 50%;
+        right: 6px;
+        width: 32px;
+        height: 32px;
+        color: var(--texto-suave);
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        transform: translateY(-50%);
+    }
+
+        .cuenta-password button:hover {
+            color: var(--celeste);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+.cuenta-nota {
+    color: var(--texto-tenue);
+    font-size: 0.78rem;
+}
+
+    .cuenta-nota i {
+        margin-right: 4px;
+        color: var(--celeste);
+    }
+
+/* Botón X para cerrar el modal */
+.mer-btn-cerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    margin-left: auto;
+    color: var(--celeste);
+    font-size: 1rem;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+    .mer-btn-cerrar:hover {
+        color: #ffffff;
+        background: #dc2626;
+        border-color: var(--rojo);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+
+/* Botones Cancelar y Guardar */
+.btn-cancelar,
+.btn-guardar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.btn-cancelar {
+    color: #e2e8f0 !important;
+    background: linear-gradient(135deg, rgba(148, 163, 184, 0.14), rgba(15, 23, 42, 0.85)) !important;
+    border: 1px solid rgba(148, 163, 184, 0.45) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+    .btn-cancelar i {
+        color: var(--texto-suave);
+    }
+
+    .btn-cancelar:hover {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #475569, #334155) !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 6px 16px rgba(148, 163, 184, 0.3);
+        transform: translateY(-1px);
+    }
+
+        .btn-cancelar:hover i {
+            color: #ffffff;
+        }
+
+.btn-guardar {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    border: 1px solid var(--celeste) !important;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+}
+
+    .btn-guardar:hover {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.55);
+        transform: translateY(-1px);
+    }
+
+    .btn-cancelar:active,
+    .btn-guardar:active {
+        transform: scale(0.96);
+    }
+
+/* --------------------------------------------------------------------------
+   9. MODAL ROLES Y PERMISOS
+   -------------------------------------------------------------------------- */
+.cuenta-aviso-admin {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    color: #e9d5ff;
+    font-size: 0.85rem;
+    background: rgba(168, 85, 247, 0.1);
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    border-radius: 12px;
+}
+
+    .cuenta-aviso-admin i {
+        color: var(--morado);
+        font-size: 1.1rem;
+    }
+
+/* Pestañas de roles */
+.cuenta-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 5px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid var(--borde-suave);
+    border-radius: 14px;
+}
+
+.cuenta-tab {
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 14px;
+    color: var(--texto-suave);
+    font-size: 0.88rem;
+    font-weight: 700;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    transition: all 0.18s ease;
+}
+
+    .cuenta-tab .cuenta-avatar {
+        width: 26px;
+        height: 26px;
+        font-size: 0.7rem;
+    }
+
+    .cuenta-tab:hover {
+        color: #ffffff;
+        background: rgba(56, 189, 248, 0.08);
+    }
+
+    .cuenta-tab.active {
+        color: #ffffff;
+        background: linear-gradient(135deg, rgba(2, 132, 199, 0.45), rgba(3, 105, 161, 0.35));
+        border-color: rgba(56, 189, 248, 0.6);
+        box-shadow: 0 0 14px rgba(56, 189, 248, 0.2);
+    }
+
+/* Bootstrap deja el modal-xl en 500px en pantallas medianas; aquí se usa casi todo el ancho */
+.modal-cuenta .modal-dialog.modal-ancho {
+    max-width: min(1000px, calc(100vw - 24px));
+}
+
+.tabla-permisos tbody td {
+    padding: 8px 12px;
+}
+
+    .tabla-permisos tbody td.celda-nombre {
+        white-space: nowrap;
+    }
+
+/* Fila de grupo con el interruptor del menú completo */
+.tabla-permisos tr.permisos-grupo td {
+    padding: 12px;
+    background: rgba(56, 189, 248, 0.06) !important;
+    border-left: none;
+    border-top: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.tabla-permisos tr.permisos-grupo:hover td:first-child {
+    box-shadow: none;
+}
+
+.permisos-grupo-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+    .permisos-grupo-titulo small {
+        color: var(--texto-tenue);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+/* Interruptor (checkbox con forma de switch) */
+.switch-permiso {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 21px;
+    margin: 0;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+    .switch-permiso input {
+        position: absolute;
+        width: 0;
+        height: 0;
+        opacity: 0;
+    }
+
+    .switch-permiso span {
+        position: absolute;
+        inset: 0;
+        background: rgba(100, 116, 139, 0.35);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 999px;
+        transition: 0.18s ease;
+    }
+
+        .switch-permiso span::before {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 15px;
+            height: 15px;
+            background: #cbd5e1;
+            border-radius: 50%;
+            transition: 0.18s ease;
+        }
+
+    .switch-permiso input:checked + span {
+        background: linear-gradient(135deg, var(--celeste-fuerte), var(--celeste));
+        border-color: var(--celeste);
+    }
+
+        .switch-permiso input:checked + span::before {
+            background: #ffffff;
+            transform: translateX(17px);
+        }
+
+    .switch-permiso input:focus-visible + span {
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35);
+    }
+
+/* --------------------------------------------------------------------------
+   10. DEPURAR BITÁCORA
+   -------------------------------------------------------------------------- */
+.btn-depurar {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    color: #fecaca !important;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 1px solid rgba(248, 113, 113, 0.45) !important;
+    border-radius: 999px;
+    transition: all 0.2s ease;
+}
+
+    .btn-depurar:hover {
+        color: #ffffff !important;
+        background: rgba(220, 38, 38, 0.6) !important;
+        border-color: var(--rojo) !important;
+    }
+
+.mer-icono.mer-icono-peligro {
+    color: var(--rojo);
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(248, 113, 113, 0.4);
+}
+
+.cuenta-aviso-peligro {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    color: #fde68a;
+    font-size: 0.82rem;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    border-radius: 12px;
+}
+
+    .cuenta-aviso-peligro i {
+        margin-top: 2px;
+        color: var(--ambar);
+    }
+
+.cuenta-depurar-conteo {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 12px 14px;
+    color: var(--texto-suave);
+    font-size: 0.85rem;
+    background: rgba(11, 19, 43, 0.7);
+    border: 1px dashed rgba(148, 163, 184, 0.3);
+    border-radius: 10px;
+}
+
+.cuenta-depurar-numero {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.btn-enlace {
+    padding: 0;
+    color: var(--celeste);
+    font-weight: 600;
+    text-decoration: underline;
+    background: none;
+    border: none;
+}
+
+    .btn-enlace:hover {
+        color: #7dd3fc;
+    }
+
+.btn-peligro {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    color: #ffffff !important;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #b91c1c, #7f1d1d) !important;
+    border: 1px solid var(--rojo) !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(185, 28, 28, 0.35);
+    transition: all 0.2s ease;
+}
+
+    .btn-peligro:hover:not(:disabled) {
+        background: linear-gradient(135deg, #dc2626, #991b1b) !important;
+        box-shadow: 0 6px 20px rgba(248, 113, 113, 0.45);
+        transform: translateY(-1px);
+    }
+
+    .btn-peligro:disabled {
+        opacity: 0.4;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
+/* --------------------------------------------------------------------------
+   11. VISTA PREVIA DEL REPORTE
+   -------------------------------------------------------------------------- */
+.cuenta-vista-acciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+    .cuenta-vista-acciones .btn {
+        white-space: nowrap;
+    }
+
+.cuenta-vista-previa {
+    height: min(78vh, 900px);
+    padding: 14px !important;
+    background: #1e293b;
+}
+
+    .cuenta-vista-previa iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: #ffffff;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
+    }
+
+/* Cuando el modal ocupa toda la pantalla (tableta y celular) el iframe llena el espacio */
+@media (max-width: 991.98px) {
+    .cuenta-vista-previa {
+        height: auto;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   12. SCROLLBAR Y FONDO DE LOS MODALES
+   -------------------------------------------------------------------------- */
+.tabla-contenedor-cuenta::-webkit-scrollbar,
+.modal-cuenta .modal-body::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.tabla-contenedor-cuenta::-webkit-scrollbar-track,
+.modal-cuenta .modal-body::-webkit-scrollbar-track {
+    background: var(--panel);
+}
+
+.tabla-contenedor-cuenta::-webkit-scrollbar-thumb,
+.modal-cuenta .modal-body::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border: 1px solid var(--celeste);
+    border-radius: 4px;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    .tabla-contenedor-cuenta,
+    .modal-cuenta .modal-body {
+        scrollbar-color: #1e293b #0f172a;
+    }
+}
+
+.modal-backdrop {
+    background-color: rgba(11, 19, 43, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+    .modal-backdrop.show {
+        opacity: 1;
+    }
+
+/* --------------------------------------------------------------------------
+   13. PANTALLAS PEQUEÑAS
+   -------------------------------------------------------------------------- */
+@media (max-width: 992px) {
+    .cuenta-resumen {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .actividades-container {
+        padding: 16px !important;
+    }
+
+    .cuenta-acciones,
+    .cuenta-acciones .btn,
+    .cuenta-herramientas,
+    .cuenta-buscador {
+        width: 100%;
+    }
+
+    .cuenta-acciones .btn {
+        justify-content: center;
+    }
+
+    .btn-limpiar-filtros {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+
+    .cuenta-tabla-pie {
+        justify-content: center;
+    }
+
+    .cuenta-tabs {
+        flex-direction: column;
+    }
+
+    .modal-cuenta .modal-header {
+        flex-wrap: wrap;
+    }
+
+    /* En la vista previa los botones bajan a su propio renglón */
+    .cuenta-vista-acciones {
+        width: 100%;
+    }
+
+        .cuenta-vista-acciones .btn {
+            flex: 1;
+            justify-content: center;
+        }
+}
+
+/* En celular las tarjetas siguen en 2 columnas, pero más compactas */
+@media (max-width: 480px) {
+    .cuenta-resumen {
+        gap: 10px;
+    }
+
+    .cuenta-stat {
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .cuenta-stat-icono {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .cuenta-stat-valor {
+        font-size: 1.35rem;
+    }
+
+    .cuenta-stat-titulo {
+        font-size: 0.7rem;
+    }
+}

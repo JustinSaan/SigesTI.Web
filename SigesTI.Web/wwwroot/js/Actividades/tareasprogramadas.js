@@ -435,6 +435,12 @@ function abrirModalTarea(id) {
     const subtitulo = document.getElementById('modalTareaSubtitulo');
     const contHistorial = document.getElementById('contenedorHistorialComentarios');
 
+    // Una tarea existente solo se puede guardar si el rol tiene permiso de editar
+    const contenedor = document.querySelector('.actividades-container');
+    const puedeEditar = !contenedor || contenedor.dataset.puedeEditar !== 'false';
+    const btnGuardar = document.getElementById('btnGuardarTarea');
+    if (btnGuardar) btnGuardar.classList.toggle('d-none', parseInt(id) !== 0 && !puedeEditar);
+
     if (parseInt(id) === 0) {
         titulo.innerText = 'Nueva Tarea Programada';
         icono.className = 'bi bi-plus-circle';

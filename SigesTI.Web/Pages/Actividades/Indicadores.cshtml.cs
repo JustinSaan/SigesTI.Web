@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SigesTI.Web.Data;
+using SigesTI.Web.Seguridad;
 using SigesTI.Web.Models;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace SigesTI.Web.Pages.Actividades
 {
+    [Modulo(Modulos.Indicadores)]
     public class IndicadoresModel : PageModel
     {
         private readonly ApplicationDbContext _context;

@@ -1,0 +1,61 @@
+.acceso-denegado {
+    display: grid;
+    place-items: center;
+    min-height: 70vh;
+    padding: 24px;
+}
+
+.acceso-card {
+    width: min(520px, 100%);
+    padding: 36px 28px;
+    text-align: center;
+    background: linear-gradient(145deg, rgba(30, 41, 59, .96), rgba(15, 23, 42, .94));
+    border: 1px solid rgba(148, 163, 184, .18);
+    border-radius: 22px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .38);
+}
+
+.acceso-icono {
+    display: grid;
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 18px;
+    color: #fca5a5;
+    font-size: 2rem;
+    background: rgba(239, 68, 68, .14);
+    border: 1px solid rgba(239, 68, 68, .45);
+    border-radius: 22px;
+}
+
+.acceso-card h1 {
+    margin: 0 0 10px;
+    color: #f8fafc;
+    font-size: 1.6rem;
+    font-weight: 850;
+}
+
+.acceso-card p {
+    margin: 0 0 22px;
+    color: #94a3b8;
+}
+
+.btn-volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    color: #ffffff;
+    font-weight: 800;
+    text-decoration: none;
+    background: linear-gradient(135deg, #2563eb, #38bdf8);
+    border-radius: 12px;
+    box-shadow: 0 0 22px rgba(56, 189, 248, .22);
+    transition: .18s ease;
+}
+
+    .btn-volver:hover {
+        color: #ffffff;
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+    }

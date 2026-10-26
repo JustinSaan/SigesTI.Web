@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SigesTI.Web.Data;
+using SigesTI.Web.Seguridad;
 using SigesTI.Web.Models;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ using PersonalModel = SigesTI.Web.Models.Personal;
 
 namespace SigesTI.Web.Pages.Actividades
 {
+    [Modulo(Modulos.ReporteTickets)]
     public class ReporteTicketsModel : PageModel
     {
         private readonly ApplicationDbContext _context;
@@ -238,7 +240,7 @@ namespace SigesTI.Web.Pages.Actividades
         private bool PuedeEditar(Ticket ticket)
         {
             string rol = HttpContext.Session.GetString("Rol") ?? "";
-            if (rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase)) return true;
+            if (rol == Roles.Admin) return true;
 
             string usuario = HttpContext.Session.GetString("Usuario") ?? "";
             string nombreCompleto = HttpContext.Session.GetString("NombreCompleto") ?? "";
@@ -289,6 +291,7 @@ namespace SigesTI.Web.Pages.Actividades
             return new JsonResult(contactos);
         }
 
+        [Permiso(Accion.Crear)]
         public async Task<IActionResult> OnPostCrearTicketAsync(
             string NumeroTicket, DateTime? FechaEntrada, string Hora, string Origen,
             string ClienteId, string? NuevaClaveCliente, string? NuevoNombreCliente,
@@ -390,6 +393,7 @@ namespace SigesTI.Web.Pages.Actividades
             }
         }
 
+        [Permiso(Accion.Editar)]
         public async Task<IActionResult> OnPostActualizarTicketAsync(
             int TicketId, DateTime? FechaEntrada, string? Hora, string Cliente, string Reporto, string Ejecutivo,
             string Sistema, string Tipo, string Estatus, string Escalado,

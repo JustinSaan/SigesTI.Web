@@ -1,1104 +1,1023 @@
 ﻿@page
-@model SigesTI.Web.Pages.Cuenta.AdminVistaModel
+@model SigesTI.Web.Pages.Cuenta.ControlAccesoModel
 
 @{
-    ViewData["Title"] = "Cuenta";
+    ViewData["Title"] = "Control de acceso";
+
+    bool puedeCrear = await Permisos.PuedeAsync(Modulos.Cuenta, Accion.Crear);
+    bool puedeEditar = await Permisos.PuedeAsync(Modulos.Cuenta, Accion.Editar);
+    bool puedeEliminar = await Permisos.PuedeAsync(Modulos.Cuenta, Accion.Eliminar);
+    bool puedeExportar = await Permisos.PuedeAsync(Modulos.Cuenta, Accion.Exportar);
+
+    // Solo un Admin puede asignar el rol Admin
+    var rolesAsignables = Roles.Todos
+        .Where(r => Model.EsAdmin || r != Roles.Admin)
+        .ToList();
+
+    int totalUsuarios = Model.ListaUsuarios.Count;
+    int usuariosActivos = Model.ListaUsuarios.Count(u => u.Activo);
+    int usuariosInactivos = totalUsuarios - usuariosActivos;
+    int pendientesPassword = Model.ListaUsuarios.Count(u => u.RequiereCambioPassword);
+
+    // Iniciales para el círculo del usuario: "Ana Belén Morales" -> "AM"
+    string Iniciales(string nombre)
+    {
+        var partes = nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (partes.Length == 0) return "?";
+        if (partes.Length == 1) return partes[0][..1].ToUpper();
+        return (partes[0][..1] + partes[^1][..1]).ToUpper();
+    }
 }
 
-<div class="cuenta-admin">
+<link rel="stylesheet" href="~/css/Cuenta/controlAcceso.css" asp-append-version="true" />
 
-    <section class="cuenta-panel">
+<div class="actividades-container cuenta-admin px-4 py-3">
 
-        <!-- ================================================================
-             ENCABEZADO
-             ================================================================ -->
-        <div class="cuenta-top">
+    <!-- ================================================================
+         ENCABEZADO Y ACCIONES
+         ================================================================ -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-white mb-1">
+                <i class="bi bi-person-lock me-2 text-info"></i>Control de acceso
+            </h3>
+            <p class="text-muted small mb-0">Usuarios del sistema, control de acceso y bitácora de actividades.</p>
+        </div>
+
+        <div class="cuenta-acciones">
+            @if (Model.EsAdmin)
+            {
+                <button type="button" class="btn btn-permisos-sigest" data-bs-toggle="modal" data-bs-target="#modalPermisos">
+                    <i class="bi bi-shield-lock me-1"></i> Roles y permisos
+                </button>
+            }
+
+            @if (puedeExportar)
+            {
+                <button type="button" class="btn btn-imprimir-sigest" data-bs-toggle="modal" data-bs-target="#modalConfigurarReporte">
+                    <i class="bi bi-printer me-1"></i> Imprimir bitácora
+                </button>
+            }
+
+            @if (puedeCrear)
+            {
+                <button type="button" class="btn btn-primary-sigest" data-bs-toggle="modal" data-bs-target="#modalNuevoUsuario">
+                    <i class="bi bi-person-plus-fill me-1"></i> Nuevo usuario
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- ================================================================
+         RESUMEN
+         ================================================================ -->
+    <div class="cuenta-resumen mb-4">
+
+        <div class="cuenta-stat stat-azul">
+            <div class="cuenta-stat-icono"><i class="bi bi-people-fill"></i></div>
             <div>
-                <h1>Cuenta</h1>
-                <p>Gestión de usuarios y control de acceso</p>
-            </div>
-
-            <div class="cuenta-actions">
-
-                <button type="button"
-                        class="btn-outline-cuenta"
-                        onclick="abrirModal('modalConfigurarReporte')">
-
-                    <i class="bi bi-clipboard-data"></i>
-                    Imprimir bitácora
-                </button>
-
-                <button type="button"
-                        id="btnNuevoUsuario"
-                        class="btn-primary-cuenta">
-
-                    <i class="bi bi-plus-lg"></i>
-                    Nuevo usuario
-                </button>
-
+                <span class="cuenta-stat-valor">@totalUsuarios</span>
+                <span class="cuenta-stat-titulo">Usuarios registrados</span>
             </div>
         </div>
 
-        <!-- ================================================================
-             TARJETAS DE RESUMEN
-             ================================================================ -->
-        <div class="cards-resumen">
-
-            <div class="card-resumen">
-                <div class="icono-resumen azul">
-                    <i class="bi bi-people-fill"></i>
-                </div>
-
-                <div>
-                    <span>Total de usuarios</span>
-                    <strong>@Model.ListaUsuarios.Count</strong>
-                    <small>Usuarios registrados en el sistema</small>
-                </div>
+        <div class="cuenta-stat stat-verde">
+            <div class="cuenta-stat-icono"><i class="bi bi-person-check-fill"></i></div>
+            <div>
+                <span class="cuenta-stat-valor">@usuariosActivos</span>
+                <span class="cuenta-stat-titulo">Con acceso activo</span>
             </div>
-
-            <div class="card-resumen">
-                <div class="icono-resumen verde">
-                    <i class="bi bi-person-check-fill"></i>
-                </div>
-
-                <div>
-                    <span>Usuarios activos</span>
-
-                    <strong>
-                        @Model.ListaUsuarios.Count(u => u.Activo)
-                    </strong>
-
-                    <small>Cuentas con acceso activo</small>
-                </div>
-            </div>
-
-            <div class="card-resumen">
-                <div class="icono-resumen morado">
-                    <i class="bi bi-key-fill"></i>
-                </div>
-
-                <div>
-                    <span>Pendientes cambio contraseña</span>
-
-                    <strong>
-                        @Model.ListaUsuarios.Count(
-                            u => u.RequiereCambioPassword)
-                    </strong>
-
-                    <small>Usuarios con contraseña temporal</small>
-                </div>
-            </div>
-
         </div>
 
-        <!-- ================================================================
-             USUARIOS DEL SISTEMA
-             ================================================================ -->
-        <div class="usuarios-box">
+        <div class="cuenta-stat stat-gris">
+            <div class="cuenta-stat-icono"><i class="bi bi-person-dash-fill"></i></div>
+            <div>
+                <span class="cuenta-stat-valor">@usuariosInactivos</span>
+                <span class="cuenta-stat-titulo">Cuentas inactivas</span>
+            </div>
+        </div>
 
-            <div class="usuarios-header">
+        <div class="cuenta-stat stat-ambar">
+            <div class="cuenta-stat-icono"><i class="bi bi-key-fill"></i></div>
+            <div>
+                <span class="cuenta-stat-valor">@pendientesPassword</span>
+                <span class="cuenta-stat-titulo">Con contraseña temporal</span>
+            </div>
+        </div>
 
-                <h2>Usuarios</h2>
+    </div>
 
-                <div class="usuarios-tools">
+    <!-- ================================================================
+         USUARIOS DEL SISTEMA
+         ================================================================ -->
+    <div class="glass-panel mb-4 overflow-hidden">
 
-                    <!-- Buscador automático -->
-                    <div class="search-box">
+        <div class="glass-header cuenta-panel-header">
+            <span><i class="bi bi-people me-2"></i>Usuarios del sistema</span>
 
-                        <input id="buscarUsuario"
-                               type="text"
-                               placeholder="Buscar usuario..."
-                               autocomplete="off" />
-
-                        <i class="bi bi-search"></i>
-
-                    </div>
-
-                    <!-- Cantidad de resultados por página -->
-                    <div class="cantidad-resultados">
-
-                        <label for="cantidadUsuarios">
-                            Mostrar:
-                        </label>
-
-                        <select id="cantidadUsuarios">
-                            <option value="10" selected>10</option>
-                            <option value="15">15</option>
-                            <option value="20">20</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-
-                    </div>
-
+            <div class="cuenta-herramientas">
+                <div class="cuenta-buscador">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <input id="buscarUsuario"
+                           type="search"
+                           class="form-control"
+                           placeholder="Buscar por nombre, usuario, correo o rol..."
+                           aria-label="Buscar usuario"
+                           autocomplete="off" />
                 </div>
 
+                <div class="cuenta-cantidad">
+                    <label for="cantidadUsuarios">Mostrar</label>
+                    <select id="cantidadUsuarios" class="form-select">
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
             </div>
+        </div>
 
-            <div class="tabla-wrap">
+        <div class="table-responsive tabla-contenedor-cuenta">
+            <table id="tablaUsuarios" class="tabla-sigest tabla-cuenta align-middle text-center text-nowrap mb-0">
+                <thead>
+                    <tr>
+                        <th colspan="2" class="th-grupo">Cuenta</th>
+                        <th colspan="4" class="th-grupo">Acceso</th>
+                        <th class="th-grupo">Gestión</th>
+                    </tr>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Nombre y correo</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Último acceso</th>
+                        <th>Contraseña</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
 
-                <table id="tablaUsuarios"
-                       class="tabla-cuenta">
-
-                    <thead>
+                <tbody>
+                    @if (!Model.ListaUsuarios.Any())
+                    {
                         <tr>
-                            <th>Usuario</th>
-                            <th>Nombre completo</th>
-                            <th>Correo</th>
-                            <th>Rol</th>
-                            <th>Estado</th>
-                            <th>Último acceso</th>
-                            <th>Cambio de contraseña</th>
-                            <th>Acciones</th>
+                            <td colspan="7" class="cuenta-vacio">
+                                <i class="bi bi-people"></i>
+                                <span>No hay usuarios registrados.</span>
+                            </td>
                         </tr>
-                    </thead>
-
-                    <tbody>
-
-                        @if (Model.ListaUsuarios.Any())
-                        {
-                            @foreach (var usuario in Model.ListaUsuarios)
-                            {
-                                <tr class="fila-usuario">
-
-                                    <td>@usuario.NombreUsuario</td>
-
-                                    <td>@usuario.NombreCompleto</td>
-
-                                    <td>@usuario.Correo</td>
-
-                                    <td>
-                                        <span class="badge-rol @usuario.Rol.ToLowerInvariant()">
-                                            @usuario.Rol
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        @if (usuario.Activo)
-                                        {
-                                            <span class="badge-estado activo">
-                                                Activo
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge-estado inactivo">
-                                                Inactivo
-                                            </span>
-                                        }
-                                    </td>
-
-                                    <td>
-                                        @(usuario.UltimoAcceso.HasValue
-                                            ? usuario.UltimoAcceso.Value
-                                                .ToString("dd/MM/yyyy hh:mm tt")
-                                            : "—")
-                                    </td>
-
-                                    <td>
-                                        @if (usuario.RequiereCambioPassword)
-                                        {
-                                            <span class="badge-password pendiente">
-                                                Pendiente cambio
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span>Actualizada</span>
-                                        }
-                                    </td>
-
-                                    <td>
-
-                                        <div class="acciones-cuenta">
-
-                                            <!-- Editar usuario -->
-                                            <button type="button"
-                                                    class="btn-icon edit js-editar-usuario"
-                                                    title="Editar usuario"
-                                                    data-id="@usuario.IdUsuario"
-                                                    data-nombre="@usuario.NombreCompleto"
-                                                    data-usuario="@usuario.NombreUsuario"
-                                                    data-correo="@usuario.Correo"
-                                                    data-rol="@usuario.Rol"
-                                                    data-activo="@usuario.Activo.ToString().ToLowerInvariant()">
-
-                                                <i class="bi bi-pencil-square"></i>
-
-                                            </button>
-
-                                            <!-- Restablecer contraseña -->
-                                            <button type="button"
-                                                    class="btn-icon key js-restablecer-password"
-                                                    title="Restablecer contraseña"
-                                                    data-id="@usuario.IdUsuario"
-                                                    data-usuario="@usuario.NombreUsuario">
-
-                                                <i class="bi bi-key"></i>
-
-                                            </button>
-
-                                            <!-- Eliminar usuario -->
-                                            <button type="button"
-                                                    class="btn-icon lock js-eliminar-usuario"
-                                                    title="Eliminar usuario"
-                                                    data-id="@usuario.IdUsuario"
-                                                    data-usuario="@usuario.NombreUsuario">
-
-                                                <i class="bi bi-trash"></i>
-
-                                            </button>
-
-                                        </div>
-
-                                    </td>
-
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="8"
-                                    class="text-center text-muted py-4">
-
-                                    No hay usuarios registrados.
-
-                                </td>
-                            </tr>
-                        }
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-            <!-- Pie y paginación de usuarios -->
-            <div class="tabla-footer">
-
-                <span id="resultadoUsuarios">
-                    Mostrando @Model.ListaUsuarios.Count usuarios
-                </span>
-
-                <div id="paginacionUsuarios"
-                     class="paginacion-tabla">
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- ================================================================
-             BITÁCORA DE ACTIVIDADES
-             ================================================================ -->
-        <div class="paneles-inferiores">
-
-            <div class="modal-preview bitacora-preview">
-
-                <div class="preview-header">
-
-                    <h3>
-                        <i class="bi bi-clipboard-data"></i>
-                        Bitácora de actividades
-                    </h3>
-
-                </div>
-
-                <!-- ========================================================
-                     FILTROS AUTOMÁTICOS DE BITÁCORA
-                     No recargan la página
-                     ======================================================== -->
-                <div class="filtros-bitacora">
-
-                    <!-- Filtro por nombre -->
-                    <select id="filtroNombre">
-
-                        <option value="">
-                            Todos los nombres
-                        </option>
-
-                        @foreach (var nombre in Model.ListaNombresBitacora)
-                        {
-                            <option value="@nombre">
-                                @nombre
-                            </option>
-                        }
-
-                    </select>
-
-                    <!-- Filtro por módulo -->
-                    <select id="filtroModulo">
-
-                        <option value="">
-                            Todos los módulos
-                        </option>
-
-                        @foreach (var modulo in Model.ListaModulosBitacora)
-                        {
-                            <option value="@modulo">
-                                @modulo
-                            </option>
-                        }
-
-                    </select>
-
-                    <!-- Filtro por acción -->
-                    <select id="filtroAccion">
-
-                        <option value="">
-                            Todas las acciones
-                        </option>
-
-                        @foreach (var accion in Model.ListaAccionesBitacora)
-                        {
-                            <option value="@accion">
-                                @accion
-                            </option>
-                        }
-
-                    </select>
-
-                    <!-- Fecha inicial -->
-                    <input id="filtroFechaInicio"
-                           type="date"
-                           title="Fecha inicial" />
-
-                    <!-- Fecha final -->
-                    <input id="filtroFechaFin"
-                           type="date"
-                           title="Fecha final" />
-
-                    <!-- Cantidad de resultados -->
-                    <div class="cantidad-resultados">
-
-                        <label for="cantidadBitacora">
-                            Mostrar:
-                        </label>
-
-                        <select id="cantidadBitacora">
-                            <option value="10" selected>10</option>
-                            <option value="15">15</option>
-                            <option value="20">20</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-
-                    </div>
-
-                    <!-- Limpiar filtros -->
-                    <button type="button"
-                            id="btnLimpiarFiltrosBitacora"
-                            class="btn-limpiar">
-
-                        <i class="bi bi-eraser"></i>
-                        Limpiar
-
-                    </button>
-
-                </div>
-
-                <div class="tabla-wrap">
-
-                    <table id="tablaBitacora"
-                           class="tabla-bitacora">
-
-                        <thead>
-                            <tr>
-                                <th>Fecha y hora</th>
-                                <th>Nombre</th>
-                                <th>Correo</th>
-                                <th>Módulo</th>
-                                <th>Acción</th>
-                                <th>Descripción</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-
-                            @if (Model.ListaBitacora.Any())
-                            {
-                                @foreach (var item in Model.ListaBitacora)
+                    }
+
+                    @foreach (var usuario in Model.ListaUsuarios)
+                    {
+                        bool esYo = usuario.IdUsuario == Model.IdUsuarioActual;
+                        bool puedeGestionar = Model.PuedeGestionar(usuario);
+
+                        <tr class="fila-usuario @(usuario.Activo ? "" : "fila-inactiva")"
+                            data-id="@usuario.IdUsuario"
+                            data-nombre="@usuario.NombreCompleto"
+                            data-usuario="@usuario.NombreUsuario"
+                            data-correo="@usuario.Correo"
+                            data-rol="@usuario.Rol"
+                            data-activo="@usuario.Activo.ToString().ToLower()"
+                            data-es-yo="@esYo.ToString().ToLower()">
+
+                            <td>
+                                <div class="cuenta-usuario">
+                                    <span class="cuenta-avatar avatar-@ControlAccesoModel.ClaseRol(usuario.Rol)" aria-hidden="true">
+                                        @Iniciales(usuario.NombreCompleto)
+                                    </span>
+                                    <span class="cuenta-usuario-nombre">@usuario.NombreUsuario</span>
+                                    @if (esYo)
+                                    {
+                                        <span class="cuenta-tu">Tú</span>
+                                    }
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="celda-nombre d-block">@usuario.NombreCompleto</span>
+                                <span class="texto-correo">@usuario.Correo</span>
+                            </td>
+
+                            <td>
+                                <span class="badge-rol @ControlAccesoModel.ClaseRol(usuario.Rol)">@usuario.Rol</span>
+                            </td>
+
+                            <td>
+                                @if (usuario.Activo)
                                 {
-                                    string claseAccion = "acceso";
-
-                                    if (item.Accion.Contains(
-                                        "cre",
-                                        StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        claseAccion = "creacion";
-                                    }
-                                    else if (
-                                        item.Accion.Contains(
-                                            "edit",
-                                            StringComparison.OrdinalIgnoreCase) ||
-                                        item.Accion.Contains(
-                                            "contraseña",
-                                            StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        claseAccion = "edicion";
-                                    }
-                                    else if (
-                                        item.Accion.Contains(
-                                            "elimin",
-                                            StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        claseAccion = "eliminacion";
-                                    }
-
-                                    <tr class="fila-bitacora"
-                                        data-nombre="@(item.NombreCompleto ?? string.Empty)"
-                                        data-correo="@(item.Correo ?? string.Empty)"
-                                        data-modulo="@item.Modulo"
-                                        data-accion="@item.Accion"
-                                        data-fecha="@item.FechaHora.ToString("yyyy-MM-dd")">
-
-                                        <td>
-                                            @item.FechaHora.ToString(
-                                                "dd/MM/yyyy hh:mm tt")
-                                        </td>
-
-                                        <td>
-                                            @(item.NombreCompleto
-                                                ?? "Sin nombre")
-                                        </td>
-
-                                        <td>
-                                            @(item.Correo
-                                                ?? "Sin correo")
-                                        </td>
-
-                                        <td>
-                                            @item.Modulo
-                                        </td>
-
-                                        <td>
-                                            <span class="tag @claseAccion">
-                                                @item.Accion
-                                            </span>
-                                        </td>
-
-                                        <td>
-                                            @item.Descripcion
-                                        </td>
-
-                                    </tr>
+                                    <span class="badge-estado activo"><i class="bi bi-circle-fill"></i>Activo</span>
                                 }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="6"
-                                        class="text-center text-muted py-4">
+                                else
+                                {
+                                    <span class="badge-estado inactivo"><i class="bi bi-dash-circle"></i>Inactivo</span>
+                                }
+                            </td>
 
-                                        No hay registros en la bitácora.
+                            <td>
+                                @if (usuario.UltimoAcceso.HasValue)
+                                {
+                                    <span class="texto-fecha d-block">@usuario.UltimoAcceso.Value.ToString("dd/MM/yyyy")</span>
+                                    <span class="texto-tenue">@usuario.UltimoAcceso.Value.ToString("hh:mm tt")</span>
+                                }
+                                else
+                                {
+                                    <span class="texto-tenue">Nunca</span>
+                                }
+                            </td>
 
-                                    </td>
-                                </tr>
-                            }
+                            <td>
+                                @if (usuario.RequiereCambioPassword)
+                                {
+                                    <span class="badge-password pendiente"><i class="bi bi-hourglass-split"></i>Temporal</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-password ok"><i class="bi bi-check2"></i>Actualizada</span>
+                                }
+                            </td>
 
-                        </tbody>
+                            <td>
+                                <div class="d-flex justify-content-center gap-1">
+                                    @if (puedeEditar && puedeGestionar)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-accion-tabla btn-editar js-editar-usuario"
+                                                title="Editar usuario"
+                                                aria-label="Editar a @usuario.NombreUsuario">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
 
-                    </table>
+                                        <button type="button"
+                                                class="btn btn-accion-tabla btn-llave js-restablecer-password"
+                                                title="Restablecer contraseña"
+                                                aria-label="Restablecer la contraseña de @usuario.NombreUsuario">
+                                            <i class="bi bi-key"></i>
+                                        </button>
+                                    }
 
-                </div>
+                                    @if (puedeEliminar && puedeGestionar && !esYo)
+                                    {
+                                        <button type="button"
+                                                class="btn btn-accion-tabla btn-eliminar js-eliminar-usuario"
+                                                title="Eliminar usuario"
+                                                aria-label="Eliminar a @usuario.NombreUsuario">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    }
 
-                <!-- Pie y paginación de bitácora -->
-                <div class="tabla-footer">
+                                    @if (!(puedeEditar && puedeGestionar) && !(puedeEliminar && puedeGestionar && !esYo))
+                                    {
+                                        <span class="texto-tenue" title="Sin acciones disponibles">—</span>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
 
-                    <span id="resultadoBitacora">
-                        Mostrando @Model.ListaBitacora.Count registros
-                    </span>
-
-                    <div id="paginacionBitacora"
-                         class="paginacion-tabla">
-                    </div>
-
-                </div>
-
-            </div>
-
+                    <tr id="sinResultadosUsuarios" class="d-none">
+                        <td colspan="7" class="cuenta-vacio">
+                            <i class="bi bi-search"></i>
+                            <span>Ningún usuario coincide con la búsqueda.</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
-    </section>
-
-    <!-- ================================================================
-         MODAL NUEVO USUARIO
-         ================================================================ -->
-    <div id="modalNuevoUsuario"
-         class="modal-cuenta-overlay">
-
-        <div class="modal-cuenta modal-cuenta-form">
-
-            <div class="preview-header">
-
-                <h3>
-                    <i class="bi bi-person-plus-fill"></i>
-                    Nuevo usuario
-                </h3>
-
-                <button type="button"
-                        class="btn-cerrar-modal js-cerrar-nuevo">
-
-                    <i class="bi bi-x-lg"></i>
-
-                </button>
-
-            </div>
-
-            <form method="post"
-                  asp-page-handler="RegistrarUsuario"
-                  id="formNuevoUsuario">
-
-                @Html.AntiForgeryToken()
-
-                <div class="form-grid-preview">
-
-                    <div>
-                        <label>Nombre completo</label>
-
-                        <input asp-for="UsuarioForm.NombreCompleto"
-                               type="text"
-                               placeholder="Ej. Ana Belén Morales"
-                               required />
-                    </div>
-
-                    <div>
-                        <label>Usuario</label>
-
-                        <input asp-for="UsuarioForm.NombreUsuario"
-                               type="text"
-                               placeholder="Ej. anamorales"
-                               required />
-                    </div>
-
-                    <div>
-                        <label>Correo</label>
-
-                        <input asp-for="UsuarioForm.Correo"
-                               type="email"
-                               placeholder="Ej. ana.morales@sigesst.com"
-                               required />
-                    </div>
-
-                    <div>
-                        <label>Rol</label>
-
-                        <select asp-for="UsuarioForm.Rol"
-                                required>
-
-                            <option value="">
-                                Seleccione un rol
-                            </option>
-
-                            <option value="Administrador">
-                                Administrador
-                            </option>
-
-                            <option value="Soporte">
-                                Soporte
-                            </option>
-
-                        </select>
-                    </div>
-
-                    <div>
-                        <label>Contraseña temporal</label>
-
-                        <div class="password-box">
-
-                            <input asp-for="UsuarioForm.PasswordTemporal"
-                                   id="passwordTemporal"
-                                   type="password"
-                                   placeholder="********"
-                                   required />
-
-                            <button type="button"
-                                    class="js-toggle-password"
-                                    data-input="passwordTemporal"
-                                    title="Mostrar u ocultar contraseña">
-
-                                <i class="bi bi-eye"></i>
-
-                            </button>
-
-                        </div>
-                    </div>
-
-                    <div>
-                        <label>Confirmar contraseña temporal</label>
-
-                        <div class="password-box">
-
-                            <input id="confirmarPasswordTemporal"
-                                   type="password"
-                                   placeholder="********"
-                                   required />
-
-                            <button type="button"
-                                    class="js-toggle-password"
-                                    data-input="confirmarPasswordTemporal"
-                                    title="Mostrar u ocultar contraseña">
-
-                                <i class="bi bi-eye"></i>
-
-                            </button>
-
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="checks-preview">
-
-                    <label>
-
-                        <input asp-for="UsuarioForm.Activo"
-                               type="checkbox" />
-
-                        Usuario activo
-
-                    </label>
-
-                    <label>
-
-                        <input type="checkbox"
-                               checked
-                               disabled />
-
-                        Requiere cambio de contraseña al iniciar sesión
-
-                    </label>
-
-                </div>
-
-                <div class="preview-actions">
-
-                    <button type="button"
-                            class="btn-cancelar js-cerrar-nuevo">
-
-                        Cancelar
-
-                    </button>
-
-                    <button type="submit"
-                            class="btn-guardar">
-
-                        <i class="bi bi-save"></i>
-                        Guardar usuario
-
-                    </button>
-
-                </div>
-
-            </form>
-
+        <div class="cuenta-tabla-pie">
+            <span id="resultadoUsuarios">Mostrando @totalUsuarios usuarios</span>
+            <nav id="paginacionUsuarios" class="paginacion-tabla" aria-label="Paginación de usuarios"></nav>
         </div>
-
     </div>
 
     <!-- ================================================================
-         MODAL EDITAR USUARIO
+         BITÁCORA DE ACTIVIDADES
          ================================================================ -->
-    <div id="modalEditarUsuario"
-         class="modal-cuenta-overlay">
+    <div class="glass-panel overflow-hidden">
 
-        <div class="modal-cuenta modal-cuenta-form">
+        <div class="glass-header cuenta-panel-header">
+            <span><i class="bi bi-clock-history me-2"></i>Bitácora de actividades</span>
 
-            <div class="preview-header">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge-contador">@Model.ListaBitacora.Count registros</span>
 
-                <h3>
-                    <i class="bi bi-pencil-square"></i>
-                    Editar usuario
-                </h3>
-
-                <button type="button"
-                        class="btn-cerrar-modal js-cerrar-editar">
-
-                    <i class="bi bi-x-lg"></i>
-
-                </button>
-
+                @if (Model.EsAdmin)
+                {
+                    <button type="button" class="btn btn-depurar" data-bs-toggle="modal" data-bs-target="#modalDepurarBitacora">
+                        <i class="bi bi-trash3 me-1"></i> Depurar
+                    </button>
+                }
             </div>
-
-            <form method="post"
-                  asp-page-handler="EditarUsuario">
-
-                @Html.AntiForgeryToken()
-
-                <input type="hidden"
-                       id="editIdUsuario"
-                       name="UsuarioForm.IdUsuario" />
-
-                <div class="form-grid-preview">
-
-                    <div>
-                        <label>Nombre completo</label>
-
-                        <input id="editNombreCompleto"
-                               name="UsuarioForm.NombreCompleto"
-                               type="text"
-                               required />
-                    </div>
-
-                    <div>
-                        <label>Usuario</label>
-
-                        <input id="editNombreUsuario"
-                               name="UsuarioForm.NombreUsuario"
-                               type="text"
-                               required />
-                    </div>
-
-                    <div>
-                        <label>Correo</label>
-
-                        <input id="editCorreo"
-                               name="UsuarioForm.Correo"
-                               type="email"
-                               required />
-                    </div>
-
-                    <div>
-                        <label>Rol</label>
-
-                        <select id="editRol"
-                                name="UsuarioForm.Rol"
-                                required>
-
-                            <option value="Administrador">
-                                Administrador
-                            </option>
-
-                            <option value="Soporte">
-                                Soporte
-                            </option>
-
-                        </select>
-                    </div>
-
-                </div>
-
-                <div class="checks-preview">
-
-                    <label>
-
-                        <input id="editActivo"
-                               name="UsuarioForm.Activo"
-                               type="checkbox"
-                               value="true" />
-
-                        Usuario activo
-
-                    </label>
-
-                    <!-- Permite enviar false cuando el checkbox está desmarcado -->
-                    <input type="hidden"
-                           name="UsuarioForm.Activo"
-                           value="false" />
-
-                </div>
-
-                <div class="preview-actions">
-
-                    <button type="button"
-                            class="btn-cancelar js-cerrar-editar">
-
-                        Cancelar
-
-                    </button>
-
-                    <button type="submit"
-                            class="btn-guardar">
-
-                        <i class="bi bi-save"></i>
-                        Guardar cambios
-
-                    </button>
-
-                </div>
-
-            </form>
-
         </div>
 
+        <div class="cuenta-filtros">
+            <div class="cuenta-filtro">
+                <label for="filtroNombre">Nombre</label>
+                <select id="filtroNombre" class="form-select">
+                    <option value="">Todos</option>
+                    @foreach (var nombre in Model.ListaNombresBitacora)
+                    {
+                        <option value="@nombre">@nombre</option>
+                    }
+                </select>
+            </div>
+
+            <div class="cuenta-filtro">
+                <label for="filtroModulo">Módulo</label>
+                <select id="filtroModulo" class="form-select">
+                    <option value="">Todos</option>
+                    @foreach (var modulo in Model.ListaModulosBitacora)
+                    {
+                        <option value="@modulo">@modulo</option>
+                    }
+                </select>
+            </div>
+
+            <div class="cuenta-filtro">
+                <label for="filtroAccion">Acción</label>
+                <select id="filtroAccion" class="form-select">
+                    <option value="">Todas</option>
+                    @foreach (var accion in Model.ListaAccionesBitacora)
+                    {
+                        <option value="@accion">@accion</option>
+                    }
+                </select>
+            </div>
+
+            <div class="cuenta-filtro">
+                <label for="filtroFechaInicio">Desde</label>
+                <input id="filtroFechaInicio" type="date" class="form-control" />
+            </div>
+
+            <div class="cuenta-filtro">
+                <label for="filtroFechaFin">Hasta</label>
+                <input id="filtroFechaFin" type="date" class="form-control" />
+            </div>
+
+            <div class="cuenta-filtro cuenta-filtro-chico">
+                <label for="cantidadBitacora">Mostrar</label>
+                <select id="cantidadBitacora" class="form-select">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+
+            <button type="button" id="btnLimpiarFiltrosBitacora" class="btn btn-limpiar-filtros">
+                <i class="bi bi-eraser-fill me-1"></i> Limpiar
+            </button>
+        </div>
+
+        <div class="table-responsive tabla-contenedor-cuenta">
+            <table id="tablaBitacora" class="tabla-sigest tabla-cuenta align-middle text-center mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-nowrap">Fecha y hora</th>
+                        <th>Realizado por</th>
+                        <th>Módulo</th>
+                        <th>Acción</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (!Model.ListaBitacora.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="cuenta-vacio">
+                                <i class="bi bi-journal"></i>
+                                <span>Todavía no hay movimientos en la bitácora.</span>
+                            </td>
+                        </tr>
+                    }
+
+                    @foreach (var item in Model.ListaBitacora)
+                    {
+                        <tr class="fila-bitacora"
+                            data-nombre="@(item.NombreCompleto ?? string.Empty)"
+                            data-correo="@(item.Correo ?? string.Empty)"
+                            data-modulo="@item.Modulo"
+                            data-accion="@item.Accion"
+                            data-fecha="@item.FechaHora.ToString("yyyy-MM-dd")">
+
+                            <td class="text-nowrap">
+                                <span class="texto-fecha">@item.FechaHora.ToString("dd/MM/yyyy")</span>
+                                <span class="texto-tenue d-block">@item.FechaHora.ToString("hh:mm tt")</span>
+                            </td>
+
+                            <td class="text-nowrap">
+                                <span class="celda-nombre d-block">@(item.NombreCompleto ?? "Usuario eliminado")</span>
+                                <span class="texto-correo">@(item.Correo ?? "—")</span>
+                            </td>
+
+                            <td>@item.Modulo</td>
+
+                            <td>
+                                <span class="tag @ReporteBitacoraModel.ObtenerClaseAccion(item.Accion)">@item.Accion</span>
+                            </td>
+
+                            <td class="celda-descripcion">@item.Descripcion</td>
+                        </tr>
+                    }
+
+                    <tr id="sinResultadosBitacora" class="d-none">
+                        <td colspan="5" class="cuenta-vacio">
+                            <i class="bi bi-funnel"></i>
+                            <span>Ningún registro coincide con los filtros.</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="cuenta-tabla-pie">
+            <span id="resultadoBitacora">Mostrando @Model.ListaBitacora.Count registros</span>
+            <nav id="paginacionBitacora" class="paginacion-tabla" aria-label="Paginación de la bitácora"></nav>
+        </div>
     </div>
 
-    <!-- ================================================================
-         MODAL CONFIGURAR REPORTE
-         ================================================================ -->
-    <div id="modalConfigurarReporte"
-         class="modal-cuenta-overlay">
+</div>
 
-        <div class="modal-reporte-config">
+<!-- ====================================================================
+     MODAL NUEVO USUARIO
+     ==================================================================== -->
+@if (puedeCrear)
+{
+    <div class="modal fade modal-cuenta" id="modalNuevoUsuario" tabindex="-1" aria-labelledby="tituloNuevoUsuario" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
 
-            <div class="modal-reporte-header">
+                <div class="modal-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="mer-icono"><i class="bi bi-person-plus-fill"></i></div>
+                        <div>
+                            <h5 class="modal-title mb-0" id="tituloNuevoUsuario">Nuevo usuario</h5>
+                            <small class="mer-subtitulo">Pedirá cambiar la contraseña la primera vez que inicie sesión</small>
+                        </div>
+                    </div>
+                    <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                </div>
 
-                <h3>
-                    <i class="bi bi-file-earmark-text"></i>
-                    Exportar bitácora
-                </h3>
+                <div class="modal-body">
+                    <form method="post" asp-page-handler="RegistrarUsuario" id="formNuevoUsuario">
 
-                <button type="button"
-                        class="btn-cerrar-modal"
-                        onclick="cerrarModal('modalConfigurarReporte')">
+                        <div class="mer-tarjeta mb-3">
+                            <div class="mer-tarjeta-titulo"><i class="bi bi-person-vcard"></i>Datos de la cuenta</div>
 
-                    <i class="bi bi-x-lg"></i>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" asp-for="UsuarioForm.NombreCompleto">Nombre completo</label>
+                                    <input asp-for="UsuarioForm.NombreCompleto" class="form-control" placeholder="Ej. Ana Belén Morales" maxlength="120" required />
+                                </div>
 
-                </button>
+                                <div class="col-md-6">
+                                    <label class="form-label" asp-for="UsuarioForm.NombreUsuario">Usuario</label>
+                                    <input asp-for="UsuarioForm.NombreUsuario" class="form-control" placeholder="Ej. anamorales" maxlength="50" autocomplete="off" required />
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label" asp-for="UsuarioForm.Correo">Correo electrónico</label>
+                                    <input asp-for="UsuarioForm.Correo" type="email" class="form-control" placeholder="ana.morales@sigesti.com" maxlength="120" required />
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label" asp-for="UsuarioForm.Rol">Rol</label>
+                                    <select asp-for="UsuarioForm.Rol" class="form-select" required>
+                                        <option value="">-- Selecciona un rol --</option>
+                                        @foreach (var rol in rolesAsignables)
+                                        {
+                                            <option value="@rol">@rol</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mer-tarjeta">
+                            <div class="mer-tarjeta-titulo"><i class="bi bi-shield-lock"></i>Acceso</div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="passwordTemporal">Contraseña temporal</label>
+                                    <div class="cuenta-password">
+                                        <input asp-for="UsuarioForm.PasswordTemporal" id="passwordTemporal" type="password" class="form-control" placeholder="Mínimo 8 caracteres" minlength="8" autocomplete="new-password" required />
+                                        <button type="button" class="js-toggle-password" data-input="passwordTemporal" aria-label="Mostrar contraseña">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label" for="confirmarPasswordTemporal">Confirmar contraseña</label>
+                                    <div class="cuenta-password">
+                                        <input id="confirmarPasswordTemporal" type="password" class="form-control" placeholder="Repite la contraseña" autocomplete="new-password" required />
+                                        <button type="button" class="js-toggle-password" data-input="confirmarPasswordTemporal" aria-label="Mostrar contraseña">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        <input asp-for="UsuarioForm.Activo" class="form-check-input" type="checkbox" role="switch" />
+                                        <label class="form-check-label" asp-for="UsuarioForm.Activo">Usuario activo (puede iniciar sesión)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="submit" form="formNuevoUsuario" class="btn btn-guardar px-4">
+                        <i class="bi bi-plus-circle-fill"></i> Añadir usuario
+                    </button>
+                </div>
 
             </div>
+        </div>
+    </div>
+}
 
-            <form id="formReporteBitacora"
-                  method="get"
-                  asp-page="/Cuenta/ReporteBitacora"
-                  target="iframeReporteBitacora">
+<!-- ====================================================================
+     MODAL EDITAR USUARIO
+     ==================================================================== -->
+@if (puedeEditar)
+{
+    <div class="modal fade modal-cuenta" id="modalEditarUsuario" tabindex="-1" aria-labelledby="tituloEditarUsuario" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
 
-                <div class="modal-reporte-body">
+                <div class="modal-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="mer-icono"><i class="bi bi-pencil-square"></i></div>
+                        <div>
+                            <h5 class="modal-title mb-0" id="tituloEditarUsuario">Editar usuario</h5>
+                            <small class="mer-subtitulo" id="subtituloEditarUsuario"></small>
+                        </div>
+                    </div>
+                    <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                </div>
 
-                    <div class="reporte-filtros-grid">
+                <div class="modal-body">
+                    <form method="post" asp-page-handler="EditarUsuario" id="formEditarUsuario">
 
-                        <div class="campo-reporte">
+                        <input type="hidden" id="editIdUsuario" name="UsuarioForm.IdUsuario" />
 
-                            <label>Fecha inicial:</label>
+                        <div class="mer-tarjeta">
+                            <div class="mer-tarjeta-titulo"><i class="bi bi-person-vcard"></i>Datos de la cuenta</div>
 
-                            <input name="fechaInicio"
-                                   type="date" />
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="editNombreCompleto">Nombre completo</label>
+                                    <input id="editNombreCompleto" name="UsuarioForm.NombreCompleto" class="form-control" maxlength="120" required />
+                                </div>
 
+                                <div class="col-md-6">
+                                    <label class="form-label" for="editNombreUsuario">Usuario</label>
+                                    <input id="editNombreUsuario" name="UsuarioForm.NombreUsuario" class="form-control" maxlength="50" autocomplete="off" required />
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label" for="editCorreo">Correo electrónico</label>
+                                    <input id="editCorreo" name="UsuarioForm.Correo" type="email" class="form-control" maxlength="120" required />
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label" for="editRol">Rol</label>
+                                    <select id="editRol" name="UsuarioForm.Rol" class="form-select" required>
+                                        @foreach (var rol in rolesAsignables)
+                                        {
+                                            <option value="@rol">@rol</option>
+                                        }
+                                    </select>
+                                    <!-- Al editar tu propia cuenta el combo se bloquea y el rol se manda desde aquí -->
+                                    <input type="hidden" id="editRolFijo" name="UsuarioForm.Rol" disabled />
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        <input id="editActivo" name="UsuarioForm.Activo" class="form-check-input" type="checkbox" role="switch" value="true" />
+                                        <label class="form-check-label" for="editActivo">Usuario activo (puede iniciar sesión)</label>
+                                    </div>
+                                    <!-- Manda false cuando el switch está apagado (true si es tu propia cuenta) -->
+                                    <input type="hidden" id="editActivoOculto" name="UsuarioForm.Activo" value="false" />
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="campo-reporte">
+                        <p id="notaCuentaPropia" class="cuenta-nota mt-3 mb-0 d-none">
+                            <i class="bi bi-lock"></i>
+                            Es tu cuenta: no puedes cambiar tu propio rol ni desactivarla.
+                        </p>
 
-                            <label>Fecha final:</label>
+                    </form>
+                </div>
 
-                            <input name="fechaFin"
-                                   type="date" />
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="submit" form="formEditarUsuario" class="btn btn-guardar px-4">
+                        <i class="bi bi-save"></i> Guardar cambios
+                    </button>
+                </div>
 
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ====================================================================
+     MODAL ROLES Y PERMISOS (solo Admin)
+     ==================================================================== -->
+@if (Model.EsAdmin)
+{
+    var acciones = Enum.GetValues<Accion>();
+
+    <div class="modal fade modal-cuenta" id="modalPermisos" tabindex="-1" aria-labelledby="tituloPermisos" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-ancho">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="mer-icono"><i class="bi bi-shield-lock-fill"></i></div>
+                        <div>
+                            <h5 class="modal-title mb-0" id="tituloPermisos">Roles y permisos</h5>
+                            <small class="mer-subtitulo">Elige qué puede ver y hacer cada rol en el sistema</small>
                         </div>
+                    </div>
+                    <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                </div>
 
-                        <div class="campo-reporte">
+                <div class="modal-body">
 
-                            <label>Nombre:</label>
-
-                            <select name="filtroNombre">
-
-                                <option value="">
-                                    Todos los nombres
-                                </option>
-
-                                @foreach (
-                                    var nombre in
-                                    Model.ListaNombresBitacora)
-                                {
-                                    <option value="@nombre">
-                                        @nombre
-                                    </option>
-                                }
-
-                            </select>
-
-                        </div>
-
-                        <div class="campo-reporte">
-
-                            <label>Correo:</label>
-
-                            <select name="filtroCorreo">
-
-                                <option value="">
-                                    Todos los correos
-                                </option>
-
-                                @foreach (
-                                    var correo in
-                                    Model.ListaCorreosBitacora)
-                                {
-                                    <option value="@correo">
-                                        @correo
-                                    </option>
-                                }
-
-                            </select>
-
-                        </div>
-
-                        <div class="campo-reporte">
-
-                            <label>Módulo:</label>
-
-                            <select name="filtroModulo">
-
-                                <option value="">
-                                    Todos los módulos
-                                </option>
-
-                                @foreach (
-                                    var modulo in
-                                    Model.ListaModulosBitacora)
-                                {
-                                    <option value="@modulo">
-                                        @modulo
-                                    </option>
-                                }
-
-                            </select>
-
-                        </div>
-
-                        <div class="campo-reporte">
-
-                            <label>Acción:</label>
-
-                            <select name="filtroAccion">
-
-                                <option value="">
-                                    Todas las acciones
-                                </option>
-
-                                @foreach (
-                                    var accion in
-                                    Model.ListaAccionesBitacora)
-                                {
-                                    <option value="@accion">
-                                        @accion
-                                    </option>
-                                }
-
-                            </select>
-
-                        </div>
-
+                    <div class="cuenta-aviso-admin mb-3">
+                        <i class="bi bi-stars"></i>
+                        <span>El rol <strong>Admin</strong> siempre tiene control total del sistema y no se puede limitar.</span>
                     </div>
 
+                    <!-- Pestañas: un rol a la vez -->
+                    <div class="cuenta-tabs mb-3" role="tablist">
+                        @for (int i = 0; i < Roles.Configurables.Length; i++)
+                        {
+                            string rol = Roles.Configurables[i];
+
+                            <button type="button"
+                                    class="cuenta-tab js-tab-permisos @(i == 0 ? "active" : "")"
+                                    role="tab"
+                                    aria-selected="@(i == 0 ? "true" : "false")"
+                                    data-rol="@rol">
+                                <span class="cuenta-avatar avatar-@ControlAccesoModel.ClaseRol(rol)" aria-hidden="true">@(rol[..1])</span>
+                                @rol
+                            </button>
+                        }
+                    </div>
+
+                    <form method="post" asp-page-handler="GuardarPermisos" id="formPermisos">
+
+                        @for (int i = 0; i < Roles.Configurables.Length; i++)
+                        {
+                            string rol = Roles.Configurables[i];
+
+                            <div class="permisos-rol @(i == 0 ? "" : "d-none")" data-rol="@rol" role="tabpanel">
+                                <div class="table-responsive tabla-contenedor-cuenta m-0">
+                                    <table class="tabla-sigest tabla-cuenta tabla-permisos align-middle text-center mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-start">Módulo</th>
+                                                @foreach (var accion in acciones)
+                                                {
+                                                    <th>@accion</th>
+                                                }
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            @foreach (var grupo in Modulos.Todos.GroupBy(m => m.Grupo))
+                                            {
+                                                string claveGrupo = rol + "|" + grupo.Key;
+                                                bool grupoVisible = grupo.Any(m => Model.TienePermiso(rol, m.Clave, Accion.Ver));
+
+                                                <!-- Interruptor del menú completo: apagado oculta toda la sección del menú -->
+                                                <tr class="permisos-grupo">
+                                                    <td colspan="@(acciones.Length + 1)">
+                                                        <div class="permisos-grupo-titulo">
+                                                            <label class="switch-permiso" title="Mostrar u ocultar todo el menú @grupo.Key">
+                                                                <input type="checkbox"
+                                                                       class="js-grupo-permisos"
+                                                                       data-grupo="@claveGrupo"
+                                                                       aria-label="Menú @grupo.Key completo"
+                                                                       checked="@grupoVisible" />
+                                                                <span></span>
+                                                            </label>
+                                                            <span>Menú @grupo.Key</span>
+                                                            <small>Apágalo para ocultar todo el menú</small>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                                @foreach (var modulo in grupo)
+                                                {
+                                                    <tr>
+                                                        <td class="text-start celda-nombre ps-4">@modulo.Nombre</td>
+
+                                                        @foreach (var accion in acciones)
+                                                        {
+                                                            <td>
+                                                                @if (modulo.Acciones.Contains(accion))
+                                                                {
+                                                                    <label class="switch-permiso" title="@accion - @modulo.Nombre">
+                                                                        <input type="checkbox"
+                                                                               name="PermisosMarcados"
+                                                                               value="@rol|@modulo.Clave|@accion"
+                                                                               data-fila="@rol|@modulo.Clave"
+                                                                               data-grupo="@claveGrupo"
+                                                                               data-accion="@accion"
+                                                                               aria-label="@accion en @modulo.Nombre"
+                                                                               checked="@Model.TienePermiso(rol, modulo.Clave, accion)" />
+                                                                        <span></span>
+                                                                    </label>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="texto-tenue" title="No aplica en este módulo">—</span>
+                                                                }
+                                                            </td>
+                                                        }
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        }
+
+                    </form>
                 </div>
 
-                <div class="modal-reporte-footer">
-
-                    <button type="button"
-                            class="btn-cancelar-reporte"
-                            onclick="cerrarModal('modalConfigurarReporte')">
-
-                        Cancelar
-
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
                     </button>
-
-                    <button type="submit"
-                            class="btn-generar-reporte">
-
-                        <i class="bi bi-file-earmark-check"></i>
-                        Generar reporte
-
+                    <button type="submit" form="formPermisos" class="btn btn-guardar px-4">
+                        <i class="bi bi-save"></i> Guardar cambios
                     </button>
-
                 </div>
 
-            </form>
-
+            </div>
         </div>
+    </div>
+}
 
+<!-- ====================================================================
+     MODAL CONFIGURAR REPORTE DE BITÁCORA
+     ==================================================================== -->
+@if (puedeExportar)
+{
+    <div class="modal fade modal-cuenta" id="modalConfigurarReporte" tabindex="-1" aria-labelledby="tituloConfigurarReporte" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="mer-icono"><i class="bi bi-file-earmark-text"></i></div>
+                        <div>
+                            <h5 class="modal-title mb-0" id="tituloConfigurarReporte">Imprimir bitácora</h5>
+                            <small class="mer-subtitulo">Deja un filtro vacío para incluir todos los registros</small>
+                        </div>
+                    </div>
+                    <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="formReporteBitacora" method="get" asp-page="/Cuenta/ReporteBitacora" target="iframeReporteBitacora">
+
+                        <div class="mer-tarjeta mb-3">
+                            <div class="mer-tarjeta-titulo"><i class="bi bi-calendar-range"></i>Periodo</div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="reporteFechaInicio">Fecha inicial</label>
+                                    <input id="reporteFechaInicio" name="fechaInicio" type="date" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="reporteFechaFin">Fecha final</label>
+                                    <input id="reporteFechaFin" name="fechaFin" type="date" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mer-tarjeta">
+                            <div class="mer-tarjeta-titulo"><i class="bi bi-funnel"></i>Filtros</div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="reporteNombre">Nombre</label>
+                                    <select id="reporteNombre" name="filtroNombre" class="form-select">
+                                        <option value="">Todos</option>
+                                        @foreach (var nombre in Model.ListaNombresBitacora)
+                                        {
+                                            <option value="@nombre">@nombre</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="reporteCorreo">Correo</label>
+                                    <select id="reporteCorreo" name="filtroCorreo" class="form-select">
+                                        <option value="">Todos</option>
+                                        @foreach (var correo in Model.ListaCorreosBitacora)
+                                        {
+                                            <option value="@correo">@correo</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="reporteModulo">Módulo</label>
+                                    <select id="reporteModulo" name="filtroModulo" class="form-select">
+                                        <option value="">Todos</option>
+                                        @foreach (var modulo in Model.ListaModulosBitacora)
+                                        {
+                                            <option value="@modulo">@modulo</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="reporteAccion">Acción</label>
+                                    <select id="reporteAccion" name="filtroAccion" class="form-select">
+                                        <option value="">Todas</option>
+                                        @foreach (var accion in Model.ListaAccionesBitacora)
+                                        {
+                                            <option value="@accion">@accion</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="submit" form="formReporteBitacora" class="btn btn-guardar px-4">
+                        <i class="bi bi-eye"></i> Ver vista previa
+                    </button>
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <!-- ================================================================
          MODAL VISTA PREVIA DEL REPORTE
          ================================================================ -->
-    <div id="modalVistaPreviaReporte"
-         class="modal-cuenta-overlay">
+    <div class="modal fade modal-cuenta" id="modalVistaPreviaReporte" tabindex="-1" aria-labelledby="tituloVistaPrevia" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-fullscreen-lg-down">
+            <div class="modal-content">
 
-        <div class="modal-vista-previa-reporte">
+                <div class="modal-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="mer-icono"><i class="bi bi-file-earmark-richtext"></i></div>
+                        <div>
+                            <h5 class="modal-title mb-0" id="tituloVistaPrevia">Vista previa del reporte</h5>
+                            <small class="mer-subtitulo">Revisa el reporte antes de imprimirlo o guardarlo en PDF</small>
+                        </div>
+                    </div>
 
-            <div class="modal-reporte-header">
+                    <div class="cuenta-vista-acciones">
+                        <button type="button" class="btn btn-filtros-sigest" data-bs-toggle="modal" data-bs-target="#modalConfigurarReporte">
+                            <i class="bi bi-sliders me-1"></i> Cambiar filtros
+                        </button>
+                        <button type="button" class="btn btn-imprimir-sigest" onclick="imprimirReporteBitacora()">
+                            <i class="bi bi-printer me-1"></i> Imprimir
+                        </button>
+                        <button type="button" id="btnDescargarPdf" class="btn btn-pdf-sigest" onclick="descargarPdfBitacora()">
+                            <i class="bi bi-file-earmark-pdf-fill me-1"></i> Descargar PDF
+                        </button>
+                        <button type="button" class="mer-btn-cerrar ms-1" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                </div>
 
-                <h3>
-                    <i class="bi bi-eye-fill"></i>
-                    Vista previa del reporte
-                </h3>
-
-                <button type="button"
-                        class="btn-cerrar-modal"
-                        onclick="cerrarVistaPreviaReporte()"
-                        title="Cerrar">
-
-                    <i class="bi bi-x-lg"></i>
-
-                </button>
-
-            </div>
-
-            <div class="vista-previa-acciones">
-
-                <button type="button"
-                        class="btn-generar-reporte"
-                        onclick="imprimirReporteBitacora()">
-
-                    <i class="bi bi-printer-fill"></i>
-                    Descargar / Imprimir
-
-                </button>
-
-            </div>
-
-            <div class="iframe-reporte-contenedor">
-
-                <iframe id="iframeReporteBitacora"
-                        name="iframeReporteBitacora"
-                        title="Vista previa del reporte de bitácora">
-                </iframe>
+                <div class="modal-body cuenta-vista-previa">
+                    <iframe id="iframeReporteBitacora"
+                            name="iframeReporteBitacora"
+                            title="Vista previa del reporte de bitácora"></iframe>
+                </div>
 
             </div>
-
         </div>
-
     </div>
+}
 
-    <!-- ================================================================
-         FORMULARIOS OCULTOS
-         ================================================================ -->
-    <!-- Restablecer contraseña -->
-    <form id="formRestablecerPassword"
-          method="post"
-          asp-page-handler="RestablecerPassword">
+<!-- ====================================================================
+     MODAL DEPURAR BITÁCORA (solo Admin)
+     ==================================================================== -->
+@if (Model.EsAdmin)
+{
+    <div class="modal fade modal-cuenta" id="modalDepurarBitacora" tabindex="-1" aria-labelledby="tituloDepurarBitacora" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
 
-        @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="mer-icono mer-icono-peligro"><i class="bi bi-trash3"></i></div>
+                        <div>
+                            <h5 class="modal-title mb-0" id="tituloDepurarBitacora">Depurar bitácora</h5>
+                            <small class="mer-subtitulo">Elimina registros antiguos para liberar espacio</small>
+                        </div>
+                    </div>
+                    <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                </div>
 
-        <input type="hidden"
-               id="passwordIdUsuario"
-               name="idUsuario" />
+                <div class="modal-body">
+                    <form method="post" asp-page-handler="DepurarBitacora" id="formDepurarBitacora">
 
-    </form>
+                        <div class="cuenta-aviso-peligro mb-3">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <span>
+                                Solo se pueden eliminar registros con más de @ControlAccesoModel.MesesMinimosBitacora meses
+                                (anteriores al <strong>@Model.FechaLimiteDepuracion.ToString("dd/MM/yyyy")</strong>).
+                                Esta acción no se puede deshacer.
+                            </span>
+                        </div>
 
-    <!-- Eliminar usuario -->
-    <form id="formEliminarUsuario"
-          method="post"
-          asp-page-handler="EliminarUsuario">
+                        <div class="mer-tarjeta">
+                            <div class="mer-tarjeta-titulo"><i class="bi bi-calendar-range"></i>Rango a eliminar</div>
 
-        @Html.AntiForgeryToken()
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="depurarDesde">Desde</label>
+                                    <input id="depurarDesde" name="desde" type="date" class="form-control"
+                                           max="@Model.UltimoDiaDepurable.ToString("yyyy-MM-dd")" />
+                                    <small class="cuenta-nota">Vacío = desde el primer registro</small>
+                                </div>
 
-        <input type="hidden"
-               id="eliminarIdUsuario"
-               name="idUsuario" />
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="depurarHasta">Hasta</label>
+                                    <input id="depurarHasta" name="hasta" type="date" class="form-control" required
+                                           max="@Model.UltimoDiaDepurable.ToString("yyyy-MM-dd")"
+                                           value="@Model.UltimoDiaDepurable.ToString("yyyy-MM-dd")" />
+                                </div>
+                            </div>
 
-    </form>
+                            <div class="cuenta-depurar-conteo mt-3">
+                                <span id="conteoDepuracion" class="cuenta-depurar-numero">—</span>
+                                <span id="textoDepuracion">registros se eliminarán</span>
+                            </div>
+                        </div>
 
-    <!-- ================================================================
-         MENSAJES ENVIADOS DESDE C#
-         ================================================================ -->
+                        <p class="cuenta-nota mt-3 mb-0">
+                            <i class="bi bi-printer"></i>
+                            ¿Quieres conservar una copia?
+                            <button type="button" id="btnImprimirRangoDepurar" class="btn-enlace">Imprime este rango antes de eliminarlo</button>.
+                        </p>
 
-    <input type="hidden"
-           id="mensajeExito"
-           value="@TempData["Exito"]" />
+                    </form>
+                </div>
 
-    <input type="hidden"
-           id="mensajeError"
-           value="@TempData["Error"]" />
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="button" id="btnConfirmarDepuracion" class="btn btn-peligro px-4" disabled>
+                        <i class="bi bi-trash3"></i> Eliminar registros
+                    </button>
+                </div>
 
-    <input type="hidden"
-           id="passwordGenerado"
-           value="@TempData["PasswordTemporal"]" />
+            </div>
+        </div>
+    </div>
+}
 
-    <input type="hidden"
-           id="abrirModalNuevo"
-           value="@TempData["AbrirModalNuevoUsuario"]" />
+<!-- ====================================================================
+     FORMULARIOS OCULTOS (restablecer contraseña y eliminar)
+     ==================================================================== -->
+<form id="formRestablecerPassword" method="post" asp-page-handler="RestablecerPassword">
+    <input type="hidden" id="passwordIdUsuario" name="idUsuario" />
+</form>
 
-</div>
+<form id="formEliminarUsuario" method="post" asp-page-handler="EliminarUsuario">
+    <input type="hidden" id="eliminarIdUsuario" name="idUsuario" />
+</form>
+
+<!-- ====================================================================
+     MENSAJES ENVIADOS DESDE C# (los lee alertas.js / controlAcceso.js)
+     ==================================================================== -->
+<input type="hidden" id="mensajeExito" value="@TempData["Exito"]" />
+<input type="hidden" id="mensajeError" value="@TempData["Error"]" />
+<input type="hidden" id="passwordGenerado" value="@TempData["PasswordTemporal"]" />
+<input type="hidden" id="abrirModalNuevo" value="@TempData["AbrirModalNuevoUsuario"]" />
+<input type="hidden" id="editarUsuarioConError" value="@TempData["EditarUsuarioConError"]" />
+
+@section Scripts {
+    <script src="~/js/Cuenta/controlAcceso.js" asp-append-version="true"></script>
+}

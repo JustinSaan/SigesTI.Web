@@ -30,7 +30,22 @@ namespace SigesTI.Web.Models
 
         public string? UnidadesRed { get; set; }
 
-        public int Orden { get; set; } 
-       
+        public int Orden { get; set; }
+
+        // Agrega una unidad de red a la lista separada por comas, sin repetirla
+        public void AgregarUnidadRed(string unidad)
+        {
+            unidad = unidad.Trim();
+            if (unidad == "") return;
+
+            var unidades = (UnidadesRed ?? "")
+                .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
+
+            if (unidades.Contains(unidad, StringComparer.OrdinalIgnoreCase)) return;
+
+            unidades.Add(unidad);
+            UnidadesRed = string.Join(", ", unidades);
+        }
     }
 }

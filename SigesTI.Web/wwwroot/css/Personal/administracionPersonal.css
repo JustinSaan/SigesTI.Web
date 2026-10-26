@@ -1,0 +1,588 @@
+/* ==========================================================================
+   ADMINISTRACIÓN DE PERSONAL
+   Usa el mismo diseño de tabla y colores de área que Plan de Respaldos,
+   y los mismos botones de acciones que Tareas Programadas.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. CONTENEDOR Y PANEL
+   -------------------------------------------------------------------------- */
+.actividades-container {
+    padding: 24px;
+    background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.25), transparent 40%), radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.15), transparent 35%), #0b132b !important;
+    min-height: calc(100vh - 120px);
+    color: #e2e8f0;
+}
+
+    .actividades-container .text-muted {
+        color: #94a3b8 !important;
+    }
+
+.glass-panel {
+    background: linear-gradient(145deg, #172a45, #0f172a) !important;
+    border: 1px solid rgba(56, 189, 248, 0.28) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.glass-header {
+    background: rgba(15, 23, 42, 0.85) !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.3) !important;
+    padding: 14px 20px !important;
+    color: #38bdf8 !important;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+}
+
+/* Botón Registrar Personal */
+.btn-primary-sigest {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid #0284c7 !important;
+    border-radius: 15px !important;
+    font-size: 0.85rem !important;
+    padding: 10px 22px;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease-in-out !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2) !important;
+}
+
+    .btn-primary-sigest:hover {
+        background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+        border-color: #38bdf8 !important;
+        box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4) !important;
+        transform: translateY(-1px);
+    }
+
+/* Insignias (contador y estado Activo / Inactivo) */
+.actividades-container .badge {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.4px !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+    .actividades-container .badge.bg-primary {
+        background-color: #0284c7 !important;
+        border: 1px solid #38bdf8 !important;
+    }
+
+    .actividades-container .badge.bg-success {
+        background-color: #15803d !important;
+        border: 1px solid #4ade80 !important;
+    }
+
+    .actividades-container .badge.bg-secondary {
+        background-color: #475569 !important;
+        color: #f8fafc !important;
+        border: 1px solid #94a3b8 !important;
+    }
+
+/* --------------------------------------------------------------------------
+   2. TABLA (mismo diseño que el cronograma de Plan de Respaldos)
+   -------------------------------------------------------------------------- */
+.tabla-sigest {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+/* Colores de la cuadrícula: cámbialos aquí para hacer las líneas más o menos visibles */
+.tabla-personal {
+    --linea-vertical: rgba(56, 189, 248, 0.16);
+    --linea-horizontal: rgba(148, 163, 184, 0.12);
+}
+
+/* Marco redondeado alrededor de la tabla */
+.tabla-contenedor-personal {
+    margin: 12px;
+    border: 1px solid rgba(56, 189, 248, 0.18);
+    border-radius: 12px;
+    background: rgba(11, 19, 43, 0.55);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Encabezado con degradado azul y texto celeste */
+.tabla-personal thead th {
+    background: linear-gradient(180deg, #14294d 0%, #0f1d38 100%) !important;
+    color: #7dd3fc !important;
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.9px !important;
+    padding: 11px 12px !important;
+    white-space: nowrap !important;
+    border: none !important;
+    border-left: 1px solid var(--linea-vertical) !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.25) !important;
+}
+
+    /* La primera columna (agarradera) no lleva línea a la izquierda */
+    .tabla-personal thead tr:first-child th:first-child {
+        border-left: none !important;
+    }
+
+    /* Títulos de grupo en blanco y subrayados */
+    .tabla-personal thead th.th-grupo {
+        color: #e2e8f0 !important;
+        border-bottom: 2px solid rgba(56, 189, 248, 0.55) !important;
+    }
+
+/* Celdas con línea abajo y a la izquierda (cuadrícula) */
+.tabla-personal tbody td {
+    color: #f1f5f9 !important;
+    font-size: 0.82rem !important;
+    vertical-align: middle !important;
+    background: transparent !important;
+    border: none !important;
+    border-left: 1px solid var(--linea-vertical) !important;
+    border-bottom: 1px solid var(--linea-horizontal) !important;
+    padding: 10px 12px !important;
+    transition: background-color 0.15s ease;
+}
+
+    .tabla-personal tbody td:first-child {
+        border-left: none !important;
+    }
+
+    /* La última fila no lleva línea abajo (ya la cierra el marco) */
+    .tabla-personal tbody tr:last-child td {
+        border-bottom: none !important;
+    }
+
+/* Filas intercaladas (cebra) */
+.tabla-personal tbody tr:nth-child(even) td {
+    background: rgba(148, 163, 184, 0.035) !important;
+}
+
+/* Al pasar el cursor: fondo azul suave y barrita celeste a la izquierda */
+.tabla-personal tbody tr:hover td {
+    background: rgba(56, 189, 248, 0.08) !important;
+}
+
+    .tabla-personal tbody tr:hover td:first-child {
+        box-shadow: inset 3px 0 0 #38bdf8;
+    }
+
+/* Nombre en blanco y negritas */
+.tabla-personal tbody td.celda-nombre {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+/* El puesto puede ir en dos renglones para que la tabla quepa en el panel sin scroll */
+.tabla-personal tbody td.celda-puesto {
+    white-space: normal !important;
+    min-width: 150px;
+    max-width: 210px;
+}
+
+.texto-correo {
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 0.78rem;
+    color: #94a3b8;
+}
+
+/* Fila de personal inactivo (apagada) */
+.tabla-personal tr.fila-inactiva td {
+    opacity: 0.4 !important;
+    filter: grayscale(80%) !important;
+}
+
+.tabla-personal tr.fila-inactiva:hover td {
+    opacity: 0.65 !important;
+}
+
+/* Agarradera del drag and drop: mano abierta, y mano agarrando al arrastrar */
+.tabla-personal tbody td.drag-handle {
+    cursor: grab !important;
+    color: #475569 !important;
+}
+
+    .tabla-personal tbody tr:hover td.drag-handle {
+        color: #38bdf8 !important;
+    }
+
+body.arrastrando-fila,
+body.arrastrando-fila * {
+    cursor: grabbing !important;
+}
+
+/* Hueco donde va a caer la fila que se arrastra */
+.tabla-personal tr.sortable-ghost td {
+    background: rgba(56, 189, 248, 0.15) !important;
+    opacity: 0.6;
+}
+
+/* --------------------------------------------------------------------------
+   3. COLORES DE ÁREA (mismos que Plan de Respaldos)
+   -------------------------------------------------------------------------- */
+.badge-area-sigest {
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    padding: 6px 14px !important;
+    border-radius: 8px !important;
+    display: inline-block !important;
+    letter-spacing: 0.3px !important;
+    white-space: nowrap !important;
+}
+
+    .badge-area-sigest.area-direccion-general {
+        background-color: #3b0764 !important;
+        color: #f3e8ff !important;
+        border: 1px solid #7e22ce !important;
+        box-shadow: 0 0 10px rgba(126, 34, 206, 0.4) !important;
+    }
+
+    .badge-area-sigest.area-administracion {
+        background-color: #451a03 !important;
+        color: #fef3c7 !important;
+        border: 1px solid #b45309 !important;
+        box-shadow: 0 0 10px rgba(180, 83, 9, 0.4) !important;
+    }
+
+    .badge-area-sigest.area-cobranza {
+        background-color: #450a0a !important;
+        color: #fee2e2 !important;
+        border: 1px solid #991b1b !important;
+        box-shadow: 0 0 10px rgba(153, 27, 27, 0.4) !important;
+    }
+
+    .badge-area-sigest.area-ventas {
+        background-color: #0c4a6e !important;
+        color: #e0f2fe !important;
+        border: 1px solid #0369a1 !important;
+        box-shadow: 0 0 10px rgba(3, 105, 161, 0.4) !important;
+    }
+
+    .badge-area-sigest.area-consultoria {
+        background-color: #431407 !important;
+        color: #ffedd5 !important;
+        border: 1px solid #9a3412 !important;
+        box-shadow: 0 0 10px rgba(154, 52, 18, 0.4) !important;
+    }
+
+    .badge-area-sigest.area-sistemas {
+        background-color: #1e1b4b !important;
+        color: #e0e7ff !important;
+        border: 1px solid #4338ca !important;
+        box-shadow: 0 0 10px rgba(67, 56, 202, 0.45) !important;
+    }
+
+    .badge-area-sigest.area-desarrollo {
+        background-color: #064e3b !important;
+        color: #d1fae5 !important;
+        border: 1px solid #047857 !important;
+        box-shadow: 0 0 10px rgba(4, 120, 87, 0.4) !important;
+    }
+
+    .badge-area-sigest.area-soporte {
+        background-color: #500724 !important;
+        color: #fce7f3 !important;
+        border: 1px solid #831843 !important;
+        box-shadow: 0 0 10px rgba(131, 24, 67, 0.4) !important;
+    }
+
+    .badge-area-sigest.area-contabilidad {
+        background-color: #3b200b !important;
+        color: #fef3c7 !important;
+        border: 1px solid #78350f !important;
+        box-shadow: 0 0 10px rgba(120, 53, 15, 0.4) !important;
+    }
+
+    .badge-area-sigest.area-general {
+        background-color: #1f2937 !important;
+        color: #e5e7eb !important;
+        border: 1px solid #4b5563 !important;
+        box-shadow: 0 0 8px rgba(75, 85, 99, 0.3) !important;
+    }
+
+/* --------------------------------------------------------------------------
+   4. BOTONES DE ACCIONES (mismos que Tareas Programadas)
+   -------------------------------------------------------------------------- */
+.btn-accion-tabla {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+    /* Editar - azul oscuro */
+    .btn-accion-tabla.btn-editar {
+        background-color: #0f3d61 !important;
+        color: #ffffff !important;
+        border: 1px solid #1d6fa5 !important;
+    }
+
+        .btn-accion-tabla.btn-editar:hover {
+            background-color: #0284c7 !important;
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.5) !important;
+            transform: translateY(-1px);
+        }
+
+    /* Eliminar - rojo vino oscuro */
+    .btn-accion-tabla.btn-eliminar {
+        background-color: #61131b !important;
+        color: #ffffff !important;
+        border: 1px solid #a82431 !important;
+    }
+
+        .btn-accion-tabla.btn-eliminar:hover {
+            background-color: #b91c1c !important;
+            border-color: #f87171 !important;
+            box-shadow: 0 0 8px rgba(248, 113, 113, 0.5) !important;
+            transform: translateY(-1px);
+        }
+
+/* --------------------------------------------------------------------------
+   5. MODAL REGISTRAR / EDITAR (mismo diseño que los modales de Plan de Respaldos)
+   -------------------------------------------------------------------------- */
+.modal-personal .modal-content {
+    color: #e2e8f0;
+    background: linear-gradient(160deg, #0f1d3a, #0b132b) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    border-radius: 18px !important;
+    overflow: hidden;
+}
+
+.modal-personal .modal-header {
+    background: #0b132b !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2) !important;
+    padding: 16px 22px !important;
+}
+
+.modal-personal .modal-title {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.modal-personal .modal-body {
+    padding: 20px 22px !important;
+}
+
+.modal-personal .modal-footer {
+    background: #0b132b !important;
+    border-top: 1px solid rgba(56, 189, 248, 0.15) !important;
+    padding: 12px 22px !important;
+}
+
+.mer-icono {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.mer-subtitulo {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+.mer-tarjeta {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.mer-tarjeta-titulo {
+    color: #38bdf8;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+    .mer-tarjeta-titulo i {
+        margin-right: 6px;
+    }
+
+.modal-personal .form-label {
+    color: #94a3b8 !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px !important;
+}
+
+.modal-personal .form-control,
+.modal-personal .form-select {
+    color: #ffffff !important;
+    background-color: #0b132b !important;
+    border: 1px solid #1e3a5f !important;
+    border-radius: 10px !important;
+    padding: 8px 12px !important;
+    font-size: 0.88rem !important;
+    color-scheme: dark;
+}
+
+    .modal-personal .form-control::placeholder {
+        color: #64748b !important;
+    }
+
+    .modal-personal .form-control:focus,
+    .modal-personal .form-select:focus {
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+    }
+
+    .modal-personal .form-select option {
+        background-color: #0f172a;
+        color: #ffffff;
+    }
+
+/* Switch "Responsable del Área" */
+.modal-personal .form-switch .form-check-input {
+    background-color: #334155;
+    border-color: #475569;
+    width: 2.5em;
+    height: 1.25em;
+    cursor: pointer;
+}
+
+    .modal-personal .form-switch .form-check-input:checked {
+        background-color: #38bdf8;
+        border-color: #38bdf8;
+    }
+
+.modal-personal .form-check-label {
+    color: #e2e8f0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 6px;
+    cursor: pointer;
+}
+
+/* Botón X para cerrar el modal */
+.mer-btn-cerrar {
+    margin-left: auto;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+    .mer-btn-cerrar:hover {
+        color: #ffffff;
+        background: #dc2626;
+        border-color: #f87171;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+
+/* Botones Cancelar y Guardar */
+.btn-cancelar,
+.btn-guardar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.btn-cancelar {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 4px 14px rgba(138, 138, 138, 0.4);
+}
+
+    .btn-cancelar:hover {
+        background: #334155 !important;
+        box-shadow: 0 6px 20px rgba(191, 191, 191, 0.55);
+        transform: translateY(-1px);
+    }
+
+.btn-guardar {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    border: 1px solid #38bdf8 !important;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+}
+
+    .btn-guardar:hover {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.55);
+        transform: translateY(-1px);
+    }
+
+    .btn-cancelar:active,
+    .btn-guardar:active {
+        transform: scale(0.96);
+    }
+
+/* --------------------------------------------------------------------------
+   6. SCROLLBAR (mismo estilo que el resto del sistema)
+   -------------------------------------------------------------------------- */
+.tabla-contenedor-personal::-webkit-scrollbar,
+.modal-personal .modal-body::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.tabla-contenedor-personal::-webkit-scrollbar-track,
+.modal-personal .modal-body::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+.tabla-contenedor-personal::-webkit-scrollbar-thumb,
+.modal-personal .modal-body::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 4px;
+    border: 1px solid #38bdf8;
+}
+
+    .tabla-contenedor-personal::-webkit-scrollbar-thumb:hover,
+    .modal-personal .modal-body::-webkit-scrollbar-thumb:hover {
+        background: #0284c7;
+    }
+
+/* Firefox no entiende ::-webkit-scrollbar; ahí se usan los mismos colores con scrollbar-color */
+@supports not selector(::-webkit-scrollbar) {
+    .tabla-contenedor-personal,
+    .modal-personal .modal-body {
+        scrollbar-color: #1e293b #0f172a;
+    }
+}
+
+/* Fondo borroso detrás del modal (este CSS solo se carga en esta página) */
+.modal-backdrop {
+    background-color: rgba(11, 19, 43, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+    .modal-backdrop.show {
+        opacity: 1;
+    }

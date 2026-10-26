@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SigesTI.Web.Data;
+using SigesTI.Web.Seguridad;
 using SigesTI.Web.Models;
 using System;
 using System.Collections.Generic;
@@ -12,19 +13,19 @@ using System.Net;
 
 namespace SigesTI.Web.Pages.Solicitudes
 {
+    [Modulo(Modulos.ConsultarSolicitudes)]
     public class ConsultarModel : PageModel
     {
         private readonly ApplicationDbContext _context;
+        private readonly PermisosService _permisos;
 
-        public ConsultarModel(ApplicationDbContext context)
+        public ConsultarModel(ApplicationDbContext context, PermisosService permisos)
         {
             _context = context;
+            _permisos = permisos;
         }
 
         public List<Solicitud> Solicitudes { get; set; } = new();
-
-        [BindProperty(SupportsGet = true)]
-        public string? BuscarTermino { get; set; }
 
         [BindProperty(SupportsGet = true)]
         public string? FiltrarArea { get; set; }
@@ -51,18 +52,6 @@ namespace SigesTI.Web.Pages.Solicitudes
             var query = _context.Solicitudes
                 .Include(s => s.Personal)
                 .AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(BuscarTermino))
-            {
-                string termino = BuscarTermino.ToLower();
-                query = query.Where(s =>
-                    s.IdSolicitud.ToString().Contains(termino) ||
-                    (s.Personal != null && s.Personal.Nombre != null && s.Personal.Nombre.ToLower().Contains(termino)) ||
-                    (s.PuestoSolicitante != null && s.PuestoSolicitante.ToLower().Contains(termino)) ||
-                    (s.DescripcionProblema != null && s.DescripcionProblema.ToLower().Contains(termino)) ||
-                    (s.EjecutivoAsignado != null && s.EjecutivoAsignado.ToLower().Contains(termino))
-                );
-            }
 
             if (!string.IsNullOrWhiteSpace(FiltrarArea))
             {
@@ -120,6 +109,7 @@ namespace SigesTI.Web.Pages.Solicitudes
             };
         }
 
+        [Permiso(Accion.Exportar)]
         public IActionResult OnGetReporteSolicitudes(DateTime? fechaInicio, DateTime? fechaFin, string? area, int? solicitante, string? estatus)
         {
             var query = _context.Solicitudes
@@ -153,11 +143,18 @@ namespace SigesTI.Web.Pages.Solicitudes
                 query = query.Where(s => s.Estatus == estatus);
             }
 
+            const int maximoReporte = 500;
+            int totalEncontradas = query.Count();
+
             var solicitudesReporte = query
-    .AsNoTracking()
-    .OrderByDescending(s => s.FechaIngreso)
-    .Take(500)
-    .ToList();
+                .AsNoTracking()
+                .OrderByDescending(s => s.FechaIngreso)
+                .Take(maximoReporte)
+                .ToList();
+
+            string textoTotal = totalEncontradas > maximoReporte
+                ? $"{totalEncontradas} solicitudes (se muestran las {maximoReporte} más recientes)"
+                : $"{totalEncontradas} solicitudes";
 
             var html = new StringBuilder();
 
@@ -222,7 +219,7 @@ namespace SigesTI.Web.Pages.Solicitudes
                 <strong>Estatus:</strong> " + WebUtility.HtmlEncode(string.IsNullOrWhiteSpace(estatus) ? "Todos" : estatus) + @"
             </div>
             <div>
-                <strong>Total:</strong> " + solicitudesReporte.Count + @" solicitudes
+                <strong>Total:</strong> " + textoTotal + @"
             </div>
         </div>
 ");
@@ -310,7 +307,6 @@ namespace SigesTI.Web.Pages.Solicitudes
                 puesto = sol.PuestoSolicitante ?? "",
                 correo = sol.CorreoSolicitante ?? "",
                 responsableArea = jefe?.Nombre ?? "Sin jefe asignado",
-                unidadesRed = sol.Personal?.UnidadesRed ?? "",
                 impresoraConfigurada = sol.TieneImpresoraConfigurada ?? "No",
                 detalleImpresora = sol.DetalleImpresora ?? "",
                 reqSistemas = sol.ReqSistemas,
@@ -319,91 +315,103 @@ namespace SigesTI.Web.Pages.Solicitudes
                 nuevaUnidadRed = sol.NuevaUnidadRed ?? "",
                 descripcionProblema = sol.DescripcionProblema ?? "",
                 ejecutivoAsignado = sol.EjecutivoAsignado ?? "",
-                autorizaAdmin = sol.AutorizaAdmin ?? ""
+                autorizaAdmin = sol.AutorizaAdmin ?? "",
+                puedeEditar = PuedeEditar(sol)
             });
         }
 
+        // Admin edita cualquier solicitud; los demás roles solo las pendientes
+        private bool PuedeEditar(Solicitud sol)
+        {
+            return sol.Estatus == "Pendiente" || _permisos.EsAdmin;
+        }
+
+        private JsonResult Error(string mensaje)
+        {
+            return new JsonResult(new { success = false, message = mensaje });
+        }
+
+        [Permiso(Accion.Editar)]
         public IActionResult OnPostEditarSolicitud([FromBody] SolicitudEditarDTO modelo)
         {
-            if (modelo == null) return new JsonResult(new { success = false, message = "Datos inválidos." });
+            if (modelo == null) return Error("Datos inválidos.");
+
+            if (modelo.Estatus != "Pendiente" && modelo.Estatus != "Resuelto")
+            {
+                return Error("El estatus seleccionado no es válido.");
+            }
 
             var sol = _context.Solicitudes.FirstOrDefault(s => s.IdSolicitud == modelo.IdSolicitud);
-            if (sol == null) return new JsonResult(new { success = false, message = "Solicitud no encontrada." });
+            if (sol == null) return Error("Solicitud no encontrada.");
+
+            if (!PuedeEditar(sol))
+            {
+                return Error("Solo un administrador puede modificar una solicitud resuelta.");
+            }
+
+            if (modelo.IdPersonal > 0 && modelo.IdPersonal != sol.IdPersonal)
+            {
+                if (!_context.Personal.Any(p => p.Id == modelo.IdPersonal))
+                {
+                    return Error("Seleccione un solicitante válido.");
+                }
+
+                sol.IdPersonal = modelo.IdPersonal;
+                sol.PuestoSolicitante = modelo.PuestoSolicitante;
+                sol.CorreoSolicitante = modelo.CorreoSolicitante;
+            }
+
+            sol.FechaIngreso = modelo.FechaIngreso;
+            sol.Estatus = modelo.Estatus;
+
+            // La fecha de entrega solo aplica cuando la solicitud ya está resuelta
+            if (sol.Estatus == "Pendiente")
+            {
+                sol.FechaEntrega = null;
+            }
+            else
+            {
+                sol.FechaEntrega = modelo.FechaEntrega ?? DateTime.Today;
+
+                if (sol.FechaEntrega.Value.Date < sol.FechaIngreso.Date)
+                {
+                    return Error("La fecha de entrega no puede ser anterior a la fecha de ingreso.");
+                }
+
+                if (!string.IsNullOrWhiteSpace(modelo.NuevaUnidadRed))
+                {
+                    var personal = _context.Personal.FirstOrDefault(p => p.Id == sol.IdPersonal);
+                    personal?.AgregarUnidadRed(modelo.NuevaUnidadRed);
+                }
+            }
 
             string historialPrevio = sol.DescripcionProblema ?? "";
             string nuevoApunte = modelo.DescripcionProblema ?? "";
 
             if (!string.IsNullOrWhiteSpace(nuevoApunte) && nuevoApunte != historialPrevio)
             {
-                string tecnico = !string.IsNullOrEmpty(modelo.EjecutivoAsignado) ? modelo.EjecutivoAsignado : "Soporte Técnico";
-                string fechaBitacora = DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt").Replace("AM", "a. m.").Replace("PM", "p. m.");
-                string cabeceraHistorial = $@"Entrado el: {fechaBitacora} Por: {tecnico}
+                string usuario = HttpContext.Session.GetString("NombreCompleto")
+                              ?? HttpContext.Session.GetString("NombreUsuario")
+                              ?? "Sistema";
 
-{nuevoApunte} 
-
-";
-                sol.DescripcionProblema = cabeceraHistorial + historialPrevio;
+                sol.DescripcionProblema = Solicitud.AgregarComentario(historialPrevio, usuario, nuevoApunte);
             }
 
-            sol.FechaIngreso = modelo.FechaIngreso;
-
-            if (modelo.Estatus == "Pendiente" || !modelo.FechaEntrega.HasValue || modelo.FechaEntrega.Value == DateTime.MinValue || modelo.FechaEntrega.Value.Year == 1)
-            {
-                sol.FechaEntrega = new DateTime(1900, 1, 1);
-            }
-            else
-            {
-                sol.FechaEntrega = modelo.FechaEntrega.Value;
-            }
-
-            sol.Estatus = modelo.Estatus ?? "Pendiente";
-            if (modelo.Estatus == "Resuelto")
-            {
-                // Corrección Crítica: p.Id usado correctamente en la búsqueda LINQ
-                var personal = _context.Personal
-                    .FirstOrDefault(p => p.Id == sol.IdPersonal);
-
-                if (personal != null && !string.IsNullOrWhiteSpace(modelo.NuevaUnidadRed))
-                {
-                    string nuevaUnidad = modelo.NuevaUnidadRed.Trim();
-
-                    if (string.IsNullOrWhiteSpace(personal.UnidadesRed))
-                    {
-                        personal.UnidadesRed = nuevaUnidad;
-                    }
-                    else if (!personal.UnidadesRed.Contains(nuevaUnidad))
-                    {
-                        personal.UnidadesRed += ", " + nuevaUnidad;
-                    }
-                }
-            }
-            sol.UnidadesRed = modelo.UnidadesRed;
             sol.TieneImpresoraConfigurada = modelo.TieneImpresoraConfigurada;
             sol.DetalleImpresora = modelo.DetalleImpresora;
             sol.ReqSistemas = modelo.ReqSistemas;
-            sol.SistemasDetalle = modelo.SistemasDetalle;
+            sol.SistemasDetalle = modelo.ReqSistemas ? modelo.SistemasDetalle : null;
+            sol.OtrosSistemas = modelo.ReqSistemas ? modelo.OtrosSistemas : null;
             sol.NuevaUnidadRed = modelo.NuevaUnidadRed;
-            sol.OtrosSistemas = modelo.OtrosSistemas;
             sol.EjecutivoAsignado = modelo.EjecutivoAsignado;
             sol.AutorizaAdmin = modelo.AutorizaAdmin;
 
-            if (modelo.IdPersonal > 0)
-            {
-                sol.IdPersonal = modelo.IdPersonal;
-                sol.PuestoSolicitante = modelo.PuestoSolicitante;
-                sol.CorreoSolicitante = modelo.CorreoSolicitante;
-            }
+            _context.SaveChanges();
 
-            _context.Solicitudes.Update(sol);
-            var cambios = _context.SaveChanges();
-
-            return new JsonResult(new
-            {
-                success = true,
-                cambios = cambios
-            });
+            return new JsonResult(new { success = true });
         }
 
+        [Permiso(Accion.Eliminar)]
         public IActionResult OnPostEliminarSolicitud(int id)
         {
             var sol = _context.Solicitudes.FirstOrDefault(s => s.IdSolicitud == id);
@@ -441,8 +449,6 @@ namespace SigesTI.Web.Pages.Solicitudes
         public int IdPersonal { get; set; }
         public string? PuestoSolicitante { get; set; }
         public string? CorreoSolicitante { get; set; }
-        public string? UnidadesRed { get; set; }
-        public string? Impresora { get; set; }
         public bool ReqSistemas { get; set; }
         public string? SistemasDetalle { get; set; }
         public string? OtrosSistemas { get; set; }

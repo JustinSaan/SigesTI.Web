@@ -1,0 +1,983 @@
+/* ==========================================================================
+   MÓDULO DE SOLICITUDES (Generar y Consultar)
+   Todo empieza con .solicitudes-container, .modal-solicitud o el prefijo "sol-"
+   para no afectar a los demás módulos.
+   ========================================================================== */
+
+.solicitudes-container,
+.modal-solicitud {
+    --sol-fondo: #0b132b;
+    --sol-panel: linear-gradient(145deg, #172a45, #0f172a);
+    --sol-tarjeta: rgba(15, 23, 42, 0.7);
+    --sol-borde: rgba(56, 189, 248, 0.22);
+    --sol-borde-suave: rgba(148, 163, 184, 0.15);
+    --sol-campo: #0b132b;
+    --sol-campo-borde: #1e3a5f;
+    --sol-acento: #38bdf8;
+    --sol-texto: #f1f5f9;
+    --sol-tenue: #94a3b8;
+    --sol-pendiente: #fbbf24;
+    --sol-resuelto: #34d399;
+    color: var(--sol-texto);
+}
+
+    .solicitudes-container ::selection {
+        background-color: rgba(56, 189, 248, 0.3);
+        color: #ffffff;
+    }
+
+/* Barras de desplazamiento oscuras (tabla y modales) */
+.solicitudes-container *,
+.modal-solicitud * {
+    scrollbar-width: thin;
+    scrollbar-color: #1e3a5f #0b132b;
+}
+
+/* --------------------------------------------------------------------------
+   1. ENCABEZADO DE LA PÁGINA
+   -------------------------------------------------------------------------- */
+.sol-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.sol-encabezado-titulo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+    .sol-encabezado-titulo h3 {
+        color: #ffffff;
+        font-weight: 700;
+        margin: 0 0 2px;
+    }
+
+    .sol-encabezado-titulo p {
+        color: var(--sol-tenue);
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+.sol-icono {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    color: var(--sol-acento);
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+    .sol-icono.sol-icono-chico {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+        border-radius: 12px;
+    }
+
+.sol-acciones {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   2. PANELES Y TARJETAS
+   -------------------------------------------------------------------------- */
+.sol-panel {
+    background: var(--sol-panel);
+    border: 1px solid var(--sol-borde);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.sol-tarjeta {
+    background: var(--sol-panel);
+    border: 1px solid var(--sol-borde);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.modal-solicitud .sol-tarjeta {
+    background: var(--sol-tarjeta);
+    border-color: var(--sol-borde-suave);
+    box-shadow: none;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.sol-tarjeta-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--sol-acento);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+    .sol-tarjeta-titulo .sol-paso {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        color: #0b132b;
+        background: var(--sol-acento);
+    }
+
+.sol-separador {
+    height: 1px;
+    background: var(--sol-borde-suave);
+    margin: 18px 0 16px;
+}
+
+/* La columna lateral de Generar se queda fija al hacer scroll */
+@media (min-width: 992px) {
+    .sol-lateral {
+        position: sticky;
+        top: 90px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   3. CAMPOS DE FORMULARIO
+   -------------------------------------------------------------------------- */
+.solicitudes-container .form-label,
+.modal-solicitud .form-label {
+    color: var(--sol-tenue, #94a3b8) !important;
+    font-size: 0.74rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 5px !important;
+}
+
+.solicitudes-container .form-control,
+.solicitudes-container .form-select,
+.modal-solicitud .form-control,
+.modal-solicitud .form-select {
+    color: #ffffff !important;
+    background-color: #0b132b !important;
+    border: 1px solid #1e3a5f !important;
+    border-radius: 10px !important;
+    font-size: 0.88rem !important;
+    padding: 8px 12px;
+    color-scheme: dark;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+    .solicitudes-container .form-select option,
+    .modal-solicitud .form-select option {
+        background-color: #0f172a;
+        color: #ffffff;
+    }
+
+    .solicitudes-container .form-control::placeholder,
+    .modal-solicitud .form-control::placeholder {
+        color: #64748b !important;
+        opacity: 1;
+    }
+
+    .solicitudes-container .form-control:focus,
+    .solicitudes-container .form-select:focus,
+    .modal-solicitud .form-control:focus,
+    .modal-solicitud .form-select:focus {
+        background-color: #111f3a !important;
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22) !important;
+    }
+
+    .solicitudes-container .form-control:disabled,
+    .solicitudes-container .form-select:disabled,
+    .modal-solicitud .form-control:disabled,
+    .modal-solicitud .form-select:disabled {
+        color: #cbd5e1 !important;
+        background-color: rgba(15, 23, 42, 0.55) !important;
+        border-color: rgba(148, 163, 184, 0.12) !important;
+        opacity: 1;
+        cursor: not-allowed;
+    }
+
+/* Datos que se llenan solos (puesto, correo, jefe) */
+.solicitudes-container .form-control.sol-dato,
+.modal-solicitud .form-control.sol-dato {
+    color: #e2e8f0 !important;
+    background-color: rgba(56, 189, 248, 0.06) !important;
+    border: 1px dashed rgba(56, 189, 248, 0.25) !important;
+    cursor: default;
+}
+
+/* Input con icono a la izquierda (buscador) */
+.sol-input-icono {
+    position: relative;
+}
+
+    .sol-input-icono i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--sol-tenue);
+        pointer-events: none;
+    }
+
+    .sol-input-icono .form-control {
+        padding-left: 36px;
+    }
+
+/* Interruptores */
+.solicitudes-container .form-switch .form-check-input,
+.modal-solicitud .form-switch .form-check-input {
+    width: 2.6em;
+    height: 1.35em;
+    cursor: pointer;
+    background-color: #1e293b;
+    border-color: #334155;
+}
+
+    .solicitudes-container .form-switch .form-check-input:checked,
+    .modal-solicitud .form-switch .form-check-input:checked {
+        background-color: #0284c7;
+        border-color: #38bdf8;
+    }
+
+.sol-switch {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(11, 19, 43, 0.6);
+    border: 1px solid var(--sol-borde-suave, rgba(148, 163, 184, 0.15));
+}
+
+    .sol-switch .form-check {
+        margin: 0;
+        padding-left: 2.8em;
+        min-height: auto;
+    }
+
+    .sol-switch-texto strong {
+        display: block;
+        color: #f1f5f9;
+        font-size: 0.88rem;
+    }
+
+    .sol-switch-texto span {
+        color: #94a3b8;
+        font-size: 0.76rem;
+    }
+
+.sol-desplegable {
+    margin-top: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   4. SELECTOR SEGMENTADO (Estatus / Impresora Sí-No)
+   -------------------------------------------------------------------------- */
+.sol-segmentos {
+    display: flex;
+    gap: 6px;
+    padding: 4px;
+    border-radius: 12px;
+    background: #0b132b;
+    border: 1px solid #1e3a5f;
+}
+
+    .sol-segmentos input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .sol-segmentos label {
+        flex: 1;
+        text-align: center;
+        margin: 0 !important;
+        padding: 7px 10px;
+        border-radius: 9px;
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+        color: #94a3b8 !important;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+        .sol-segmentos label:hover {
+            color: #ffffff !important;
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+    .sol-segmentos input:checked + label {
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #0284c7, #0369a1);
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+    }
+
+    .sol-segmentos input.seg-pendiente:checked + label {
+        color: #1c1400 !important;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+    }
+
+    .sol-segmentos input.seg-resuelto:checked + label {
+        color: #022c22 !important;
+        background: linear-gradient(135deg, #34d399, #10b981);
+        box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+    }
+
+    .sol-segmentos input:disabled + label {
+        cursor: not-allowed;
+    }
+
+/* --------------------------------------------------------------------------
+   5. CHIPS DE SISTEMAS
+   -------------------------------------------------------------------------- */
+.sol-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+    .sol-chips input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .sol-chips label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0 !important;
+        padding: 7px 14px;
+        border-radius: 999px;
+        font-size: 0.8rem !important;
+        font-weight: 700 !important;
+        text-transform: none !important;
+        letter-spacing: 0.2px !important;
+        color: #cbd5e1 !important;
+        background: #0b132b;
+        border: 1px solid #1e3a5f;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+        .sol-chips label::before {
+            content: "\F4FE"; /* bi-plus */
+            font-family: "bootstrap-icons";
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .sol-chips label:hover {
+            border-color: #38bdf8;
+            color: #ffffff !important;
+        }
+
+    .sol-chips input:checked + label {
+        color: #ffffff !important;
+        background: rgba(2, 132, 199, 0.25);
+        border-color: #38bdf8;
+        box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+    }
+
+        .sol-chips input:checked + label::before {
+            content: "\F26E"; /* bi-check */
+            color: #38bdf8;
+        }
+
+    .sol-chips input:disabled + label {
+        cursor: not-allowed;
+        opacity: 0.75;
+    }
+
+/* --------------------------------------------------------------------------
+   6. BOTONES
+   -------------------------------------------------------------------------- */
+.sol-btn-principal,
+.sol-btn-secundario,
+.sol-btn-fantasma {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    border-radius: 12px !important;
+    padding: 9px 18px !important;
+    transition: all 0.2s ease !important;
+    text-decoration: none;
+}
+
+.sol-btn-principal {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+    border: 1px solid #38bdf8 !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3) !important;
+}
+
+    .sol-btn-principal:hover {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+        box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4) !important;
+        transform: translateY(-1px);
+    }
+
+.sol-btn-secundario {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(15, 23, 42, 0.8)) !important;
+    border: 1px solid #0284c7 !important;
+}
+
+    .sol-btn-secundario:hover {
+        background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+        border-color: #38bdf8 !important;
+        transform: translateY(-1px);
+    }
+
+.sol-btn-fantasma {
+    color: #cbd5e1 !important;
+    background: transparent !important;
+    border: 1px solid #334155 !important;
+}
+
+    .sol-btn-fantasma:hover {
+        color: #ffffff !important;
+        background: #1e293b !important;
+        border-color: #475569 !important;
+    }
+
+.sol-btn-guardar {
+    width: 100%;
+    padding: 12px 18px !important;
+    font-size: 0.95rem !important;
+}
+
+/* Botones de acción de la tabla */
+.sol-btn-icono {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-size: 0.95rem;
+    transition: all 0.15s ease;
+}
+
+    .sol-btn-icono.ver {
+        color: #38bdf8;
+        background: rgba(56, 189, 248, 0.1);
+        border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .sol-btn-icono.editar {
+        color: #fbbf24;
+        background: rgba(251, 191, 36, 0.1);
+        border-color: rgba(251, 191, 36, 0.3);
+    }
+
+    .sol-btn-icono.eliminar {
+        color: #f87171;
+        background: rgba(248, 113, 113, 0.1);
+        border-color: rgba(248, 113, 113, 0.3);
+    }
+
+    .sol-btn-icono:hover:not(:disabled) {
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    .sol-btn-icono.ver:hover {
+        background: #0284c7;
+    }
+
+    .sol-btn-icono.editar:hover:not(:disabled) {
+        background: #d97706;
+    }
+
+    .sol-btn-icono.eliminar:hover {
+        background: #dc2626;
+    }
+
+    .sol-btn-icono:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+/* --------------------------------------------------------------------------
+   7. INDICADORES (Consultar)
+   -------------------------------------------------------------------------- */
+.sol-indicador {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: var(--sol-panel);
+    border: 1px solid var(--sol-borde);
+    height: 100%;
+}
+
+    .sol-indicador .sol-icono {
+        width: 44px;
+        height: 44px;
+    }
+
+.sol-indicador-valor {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #ffffff;
+}
+
+.sol-indicador-texto {
+    color: var(--sol-tenue);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.sol-indicador.pendiente .sol-icono {
+    color: var(--sol-pendiente);
+    background: rgba(251, 191, 36, 0.12);
+    border-color: rgba(251, 191, 36, 0.35);
+}
+
+.sol-indicador.resuelto .sol-icono {
+    color: var(--sol-resuelto);
+    background: rgba(52, 211, 153, 0.12);
+    border-color: rgba(52, 211, 153, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   8. TABLA DE SOLICITUDES
+   -------------------------------------------------------------------------- */
+.sol-panel-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    color: var(--sol-acento);
+    font-weight: 700;
+    font-size: 0.92rem;
+}
+
+.sol-filtros {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--sol-borde-suave);
+    background: rgba(11, 19, 43, 0.45);
+}
+
+.sol-tabla {
+    width: 100%;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+    .sol-tabla thead th {
+        padding: 12px 14px;
+        color: #38bdf8;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        white-space: nowrap;
+        background: #0b132b;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    .sol-tabla tbody td {
+        padding: 12px 14px;
+        color: #f1f5f9;
+        font-size: 0.85rem;
+        vertical-align: middle;
+        background: transparent;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .sol-tabla tbody tr {
+        transition: background 0.15s ease;
+    }
+
+        .sol-tabla tbody tr:hover td {
+            background: rgba(56, 189, 248, 0.07);
+        }
+
+        .sol-tabla tbody tr.sol-fila-vacia:hover td {
+            background: transparent;
+        }
+
+.sol-folio {
+    font-family: Consolas, monospace;
+    font-weight: 700;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    padding: 3px 9px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+}
+
+.sol-persona {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sol-avatar {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #e0f2fe;
+    background: linear-gradient(135deg, #1e3a8a, #0369a1);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.sol-persona-nombre {
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.sol-persona-correo {
+    font-size: 0.76rem;
+    color: var(--sol-tenue);
+}
+
+.sol-fechas {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: Consolas, monospace;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+    .sol-fechas i {
+        color: #475569;
+    }
+
+.sol-texto-tenue {
+    color: #64748b;
+    font-style: italic;
+}
+
+.sol-vacio {
+    padding: 48px 16px !important;
+    text-align: center;
+    color: var(--sol-tenue) !important;
+}
+
+    .sol-vacio i {
+        display: block;
+        font-size: 2rem;
+        color: #334155;
+        margin-bottom: 8px;
+    }
+
+/* Estatus */
+.sol-estatus {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+    .sol-estatus::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .sol-estatus.pendiente {
+        color: #fbbf24;
+        background: rgba(251, 191, 36, 0.12);
+        border: 1px solid rgba(251, 191, 36, 0.35);
+    }
+
+    .sol-estatus.resuelto {
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.12);
+        border: 1px solid rgba(52, 211, 153, 0.35);
+    }
+
+/* Badges de área (mismos colores que Plan de Respaldos) */
+.sol-area {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+    color: #e5e7eb;
+    background-color: #1f2937;
+    border: 1px solid #4b5563;
+}
+
+    .sol-area.area-administracion {
+        background-color: #451a03;
+        color: #fef3c7;
+        border-color: #b45309;
+    }
+
+    .sol-area.area-cobranza {
+        background-color: #450a0a;
+        color: #fee2e2;
+        border-color: #991b1b;
+    }
+
+    .sol-area.area-ventas {
+        background-color: #0c4a6e;
+        color: #e0f2fe;
+        border-color: #0369a1;
+    }
+
+    .sol-area.area-consultoria {
+        background-color: #431407;
+        color: #ffedd5;
+        border-color: #9a3412;
+    }
+
+    .sol-area.area-soporte {
+        background-color: #500724;
+        color: #fce7f3;
+        border-color: #831843;
+    }
+
+/* Pie de la tabla y paginación */
+.sol-pie-tabla {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--sol-borde-suave);
+    color: var(--sol-tenue);
+    font-size: 0.8rem;
+}
+
+    .sol-pie-tabla .form-select {
+        width: auto;
+        padding: 4px 30px 4px 10px;
+        font-size: 0.8rem !important;
+    }
+
+.sol-paginacion {
+    display: flex;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+    .sol-paginacion .page-link {
+        min-width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px !important;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #cbd5e1;
+        background: #0b132b;
+        border: 1px solid #1e3a5f;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+
+        .sol-paginacion .page-link:hover {
+            color: #ffffff;
+            border-color: #38bdf8;
+        }
+
+    .sol-paginacion .page-item.active .page-link {
+        color: #ffffff;
+        background: linear-gradient(135deg, #0284c7, #0369a1);
+        border-color: #38bdf8;
+    }
+
+    .sol-paginacion .page-item.disabled .page-link {
+        opacity: 0.35;
+        pointer-events: none;
+    }
+
+/* Pantalla de carga */
+.sol-cargando {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2, 6, 23, 0.65);
+    backdrop-filter: blur(3px);
+}
+
+    .sol-cargando.d-none {
+        display: none !important;
+    }
+
+.sol-cargando-caja {
+    min-width: 260px;
+    padding: 26px 30px;
+    text-align: center;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #172a45, #0f172a);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #f1f5f9;
+}
+
+    .sol-cargando-caja span {
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+
+/* --------------------------------------------------------------------------
+   9. MODALES
+   -------------------------------------------------------------------------- */
+.modal-solicitud .modal-content {
+    color: #f1f5f9;
+    background: linear-gradient(160deg, #0f1d3a, #0b132b) !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    border-radius: 18px !important;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+}
+
+.modal-solicitud .modal-header {
+    background: #0b132b !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.2) !important;
+    padding: 16px 22px !important;
+}
+
+.modal-solicitud .modal-title {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+.modal-solicitud .modal-body {
+    padding: 20px 22px !important;
+}
+
+.modal-solicitud .modal-footer {
+    background: #0b132b !important;
+    border-top: 1px solid rgba(56, 189, 248, 0.15) !important;
+    padding: 12px 22px !important;
+}
+
+.sol-modal-subtitulo {
+    color: #94a3b8;
+    font-size: 0.8rem;
+}
+
+/* Historial de comentarios (mismo diseño que Tareas Programadas) */
+.box-historial-comentarios {
+    background-color: #090e1a;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    padding: 10px;
+    max-height: 320px;
+    overflow-y: auto;
+    color: #e2e8f0;
+    font-size: 0.83rem;
+    line-height: 1.5;
+}
+
+.comentario-item {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-left: 3px solid #38bdf8;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+    .comentario-item + .comentario-item {
+        margin-top: 8px;
+    }
+
+.comentario-cabecera {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+}
+
+.comentario-autor {
+    color: #38bdf8;
+    font-weight: 700;
+}
+
+.comentario-fecha {
+    color: #94a3b8;
+}
+
+.comentario-texto {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Vista previa del reporte */
+.sol-reporte-cuerpo {
+    height: 80vh;
+    padding: 0 !important;
+    background: #ffffff;
+}
+
+.sol-reporte-cargando {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #0f172a;
+}
+
+.sol-reporte-iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: none;
+}

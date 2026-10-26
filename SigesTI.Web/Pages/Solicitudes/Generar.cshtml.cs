@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SigesTI.Web.Data;
+using SigesTI.Web.Seguridad;
 using SigesTI.Web.Models;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.Linq;
 
 namespace SigesTI.Web.Pages.Solicitudes
 {
+    [Modulo(Modulos.GenerarSolicitud)]
     public class GenerarModel : PageModel
     {
         private readonly ApplicationDbContext _context;
@@ -38,6 +40,7 @@ namespace SigesTI.Web.Pages.Solicitudes
 
         public void OnGet()
         {
+
             AreasOptions = new List<SelectListItem>
             {
                 new SelectListItem { Value = "Ventas", Text = "Ventas" },
@@ -70,50 +73,81 @@ namespace SigesTI.Web.Pages.Solicitudes
             };
         }
 
-        // CORRECCIÓN: Retorna un estado para que AJAX en el Frontend maneje la animación de SweetAlert2
+        // Responde JSON para que el frontend muestre el resultado con SweetAlert2
+        [Permiso(Accion.Crear)]
         public IActionResult OnPost()
         {
-            // Forzar remoción de campos auxiliares en la validación que causan falsos errores en el ModelState
+            // Campos auxiliares que no forman parte de la solicitud
             ModelState.Remove("AreaAuxiliar");
             ModelState.Remove("ImpresoraConfiguradaAux");
 
             if (!ModelState.IsValid)
             {
-                // Si hay un error real de datos nulos en el modelo, mandamos un aviso controlado al cliente
-                return new BadRequestObjectResult("Por favor, rellene todos los campos requeridos.");
+                return Error("Por favor, rellene todos los campos requeridos.");
             }
 
-            if (SistemasSeleccionados != null && SistemasSeleccionados.Length > 0)
+            if (NuevaSolicitud.Estatus != "Pendiente" && NuevaSolicitud.Estatus != "Resuelto")
+            {
+                return Error("El estatus seleccionado no es válido.");
+            }
+
+            if (string.IsNullOrWhiteSpace(NuevaSolicitud.DescripcionProblema))
+            {
+                return Error("Escriba la descripción del problema o requerimiento.");
+            }
+
+            var personal = _context.Personal.FirstOrDefault(p => p.Id == NuevaSolicitud.IdPersonal);
+            if (personal == null)
+            {
+                return Error("Seleccione un solicitante válido.");
+            }
+
+            // La fecha de entrega solo aplica cuando la solicitud ya está resuelta
+            if (NuevaSolicitud.Estatus == "Pendiente")
+            {
+                NuevaSolicitud.FechaEntrega = null;
+            }
+            else
+            {
+                NuevaSolicitud.FechaEntrega ??= DateTime.Today;
+
+                if (NuevaSolicitud.FechaEntrega.Value.Date < NuevaSolicitud.FechaIngreso.Date)
+                {
+                    return Error("La fecha de entrega no puede ser anterior a la fecha de ingreso.");
+                }
+
+                if (!string.IsNullOrWhiteSpace(NuevaSolicitud.NuevaUnidadRed))
+                {
+                    personal.AgregarUnidadRed(NuevaSolicitud.NuevaUnidadRed);
+                }
+            }
+
+            if (NuevaSolicitud.ReqSistemas && SistemasSeleccionados.Length > 0)
             {
                 NuevaSolicitud.SistemasDetalle = string.Join(", ", SistemasSeleccionados);
             }
 
             NuevaSolicitud.TieneImpresoraConfigurada = ImpresoraConfiguradaAux;
 
-            // FORMATO INICIAL DEL HISTORIAL
-            string fechaBitacora =
-                DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt")
-                .Replace("AM", "a. m.")
-                .Replace("PM", "p. m.");
-
-            string ejecutivo =
-                string.IsNullOrWhiteSpace(NuevaSolicitud.EjecutivoAsignado)
-                    ? "Sin asignar"
-                    : NuevaSolicitud.EjecutivoAsignado;
-
             NuevaSolicitud.DescripcionProblema =
-            $@"📌 SOLICITUD INICIAL
-            Entrado el: {fechaBitacora} Por: {ejecutivo}
-            ──────────────────────────────────────
+                Solicitud.AgregarComentario(null, NombreUsuarioSesion(), NuevaSolicitud.DescripcionProblema);
 
-            {NuevaSolicitud.DescripcionProblema}
+            _context.Solicitudes.Add(NuevaSolicitud);
+            _context.SaveChanges();
 
-            ═══════════════════════════════════════
-
-            ";
-
-            // Enviamos señal en limpio diciendo que la base de datos procesó el registro exitosamente
             return new JsonResult(new { success = true });
+        }
+
+        private string NombreUsuarioSesion()
+        {
+            return HttpContext.Session.GetString("NombreCompleto")
+                ?? HttpContext.Session.GetString("NombreUsuario")
+                ?? "Sistema";
+        }
+
+        private JsonResult Error(string mensaje)
+        {
+            return new JsonResult(new { success = false, message = mensaje });
         }
 
         public JsonResult OnGetFiltrarPersonal(string area)
@@ -126,8 +160,7 @@ namespace SigesTI.Web.Pages.Solicitudes
                     nombre = p.Nombre,
                     correo = p.Correo,
                     puesto = p.Puesto,
-                    esResponsable = p.EsResponsable,
-                    unidadesRed = p.UnidadesRed
+                    esResponsable = p.EsResponsable
                 }).ToList();
 
             return new JsonResult(listaPersonal);
