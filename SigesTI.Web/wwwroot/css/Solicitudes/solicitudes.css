@@ -392,10 +392,7 @@
 /* --------------------------------------------------------------------------
    6. BOTONES (mismos que Control de acceso)
    -------------------------------------------------------------------------- */
-.btn-primary-sigest,
-.btn-imprimir-sigest,
-.btn-pdf-sigest,
-.btn-filtros-sigest {
+.btn-primary-sigest {
     display: inline-flex;
     align-items: center;
     padding: 10px 20px;
@@ -422,65 +419,7 @@
         transform: translateY(-1px);
     }
 
-/* Exportar / Imprimir / Ver formato: verde azulado */
-.btn-imprimir-sigest {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, rgba(20, 184, 166, 0.16), rgba(15, 23, 42, 0.8)) !important;
-    border: 1px solid rgba(45, 212, 191, 0.55) !important;
-    box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
-}
-
-    .btn-imprimir-sigest i {
-        color: #2dd4bf;
-    }
-
-    .btn-imprimir-sigest:hover {
-        background: linear-gradient(135deg, #0f766e, #115e59) !important;
-        border-color: #5eead4 !important;
-        box-shadow: 0 6px 18px rgba(45, 212, 191, 0.45);
-        transform: translateY(-1px);
-    }
-
-        .btn-imprimir-sigest:hover i {
-            color: #ffffff;
-        }
-
-/* Descargar PDF: rojo */
-.btn-pdf-sigest {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(15, 23, 42, 0.8)) !important;
-    border: 1px solid rgba(248, 113, 113, 0.5) !important;
-    border-radius: 15px;
-    box-shadow: 0 4px 18px rgba(220, 38, 38, 0.35);
-}
-
-    .btn-pdf-sigest:hover:not(:disabled) {
-        color: #ffffff !important;
-        background: linear-gradient(135deg, #991b1b, #7f1d1d) !important;
-        border-color: #f87171 !important;
-        box-shadow: 0 0 22px rgba(248, 113, 113, 0.5);
-        transform: translateY(-2px);
-    }
-
-/* Cambiar filtros / Habilitar edición: ámbar */
-.btn-filtros-sigest {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(15, 23, 42, 0.8)) !important;
-    border: 1px solid rgba(251, 191, 36, 0.5) !important;
-    border-radius: 15px;
-    box-shadow: 0 4px 18px rgba(217, 119, 6, 0.35);
-}
-
-    .btn-filtros-sigest:hover {
-        color: #ffffff !important;
-        background: linear-gradient(135deg, #b45309, #92400e) !important;
-        border-color: #fbbf24 !important;
-        box-shadow: 0 0 22px rgba(251, 191, 36, 0.5);
-        transform: translateY(-2px);
-    }
-
 /* Botones Cancelar y Guardar de los modales */
-.btn-cancelar,
 .btn-guardar {
     display: inline-flex;
     align-items: center;
@@ -492,29 +431,6 @@
     border-radius: 12px;
     transition: all 0.2s ease;
 }
-
-.btn-cancelar {
-    color: #e2e8f0 !important;
-    background: linear-gradient(135deg, rgba(148, 163, 184, 0.14), rgba(15, 23, 42, 0.85)) !important;
-    border: 1px solid rgba(148, 163, 184, 0.45) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-}
-
-    .btn-cancelar i {
-        color: #94a3b8;
-    }
-
-    .btn-cancelar:hover {
-        color: #ffffff !important;
-        background: linear-gradient(135deg, #475569, #334155) !important;
-        border-color: #cbd5e1 !important;
-        box-shadow: 0 6px 16px rgba(148, 163, 184, 0.3);
-        transform: translateY(-1px);
-    }
-
-        .btn-cancelar:hover i {
-            color: #ffffff;
-        }
 
 .btn-guardar {
     color: #ffffff !important;
@@ -529,7 +445,6 @@
         transform: translateY(-1px);
     }
 
-    .btn-cancelar:active,
     .btn-guardar:active {
         transform: scale(0.96);
     }
@@ -540,30 +455,6 @@
     padding: 12px 18px;
     font-size: 0.95rem;
 }
-
-/* Botón X para cerrar los modales */
-.mer-btn-cerrar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    margin-left: auto;
-    color: #38bdf8;
-    font-size: 1rem;
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.35);
-    border-radius: 10px;
-    transition: all 0.2s ease;
-}
-
-    .mer-btn-cerrar:hover {
-        color: #ffffff;
-        background: #dc2626;
-        border-color: #f87171;
-        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
-    }
 
 /* Limpiar filtros */
 .btn-limpiar-filtros {
@@ -757,6 +648,30 @@
         .sol-tabla thead th:first-child {
             border-left: none;
         }
+
+        /* Encabezado que ordena la tabla (Folio) */
+        .sol-tabla thead th .sol-ordenar {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0;
+            color: inherit;
+            font: inherit;
+            letter-spacing: inherit;
+            text-transform: inherit;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+            .sol-tabla thead th .sol-ordenar:hover,
+            .sol-tabla thead th .sol-ordenar.activo {
+                color: #ffffff;
+            }
+
+            .sol-tabla thead th .sol-ordenar i {
+                font-size: 0.8rem;
+            }
 
         /* Títulos de grupo en blanco y subrayados */
         .sol-tabla thead th.th-grupo {
@@ -1048,6 +963,18 @@
 }
 
 /* Historial de comentarios (mismo diseño que Tareas Programadas) */
+/* Lo que pidió el solicitante (solo lectura) */
+.sol-descripcion-requisito {
+    padding: 10px 12px;
+    color: #e2e8f0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    background-color: #090e1a;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+}
+
 .box-historial-comentarios {
     background-color: #090e1a;
     border: 1px solid #1e293b;

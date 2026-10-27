@@ -1,0 +1,91 @@
+/* ==========================================================================
+   ENCABEZADO Y PIE DE TODOS LOS REPORTES (IMPRESIÓN / PDF)
+   Área a la izquierda, título debajo y la fecha del reporte en un recuadro a
+   la derecha, con una raya azul oscuro y otra azul claro debajo.
+   ========================================================================== */
+
+.rep-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    position: relative;
+    margin-bottom: 18px;
+    padding: 0 0 10px 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #ffffff !important;
+    border-bottom: 3px solid #0f2a52;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    break-inside: avoid;
+}
+
+    .rep-encabezado::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        bottom: -6px;
+        left: 0;
+        height: 2px;
+        background: #2563eb !important;
+    }
+
+    .rep-encabezado .rep-area {
+        margin-bottom: 2px;
+        color: #0284c7 !important;
+        font-size: 7pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+    }
+
+    .rep-encabezado .rep-titulo {
+        color: #0f172a !important;
+        font-size: 15pt;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        line-height: 1.1;
+    }
+
+    .rep-encabezado .rep-fecha {
+        flex-shrink: 0;
+        padding: 4px 12px;
+        text-align: center;
+        background: #f0f9ff !important;
+        border: 1px solid #bae6fd;
+        border-radius: 6px;
+    }
+
+        .rep-encabezado .rep-fecha span {
+            display: block;
+            color: #64748b !important;
+            font-size: 6pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .rep-encabezado .rep-fecha strong {
+            color: #0c4a6e !important;
+            font-size: 10.5pt;
+        }
+
+/* Pie: solo el nombre del sistema a la izquierda */
+.rep-pie {
+    margin-top: 10px;
+    padding-top: 6px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: left;
+    border-top: 1px solid #e2e8f0;
+}
+
+    .rep-pie span {
+        color: #94a3b8 !important;
+        font-size: 6.5pt;
+    }
+
+/* Al descargar el PDF la hoja se captura sin sombra ni esquinas redondeadas */
+.generando-pdf {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}

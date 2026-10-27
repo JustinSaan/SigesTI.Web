@@ -294,9 +294,6 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle ms-1"></i> Cancelar
-                </button>
                 <button type="button" class="btn btn-guardar px-4" onclick="guardarNuevoEquipo()">
                     <i class="bi bi-save me-1"></i> Guardar Equipo
                 </button>
@@ -422,19 +419,14 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer justify-content-between">
-                @if (puedeEliminar)
-                {
+            @if (puedeEliminar)
+            {
+                <div class="modal-footer justify-content-start">
                     <button type="button" class="btn mer-btn-eliminar" onclick="eliminarEquipo()">
                         <i class="bi bi-trash3 me-1"></i> Eliminar Equipo
                     </button>
-                }
-                else
-                {
-                    <span></span>
-                }
-                <button type="button" class="btn btn-cancelar-sigest" data-bs-dismiss="modal">Cerrar</button>
-            </div>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -515,9 +507,6 @@
                 <div class="cal-scroll">
                     <div id="calendarioRespaldos"></div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-cancelar-sigest" data-bs-dismiss="modal">Cerrar</button>
             </div>
 <!-- ===== FIN MODIFICADO ===== -->
         </div>

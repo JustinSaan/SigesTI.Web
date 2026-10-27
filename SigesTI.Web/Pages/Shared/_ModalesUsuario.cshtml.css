@@ -42,3 +42,34 @@
 .mi-cuenta-pie {
     border-top: 1px solid rgba(56, 189, 248, 0.2);
 }
+
+/* Botón Guardar: azul, igual que los demás botones de guardar */
+.mi-cuenta-guardar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 22px;
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    border: 1px solid #38bdf8;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+    transition: all 0.2s ease;
+}
+
+    .mi-cuenta-guardar:hover {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.55);
+        transform: translateY(-1px);
+    }
+
+    .mi-cuenta-guardar:active {
+        transform: scale(0.96);
+    }
+
+    .mi-cuenta-guardar:disabled {
+        opacity: 0.6;
+        transform: none;
+    }

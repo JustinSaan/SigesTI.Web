@@ -679,23 +679,6 @@ tr.fila-inactiva:hover td {
     display: inline-block !important;
 }
 
-/* Botones de Modales Rediseñados */
-.btn-cancelar-sigest {
-    color: #cbd5e1 !important;
-    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
-    border: 1px solid #334155 !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    padding: 7px 16px !important;
-    transition: all 0.2s ease !important;
-}
-
-    .btn-cancelar-sigest:hover {
-        color: #ffffff !important;
-        background: #334155 !important;
-        border-color: #475569 !important;
-    }
-
 .btn-anadir-fecha-sigest {
     color: #38bdf8 !important;
     background: rgba(56, 189, 248, 0.1) !important;
@@ -758,7 +741,6 @@ tr.fila-inactiva:hover td {
     }
 
 /* Botones de cancelar y guardar */
-.btn-cancelar,
 .btn-guardar {
     display: inline-flex;
     align-items: center;
@@ -769,19 +751,6 @@ tr.fila-inactiva:hover td {
     font-weight: 700;
     transition: all 0.2s ease;
 }
-
-.btn-cancelar {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
-    border: 1px solid #334155 !important;
-    box-shadow: 0 4px 14px rgba(138, 138, 138, 0.4);
-}
-
-    .btn-cancelar:hover {
-        background: #334155 !important;
-        box-shadow: 0 6px 20px rgba(191, 191, 191, 0.55);
-        transform: translateY(-1px);
-    }
 
 .btn-guardar {
     color: #ffffff;
@@ -796,7 +765,6 @@ tr.fila-inactiva:hover td {
         transform: translateY(-1px);
     }
 
-    .btn-cancelar:active,
     .btn-guardar:active {
         transform: scale(0.96);
     }
@@ -1308,58 +1276,11 @@ tr.fila-inactiva:hover td {
     border-radius: 10px !important;
 }
 
-/* Botón X para cerrar los modales (icono bi-x-lg; cámbialo en el <i> del .cshtml si quieres otro) */
-.mer-btn-cerrar {
-    margin-left: auto;   /* lo empuja a la esquina superior derecha del encabezado */
-    flex-shrink: 0;      /* evita que se aplaste si el título es largo */
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    color: #38bdf8;                          /* sin presionar: icono azul claro */
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.35);
-    border-radius: 10px;
-    transition: all 0.2s ease;
-}
-
-    /* Al pasar el cursor: rojo con icono blanco */
-    .mer-btn-cerrar:hover {
-        color: #ffffff;
-        background: #dc2626;
-        border-color: #f87171;
-        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
-    }
-
-    /* Al presionarlo: rojo más oscuro y se "hunde" un poco */
-    .mer-btn-cerrar:active {
-        color: #ffffff;
-        background: #991b1b;
-        border-color: #dc2626;
-        transform: scale(0.92);
-    }
-
-    .mer-btn-cerrar:focus-visible {
-        outline: 2px solid #38bdf8;
-        outline-offset: 2px;
-    }
 /* ===== FIN MODALES AGREGAR Y EDITAR EQUIPO ===== */
 
 /* ====================================================================
    ===== FONDO BORROSO (BLUR) DETRÁS DE LOS MODALES =====
    Este CSS solo se carga en Plan de Respaldos, así que no afecta otras páginas.
    ==================================================================== */
-.modal-backdrop {
-    background-color: rgba(11, 19, 43, 0.55); /* darkblue semitransparente */
-    backdrop-filter: blur(6px);               /* qué tan borroso: más px = más borroso */
-    -webkit-backdrop-filter: blur(6px);
-    transition: opacity 0.2s ease;
-}
 
-    /* Bootstrap le pone opacidad 0.5; con 1 el blur se ve completo (la transparencia la da el rgba de arriba) */
-    .modal-backdrop.show {
-        opacity: 1;
-    }
 /* ===== FIN FONDO BORROSO ===== */

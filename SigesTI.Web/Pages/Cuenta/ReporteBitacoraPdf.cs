@@ -3,6 +3,7 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using SigesTI.Web.Models;
+using SigesTI.Web.Pages.Shared;
 
 namespace SigesTI.Web.Pages.Cuenta
 {
@@ -25,13 +26,13 @@ namespace SigesTI.Web.Pages.Cuenta
         private static readonly CultureInfo Cultura = new("es-MX");
 
         // Devuelve el archivo PDF listo para descargar
-        public static byte[] Generar(IList<BitacoraUsuario> registros, string generadoPor, DateTime fechaGeneracion)
+        public static byte[] Generar(IList<BitacoraUsuario> registros, DateTime fechaGeneracion)
         {
-            return Crear(registros, generadoPor, fechaGeneracion).GeneratePdf();
+            return Crear(registros, fechaGeneracion).GeneratePdf();
         }
 
-        // Arma el documento: tamaño carta, contenido y número de página
-        public static IDocument Crear(IList<BitacoraUsuario> registros, string generadoPor, DateTime fechaGeneracion)
+        // Arma el documento: tamaño carta, contenido y pie de página
+        public static IDocument Crear(IList<BitacoraUsuario> registros, DateTime fechaGeneracion)
         {
             return Document.Create(documento =>
             {
@@ -51,69 +52,13 @@ namespace SigesTI.Web.Pages.Cuenta
 
                     pagina.Content().Column(columna =>
                     {
-                        columna.Item().Element(c => Encabezado(c, generadoPor, fechaGeneracion));
+                        columna.Item().Element(c => EncabezadoPdf.Encabezado(c, "Bitácora de Actividades", fechaGeneracion));
                         columna.Item().PaddingTop(22).Element(c => Resumen(c, registros));
                         columna.Item().PaddingTop(16).Element(c => Tabla(c, registros));
-                        columna.Item().PaddingTop(14).Element(c => Cierre(c, registros.Count));
                     });
 
-                    // Número de página abajo a la derecha, igual que la vista previa impresa
-                    pagina.Footer().AlignRight().Text(texto =>
-                    {
-                        texto.DefaultTextStyle(estilo => estilo.FontSize(7).FontColor(TextoTenue));
-                        texto.Span("Página ");
-                        texto.CurrentPageNumber();
-                        texto.Span(" de ");
-                        texto.TotalPages();
-                    });
+                    pagina.Footer().Element(EncabezadoPdf.Pie);
                 });
-            });
-        }
-
-        /* ------------------------------------------------------------------
-           ENCABEZADO: título a la izquierda, fecha y usuario a la derecha
-           ------------------------------------------------------------------ */
-        private static void Encabezado(IContainer contenedor, string generadoPor, DateTime fecha)
-        {
-            contenedor.Column(columna =>
-            {
-                columna.Item().PaddingBottom(10).Row(fila =>
-                {
-                    fila.RelativeItem().Column(titulos =>
-                    {
-                        titulos.Item().PaddingBottom(3)
-                            .Text("SISTEMA DE GESTIÓN DE SOPORTE TÉCNICO")
-                            .FontSize(7.5f).Bold().LetterSpacing(0.12f).FontColor(Azul);
-
-                        titulos.Item()
-                            .Text("Bitácora de actividades")
-                            .FontSize(19.5f).ExtraBold().LetterSpacing(-0.01f).FontColor(AzulOscuro);
-
-                        titulos.Item().PaddingTop(3)
-                            .Text("Registro de movimientos realizados en Control de acceso")
-                            .FontColor(TextoSuave);
-                    });
-
-                    fila.ConstantItem(200).AlignBottom().Column(datos =>
-                    {
-                        datos.Spacing(3);
-                        DatoEncabezado(datos, "GENERADO", fecha.ToString("dd/MM/yyyy · hh:mm tt", Cultura));
-                        DatoEncabezado(datos, "POR", generadoPor);
-                    });
-                });
-
-                // Doble línea: azul oscuro gruesa y azul delgada debajo
-                columna.Item().LineHorizontal(2.25f).LineColor(AzulOscuro);
-                columna.Item().PaddingTop(2.25f).LineHorizontal(1.5f).LineColor(Azul);
-            });
-        }
-
-        private static void DatoEncabezado(ColumnDescriptor datos, string titulo, string valor)
-        {
-            datos.Item().AlignRight().Text(texto =>
-            {
-                texto.Span(titulo + "   ").FontSize(7.5f).Bold().LetterSpacing(0.06f).FontColor(TextoTenue);
-                texto.Span(valor).SemiBold();
             });
         }
 
@@ -300,23 +245,6 @@ namespace SigesTI.Web.Pages.Cuenta
                     .Width(5.25f).Height(5.25f).CornerRadius(2.6f).Background(color);
 
                 fila.AutoItem().Text(accion).Bold().FontColor(color);
-            });
-        }
-
-        /* ------------------------------------------------------------------
-           CIERRE: la misma línea final que la vista previa
-           ------------------------------------------------------------------ */
-        private static void Cierre(IContainer contenedor, int totalRegistros)
-        {
-            contenedor.BorderTop(0.75f).BorderColor(Linea).PaddingTop(6).Row(fila =>
-            {
-                fila.RelativeItem()
-                    .Text("SigesST · Bitácora de actividades")
-                    .FontSize(7.5f).FontColor(TextoTenue);
-
-                fila.RelativeItem().AlignRight()
-                    .Text($"Fin del reporte · {totalRegistros} registros")
-                    .FontSize(7.5f).FontColor(TextoTenue);
             });
         }
     }

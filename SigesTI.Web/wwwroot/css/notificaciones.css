@@ -303,29 +303,6 @@
         transform: translateY(-1px);
     }
 
-.notif-btn-cerrar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    margin-left: 4px;
-    color: #38bdf8;
-    font-size: 1rem;
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.35);
-    border-radius: 10px;
-    transition: all 0.2s ease;
-}
-
-    .notif-btn-cerrar:hover {
-        color: #ffffff;
-        background: #dc2626;
-        border-color: #f87171;
-        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
-    }
-
 .notif-vista-previa {
     height: min(78vh, 900px);
     padding: 14px !important;

@@ -27,13 +27,14 @@ namespace SigesTI.Web.Pages.Actividades
         public IList<Ticket> ListaTickets { get; set; } = new List<Ticket>();
         public IList<Cliente> ListaClientes { get; set; } = new List<Cliente>();
         public IList<PersonalModel> ListaEjecutivosSoporte { get; set; } = new List<PersonalModel>();
+        public IList<SistemaTicket> Sistemas { get; set; } = new List<SistemaTicket>();
+        public IEnumerable<SistemaTicket> SistemasExternos => Sistemas.Where(s => !s.Interno);
+        public IEnumerable<SistemaTicket> SistemasInternos => Sistemas.Where(s => s.Interno);
 
         public IndicadoresTicketsDto IndicadoresDia { get; set; } = new IndicadoresTicketsDto();
         public IndicadoresTicketsDto IndicadoresSeguimiento { get; set; } = new IndicadoresTicketsDto();
         public IList<ConcentradoSistemaDto> ConcentradoSistemas { get; set; } = new List<ConcentradoSistemaDto>();
         public ConcentradoSistemaDto ConcentradoTotal { get; set; } = new ConcentradoSistemaDto();
-
-        public const string SistemaConector = "CONECTOR DIAWEB-ZOÉ";
 
         [BindProperty(SupportsGet = true)]
         public DateTime? FechaReporte { get; set; }
@@ -53,7 +54,8 @@ namespace SigesTI.Web.Pages.Actividades
         public async Task OnGetAsync()
         {
             FechaReporte ??= DateTime.Today;
-            if (!string.IsNullOrEmpty(FiltroSistema)) FiltroSistema = NormalizarSistema(FiltroSistema);
+            FiltroSistema = FiltroSistema?.Trim();
+            Sistemas = await CargarSistemasAsync();
 
             var clientes = await _context.Clientes.AsNoTracking().ToListAsync();
             ListaClientes = clientes.Where(c => c.Activo).ToList();
@@ -124,13 +126,15 @@ namespace SigesTI.Web.Pages.Actividades
             }
         }
 
+        private Task<List<SistemaTicket>> CargarSistemasAsync()
+        {
+            return _context.SistemasTicket.AsNoTracking()
+                .OrderBy(s => s.Orden).ThenBy(s => s.Nombre)
+                .ToListAsync();
+        }
+
         private IQueryable<Ticket> FiltrarPorSistema(IQueryable<Ticket> query)
         {
-            if (FiltroSistema == SistemaConector)
-            {
-                return query.Where(t => t.Sistema.Contains("CONECTOR") || t.Sistema.Contains("ZOE") || t.Sistema.Contains("ZOÉ"));
-            }
-
             if (!string.IsNullOrEmpty(FiltroSistema))
             {
                 return query.Where(t => t.Sistema == FiltroSistema);
@@ -171,21 +175,10 @@ namespace SigesTI.Web.Pages.Actividades
             return clave == "" ? nombreCliente ?? "" : $"{clave} {nombreCliente}";
         }
 
-        // Clase CSS de la insignia de cada sistema (colores definidos en reporte-tickets.css)
-        public static string ClaseSistema(string? sistema)
+        // Clase CSS de la insignia del sistema; un sistema que ya no está en el catálogo se ve gris
+        public string ClaseSistema(string? sistema)
         {
-            var valor = NormalizarSistema(sistema).ToUpper();
-
-            if (valor == SistemaConector) return "badge-sistema-med";
-            if (valor == "DIA") return "badge-sistema-dia";
-            if (valor == "DIAWEB") return "badge-sistema-diaweb";
-            if (valor == "SITA") return "badge-sistema-sita";
-            if (valor == "VUCEM") return "badge-sistema-vucem";
-            if (valor.Contains("DIAENLINEA")) return "badge-sistema-diaenlinea";
-            if (valor == "COA") return "badge-sistema-coa";
-            if (valor == "ADMIN") return "badge-sistema-admin";
-
-            return "badge-sistema-otro";
+            return SistemaTicket.Buscar(Sistemas, sistema)?.ClaseCss ?? "badge-sistema-otro";
         }
 
         // Estatus que tenía el ticket al cierre de la fecha consultada.
@@ -202,23 +195,10 @@ namespace SigesTI.Web.Pages.Actividades
             return cerradoEseDia ? "Cerrado" : "En curso";
         }
 
-        public static string NormalizarSistema(string? sistema)
-        {
-            var valor = (sistema ?? "").Trim();
-            var mayusculas = valor.ToUpper();
-
-            if (mayusculas.Contains("CONECTOR") || mayusculas.Contains("ZOE") || mayusculas.Contains("ZOÉ"))
-            {
-                return SistemaConector;
-            }
-
-            return valor;
-        }
-
         private List<ConcentradoSistemaDto> CalcularConcentrado(IList<Ticket> tickets, DateTime inicioDia)
         {
             return tickets
-                .GroupBy(t => string.IsNullOrWhiteSpace(t.Sistema) ? "SIN SISTEMA" : NormalizarSistema(t.Sistema).ToUpper())
+                .GroupBy(t => string.IsNullOrWhiteSpace(t.Sistema) ? "SIN SISTEMA" : t.Sistema.Trim().ToUpper())
                 .Select(g => new ConcentradoSistemaDto
                 {
                     Sistema = g.Key,
@@ -260,15 +240,9 @@ namespace SigesTI.Web.Pages.Actividades
                 Ajuste = tickets.Count(t => t.Tipo == "Ajuste"),
                 Mejora = tickets.Count(t => t.Tipo == "Mejora"),
 
-                // Normalización de búsqueda por Sistema para evitar discrepancias por espacios o sufijos
-                DIA = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.Trim().Equals("DIA", StringComparison.OrdinalIgnoreCase)),
-                DIAWEB = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.Trim().Equals("DIAWEB", StringComparison.OrdinalIgnoreCase)),
-                ConectorDiawebZoe = tickets.Count(t => NormalizarSistema(t.Sistema) == SistemaConector),
-                SITA = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.Trim().Equals("SITA", StringComparison.OrdinalIgnoreCase)),
-                VUCEM = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.Trim().Equals("VUCEM", StringComparison.OrdinalIgnoreCase)),
-                DIAENLINEA = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.ToUpper().Contains("DIAENLINEA")),
-                COA = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.Trim().Equals("COA", StringComparison.OrdinalIgnoreCase)),
-                ADMIN = tickets.Count(t => !string.IsNullOrEmpty(t.Sistema) && t.Sistema.Trim().Equals("ADMIN", StringComparison.OrdinalIgnoreCase)),
+                PorSistema = Sistemas.ToDictionary(
+                    s => s.IdSistema,
+                    s => tickets.Count(t => s.Nombre.Equals((t.Sistema ?? "").Trim(), StringComparison.OrdinalIgnoreCase))),
 
                 Llamada = tickets.Count(t => t.Origen == "Llamada"),
                 Correo = tickets.Count(t => t.Origen == "Correo"),
@@ -367,7 +341,7 @@ namespace SigesTI.Web.Pages.Actividades
                     Ejecutivo = Ejecutivo,
                     Reporto = personaReportoFinal,
                     Estatus = Estatus,
-                    Sistema = NormalizarSistema(Sistema),
+                    Sistema = Sistema.Trim(),
                     Tipo = Tipo,
                     Origen = Origen,
                     Descripcion = Descripcion,
@@ -424,7 +398,7 @@ namespace SigesTI.Web.Pages.Actividades
                     ticket.Cliente = Cliente;
                     ticket.Reporto = Reporto;
                     ticket.Ejecutivo = Ejecutivo;
-                    ticket.Sistema = NormalizarSistema(Sistema);
+                    ticket.Sistema = Sistema.Trim();
                     ticket.Tipo = Tipo;
                     ticket.Estatus = Estatus;
                     ticket.Escalado = seEscala;
@@ -488,14 +462,9 @@ namespace SigesTI.Web.Pages.Actividades
             public int Incidencia { get; set; }
             public int Ajuste { get; set; }
             public int Mejora { get; set; }
-            public int DIA { get; set; }
-            public int DIAWEB { get; set; }
-            public int ConectorDiawebZoe { get; set; }
-            public int SITA { get; set; }
-            public int VUCEM { get; set; }
-            public int DIAENLINEA { get; set; }
-            public int COA { get; set; }
-            public int ADMIN { get; set; }
+
+            // Tickets por sistema del catálogo (IdSistema → cantidad)
+            public Dictionary<int, int> PorSistema { get; set; } = new();
             public int Llamada { get; set; }
             public int Correo { get; set; }
             public int EscaladoDesarrollo { get; set; }

@@ -3,6 +3,7 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using SigesTI.Web.Models;
+using SigesTI.Web.Pages.Shared;
 
 namespace SigesTI.Web.Pages.Solicitudes
 {
@@ -27,7 +28,7 @@ namespace SigesTI.Web.Pages.Solicitudes
         private static readonly CultureInfo Cultura = new("es-MX");
 
         // Devuelve el archivo PDF listo para descargar
-        public static byte[] Generar(IList<Solicitud> solicitudes, string filtros, string generadoPor, DateTime fechaGeneracion)
+        public static byte[] Generar(IList<Solicitud> solicitudes, string filtros, DateTime fechaGeneracion)
         {
             return Document.Create(documento =>
             {
@@ -47,71 +48,15 @@ namespace SigesTI.Web.Pages.Solicitudes
 
                     pagina.Content().Column(columna =>
                     {
-                        columna.Item().Element(c => Encabezado(c, generadoPor, fechaGeneracion));
+                        columna.Item().Element(c => EncabezadoPdf.Encabezado(c, "Reporte de Solicitudes", fechaGeneracion));
                         columna.Item().PaddingTop(16).Text(filtros).FontSize(8).FontColor(TextoSuave);
                         columna.Item().PaddingTop(14).Element(c => Resumen(c, solicitudes));
                         columna.Item().PaddingTop(16).Element(c => Tabla(c, solicitudes));
-                        columna.Item().PaddingTop(14).Element(c => Cierre(c, solicitudes.Count));
                     });
 
-                    // Número de página abajo a la derecha, igual que la vista previa impresa
-                    pagina.Footer().AlignRight().Text(texto =>
-                    {
-                        texto.DefaultTextStyle(estilo => estilo.FontSize(7).FontColor(TextoTenue));
-                        texto.Span("Página ");
-                        texto.CurrentPageNumber();
-                        texto.Span(" de ");
-                        texto.TotalPages();
-                    });
+                    pagina.Footer().Element(EncabezadoPdf.Pie);
                 });
             }).GeneratePdf();
-        }
-
-        /* ------------------------------------------------------------------
-           ENCABEZADO: título a la izquierda, fecha y usuario a la derecha
-           ------------------------------------------------------------------ */
-        private static void Encabezado(IContainer contenedor, string generadoPor, DateTime fecha)
-        {
-            contenedor.Column(columna =>
-            {
-                columna.Item().PaddingBottom(10).Row(fila =>
-                {
-                    fila.RelativeItem().Column(titulos =>
-                    {
-                        titulos.Item().PaddingBottom(3)
-                            .Text("SISTEMA DE GESTIÓN DE SOPORTE TÉCNICO")
-                            .FontSize(7.5f).Bold().LetterSpacing(0.12f).FontColor(Azul);
-
-                        titulos.Item()
-                            .Text("Reporte de solicitudes")
-                            .FontSize(19.5f).ExtraBold().LetterSpacing(-0.01f).FontColor(AzulOscuro);
-
-                        titulos.Item().PaddingTop(3)
-                            .Text("Requerimientos de Soporte Técnico registrados en el sistema")
-                            .FontColor(TextoSuave);
-                    });
-
-                    fila.ConstantItem(200).AlignBottom().Column(datos =>
-                    {
-                        datos.Spacing(3);
-                        DatoEncabezado(datos, "GENERADO", fecha.ToString("dd/MM/yyyy · hh:mm tt", Cultura));
-                        DatoEncabezado(datos, "POR", generadoPor);
-                    });
-                });
-
-                // Doble línea: azul oscuro gruesa y azul delgada debajo
-                columna.Item().LineHorizontal(2.25f).LineColor(AzulOscuro);
-                columna.Item().PaddingTop(2.25f).LineHorizontal(1.5f).LineColor(Azul);
-            });
-        }
-
-        private static void DatoEncabezado(ColumnDescriptor datos, string titulo, string valor)
-        {
-            datos.Item().AlignRight().Text(texto =>
-            {
-                texto.Span(titulo + "   ").FontSize(7.5f).Bold().LetterSpacing(0.06f).FontColor(TextoTenue);
-                texto.Span(valor).SemiBold();
-            });
         }
 
         /* ------------------------------------------------------------------
@@ -311,23 +256,6 @@ namespace SigesTI.Web.Pages.Solicitudes
                     .Width(5.25f).Height(5.25f).CornerRadius(2.6f).Background(color);
 
                 fila.AutoItem().Text(EstatusSolicitud.Texto(estatus)).FontSize(8).Bold().FontColor(color);
-            });
-        }
-
-        /* ------------------------------------------------------------------
-           CIERRE: la misma línea final que la vista previa
-           ------------------------------------------------------------------ */
-        private static void Cierre(IContainer contenedor, int total)
-        {
-            contenedor.BorderTop(0.75f).BorderColor(Linea).PaddingTop(6).Row(fila =>
-            {
-                fila.RelativeItem()
-                    .Text("SigesST · Reporte de solicitudes")
-                    .FontSize(7.5f).FontColor(TextoTenue);
-
-                fila.RelativeItem().AlignRight()
-                    .Text($"Fin del reporte · {total} solicitudes")
-                    .FontSize(7.5f).FontColor(TextoTenue);
             });
         }
     }

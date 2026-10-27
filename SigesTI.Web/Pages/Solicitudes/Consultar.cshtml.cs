@@ -91,7 +91,7 @@ namespace SigesTI.Web.Pages.Solicitudes
                 .ToList();
 
             SoporteOptions = _context.Personal
-                .Where(p => p.Area == "Soporte Técnico" || p.Area == "Soporte")
+                .Where(p => p.Area == "Soporte Técnico" || p.Area == "Soporte" || p.Area == "Sistemas")
                 .Select(p => new SelectListItem { Value = p.Nombre, Text = p.Nombre })
                 .ToList();
 
@@ -134,7 +134,11 @@ namespace SigesTI.Web.Pages.Solicitudes
                 sistemasDetalle = sol.SistemasDetalle ?? "",
                 otrosSistemas = sol.OtrosSistemas ?? "",
                 nuevaUnidadRed = sol.NuevaUnidadRed ?? "",
+                descripcionRequisito = Solicitud.LeerDescripcionYSeguimiento(sol.DescripcionRequisito, sol.DescripcionProblema).Descripcion,
                 descripcionProblema = sol.DescripcionProblema ?? "",
+                seguimiento = string.IsNullOrWhiteSpace(sol.DescripcionRequisito)
+                    ? Solicitud.QuitarComentarioInicial(sol.DescripcionProblema)
+                    : sol.DescripcionProblema ?? "",
                 ejecutivoAsignado = sol.EjecutivoAsignado ?? "",
                 autorizaAdmin = sol.AutorizaAdmin ?? "",
                 autorizadoPor = sol.AutorizadoPor ?? "",

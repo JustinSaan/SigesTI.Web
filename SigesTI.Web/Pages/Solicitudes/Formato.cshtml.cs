@@ -28,7 +28,17 @@ namespace SigesTI.Web.Pages.Solicitudes
 
         public string ResponsableArea { get; set; } = "Sin jefe asignado";
 
-        public List<ComentarioHistorial> Historial { get; set; } = new();
+        public bool TieneResponsable => ResponsableArea != "Sin jefe asignado";
+
+        // Lo que va debajo de la firma de quien entrega: "Sistemas" si es de esa área,
+        // si no "Sistemas (Soporte Técnico)"
+        public string AreaEntrega { get; set; } = "Sistemas (Soporte Técnico)";
+
+        // Lo que pidió el solicitante
+        public string Descripcion { get; set; } = "";
+
+        // Comentarios de quien atiende o autoriza
+        public List<ComentarioHistorial> Seguimiento { get; set; } = new();
 
         public DateTime FechaGeneracion { get; set; }
 
@@ -50,13 +60,23 @@ namespace SigesTI.Web.Pages.Solicitudes
 
             Solicitud = sol;
             FechaGeneracion = DateTime.Now;
-            Historial = Solicitud.LeerHistorial(sol.DescripcionProblema);
+            (Descripcion, Seguimiento) = Solicitud.LeerDescripcionYSeguimiento(sol.DescripcionRequisito, sol.DescripcionProblema);
 
             string? area = sol.Personal?.Area;
             ResponsableArea = await _context.Personal
                 .Where(p => p.Area == area && p.EsResponsable)
                 .Select(p => p.Nombre)
                 .FirstOrDefaultAsync() ?? "Sin jefe asignado";
+
+            string? areaEjecutivo = await _context.Personal
+                .Where(p => p.Nombre == sol.EjecutivoAsignado)
+                .Select(p => p.Area)
+                .FirstOrDefaultAsync();
+
+            if (areaEjecutivo == "Sistemas")
+            {
+                AreaEntrega = "Sistemas";
+            }
 
             return Page();
         }

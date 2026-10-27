@@ -130,7 +130,6 @@ namespace SigesTI.Web.Pages
             sol.Estatus = EstatusSolicitud.Pendiente;
             sol.AutorizadoPor = usuario;
             sol.FechaAutorizacion = DateTime.Now;
-            sol.DescripcionProblema = Solicitud.AgregarComentario(sol.DescripcionProblema, usuario, "Requerimiento autorizado.");
             _context.SaveChanges();
 
             _notificaciones.NotificarAutorizado(sol, sol.Personal);

@@ -53,7 +53,7 @@ namespace SigesTI.Web.Pages.Solicitudes
             };
 
             SoporteOptions = _context.Personal
-                .Where(p => p.Area == "Soporte Técnico" || p.Area == "Soporte")
+                .Where(p => p.Area == "Soporte Técnico" || p.Area == "Soporte" || p.Area == "Sistemas")
                 .Select(p => new SelectListItem
                 {
                     Value = p.Nombre,
@@ -93,9 +93,9 @@ namespace SigesTI.Web.Pages.Solicitudes
                 return Error("El estatus seleccionado no es válido.");
             }
 
-            if (string.IsNullOrWhiteSpace(NuevaSolicitud.DescripcionProblema))
+            if (string.IsNullOrWhiteSpace(NuevaSolicitud.DescripcionRequisito))
             {
-                return Error("Escriba la descripción del problema o requerimiento.");
+                return Error("Escriba la descripción del requisito.");
             }
 
             var personal = _context.Personal.FirstOrDefault(p => p.Id == NuevaSolicitud.IdPersonal);
@@ -131,8 +131,8 @@ namespace SigesTI.Web.Pages.Solicitudes
 
             NuevaSolicitud.TieneImpresoraConfigurada = ImpresoraConfiguradaAux;
 
-            NuevaSolicitud.DescripcionProblema =
-                Solicitud.AgregarComentario(null, NombreUsuarioSesion(), NuevaSolicitud.DescripcionProblema);
+            NuevaSolicitud.DescripcionRequisito = NuevaSolicitud.DescripcionRequisito.Trim();
+            NuevaSolicitud.DescripcionProblema = null;
 
             // Si se eligió quién autoriza, la solicitud espera su autorización antes de quedar pendiente
             bool pideAutorizacion = NuevaSolicitud.Estatus == EstatusSolicitud.Pendiente

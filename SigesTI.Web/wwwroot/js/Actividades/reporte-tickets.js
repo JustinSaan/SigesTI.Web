@@ -57,7 +57,7 @@ function imprimirContenidoLimpio() {
     const padreOriginal = seccion.parentNode;
     document.body.appendChild(seccion);
 
-    window.print();
+    imprimirConNombre("ReporteDiarioDeTickets");
 
     setTimeout(function () {
         padreOriginal.appendChild(seccion);
@@ -101,43 +101,31 @@ function exportarExcelLocal() {
         // SECCIÓN 1: INDICADORES
         rows.push([{ v: '1. RESUMEN DE INDICADORES', s: { font: { name: 'Segoe UI', sz: 10, bold: true, color: { rgb: '0F172A' } } } }]);
 
-        const headerInd1 = [
-            { v: 'Tickets', s: { fill: { fgColor: { rgb: '8EA9DB' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
-            { v: 'Total', s: { fill: { fgColor: { rgb: '8EA9DB' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
-            { v: 'Tipo', s: { fill: { fgColor: { rgb: 'DB6E6E' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'DB6E6E' } }, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'DB6E6E' } }, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'DB6E6E' } }, border: borderNegro } },
-            { v: 'Sistemas Externos', s: { fill: { fgColor: { rgb: 'A9D18E' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'A9D18E' } }, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'A9D18E' } }, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'A9D18E' } }, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'A9D18E' } }, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'A9D18E' } }, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'A9D18E' } }, border: borderNegro } },
-            { v: 'Sistema Int.', s: { fill: { fgColor: { rgb: 'FFD966' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
-            { v: 'Origen del Ticket', s: { fill: { fgColor: { rgb: 'FCE4D6' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'FCE4D6' } }, border: borderNegro } },
-            { v: 'Escalados', s: { fill: { fgColor: { rgb: 'B4A7D6' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'B4A7D6' } }, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'B4A7D6' } }, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'B4A7D6' } }, border: borderNegro } },
-            { v: 'Estatus', s: { fill: { fgColor: { rgb: 'FFF2CC' } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: 'FFF2CC' } }, border: borderNegro } }
-        ];
+        // Encabezados copiados de la tabla de la página; el color depende del grupo de cada columna
+        const coloresGrupo = {
+            'th-tickets': '8EA9DB', 'th-total': '8EA9DB', 'th-tipo': 'DB6E6E', 'th-sistemas-ext': 'A9D18E',
+            'th-sistema-int': 'FFD966', 'th-origen': 'FCE4D6', 'th-escalados': 'B4A7D6', 'th-estatus': 'FFF2CC'
+        };
+        const colorDeEncabezado = th => coloresGrupo[[...th.classList].find(c => coloresGrupo[c])] || 'FFFFFF';
+        const encabezado = (texto, color) => ({ v: texto, s: { fill: { fgColor: { rgb: color } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } });
+
+        const filasEncabezado = document.querySelectorAll('#tablaIndicadores thead tr');
+        // Celdas combinadas de los encabezados (fila 5 y 6 del Excel)
+        const headerInd1 = [];
+        const combinadasIndicadores = [];
+        filasEncabezado[0].querySelectorAll('th').forEach(th => {
+            const color = colorDeEncabezado(th);
+            const columna = headerInd1.length;
+            if (th.rowSpan > 1) combinadasIndicadores.push({ s: { r: 4, c: columna }, e: { r: 5, c: columna } });
+            if (th.colSpan > 1) combinadasIndicadores.push({ s: { r: 4, c: columna }, e: { r: 4, c: columna + th.colSpan - 1 } });
+
+            headerInd1.push(encabezado(th.textContent.replace(/\s+/g, " ").trim(), color));
+            for (let i = 1; i < th.colSpan; i++) headerInd1.push(encabezado('', color));
+        });
         rows.push(headerInd1);
 
-        const subHeaders = ['Servicio', 'Incidencia', 'Ajuste', 'Mejora', 'DIA', 'DIAWEB', 'SITA', 'VUCEM', 'DIAENLINEA PREMIUM', 'COA', 'CONECTOR DIAWEB-ZOÉ', 'ADMIN', 'Llamada', 'Correo', 'Desarrollo', 'Consultoría', 'Ventas', 'Cobranza', 'Cerrado', 'En Curso'];
-        const colorsSubHeaders = ['DB6E6E', 'DB6E6E', 'DB6E6E', 'DB6E6E', 'A9D18E', 'A9D18E', 'A9D18E', 'A9D18E', 'A9D18E', 'A9D18E', 'A9D18E', 'FFD966', 'FCE4D6', 'FCE4D6', 'B4A7D6', 'B4A7D6', 'B4A7D6', 'B4A7D6', 'FFF2CC', 'FFF2CC'];
-
-        let headerInd2 = [
-            { v: '', s: { fill: { fgColor: { rgb: '8EA9DB' } }, border: borderNegro } },
-            { v: '', s: { fill: { fgColor: { rgb: '8EA9DB' } }, border: borderNegro } }
-        ];
-
-        subHeaders.forEach((sh, idx) => {
-            headerInd2.push({ v: sh, s: { fill: { fgColor: { rgb: colorsSubHeaders[idx] } }, font: fontBlackBold, alignment: alignCenter, border: borderNegro } });
-        });
+        const headerInd2 = [encabezado('', '8EA9DB'), encabezado('', '8EA9DB')];
+        filasEncabezado[1].querySelectorAll('th').forEach(th => headerInd2.push(encabezado(th.textContent.replace(/\s+/g, " ").trim(), colorDeEncabezado(th))));
         rows.push(headerInd2);
 
         const tablaIndHTML = document.getElementById('tablaIndicadores');
@@ -241,14 +229,8 @@ function exportarExcelLocal() {
         const ws = XLSX.utils.aoa_to_sheet(rows);
 
         ws['!merges'] = [
-            { s: { r: 3, c: 0 }, e: { r: 3, c: 21 } },
-            { s: { r: 4, c: 0 }, e: { r: 5, c: 0 } },
-            { s: { r: 4, c: 1 }, e: { r: 5, c: 1 } },
-            { s: { r: 4, c: 2 }, e: { r: 4, c: 5 } },
-            { s: { r: 4, c: 6 }, e: { r: 4, c: 12 } },
-            { s: { r: 4, c: 14 }, e: { r: 4, c: 15 } },
-            { s: { r: 4, c: 16 }, e: { r: 4, c: 19 } },
-            { s: { r: 4, c: 20 }, e: { r: 4, c: 21 } },
+            { s: { r: 3, c: 0 }, e: { r: 3, c: headerInd2.length - 1 } },
+            ...combinadasIndicadores,
             { s: { r: 9, c: 0 }, e: { r: 9, c: 16 } },
             { s: { r: 10, c: 0 }, e: { r: 10, c: 16 } }
         ];
@@ -343,7 +325,7 @@ function exportarExcelLocal() {
 
         XLSX.utils.book_append_sheet(wb, wsConcentrado, 'Concentrado por Sistema');
 
-        const nombreArchivo = `Reporte_Tickets_${fecha}.xlsx`;
+        const nombreArchivo = nombreReporte("ReporteDiarioDeTickets") + ".xlsx";
         XLSX.writeFile(wb, nombreArchivo);
 
     } catch (err) {
@@ -422,13 +404,8 @@ function fechaLocalHoy() {
     return `${hoy.getFullYear()}-${mes}-${dia}`;
 }
 
-// Todas las variantes guardadas del Conector se muestran con un solo valor
 function normalizarSistema(sistema) {
-    const valor = (sistema || "").toUpperCase();
-    if (valor.includes("CONECTOR") || valor.includes("ZOE") || valor.includes("ZOÉ")) {
-        return "CONECTOR DIAWEB-ZOÉ";
-    }
-    return sistema || "";
+    return (sistema || "").trim();
 }
 
 function evaluarFechaSolucionNuevo(estatus) {
@@ -508,7 +485,12 @@ function abrirModalDetalleDesdeFila(filaElem) {
     // Asignación de Sistema y actualización de color
     const selectEditSistema = document.getElementById("editSistema");
     if (selectEditSistema) {
-        selectEditSistema.value = normalizarSistema(sistema) || "SITA";
+        // Un ticket de un sistema que ya se quitó del catálogo conserva su nombre
+        const valorSistema = normalizarSistema(sistema);
+        if (valorSistema && ![...selectEditSistema.options].some(o => o.value === valorSistema)) {
+            selectEditSistema.add(new Option(valorSistema, valorSistema));
+        }
+        selectEditSistema.value = valorSistema;
         aplicarColorSelectSistema(selectEditSistema);
     }
 
@@ -677,20 +659,12 @@ function colorPaleta(nombreVariable) {
     return getComputedStyle(document.documentElement).getPropertyValue(nombreVariable).trim();
 }
 
-// Clave de la paleta de cada sistema (equivale a ClaseSistema del servidor)
+// Clave de la paleta de cada sistema (equivale a ClaseSistema del servidor):
+// el id del catálogo, o "otro" si el sistema ya no existe
 function claveSistema(sistema) {
-    const valor = normalizarSistema(sistema).trim().toUpperCase();
-
-    if (valor === 'CONECTOR DIAWEB-ZOÉ') return 'med';
-    if (valor === 'DIA') return 'dia';
-    if (valor === 'DIAWEB') return 'diaweb';
-    if (valor === 'SITA') return 'sita';
-    if (valor === 'VUCEM') return 'vucem';
-    if (valor.includes('DIAENLINEA')) return 'diaenlinea';
-    if (valor === 'COA') return 'coa';
-    if (valor === 'ADMIN') return 'admin';
-
-    return 'otro';
+    const valor = normalizarSistema(sistema).toUpperCase();
+    const encontrado = (window.catalogoSistemas || []).find(s => s.nombre.toUpperCase() === valor);
+    return encontrado ? encontrado.id : 'otro';
 }
 
 function colorSistema(sistema) {

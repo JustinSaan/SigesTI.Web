@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -57,6 +58,10 @@ namespace SigesTI.Web.Pages.Cuenta
 
         public IList<PermisoRol> ListaPermisos { get; set; }
             = new List<PermisoRol>();
+
+        // Sistemas de los tickets (modal "Sistemas", solo Admin)
+        public IList<SistemaTicket> ListaSistemas { get; set; }
+            = new List<SistemaTicket>();
 
         /* ================================================================
            DATOS DEL USUARIO QUE TIENE LA SESIÓN ABIERTA
@@ -778,6 +783,10 @@ namespace SigesTI.Web.Pages.Cuenta
             if (EsAdmin)
             {
                 ListaPermisos = await _permisos.ObtenerPermisosAsync();
+                ListaSistemas = await _context.SistemasTicket
+                    .AsNoTracking()
+                    .OrderBy(s => s.Orden).ThenBy(s => s.Nombre)
+                    .ToListAsync();
             }
         }
 
@@ -933,6 +942,95 @@ namespace SigesTI.Web.Pages.Cuenta
                 "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%*";
 
             return RandomNumberGenerator.GetString(caracteres, 12);
+        }
+
+        /* ================================================================
+           SISTEMAS DE LOS TICKETS (solo Admin)
+           La lista se usa en el Reporte de Tickets y en Indicadores.
+           ================================================================ */
+
+        // Guarda nombres, colores, tipo y orden de la lista del modal.
+        // Si un sistema cambia de nombre, sus tickets se actualizan con el nombre nuevo.
+        public async Task<IActionResult> OnPostGuardarSistemasAsync([FromBody] List<SistemaTicket> lista)
+        {
+            if (!EsAdmin)
+                return new JsonResult(new { exito = false, mensaje = "Solo el rol Admin puede modificar los sistemas." });
+
+            lista ??= new List<SistemaTicket>();
+            foreach (var s in lista)
+            {
+                s.Nombre = (s.Nombre ?? "").Trim().ToUpper();
+                s.ColorFondo = (s.ColorFondo ?? "").Trim().ToUpper();
+                s.ColorTexto = (s.ColorTexto ?? "").Trim().ToUpper();
+            }
+
+            if (lista.Any(s => s.Nombre == ""))
+                return new JsonResult(new { exito = false, mensaje = "Todos los sistemas deben tener nombre." });
+
+            if (lista.Any(s => s.Nombre.Length > 50))
+                return new JsonResult(new { exito = false, mensaje = "El nombre de un sistema no puede pasar de 50 caracteres." });
+
+            var repetido = lista.GroupBy(s => s.Nombre).FirstOrDefault(g => g.Count() > 1);
+            if (repetido != null)
+                return new JsonResult(new { exito = false, mensaje = $"El sistema {repetido.Key} está repetido." });
+
+            var colorValido = new Regex("^#[0-9A-F]{6}$");
+            if (lista.Any(s => !colorValido.IsMatch(s.ColorFondo) || !colorValido.IsMatch(s.ColorTexto)))
+                return new JsonResult(new { exito = false, mensaje = "Hay un color que no es válido." });
+
+            var actuales = await _context.SistemasTicket.ToListAsync();
+
+            for (int i = 0; i < lista.Count; i++)
+            {
+                var s = lista[i];
+                var existente = actuales.FirstOrDefault(a => a.IdSistema == s.IdSistema);
+
+                if (existente == null)
+                {
+                    _context.SistemasTicket.Add(new SistemaTicket
+                    {
+                        Nombre = s.Nombre,
+                        ColorFondo = s.ColorFondo,
+                        ColorTexto = s.ColorTexto,
+                        Interno = s.Interno,
+                        Orden = i + 1
+                    });
+                    continue;
+                }
+
+                if (existente.Nombre != s.Nombre)
+                {
+                    await _context.Tickets
+                        .Where(t => t.Sistema == existente.Nombre)
+                        .ExecuteUpdateAsync(u => u.SetProperty(t => t.Sistema, s.Nombre));
+                }
+
+                existente.Nombre = s.Nombre;
+                existente.ColorFondo = s.ColorFondo;
+                existente.ColorTexto = s.ColorTexto;
+                existente.Interno = s.Interno;
+                existente.Orden = i + 1;
+            }
+
+            await RegistrarBitacora("Cuenta", "Edición", "Actualizó los sistemas de los tickets");
+            await _context.SaveChangesAsync();
+            return new JsonResult(new { exito = true });
+        }
+
+        // Los tickets del sistema eliminado conservan su nombre, pero se ven en gris
+        public async Task<IActionResult> OnPostEliminarSistemaAsync(int idSistema)
+        {
+            if (!EsAdmin)
+                return new JsonResult(new { exito = false, mensaje = "Solo el rol Admin puede eliminar sistemas." });
+
+            var sistema = await _context.SistemasTicket.FindAsync(idSistema);
+            if (sistema == null)
+                return new JsonResult(new { exito = false, mensaje = "El sistema ya no existe." });
+
+            _context.SistemasTicket.Remove(sistema);
+            await RegistrarBitacora("Cuenta", "Eliminación", $"Eliminó el sistema {sistema.Nombre}");
+            await _context.SaveChangesAsync();
+            return new JsonResult(new { exito = true });
         }
 
         /* ================================================================

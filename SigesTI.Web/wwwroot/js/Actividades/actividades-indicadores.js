@@ -11,7 +11,8 @@ function toggleObservaciones() {
     }
 }
 
-function imprimirReporte() {
+// Copia las observaciones escritas al recuadro que sale en el reporte
+function prepararObservaciones() {
     const txt = document.getElementById('txtObservaciones')?.value || "";
     const printDiv = document.getElementById('printObservacionesText');
     
@@ -23,8 +24,28 @@ function imprimirReporte() {
             printDiv.classList.add('d-none');
         }
     }
+}
 
-    window.print();
+// Pone el tablero en fondo blanco con textos oscuros (al imprimir y al descargar el PDF)
+function modoImpresion(activo) {
+    document.getElementById('seccionImpresion')?.classList.toggle('modo-impresion', activo);
+    aplicarColoresEspeciales(activo);
+}
+
+function imprimirReporte() {
+    prepararObservaciones();
+    imprimirConNombre('ReporteIndicadoresYMetricas');
+}
+
+async function descargarPdfIndicadores(boton) {
+    prepararObservaciones();
+    modoImpresion(true);
+
+    try {
+        await descargarPdfReporte(document.getElementById('seccionImpresion'), 'ReporteIndicadoresYMetricas', boton);
+    } finally {
+        modoImpresion(false);
+    }
 }
 
 // --------------------------------------------------------------------------
@@ -64,8 +85,8 @@ function aplicarColoresEspeciales(modoImpresion) {
     }
 }
 
-window.addEventListener('beforeprint', () => aplicarColoresEspeciales(true));
-window.addEventListener('afterprint', () => aplicarColoresEspeciales(false));
+window.addEventListener('beforeprint', () => modoImpresion(true));
+window.addEventListener('afterprint', () => modoImpresion(false));
 
 document.addEventListener("DOMContentLoaded", function () {
     if (typeof ChartDataLabels !== 'undefined') {
@@ -81,6 +102,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const llamadasCount = window.totalLlamadasServer !== undefined ? window.totalLlamadasServer : 14;
     const correosCount = window.totalCorreosServer !== undefined ? window.totalCorreosServer : 10;
 
+    // Colores de cada sistema según el catálogo; gris si ya no existe
+    const sistemaDelCatalogo = nombre => (window.catalogoSistemas || []).find(s => s.nombre.toUpperCase() === nombre.toUpperCase());
+    const colorDeSistema = nombre => sistemaDelCatalogo(nombre)?.fondo || '#64748b';
+    const textoDeSistema = nombre => sistemaDelCatalogo(nombre)?.texto || '#ffffff';
+
     // 1. Gráfica de Sistemas
     const elSistemas = document.getElementById('chartSistemas');
     if (elSistemas) {
@@ -90,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 labels: Object.keys(datosSistemasObj),
                 datasets: [{
                     data: Object.values(datosSistemasObj),
-                    backgroundColor: ['#2563eb', '#38bdf8', '#64748b', '#f97316', '#1e3a8a', '#4ade80', '#16a34a', '#eab308'],
+                    backgroundColor: Object.keys(datosSistemasObj).map(colorDeSistema),
                     borderColor: '#0f172a',
                     borderWidth: 2
                 }]
@@ -109,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         } 
                     },
                     datalabels: {
-                        color: '#ffffff',
+                        color: (ctx) => textoDeSistema(ctx.chart.data.labels[ctx.dataIndex]),
                         font: { weight: 'bold', size: 10 },
                         formatter: (value, ctx) => {
                             if (!value || value === 0) return null;

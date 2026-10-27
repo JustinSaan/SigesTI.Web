@@ -75,13 +75,12 @@ namespace SigesTI.Web.Pages.Solicitudes
         {
             CargarRegistros();
 
-            string generadoPor = HttpContext.Session.GetString("NombreCompleto") ?? "—";
             string filtros = $"Periodo: {Periodo}   ·   Área: {TextoArea}   ·   Solicitante: {NombreSolicitante}   ·   Estatus: {TextoEstatus}";
             DateTime ahora = DateTime.Now;
 
-            byte[] pdf = ReporteSolicitudesPdf.Generar(Registros, filtros, generadoPor, ahora);
+            byte[] pdf = ReporteSolicitudesPdf.Generar(Registros, filtros, ahora);
 
-            return File(pdf, "application/pdf", $"ReporteSolicitudes_{ahora:ddMMyyyyHHmmss}.pdf");
+            return File(pdf, "application/pdf", $"ReporteDeSolicitudes_{ahora:dd-MM-yyyy}.pdf");
         }
 
         /* ================================================================

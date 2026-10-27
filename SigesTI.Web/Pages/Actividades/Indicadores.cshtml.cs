@@ -33,6 +33,7 @@ namespace SigesTI.Web.Pages.Actividades
         // PROPIEDADES QUE LEE Y CONSUME LA VISTA RAZOR (.cshtml)
         public IndicadoresViewModel Indicadores { get; set; } = new();
         public List<ActividadMantenimientoDto> TablaProgramas { get; set; } = new();
+        public List<SistemaTicket> Sistemas { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -53,6 +54,7 @@ namespace SigesTI.Web.Pages.Actividades
             }
 
             var tickets = await queryTickets.ToListAsync();
+            Sistemas = await _context.SistemasTicket.AsNoTracking().OrderBy(s => s.Orden).ThenBy(s => s.Nombre).ToListAsync();
 
             // 2. Cálculo de Métricas (KPIs)
             Indicadores.TotalAtendidos = tickets.Count;
@@ -74,7 +76,7 @@ namespace SigesTI.Web.Pages.Actividades
 
             // 3. Agrupaciones para Chart.js
             Indicadores.TicketsPorSistema = tickets
-                .GroupBy(t => string.IsNullOrWhiteSpace(t.Sistema) ? "Sin Especificar" : t.Sistema)
+                .GroupBy(t => string.IsNullOrWhiteSpace(t.Sistema) ? "Sin Especificar" : t.Sistema.Trim().ToUpper())
                 .ToDictionary(g => g.Key, g => g.Count());
 
             Indicadores.TicketsPorTipoRequerimiento = tickets

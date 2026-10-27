@@ -173,7 +173,11 @@
                         <th class="th-grupo">Gestión</th>
                     </tr>
                     <tr>
-                        <th>Folio</th>
+                        <th>
+                            <button type="button" class="sol-ordenar" id="btnOrdenarFolio" title="Ordenar por folio">
+                                Folio <i class="bi bi-arrow-down-up"></i>
+                            </button>
+                        </th>
                         <th>Solicitante y correo</th>
                         <th>Área</th>
                         <th>Ingreso</th>
@@ -200,7 +204,7 @@
                         bool puedeEditar = Permisos.EsAdmin || !esResuelta;
                         bool tieneEntrega = esResuelta && item.FechaEntrega.HasValue && item.FechaEntrega.Value.Year > 1901;
 
-                        <tr>
+                        <tr data-folio="@item.IdSolicitud">
                             <td><span class="sol-folio">@item.IdSolicitud.ToString("D4")</span></td>
                             <td>
                                 <span class="sol-persona-nombre d-block">@(item.Personal?.Nombre ?? "N/A")</span>
@@ -403,8 +407,13 @@
                             </div>
                         </div>
 
+                        <div class="sol-tarjeta">
+                            <div class="sol-tarjeta-titulo"><i class="bi bi-card-text"></i> Descripción del requisito</div>
+                            <p id="modal_DescripcionRequisito" class="sol-descripcion-requisito mb-0"></p>
+                        </div>
+
                         <div class="sol-tarjeta mb-0">
-                            <div class="sol-tarjeta-titulo"><i class="bi bi-chat-dots"></i> Historial de comentarios</div>
+                            <div class="sol-tarjeta-titulo"><i class="bi bi-chat-dots"></i> Seguimiento</div>
 
                             <div id="modal_Historial" class="box-historial-comentarios"></div>
 
@@ -483,9 +492,6 @@
                         <i class="bi bi-unlock-fill me-1"></i> Habilitar edición
                     </button>
                 }
-                <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle"></i> Cerrar
-                </button>
                 <button type="button" id="btnGuardarCambiosModal" class="btn btn-guardar px-4 d-none">
                     <i class="bi bi-save"></i> Guardar cambios
                 </button>
@@ -569,9 +575,6 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </button>
                     <button type="submit" form="formReporteSolicitudes" class="btn btn-guardar px-4">
                         <i class="bi bi-eye"></i> Ver vista previa
                     </button>

@@ -321,7 +321,7 @@
                         <small id="modalTareaSubtitulo" class="modal-subtitulo"></small>
                     </div>
                 </div>
-                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
             <form id="formTarea">
                 @Html.AntiForgeryToken()
@@ -422,7 +422,6 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 bg-transparent pt-0">
-                    <button type="button" class="btn btn-sm btn-cancelar px-3" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cancelar</button>
                     <button type="submit" id="btnGuardarTarea" class="btn btn-sm btn-guardar px-3" data-bs-dismiss="modal"><i class="bi bi-save"></i> Guardar Tarea</button>
                 </div>
             </form>
@@ -442,7 +441,15 @@
                         <small class="modal-subtitulo">Revisa el reporte antes de imprimirlo o guardarlo como PDF</small>
                     </div>
                 </div>
-                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                <div class="reporte-acciones">
+                    <button type="button" class="btn btn-imprimir-sigest" id="btnConfirmarImpresion">
+                        <i class="bi bi-printer me-1"></i> Imprimir
+                    </button>
+                    <button type="button" class="btn btn-pdf-sigest" id="btnDescargarPdfTareas">
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Descargar PDF
+                    </button>
+                    <button type="button" class="mer-btn-cerrar ms-1" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                </div>
             </div>
             <div class="modal-body reporte-fondo" id="contenedorVistaPreviaPDF">
                 <!-- Todo lo que está dentro de #seccionImpresion es lo que se imprime -->
@@ -528,18 +535,9 @@
                     </table>
 
                     <div class="rep-pie">
-                        <span>Área de Soporte Técnico</span>
-                      
+                        <span>SigesST - Sistema de Gestión de Soporte Técnico</span>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer border-0 bg-transparent">
-                <button type="button" class="btn-cancelar" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle"></i> Cancelar
-                </button>
-                <button type="button" class="btn-modal-imprimir" id="btnConfirmarImpresion">
-                    <i class="bi bi-printer-fill"></i> Imprimir / Guardar PDF
-                </button>
             </div>
         </div>
     </div>

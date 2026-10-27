@@ -206,25 +206,11 @@
 /* ==========================================================================
    PALETA DE SISTEMAS Y ESTATUS (ÚNICA FUENTE DE COLORES)
    La usan las insignias, los selects, las gráficas, el PDF y el Excel.
+   Los colores de cada sistema vienen del catálogo (Shared/_ColoresSistemas);
+   aquí solo está el gris de los sistemas que ya no existen.
    ========================================================================== */
 
 :root {
-    --sis-dia: #008BBF;
-    --sis-dia-texto: #ffffff;
-    --sis-diaweb: #8FE5FF;
-    --sis-diaweb-texto: #0f172a;
-    --sis-sita: #EA580C;
-    --sis-sita-texto: #ffffff;
-    --sis-med: #704332;
-    --sis-med-texto: #ffffff;
-    --sis-vucem: #1D4ED8;
-    --sis-vucem-texto: #ffffff;
-    --sis-diaenlinea: #B6FF82;
-    --sis-diaenlinea-texto: #0f172a;
-    --sis-coa: #15803D;
-    --sis-coa-texto: #ffffff;
-    --sis-admin: #C9A227;
-    --sis-admin-texto: #0f172a;
     --sis-otro: #64748B;
     --sis-otro-texto: #ffffff;
 
@@ -241,14 +227,6 @@
     --estatus-escalado: #F87171;
 }
 
-.badge-sistema-dia { --sis-color: var(--sis-dia); --sis-texto: var(--sis-dia-texto); }
-.badge-sistema-diaweb { --sis-color: var(--sis-diaweb); --sis-texto: var(--sis-diaweb-texto); }
-.badge-sistema-sita { --sis-color: var(--sis-sita); --sis-texto: var(--sis-sita-texto); }
-.badge-sistema-med { --sis-color: var(--sis-med); --sis-texto: var(--sis-med-texto); }
-.badge-sistema-vucem { --sis-color: var(--sis-vucem); --sis-texto: var(--sis-vucem-texto); }
-.badge-sistema-diaenlinea { --sis-color: var(--sis-diaenlinea); --sis-texto: var(--sis-diaenlinea-texto); }
-.badge-sistema-coa { --sis-color: var(--sis-coa); --sis-texto: var(--sis-coa-texto); }
-.badge-sistema-admin { --sis-color: var(--sis-admin); --sis-texto: var(--sis-admin-texto); }
 .badge-sistema-otro { --sis-color: var(--sis-otro); --sis-texto: var(--sis-otro-texto); }
 
 .actividades-container .badge[class*="badge-sistema-"],
@@ -431,14 +409,24 @@ select.form-select[class*="badge-sistema-"] {
 }
 
 /* Indicadores: separadores entre grupos (Tipo, Sistemas, Origen, Escalados, Estatus) */
-#tablaIndicadores tbody td:nth-child(3),
-#tablaIndicadores tbody td:nth-child(7),
-#tablaIndicadores tbody td:nth-child(14),
-#tablaIndicadores tbody td:nth-child(15),
-#tablaIndicadores tbody td:nth-child(17),
-#tablaIndicadores tbody td:nth-child(21) {
+#tablaIndicadores tbody td.inicio-grupo {
     border-left: 1px solid rgba(56, 189, 248, 0.16) !important;
 }
+
+/* Nombres de los sistemas: centrados y en dos líneas si no caben (DIAENLINEA / PREMIUM) */
+#tablaIndicadores th.th-nombre-sistema,
+.tabla-print-indicadores th.th-nombre-sistema {
+    min-width: 70px;
+    max-width: 120px;
+    white-space: normal !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    line-height: 1.25 !important;
+}
+
+    .th-nombre-sistema .sin-corte {
+        white-space: nowrap;
+    }
 
 .tabla-sigest#tablaIndicadores tbody td:nth-child(2),
 .tabla-concentrado tbody td:nth-child(2) {
@@ -845,52 +833,6 @@ select.form-select option {
     background: linear-gradient(180deg, #14294d 0%, #0f1d38 100%) !important;
 }
 
-/* Desenfoque del fondo al abrir un modal */
-.modal-backdrop.show {
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    background-color: rgba(2, 6, 23, 0.55);
-    opacity: 1;
-}
-
-/* Botón X para cerrar los modales (mismo diseño que Tareas Generales, Plan de Respaldos y Campaña) */
-.btn-cerrar-modal {
-    margin-left: auto;
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    color: #38bdf8;
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.35);
-    border-radius: 10px;
-    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-    /* Al pasar el cursor: rojo con icono blanco */
-    .btn-cerrar-modal:hover {
-        color: #ffffff;
-        background: #dc2626;
-        border-color: #f87171;
-        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
-    }
-
-    /* Al presionarlo: rojo más oscuro y se "hunde" un poco */
-    .btn-cerrar-modal:active {
-        color: #ffffff;
-        background: #991b1b;
-        border-color: #dc2626;
-        transform: scale(0.92);
-    }
-
-    .btn-cerrar-modal:focus-visible {
-        outline: 2px solid #38bdf8;
-        outline-offset: 2px;
-    }
-
 /* Icono cuadrado junto al título del modal */
 .modal-icono {
     width: 44px;
@@ -1064,7 +1006,6 @@ select.form-select option {
 }
 
 /* Botones de cancelar y guardar de los modales */
-.btn-cancelar,
 .btn-guardar {
     display: inline-flex;
     align-items: center;
@@ -1075,19 +1016,6 @@ select.form-select option {
     font-weight: 700;
     transition: all 0.2s ease;
 }
-
-.btn-cancelar {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
-    border: 1px solid #334155 !important;
-    box-shadow: 0 4px 14px rgba(138, 138, 138, 0.4);
-}
-
-    .btn-cancelar:hover {
-        background: #334155 !important;
-        box-shadow: 0 6px 20px rgba(191, 191, 191, 0.55);
-        transform: translateY(-1px);
-    }
 
 .btn-guardar {
     color: #ffffff;
@@ -1103,7 +1031,6 @@ select.form-select option {
         transform: translateY(-1px);
     }
 
-.btn-cancelar:active,
 .btn-guardar:active {
     transform: scale(0.96);
 }
@@ -1166,7 +1093,6 @@ select.form-select option {
     padding: 14px 22px !important;
     gap: 8px;
 }
-
 
 /* Barras de Desplazamiento Sincronizadas */
 .wrapper-scroll-top {
@@ -1280,7 +1206,6 @@ select.form-select option {
         font-size: 6pt !important;
     }
 
-
 /* TABLA INDICADORES IMPRESIÓN */
 .tabla-print-indicadores {
     width: 100% !important;
@@ -1302,45 +1227,37 @@ select.form-select option {
     }
 
         .tabla-print-indicadores th.th-tickets,
-        .tabla-print-indicadores th.th-total,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(1),
-        .tabla-print-indicadores thead tr:first-child th:nth-child(2) {
+        .tabla-print-indicadores th.th-total {
             background-color: #8ea9db !important;
             font-weight: bold !important;
         }
 
-        .tabla-print-indicadores th.th-tipo,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(3) {
+        .tabla-print-indicadores th.th-tipo {
             background-color: #db6e6e !important;
             font-weight: bold !important;
         }
 
-        .tabla-print-indicadores th.th-sistemas-ext,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(4) {
+        .tabla-print-indicadores th.th-sistemas-ext {
             background-color: #a9d18e !important;
             font-weight: bold !important;
         }
 
-        .tabla-print-indicadores th.th-sistema-int,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(5) {
+        .tabla-print-indicadores th.th-sistema-int {
             background-color: #ffd966 !important;
             font-weight: bold !important;
         }
 
-        .tabla-print-indicadores th.th-origen,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(6) {
+        .tabla-print-indicadores th.th-origen {
             background-color: #fce4d6 !important;
             font-weight: bold !important;
         }
 
-        .tabla-print-indicadores th.th-escalados,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(7) {
+        .tabla-print-indicadores th.th-escalados {
             background-color: #b4a7d6 !important;
             font-weight: bold !important;
         }
 
-        .tabla-print-indicadores th.th-estatus,
-        .tabla-print-indicadores thead tr:first-child th:nth-child(8) {
+        .tabla-print-indicadores th.th-estatus {
             background-color: #fff2cc !important;
             font-weight: bold !important;
         }
@@ -1626,7 +1543,6 @@ select.form-select option {
         width: 100% !important;
     }
 }
-
 
 /* Botones de Acción */
 

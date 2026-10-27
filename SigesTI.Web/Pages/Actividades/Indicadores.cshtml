@@ -5,10 +5,27 @@
 }
 
 <link rel="stylesheet" href="~/css/Actividades/indicadores.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Reportes/reporte-encabezado.css" asp-append-version="true" />
+<partial name="_ColoresSistemas" model="Model.Sistemas" />
 
 <div class="actividades-container px-4 py-3" id="seccionImpresion">
+    <!-- Encabezado del reporte impreso -->
+    <div class="rep-encabezado solo-impresion">
+        <div>
+            <div class="rep-area">Área de Soporte Técnico</div>
+            <div class="rep-titulo">Indicadores y Métricas del Área de Soporte Técnico</div>
+        </div>
+        <div class="rep-fecha">
+            <span>Fecha del reporte</span>
+            <strong>@DateTime.Now.ToString("dd/MM/yyyy")</strong>
+        </div>
+    </div>
+    <p class="solo-impresion small mb-3">
+        <strong>Período de Evaluación:</strong> @Model.FechaInicio?.ToString("dd/MM/yyyy") - @Model.FechaFin?.ToString("dd/MM/yyyy")
+    </p>
+
     <!-- Encabezado -->
-    <div class="d-flex justify-content-between align-items-center mb-4 header-reporte">
+    <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
         <div>
             <h3 class="fw-bold text-white mb-1">
                 <i class="bi bi-bar-chart-line-fill me-2 text-info d-print-none"></i>Indicadores y Métricas del Área de Soporte Técnico
@@ -19,9 +36,12 @@
         </div>
         @if (await Permisos.PuedeAsync(Modulos.Indicadores, Accion.Exportar))
         {
-            <div class="d-print-none">
-                <button class="btn btn-secondary-sigest btn-sm shadow-sm px-3" onclick="imprimirReporte()">
-                    <i class="bi bi-printer me-1"></i> Imprimir / Guardar PDF
+            <div class="reporte-acciones d-print-none">
+                <button type="button" class="btn btn-imprimir-sigest" onclick="imprimirReporte()">
+                    <i class="bi bi-printer me-1"></i> Imprimir
+                </button>
+                <button type="button" class="btn btn-pdf-sigest" onclick="descargarPdfIndicadores(this)">
+                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> Descargar PDF
                 </button>
             </div>
         }
@@ -229,11 +249,16 @@
             <div id="printObservacionesText" class="d-none text-white small p-2"></div>
         </div>
     </div>
+
+    <div class="rep-pie solo-impresion">
+        <span>SigesST - Sistema de Gestión de Soporte Técnico</span>
+    </div>
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <script>
         // Puente de datos entre C# y Javascript

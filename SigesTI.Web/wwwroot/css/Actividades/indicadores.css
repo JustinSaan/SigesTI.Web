@@ -264,6 +264,7 @@
 
 /* --------------------------------------------------------------------------
    6. ESTILOS DE IMPRESIÓN Y GUARDADO EN PDF (FONDO BLANCO DE ALTO CONTRASTE)
+   La clase modo-impresion se pone al imprimir y al descargar el PDF.
    -------------------------------------------------------------------------- */
 @media print {
     @page {
@@ -287,8 +288,6 @@
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
-        background: #ffffff !important;
-        color: #0f172a !important;
     }
 
     /* Salto de página forzado para colocar las Gráficas 3 y 4 en la Hoja 2 */
@@ -297,69 +296,84 @@
         break-before: page !important;
         margin-top: 15px !important;
     }
+}
 
-    /* Tarjetas blancas con borde suave en impresión */
-    .actividades-container .glass-panel {
+/* Encabezado, período y pie que solo salen en el reporte */
+.solo-impresion {
+    display: none !important;
+}
+
+.modo-impresion .solo-impresion {
+    display: block !important;
+}
+
+.modo-impresion .rep-encabezado.solo-impresion {
+    display: flex !important;
+}
+
+.actividades-container.modo-impresion {
+    color: #0f172a !important;
+    background: #ffffff !important;
+}
+
+    /* Tarjetas blancas con borde suave */
+    .modo-impresion .glass-panel {
         background: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         box-shadow: none !important;
         page-break-inside: avoid !important;
     }
 
-    .actividades-container .glass-header {
-        background: #f1f5f9 !important;
+    .modo-impresion .glass-header {
         color: #0369a1 !important;
+        background: #f1f5f9 !important;
         border-bottom: 1px solid #cbd5e1 !important;
     }
 
     /* Textos oscuros legibles */
-    .actividades-container h1,
-    .actividades-container h2,
-    .actividades-container h3,
-    .actividades-container h4,
-    .actividades-container p,
-    .actividades-container span,
-    .actividades-container label,
-    .actividades-container td,
-    .actividades-container th {
+    .modo-impresion h1,
+    .modo-impresion h2,
+    .modo-impresion h3,
+    .modo-impresion h4,
+    .modo-impresion p,
+    .modo-impresion span,
+    .modo-impresion label,
+    .modo-impresion td,
+    .modo-impresion th {
         color: #0f172a !important;
         text-shadow: none !important;
     }
 
-    .actividades-container .text-muted,
-    .actividades-container .text-secondary {
+    .modo-impresion .text-muted,
+    .modo-impresion .text-secondary {
         color: #475569 !important;
     }
 
-    .actividades-container .text-info {
+    .modo-impresion .text-info {
         color: #0284c7 !important;
     }
 
-    .actividades-container .text-success {
+    .modo-impresion .text-success {
         color: #15803d !important;
     }
 
-    .actividades-container .text-primary {
+    .modo-impresion .text-primary {
         color: #1d4ed8 !important;
     }
 
-    .actividades-container .text-warning {
+    .modo-impresion .text-warning {
         color: #d97706 !important;
     }
 
-    .d-print-none {
+    .modo-impresion .d-print-none,
+    .modo-impresion #txtObservaciones {
         display: none !important;
     }
 
-    #txtObservaciones {
-        display: none !important;
-    }
-
-    #printObservacionesText {
+    .modo-impresion #printObservacionesText {
         display: block !important;
-        border: 1px dashed #0284c7;
-        border-radius: 6px;
         color: #0f172a !important;
         background-color: #f8fafc !important;
+        border: 1px dashed #0284c7;
+        border-radius: 6px;
     }
-}

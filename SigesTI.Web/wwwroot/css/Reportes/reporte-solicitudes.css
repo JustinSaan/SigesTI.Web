@@ -52,80 +52,6 @@ body {
     box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
 }
 
-/* --------------------------------------------------------------------------
-   2. ENCABEZADO
-   -------------------------------------------------------------------------- */
-.encabezado {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 24px;
-    padding-bottom: 14px;
-    border-bottom: 3px solid var(--azul-oscuro);
-    position: relative;
-}
-
-    /* Segunda línea azul debajo del borde oscuro */
-    .encabezado::after {
-        content: "";
-        position: absolute;
-        right: 0;
-        bottom: -6px;
-        left: 0;
-        height: 2px;
-        background: var(--azul);
-    }
-
-.encabezado-sistema {
-    margin: 0 0 4px;
-    color: var(--azul);
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-}
-
-.encabezado h1 {
-    margin: 0;
-    color: var(--azul-oscuro);
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -0.3px;
-}
-
-.encabezado-descripcion {
-    margin: 4px 0 0;
-    color: var(--texto-suave);
-    font-size: 12px;
-}
-
-.encabezado-datos {
-    display: grid;
-    gap: 4px;
-    margin: 0;
-    text-align: right;
-}
-
-    .encabezado-datos div {
-        display: flex;
-        justify-content: flex-end;
-        gap: 8px;
-    }
-
-    .encabezado-datos dt {
-        color: var(--texto-tenue);
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-    }
-
-    .encabezado-datos dd {
-        margin: 0;
-        color: var(--texto);
-        font-weight: 600;
-    }
-
 /* Filtros aplicados al reporte */
 .filtros {
     display: flex;
@@ -141,7 +67,7 @@ body {
     }
 
 /* --------------------------------------------------------------------------
-   3. RESUMEN
+   2. RESUMEN
    -------------------------------------------------------------------------- */
 .resumen {
     display: flex;
@@ -180,7 +106,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   4. TABLA DEL REPORTE
+   3. TABLA DEL REPORTE
    -------------------------------------------------------------------------- */
 .tabla {
     width: 100%;
@@ -331,10 +257,10 @@ body {
     }
 
 /* --------------------------------------------------------------------------
-   5. FORMATO DE UN REQUERIMIENTO
+   4. FORMATO DE UN REQUERIMIENTO
    -------------------------------------------------------------------------- */
 .seccion {
-    margin-top: 22px;
+    margin-top: 18px;
     break-inside: avoid;
 }
 
@@ -349,16 +275,20 @@ body {
     border-bottom: 2px solid var(--azul);
 }
 
-/* Datos en recuadros de 3 columnas */
+/* Datos en recuadros que se ajustan a su contenido */
 .ficha {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
     margin: 0;
 }
 
     .ficha div {
-        padding: 8px 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-width: 120px;
+        padding: 5px 10px;
         background: var(--fondo-suave);
         border: 1px solid var(--linea);
         border-radius: 6px;
@@ -376,7 +306,7 @@ body {
         margin: 2px 0 0;
         color: var(--texto);
         font-weight: 600;
-        word-break: break-word;
+        white-space: nowrap;
     }
 
 /* Sistemas requeridos */
@@ -400,7 +330,17 @@ body {
     border-radius: 999px;
 }
 
-/* Historial de comentarios */
+/* Descripción del requisito: lo que escribió el solicitante */
+.descripcion {
+    padding: 10px 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: var(--fondo-suave);
+    border: 1px solid var(--linea);
+    border-radius: 6px;
+}
+
+/* Seguimiento: comentarios de quien atiende o autoriza */
 .comentario {
     padding: 8px 12px;
     background: var(--fondo-suave);
@@ -464,32 +404,11 @@ body {
     }
 
 /* --------------------------------------------------------------------------
-   6. PIE
-   -------------------------------------------------------------------------- */
-.pie {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 18px;
-    padding-top: 8px;
-    color: var(--texto-tenue);
-    font-size: 10px;
-    border-top: 1px solid var(--linea);
-}
-
-/* --------------------------------------------------------------------------
-   7. IMPRESIÓN
+   5. IMPRESIÓN
    -------------------------------------------------------------------------- */
 @page {
     size: letter;
     margin: 12mm 12mm 16mm;
-
-    /* Número de página abajo a la derecha (Chrome y Edge) */
-    @bottom-right {
-        content: "Página " counter(page) " de " counter(pages);
-        color: #94a3b8;
-        font-family: "Segoe UI", Arial, sans-serif;
-        font-size: 9px;
-    }
 }
 
 @media print {
@@ -513,8 +432,7 @@ body {
     }
 
     .tabla tr,
-    .resumen,
-    .encabezado {
+    .resumen {
         break-inside: avoid;
     }
 

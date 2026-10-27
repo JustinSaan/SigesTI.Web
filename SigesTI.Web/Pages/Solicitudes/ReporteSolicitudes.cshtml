@@ -1,15 +1,11 @@
 @page
 @model SigesTI.Web.Pages.Solicitudes.ReporteSolicitudesModel
-@using System.Globalization
-@using Microsoft.AspNetCore.Http
 @using SigesTI.Web.Models
 
 @{
     Layout = null;
 
-    var cultura = new CultureInfo("es-MX");
-    string nombreReporte = $"ReporteSolicitudes_{Model.FechaGeneracion:ddMMyyyyHHmm}";
-    string generadoPor = HttpContext.Session.GetString("NombreCompleto") ?? "—";
+    string nombreReporte = $"ReporteDeSolicitudes_{Model.FechaGeneracion:dd-MM-yyyy}";
 
     int porAutorizar = Model.Registros.Count(s => s.Estatus == EstatusSolicitud.PorAutorizar);
     int pendientes = Model.Registros.Count(s => s.Estatus == EstatusSolicitud.Pendiente);
@@ -26,29 +22,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@nombreReporte</title>
     <link rel="stylesheet" href="~/css/Reportes/reporte-solicitudes.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/Reportes/reporte-encabezado.css" asp-append-version="true" />
 </head>
 
 <body>
     <main class="hoja">
 
         <!-- Encabezado -->
-        <header class="encabezado">
+        <header class="rep-encabezado">
             <div>
-                <p class="encabezado-sistema">Sistema de Gestión de Soporte Técnico</p>
-                <h1>Reporte de solicitudes</h1>
-                <p class="encabezado-descripcion">Requerimientos de Soporte Técnico registrados en el sistema</p>
+                <div class="rep-area">Área de Soporte Técnico</div>
+                <div class="rep-titulo">Reporte de Solicitudes</div>
             </div>
-
-            <dl class="encabezado-datos">
-                <div>
-                    <dt>Generado</dt>
-                    <dd>@Model.FechaGeneracion.ToString("dd/MM/yyyy · hh:mm tt", cultura)</dd>
-                </div>
-                <div>
-                    <dt>Por</dt>
-                    <dd>@generadoPor</dd>
-                </div>
-            </dl>
+            <div class="rep-fecha">
+                <span>Fecha del reporte</span>
+                <strong>@Model.FechaGeneracion.ToString("dd/MM/yyyy")</strong>
+            </div>
         </header>
 
         <!-- Filtros aplicados -->
@@ -149,9 +138,8 @@
         }
 
         <!-- Pie -->
-        <footer class="pie">
-            <span>SigesST · Reporte de solicitudes</span>
-            <span>Fin del reporte · @Model.Registros.Count solicitudes</span>
+        <footer class="rep-pie">
+            <span>SigesST - Sistema de Gestión de Soporte Técnico</span>
         </footer>
 
     </main>

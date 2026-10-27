@@ -8,7 +8,7 @@
                     <div class="notif-modal-icono"><i class="bi bi-key"></i></div>
                     <h5 class="modal-title mb-0" id="tituloCambiarPassword">Cambiar contraseña</h5>
                 </div>
-                <button type="button" class="notif-btn-cerrar ms-auto" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
 
             <form method="post" asp-page="/MiCuenta" asp-page-handler="CambiarPassword" id="formCambiarPassword">
@@ -26,9 +26,8 @@
                 </div>
 
                 <div class="modal-footer mi-cuenta-pie">
-                    <button type="button" class="btn btn-outline-secondary btn-sm px-4 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-info btn-sm px-4 rounded-pill" id="btnGuardarPassword">
-                        <i class="bi bi-check-lg me-1"></i>Guardar
+                    <button type="submit" class="mi-cuenta-guardar" id="btnGuardarPassword">
+                        <i class="bi bi-save"></i> Guardar contraseña
                     </button>
                 </div>
             </form>

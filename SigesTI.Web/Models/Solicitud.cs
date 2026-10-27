@@ -25,6 +25,10 @@ namespace SigesTI.Web.Models
         public string? SistemasDetalle { get; set; } // Guarda los sistemas elegidos (ADMIN, SITA, etc.)
         public string? OtrosSistemas { get; set; }
 
+        // Lo que pidió el solicitante al generar la solicitud
+        public string? DescripcionRequisito { get; set; }
+
+        // Comentarios de seguimiento (de quien atiende o autoriza)
         public string? DescripcionProblema { get; set; }
         public string? EjecutivoAsignado { get; set; }
         public string? AutorizaAdmin { get; set; }
@@ -58,6 +62,37 @@ namespace SigesTI.Web.Models
             return string.IsNullOrWhiteSpace(historial)
                 ? bloque
                 : bloque + "\n\n" + historial;
+        }
+
+        /*
+         * Descripción del requisito y comentarios de seguimiento por separado.
+         * En las solicitudes anteriores la descripción venía como el primer comentario
+         * del historial (el último de la lista, porque los nuevos van arriba).
+         */
+        public static (string Descripcion, List<ComentarioHistorial> Seguimiento) LeerDescripcionYSeguimiento(string? descripcionRequisito, string? historial)
+        {
+            var seguimiento = LeerHistorial(historial);
+
+            if (!string.IsNullOrWhiteSpace(descripcionRequisito))
+            {
+                return (descripcionRequisito.Trim(), seguimiento);
+            }
+
+            if (seguimiento.Count == 0)
+            {
+                return ("", seguimiento);
+            }
+
+            string descripcion = seguimiento[^1].Texto;
+            seguimiento.RemoveAt(seguimiento.Count - 1);
+            return (descripcion, seguimiento);
+        }
+
+        // Historial sin el primer comentario (para las solicitudes anteriores, donde ese era la descripción)
+        public static string QuitarComentarioInicial(string? historial)
+        {
+            var inicios = Regex.Matches(historial ?? "", "(?:Agregado|Entrado) el: ");
+            return inicios.Count <= 1 ? "" : historial![..inicios[^1].Index].TrimEnd();
         }
 
         /*

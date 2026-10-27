@@ -167,13 +167,12 @@ namespace SigesTI.Web.Pages
                             (s.Estatus != EstatusSolicitud.Resuelto || s.FechaEntrega >= haceUnaSemana))
                 .OrderByDescending(s => s.IdSolicitud)
                 .Take(5)
-                .Select(s => new { s.IdSolicitud, s.DescripcionProblema, s.Estatus, s.EjecutivoAsignado, s.FechaIngreso })
+                .Select(s => new { s.IdSolicitud, s.DescripcionRequisito, s.DescripcionProblema, s.Estatus, s.EjecutivoAsignado, s.FechaIngreso })
                 .ToListAsync();
 
             foreach (var s in solicitudes)
             {
-                // El primer comentario del historial es lo que se pidió (los nuevos van arriba)
-                string descripcion = Solicitud.LeerHistorial(s.DescripcionProblema).LastOrDefault()?.Texto ?? "";
+                string descripcion = Solicitud.LeerDescripcionYSeguimiento(s.DescripcionRequisito, s.DescripcionProblema).Descripcion;
 
                 if (descripcion.Length > 90)
                 {

@@ -162,6 +162,25 @@ $(document).ready(function () {
         aplicarPaginacionYFiltro();
     });
 
+    /* Ordenar por folio: cada clic cambia entre menor a mayor y mayor a menor */
+    var ordenFolioAscendente = false;
+    $("#btnOrdenarFolio").on("click", function () {
+        ordenFolioAscendente = !ordenFolioAscendente;
+
+        var $tbody = $("#tablaBitacoraPrincipal tbody");
+        var filas = $tbody.children("tr[data-folio]").get();
+        filas.sort(function (a, b) {
+            var diferencia = Number(a.dataset.folio) - Number(b.dataset.folio);
+            return ordenFolioAscendente ? diferencia : -diferencia;
+        });
+        $tbody.prepend(filas);
+
+        $(this).addClass("activo").find("i")
+            .attr("class", ordenFolioAscendente ? "bi bi-sort-numeric-down" : "bi bi-sort-numeric-up-alt");
+        paginaActual = 1;
+        aplicarPaginacionYFiltro();
+    });
+
     /* Filtros que se resuelven en el servidor */
     $(".filtro-servidor-auto").on("change", function () {
         $("#loaderFiltro").removeClass("d-none");
@@ -292,7 +311,8 @@ $(document).ready(function () {
                 $("#modal_Responsable").val(data.responsableArea);
                 $("#modal_EjecutivoAsignado").val(data.ejecutivoAsignado);
                 $("#modal_AutorizaAdmin").val(data.autorizaAdmin);
-                renderizarHistorial(document.getElementById("modal_Historial"), historialCompletoGuardado);
+                $("#modal_DescripcionRequisito").text(data.descripcionRequisito);
+                renderizarHistorial(document.getElementById("modal_Historial"), data.seguimiento);
 
                 cargarPersonalModal(data.area, data.idPersonal);
 

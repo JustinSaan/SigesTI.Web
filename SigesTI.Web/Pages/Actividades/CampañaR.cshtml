@@ -290,7 +290,7 @@
                         <small id="editSubtitulo" class="modal-subtitulo"></small>
                     </div>
                 </div>
-                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
             <div class="modal-body modal-body-glass">
                 <form id="formEdicion">
@@ -378,15 +378,14 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer modal-footer-glass">
-                <button type="button" class="btn btn-modal-cancelar" data-bs-dismiss="modal">Cancelar</button>
-                @if (puedeEditar)
-                {
+            @if (puedeEditar)
+            {
+                <div class="modal-footer modal-footer-glass">
                     <button type="button" class="btn btn-modal-guardar" onclick="guardarEdicionRegistro()">
                         <i class="bi bi-check-lg me-1"></i>Guardar Cambios
                     </button>
-                }
-            </div>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -403,7 +402,7 @@
                         <small class="modal-subtitulo">Selecciona el periodo y el archivo de la campaña</small>
                     </div>
                 </div>
-                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
             <div class="modal-body modal-body-glass">
                 <!-- Periodo -->
@@ -439,7 +438,6 @@
                 </div>
             </div>
             <div class="modal-footer modal-footer-glass">
-                <button type="button" class="btn btn-modal-cancelar" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-modal-guardar" onclick="procesarEnvioArchivo(false)">
                     <i class="bi bi-upload me-1"></i>Procesar Carga
                 </button>
@@ -460,7 +458,7 @@
                         <small class="modal-subtitulo">Plantilla con la estructura para cargar las campañas</small>
                     </div>
                 </div>
-                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
             <div class="modal-body modal-body-glass">
                 <!-- Estado del layout -->
@@ -495,9 +493,6 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer modal-footer-glass">
-                <button type="button" class="btn btn-modal-cancelar" data-bs-dismiss="modal">Cerrar</button>
-            </div>
         </div>
     </div>
 </div>
@@ -510,7 +505,7 @@
                 <h5 class="modal-title fw-bold text-info">
                     <i class="bi bi-journal-text me-2"></i>Bitácora de Seguimiento - <span id="empresaModalTitle" class="text-white"></span>
                 </h5>
-                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
             <div class="modal-body modal-body-glass">
                 <input type="hidden" id="detalleIdModal" />
@@ -540,7 +535,6 @@
                 </div>
 
                 <div>
-                    <button type="button" class="btn btn-modal-cancelar me-2" data-bs-dismiss="modal">Cerrar</button>
                     @if (puedeEditar)
                     {
                         <button type="button" class="btn btn-modal-guardar" onclick="guardarComentarioModal()">

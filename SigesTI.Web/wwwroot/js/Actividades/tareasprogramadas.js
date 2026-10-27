@@ -140,6 +140,11 @@
         btnConfirmarImp.addEventListener('click', imprimirContenidoLimpioTareas);
     }
 
+    const btnDescargarPdf = document.getElementById('btnDescargarPdfTareas');
+    if (btnDescargarPdf) {
+        btnDescargarPdf.addEventListener('click', imprimirContenidoLimpioTareas);
+    }
+
     window.addEventListener('resize', sincronizarScrollbars);
 });
 
@@ -867,17 +872,12 @@ function imprimirContenidoLimpioTareas() {
         return;
     }
 
-    const tituloAnterior = document.title;
-    const fecha = new Date().toISOString().split('T')[0];
-    document.title = `Reporte_TareasProgramadas_${fecha}`;
-
     const padreOriginal = seccion.parentNode;
     document.body.appendChild(seccion);
 
-    window.print();
+    imprimirConNombre('ReporteTareasProgramadasGenerales');
 
     setTimeout(function () {
         padreOriginal.appendChild(seccion);
-        document.title = tituloAnterior;
     }, 500);
 }

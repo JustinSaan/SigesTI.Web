@@ -1,0 +1,22 @@
+@model IEnumerable<SigesTI.Web.Models.SistemaTicket>
+@*
+    Colores de cada sistema del catálogo.
+    Variables --sis-{id} para JavaScript (gráficas y Excel) y clase badge-sistema-{id} para las insignias.
+*@
+<style>
+    :root {
+    @foreach (var s in Model)
+    {
+        @:--sis-@(s.IdSistema): @s.ColorFondo;
+        @:--sis-@(s.IdSistema)-texto: @s.ColorTexto;
+    }
+    }
+
+    @foreach (var s in Model)
+    {
+        @:.@s.ClaseCss { --sis-color: var(--sis-@(s.IdSistema)); --sis-texto: var(--sis-@(s.IdSistema)-texto); }
+    }
+</style>
+<script>
+    window.catalogoSistemas = @Json.Serialize(Model.Select(s => new { id = s.IdSistema, nombre = s.Nombre, fondo = s.ColorFondo, texto = s.ColorTexto, interno = s.Interno }));
+</script>

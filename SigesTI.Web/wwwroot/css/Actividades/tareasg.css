@@ -505,57 +505,6 @@
     background-color: #0f172a !important;
 }
 
-/* Desenfoque del fondo al abrir un modal o una alerta */
-.modal-backdrop.show {
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    background-color: rgba(2, 6, 23, 0.55);
-    opacity: 1;
-}
-
-.swal2-container.swal2-backdrop-show {
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-}
-
-/* Botón X para cerrar los modales (mismo diseño que Plan de Respaldos y Campaña) */
-.btn-cerrar-modal {
-    margin-left: auto;
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    color: #38bdf8;
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.35);
-    border-radius: 10px;
-    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-    /* Al pasar el cursor: rojo con icono blanco */
-    .btn-cerrar-modal:hover {
-        color: #ffffff;
-        background: #dc2626;
-        border-color: #f87171;
-        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
-    }
-
-    /* Al presionarlo: rojo más oscuro y se "hunde" un poco */
-    .btn-cerrar-modal:active {
-        color: #ffffff;
-        background: #991b1b;
-        border-color: #dc2626;
-        transform: scale(0.92);
-    }
-
-    .btn-cerrar-modal:focus-visible {
-        outline: 2px solid #38bdf8;
-        outline-offset: 2px;
-    }
-
 /* Icono cuadrado junto al título del modal */
 .modal-icono {
     width: 44px;
@@ -1320,53 +1269,6 @@
         font-size: 6.5pt;
     }
 
-/* Botones del modal de vista previa */
-.btn-modal-cancelar,
-.btn-modal-imprimir {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 9px 20px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    transition: all 0.2s ease;
-}
-
-.btn-modal-cancelar {
-    color: #cbd5e1 !important;
-    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
-    border: 1px solid #334155 !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    padding: 7px 16px !important;
-    transition: all 0.2s ease !important;
-}
-
-    .btn-modal-cancelar:hover {
-        color: #ffffff !important;
-        background: #334155 !important;
-        border-color: #475569 !important;
-    }
-
-.btn-modal-imprimir {
-    color: #ffffff;
-    background: linear-gradient(135deg, #0284c7, #0369a1);
-    border: 1px solid #38bdf8;
-    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
-}
-
-    .btn-modal-imprimir:hover {
-        background: linear-gradient(135deg, #0ea5e9, #0284c7);
-        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.55);
-        transform: translateY(-1px);
-    }
-
-.btn-modal-cancelar:active,
-.btn-modal-imprimir:active {
-    transform: scale(0.96);
-}
-
 @media print {
     @page {
         size: landscape;
@@ -1405,7 +1307,6 @@
 }
 
 /* Botones de cancelar y guardar */
-.btn-cancelar,
 .btn-guardar {
     display: inline-flex;
     align-items: center;
@@ -1416,19 +1317,6 @@
     font-weight: 700;
     transition: all 0.2s ease;
 }
-
-.btn-cancelar {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
-    border: 1px solid #334155 !important;
-    box-shadow: 0 4px 14px rgba(138, 138, 138, 0.4);
-}
-
-    .btn-cancelar:hover {
-        background: #334155 !important;
-        box-shadow: 0 6px 20px rgba(191, 191, 191, 0.55);
-        transform: translateY(-1px);
-    }
 
 .btn-guardar {
     color: #ffffff;
@@ -1443,9 +1331,7 @@
         transform: translateY(-1px);
     }
 
-.btn-cancelar:active,
 .btn-guardar:active {
     transform: scale(0.96);
 }
-
 

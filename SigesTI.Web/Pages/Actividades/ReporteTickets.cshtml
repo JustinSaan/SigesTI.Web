@@ -33,6 +33,45 @@
         }
     }
 
+    // Fila de "Indicadores de Atención del Día"; las columnas de sistemas salen del catálogo
+    void FilaIndicadores(string titulo, string claseTitulo, ReporteTicketsModel.IndicadoresTicketsDto d)
+    {
+        <tr>
+            <td class="fw-bold @claseTitulo text-center">@titulo</td>
+            <td class="fw-bold text-center">@d.Total</td>
+            <td class="text-center inicio-grupo">@d.Servicio</td>
+            <td class="text-center">@d.Incidencia</td>
+            <td class="text-center">@d.Ajuste</td>
+            <td class="text-center">@d.Mejora</td>
+            @foreach (var grupo in new[] { Model.SistemasExternos, Model.SistemasInternos })
+            {
+                bool primero = true;
+                foreach (var s in grupo)
+                {
+                    <td class="text-center @(primero ? "inicio-grupo" : "")">@d.PorSistema.GetValueOrDefault(s.IdSistema)</td>
+                    primero = false;
+                }
+            }
+            <td class="text-center inicio-grupo">@d.Llamada</td>
+            <td class="text-center">@d.Correo</td>
+            <td class="text-center inicio-grupo">@d.EscaladoDesarrollo</td>
+            <td class="text-center">@d.EscaladoConsultoria</td>
+            <td class="text-center">@d.EscaladoVentas</td>
+            <td class="text-center">@d.EscaladoCobranza</td>
+            <td class="text-center inicio-grupo"><span class="badge estatus-tiempo">@d.Cerrado</span></td>
+            <td class="text-center"><span class="badge estatus-encurso">@d.EnCurso</span></td>
+        </tr>
+    }
+
+    // Nombre del sistema que puede ir en varias líneas, pero sin partir una palabra (DIAWEB-ZOÉ)
+    void NombreSistema(string nombre)
+    {
+        foreach (var palabra in nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+        {
+            <span class="sin-corte">@palabra</span>
+        }
+    }
+
     void CeldaPorcentaje(int? porcentaje)
     {
         if (porcentaje == null)
@@ -51,6 +90,8 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" />
 <link rel="stylesheet" href="~/css/Actividades/reporte-tickets.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Reportes/reporte-encabezado.css" asp-append-version="true" />
+<partial name="_ColoresSistemas" model="Model.Sistemas" />
 
 <div class="actividades-container px-4 py-3">
 
@@ -79,14 +120,10 @@
                 <label class="form-label small text-muted mb-1">Sistema</label>
                 <select class="form-select form-select-sm" id="FiltroSistema" asp-for="FiltroSistema">
                     <option value="">-- Todos --</option>
-                    <option value="DIA" style="background-color: #0f172a; color: #60a5fa;">DIA</option>
-                    <option value="DIAWEB" style="background-color: #0f172a; color: #38bdf8;">DIAWEB</option>
-                    <option value="SITA" style="background-color: #0f172a; color: #fb923c;">SITA</option>
-                    <option value="VUCEM" style="background-color: #1d4ed8; color: #ffffff;">VUCEM</option>
-                    <option value="DIAENLINEA PREMIUM" style="background-color: #0f172a; color: #4ade80;">DIAENLINEA PREMIUM</option>
-                    <option value="COA" style="background-color: #0f172a; color: #22c55e;">COA</option>
-                    <option value="CONECTOR DIAWEB-ZOÉ" style="background-color: #704332; color: #ffffff;">CONECTOR DIAWEB-ZOÉ</option>
-                    <option value="ADMIN" style="background-color: #0f172a; color: #ffffff;">ADMIN</option>
+                    @foreach (var s in Model.Sistemas)
+                    {
+                        <option value="@s.Nombre" style="background-color: @s.ColorFondo; color: @s.ColorTexto; font-weight: 700;">@s.Nombre</option>
+                    }
                 </select>
             </div>
 
@@ -137,8 +174,14 @@
                         <th rowspan="2" class="align-middle th-tickets text-center">Tickets</th>
                         <th rowspan="2" class="align-middle th-total text-center">Total</th>
                         <th colspan="4" class="th-tipo text-center">Tipo</th>
-                        <th colspan="7" class="th-sistemas-ext text-center">Sistemas Externos</th>
-                        <th colspan="1" class="th-sistema-int text-center">Sistema Int.</th>
+                        @if (Model.SistemasExternos.Any())
+                        {
+                            <th colspan="@Model.SistemasExternos.Count()" class="th-sistemas-ext text-center">Sistemas Externos</th>
+                        }
+                        @if (Model.SistemasInternos.Any())
+                        {
+                            <th colspan="@Model.SistemasInternos.Count()" class="th-sistema-int text-center">Sistema Int.</th>
+                        }
                         <th colspan="2" class="th-origen text-center">Origen del Ticket</th>
                         <th colspan="4" class="th-escalados text-center">Escalados</th>
                         <th colspan="2" class="th-estatus text-center">Estatus</th>
@@ -148,14 +191,14 @@
                         <th class="th-tipo text-center">Incidencia</th>
                         <th class="th-tipo text-center">Ajuste</th>
                         <th class="th-tipo text-center">Mejora</th>
-                        <th class="th-sistemas-ext text-center">DIA</th>
-                        <th class="th-sistemas-ext text-center">DIAWEB</th>
-                        <th class="th-sistemas-ext text-center">SITA</th>
-                        <th class="th-sistemas-ext text-center">VUCEM</th>
-                        <th class="th-sistemas-ext text-center">DIAENLINEA PREMIUM</th>
-                        <th class="th-sistemas-ext text-center">COA</th>
-                        <th class="th-sistemas-ext text-center">CONECTOR DIAWEB-ZOE</th>
-                        <th class="th-sistema-int text-center">ADMIN</th>
+                        @foreach (var s in Model.SistemasExternos)
+                        {
+                            <th class="th-sistemas-ext th-nombre-sistema text-center">@{ NombreSistema(s.Nombre); }</th>
+                        }
+                        @foreach (var s in Model.SistemasInternos)
+                        {
+                            <th class="th-sistema-int th-nombre-sistema text-center">@{ NombreSistema(s.Nombre); }</th>
+                        }
                         <th class="th-origen text-center">Llamada</th>
                         <th class="th-origen text-center">Correo</th>
                         <th class="th-escalados text-center">Desarrollo</th>
@@ -167,54 +210,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="fw-bold text-warning text-center">Seguimiento</td>
-                        <td class="fw-bold text-center">@Model.IndicadoresSeguimiento.Total</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.Servicio</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.Incidencia</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.Ajuste</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.Mejora</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.DIA</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.DIAWEB</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.SITA</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.VUCEM</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.DIAENLINEA</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.COA</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.ConectorDiawebZoe</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.ADMIN</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.Llamada</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.Correo</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.EscaladoDesarrollo</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.EscaladoConsultoria</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.EscaladoVentas</td>
-                        <td class="text-center">@Model.IndicadoresSeguimiento.EscaladoCobranza</td>
-                        <td class="text-center"><span class="badge estatus-tiempo">@Model.IndicadoresSeguimiento.Cerrado</span></td>
-                        <td class="text-center"><span class="badge estatus-encurso">@Model.IndicadoresSeguimiento.EnCurso</span></td>
-                    </tr>
-                    <tr>
-                        <td class="fw-bold text-info text-center">Resumen del Día</td>
-                        <td class="fw-bold text-center">@Model.IndicadoresDia.Total</td>
-                        <td class="text-center">@Model.IndicadoresDia.Servicio</td>
-                        <td class="text-center">@Model.IndicadoresDia.Incidencia</td>
-                        <td class="text-center">@Model.IndicadoresDia.Ajuste</td>
-                        <td class="text-center">@Model.IndicadoresDia.Mejora</td>
-                        <td class="text-center">@Model.IndicadoresDia.DIA</td>
-                        <td class="text-center">@Model.IndicadoresDia.DIAWEB</td>
-                        <td class="text-center">@Model.IndicadoresDia.SITA</td>
-                        <td class="text-center">@Model.IndicadoresDia.VUCEM</td>
-                        <td class="text-center">@Model.IndicadoresDia.DIAENLINEA</td>
-                        <td class="text-center">@Model.IndicadoresDia.COA</td>
-                        <td class="text-center">@Model.IndicadoresDia.ConectorDiawebZoe</td>
-                        <td class="text-center">@Model.IndicadoresDia.ADMIN</td>
-                        <td class="text-center">@Model.IndicadoresDia.Llamada</td>
-                        <td class="text-center">@Model.IndicadoresDia.Correo</td>
-                        <td class="text-center">@Model.IndicadoresDia.EscaladoDesarrollo</td>
-                        <td class="text-center">@Model.IndicadoresDia.EscaladoConsultoria</td>
-                        <td class="text-center">@Model.IndicadoresDia.EscaladoVentas</td>
-                        <td class="text-center">@Model.IndicadoresDia.EscaladoCobranza</td>
-                        <td class="text-center"><span class="badge estatus-tiempo">@Model.IndicadoresDia.Cerrado</span></td>
-                        <td class="text-center"><span class="badge estatus-encurso">@Model.IndicadoresDia.EnCurso</span></td>
-                    </tr>
+                    @{ FilaIndicadores("Seguimiento", "text-warning", Model.IndicadoresSeguimiento); }
+                    @{ FilaIndicadores("Resumen del Día", "text-info", Model.IndicadoresDia); }
                 </tbody>
             </table>
         </div>
@@ -293,7 +290,7 @@
                         {
                             <tr class="fila-concentrado" data-sistema="@s.Sistema" title="Clic para ver solo los tickets de @s.Sistema">
                                 <td class="col-sistema">
-                                    <span class="badge @ReporteTicketsModel.ClaseSistema(s.Sistema)">@s.Sistema</span>
+                                    <span class="badge @Model.ClaseSistema(s.Sistema)">@s.Sistema</span>
                                 </td>
                                 <td class="fw-bold">@s.Total</td>
                                 <td>@{ Celda(s.Incidencias); }</td>
@@ -447,19 +444,7 @@
                                     }
                                 </td>
                                 <td class="text-center align-middle col-sistema">
-                                    @{
-                                        bool esConectorItem = ReporteTicketsModel.NormalizarSistema(item.Sistema) == ReporteTicketsModel.SistemaConector;
-                                    }
-                                    <span class="badge @ReporteTicketsModel.ClaseSistema(item.Sistema) text-wrap" style="line-height: 1.2;">
-                                        @if (esConectorItem)
-                                        {
-                                            @:CONECTOR<br />DIAWEB-ZOÉ
-                                        }
-                                        else
-                                        {
-                                            @item.Sistema
-                                        }
-                                    </span>
+                                    <span class="badge @Model.ClaseSistema(item.Sistema) text-wrap" style="line-height: 1.2;">@item.Sistema</span>
                                 </td>
                                 <td class="text-center col-tipo">@item.Tipo</td>
                                 <td class="col-corta text-truncate" style="max-width: 150px;" title="@item.Descripcion">
@@ -522,7 +507,7 @@
                         <small class="modal-subtitulo">Captura los datos del ticket atendido</small>
                     </div>
                 </div>
-                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
             <form method="post" asp-page-handler="CrearTicket" class="d-flex flex-column overflow-hidden">
                 @Html.AntiForgeryToken()
@@ -618,14 +603,10 @@
                             <div class="col-auto campo-lg">
                                 <label class="form-label small text-muted">Sistema</label>
                                 <select id="regSistema" name="Sistema" class="form-select form-select-sm" onchange="aplicarColorSelectSistema(this)" required>
-                                    <option value="DIA">DIA</option>
-                                    <option value="DIAWEB">DIAWEB</option>
-                                    <option value="CONECTOR DIAWEB-ZOÉ">CONECTOR DIAWEB-ZOÉ</option>
-                                    <option value="SITA">SITA</option>
-                                    <option value="VUCEM">VUCEM</option>
-                                    <option value="DIAENLINEA PREMIUM">DIAENLINEA PREMIUM</option>
-                                    <option value="COA">COA</option>
-                                    <option value="ADMIN">ADMIN</option>
+                                    @foreach (var s in Model.Sistemas)
+                                    {
+                                        <option value="@s.Nombre">@s.Nombre</option>
+                                    }
                                 </select>
                             </div>
                             <div class="col-auto campo-sm">
@@ -688,7 +669,6 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-sm btn-cancelar px-3" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cancelar</button>
                     <button type="submit" class="btn btn-sm btn-guardar px-3"><i class="bi bi-save"></i> Guardar Ticket</button>
                 </div>
             </form>
@@ -710,7 +690,7 @@
                         <small class="modal-subtitulo">Consulta o actualiza la información del ticket</small>
                     </div>
                 </div>
-                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
             </div>
             <form method="post" asp-page-handler="ActualizarTicket" class="d-flex flex-column overflow-hidden">
                 @Html.AntiForgeryToken()
@@ -763,15 +743,11 @@
                             </div>
                             <div class="col-auto campo-lg">
                                 <label class="form-label small text-muted">Sistema</label>
-                                <select id="editSistema" name="Sistema" class="form-select form-select-sm badge-sistema-dia" onchange="aplicarColorSelectSistema(this)" required>
-                                    <option value="DIA">DIA</option>
-                                    <option value="DIAWEB">DIAWEB</option>
-                                    <option value="CONECTOR DIAWEB-ZOÉ">CONECTOR DIAWEB-ZOÉ</option>
-                                    <option value="SITA">SITA</option>
-                                    <option value="VUCEM">VUCEM</option>
-                                    <option value="DIAENLINEA PREMIUM">DIAENLINEA PREMIUM</option>
-                                    <option value="COA">COA</option>
-                                    <option value="ADMIN">ADMIN</option>
+                                <select id="editSistema" name="Sistema" class="form-select form-select-sm" onchange="aplicarColorSelectSistema(this)" required>
+                                    @foreach (var s in Model.Sistemas)
+                                    {
+                                        <option value="@s.Nombre">@s.Nombre</option>
+                                    }
                                 </select>
                             </div>
                             <div class="col-auto campo-sm">
@@ -835,7 +811,6 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-sm btn-cancelar px-3" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cerrar</button>
                     <button type="submit" id="btnGuardarCambios" class="btn btn-sm btn-guardar px-3 d-none">
                         <i class="bi bi-save"></i> Guardar Cambios
                     </button>
@@ -857,7 +832,15 @@
                         <small class="modal-subtitulo">Revisa el reporte antes de imprimirlo o guardarlo en PDF</small>
                     </div>
                 </div>
-                <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                <div class="reporte-acciones">
+                    <button type="button" class="btn btn-imprimir-sigest" onclick="imprimirContenidoLimpio()">
+                        <i class="bi bi-printer me-1"></i> Imprimir
+                    </button>
+                    <button type="button" class="btn btn-pdf-sigest" onclick="imprimirContenidoLimpio()">
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Descargar PDF
+                    </button>
+                    <button type="button" class="mer-btn-cerrar ms-1" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                </div>
             </div>
 
             <!-- Contenedor de Impresión: la hoja blanca sobre un fondo oscuro tipo visor -->
@@ -865,17 +848,14 @@
             <div class="hoja-reporte p-4 text-dark bg-white" id="seccionImpresion">
 
                 <!-- ENCABEZADO -->
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-2 border-primary">
+                <div class="rep-encabezado">
                     <div>
-                        <h2 class="fw-bold mb-0 text-uppercase text-dark" style="font-size: 16pt; color: #0f172a !important;">
-                            Reporte Diario de Tickets
-                        </h2>
-                        <span class="text-muted small">Área de Soporte Técnico</span>
+                        <div class="rep-area">Área de Soporte Técnico</div>
+                        <div class="rep-titulo">Reporte Diario de Tickets</div>
                     </div>
-                    <div class="text-end">
-                        <span class="badge bg-dark text-white px-3 py-2 fs-6">
-                            Fecha: @(Model.FechaReporte?.ToString("dd/MM/yyyy"))
-                        </span>
+                    <div class="rep-fecha">
+                        <span>Fecha del reporte</span>
+                        <strong>@(Model.FechaReporte?.ToString("dd/MM/yyyy"))</strong>
                     </div>
                 </div>
 
@@ -941,7 +921,7 @@
                                             }
                                             else
                                             {
-                                                <span class="badge @ReporteTicketsModel.ClaseSistema(s.Sistema)" style="font-size: 6.5pt !important;">@s.Sistema</span>
+                                                <span class="badge @Model.ClaseSistema(s.Sistema)" style="font-size: 6.5pt !important;">@s.Sistema</span>
                                             }
                                         </td>
                                         <td class="fw-bold">@s.Total</td>
@@ -1026,7 +1006,7 @@
                                         </td>
                                         <td class="text-center">@item.Reporto</td>
                                         <td class="text-center col-sistema">
-                                            <span class="badge badge-print-sistema @ReporteTicketsModel.ClaseSistema(item.Sistema)">@ReporteTicketsModel.NormalizarSistema(item.Sistema)</span>
+                                            <span class="badge badge-print-sistema @Model.ClaseSistema(item.Sistema)">@item.Sistema</span>
                                         </td>
                                         <td class="text-center">@item.Origen</td>
                                         <td class="text-center col-tipo">@item.Tipo</td>
@@ -1048,15 +1028,13 @@
                     </table>
                 </div>
 
+                <div class="rep-pie">
+                    <span>SigesST - Sistema de Gestión de Soporte Técnico</span>
+                </div>
+
             </div>
             </div>
 
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-sm btn-cancelar px-3" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cerrar</button>
-                <button type="button" class="btn btn-sm btn-guardar px-3" onclick="imprimirContenidoLimpio()">
-                    <i class="bi bi-printer"></i> Imprimir / Guardar PDF
-                </button>
-            </div>
         </div>
     </div>
 </div>

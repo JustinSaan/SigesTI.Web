@@ -511,32 +511,7 @@ body.arrastrando-fila * {
     cursor: pointer;
 }
 
-/* Botón X para cerrar el modal */
-.mer-btn-cerrar {
-    margin-left: auto;
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    color: #38bdf8;
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.35);
-    border-radius: 10px;
-    transition: all 0.2s ease;
-}
-
-    .mer-btn-cerrar:hover {
-        color: #ffffff;
-        background: #dc2626;
-        border-color: #f87171;
-        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
-    }
-
 /* Botones Cancelar y Guardar */
-.btn-cancelar,
 .btn-guardar {
     display: inline-flex;
     align-items: center;
@@ -547,19 +522,6 @@ body.arrastrando-fila * {
     font-weight: 700;
     transition: all 0.2s ease;
 }
-
-.btn-cancelar {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, #1e293b, #0f172a) !important;
-    border: 1px solid #334155 !important;
-    box-shadow: 0 4px 14px rgba(138, 138, 138, 0.4);
-}
-
-    .btn-cancelar:hover {
-        background: #334155 !important;
-        box-shadow: 0 6px 20px rgba(191, 191, 191, 0.55);
-        transform: translateY(-1px);
-    }
 
 .btn-guardar {
     color: #ffffff !important;
@@ -574,7 +536,6 @@ body.arrastrando-fila * {
         transform: translateY(-1px);
     }
 
-    .btn-cancelar:active,
     .btn-guardar:active {
         transform: scale(0.96);
     }
@@ -613,13 +574,3 @@ body.arrastrando-fila * {
     }
 }
 
-/* Fondo borroso detrás del modal (este CSS solo se carga en esta página) */
-.modal-backdrop {
-    background-color: rgba(11, 19, 43, 0.55);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-}
-
-    .modal-backdrop.show {
-        opacity: 1;
-    }

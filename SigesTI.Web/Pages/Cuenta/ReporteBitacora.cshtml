@@ -1,14 +1,12 @@
 ﻿@page
 @model SigesTI.Web.Pages.Cuenta.ReporteBitacoraModel
 @using System.Globalization
-@using Microsoft.AspNetCore.Http
 
 @{
     Layout = null;
 
     var cultura = new CultureInfo("es-MX");
-    string nombreReporte = $"ReporteBitacora_{Model.FechaGeneracion:ddMMyyyyHHmm}";
-    string generadoPor = HttpContext.Session.GetString("NombreCompleto") ?? "—";
+    string nombreReporte = $"ReporteBitacoraDeActividades_{Model.FechaGeneracion:dd-MM-yyyy}";
 
     // Cuántos registros hay de cada tipo de acción (para los recuadros del resumen)
     int creaciones = Model.Registros.Count(r => ReporteBitacoraModel.ObtenerClaseAccion(r.Accion) == "creacion");
@@ -27,29 +25,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@nombreReporte</title>
     <link rel="stylesheet" href="~/css/Reportes/reporte-bitacora.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/Reportes/reporte-encabezado.css" asp-append-version="true" />
 </head>
 
 <body>
     <main class="hoja">
 
         <!-- Encabezado -->
-        <header class="encabezado">
+        <header class="rep-encabezado">
             <div>
-                <p class="encabezado-sistema">Sistema de Gestión de Soporte Técnico</p>
-                <h1>Bitácora de actividades</h1>
-                <p class="encabezado-descripcion">Registro de movimientos realizados en Control de acceso</p>
+                <div class="rep-area">Área de Soporte Técnico</div>
+                <div class="rep-titulo">Bitácora de Actividades</div>
             </div>
-
-            <dl class="encabezado-datos">
-                <div>
-                    <dt>Generado</dt>
-                    <dd>@Model.FechaGeneracion.ToString("dd/MM/yyyy · hh:mm tt", cultura)</dd>
-                </div>
-                <div>
-                    <dt>Por</dt>
-                    <dd>@generadoPor</dd>
-                </div>
-            </dl>
+            <div class="rep-fecha">
+                <span>Fecha del reporte</span>
+                <strong>@Model.FechaGeneracion.ToString("dd/MM/yyyy")</strong>
+            </div>
         </header>
 
         <!-- Resumen -->
@@ -131,9 +122,8 @@
         }
 
         <!-- Pie -->
-        <footer class="pie">
-            <span>SigesST · Bitácora de actividades</span>
-            <span>Fin del reporte · @Model.Registros.Count registros</span>
+        <footer class="rep-pie">
+            <span>SigesST - Sistema de Gestión de Soporte Técnico</span>
         </footer>
 
     </main>

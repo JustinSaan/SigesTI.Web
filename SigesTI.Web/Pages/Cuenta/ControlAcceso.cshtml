@@ -30,6 +30,10 @@
 }
 
 <link rel="stylesheet" href="~/css/Cuenta/controlAcceso.css" asp-append-version="true" />
+@if (Model.EsAdmin)
+{
+    <partial name="_ColoresSistemas" model="Model.ListaSistemas" />
+}
 
 <div class="actividades-container cuenta-admin px-4 py-3">
 
@@ -49,6 +53,10 @@
             {
                 <button type="button" class="btn btn-permisos-sigest" data-bs-toggle="modal" data-bs-target="#modalPermisos">
                     <i class="bi bi-shield-lock me-1"></i> Roles y permisos
+                </button>
+
+                <button type="button" class="btn btn-sistemas-sigest" data-bs-toggle="modal" data-bs-target="#modalSistemas">
+                    <i class="bi bi-palette-fill me-1"></i> Sistemas
                 </button>
             }
 
@@ -533,9 +541,6 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </button>
                     <button type="submit" form="formNuevoUsuario" class="btn btn-guardar px-4">
                         <i class="bi bi-plus-circle-fill"></i> Añadir usuario
                     </button>
@@ -622,9 +627,6 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </button>
                     <button type="submit" form="formEditarUsuario" class="btn btn-guardar px-4">
                         <i class="bi bi-save"></i> Guardar cambios
                     </button>
@@ -765,10 +767,50 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </button>
                     <button type="submit" form="formPermisos" class="btn btn-guardar px-4">
+                        <i class="bi bi-save"></i> Guardar cambios
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ====================================================================
+     MODAL SISTEMAS DE LOS TICKETS (solo Admin)
+     ==================================================================== -->
+@if (Model.EsAdmin)
+{
+    <div class="modal fade modal-cuenta" id="modalSistemas" tabindex="-1" aria-labelledby="tituloSistemas" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="mer-icono"><i class="bi bi-palette-fill"></i></div>
+                        <div>
+                            <h5 class="modal-title mb-0" id="tituloSistemas">Sistemas</h5>
+                            <small class="mer-subtitulo">Sistemas de los tickets: nombre, tipo, colores y orden</small>
+                        </div>
+                    </div>
+                    <button type="button" class="mer-btn-cerrar" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="listaSistemas" class="sis-lista"></div>
+
+                    <button type="button" class="sis-agregar" id="btnAgregarSistema">
+                        <i class="bi bi-plus-circle"></i> Agregar sistema
+                    </button>
+                    <p class="sis-nota">
+                        <i class="bi bi-info-circle"></i>
+                        Arrastra las filas para cambiar el orden. Si cambias el nombre de un sistema, sus tickets se actualizan con el nombre nuevo.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-guardar px-4" id="btnGuardarSistemas">
                         <i class="bi bi-save"></i> Guardar cambios
                     </button>
                 </div>
@@ -865,9 +907,6 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </button>
                     <button type="submit" form="formReporteBitacora" class="btn btn-guardar px-4">
                         <i class="bi bi-eye"></i> Ver vista previa
                     </button>
@@ -985,9 +1024,6 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-cancelar" data-bs-dismiss="modal">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </button>
                     <button type="button" id="btnConfirmarDepuracion" class="btn btn-peligro px-4" disabled>
                         <i class="bi bi-trash3"></i> Eliminar registros
                     </button>
@@ -1020,4 +1056,9 @@
 
 @section Scripts {
     <script src="~/js/Cuenta/controlAcceso.js" asp-append-version="true"></script>
+    @if (Model.EsAdmin)
+    {
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+        <script src="~/js/Cuenta/sistemas.js" asp-append-version="true"></script>
+    }
 }

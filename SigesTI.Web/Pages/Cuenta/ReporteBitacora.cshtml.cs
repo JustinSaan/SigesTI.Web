@@ -61,12 +61,11 @@ namespace SigesTI.Web.Pages.Cuenta
         public async Task<IActionResult> OnGetPdfAsync()
         {
             var registros = await CargarRegistrosAsync();
-            string generadoPor = HttpContext.Session.GetString("NombreCompleto") ?? "—";
             DateTime ahora = DateTime.Now;
 
-            byte[] pdf = ReporteBitacoraPdf.Generar(registros, generadoPor, ahora);
+            byte[] pdf = ReporteBitacoraPdf.Generar(registros, ahora);
 
-            return File(pdf, "application/pdf", $"ReporteBitacora_{ahora:ddMMyyyyHHmmss}.pdf");
+            return File(pdf, "application/pdf", $"ReporteBitacoraDeActividades_{ahora:dd-MM-yyyy}.pdf");
         }
 
         /* ================================================================
