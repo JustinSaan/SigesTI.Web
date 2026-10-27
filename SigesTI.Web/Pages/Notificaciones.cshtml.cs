@@ -145,13 +145,16 @@ namespace SigesTI.Web.Pages
             return PuedeVerSolicitudAsync(_context, _permisos, idSolicitud, IdUsuarioActual);
         }
 
-        // Puede ver el requerimiento quien tiene acceso a Consultar o recibió una notificación de él.
+        // Puede ver el requerimiento quien tiene acceso a Consultar, quien lo solicitó o recibió una notificación de él.
         // También lo usa la página del formato (Solicitudes/Formato).
         public static async Task<bool> PuedeVerSolicitudAsync(ApplicationDbContext context, PermisosService permisos, int idSolicitud, int? idUsuario)
         {
             if (await permisos.PuedeAsync(Modulos.ConsultarSolicitudes, Accion.Ver)) return true;
 
-            return context.Notificaciones.Any(n => n.IdSolicitud == idSolicitud && n.IdUsuario == idUsuario);
+            bool esSolicitante = context.Solicitudes.Any(s => s.IdSolicitud == idSolicitud &&
+                context.Personal.Any(p => p.Id == s.IdPersonal && p.IdUsuario == idUsuario));
+
+            return esSolicitante || context.Notificaciones.Any(n => n.IdSolicitud == idSolicitud && n.IdUsuario == idUsuario);
         }
     }
 }

@@ -308,6 +308,9 @@ function cambiarEstatusTarea(id, nuevoEstatus, selectElement) {
 
             const row = selectElement.closest('tr');
             if (row) {
+                // Al cambiar el estatus hoy, la tarea deja de ser "solo para búsqueda" y se queda visible
+                row.setAttribute('data-solo-busqueda', 'false');
+
                 const tdFechaReal = row.querySelector('.text-fechareal');
                 if (tdFechaReal) {
                     tdFechaReal.innerText = data.fechaRealizacion;

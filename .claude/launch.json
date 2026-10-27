@@ -24,6 +24,18 @@
       ],
       "port": 5239,
       "autoPort": false
+    },
+    {
+      "name": "SigesTI.Web Layout",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": [
+        "C:/Users/Soporte2/AppData/Local/Temp/claude/C--Users-Soporte2--claude-spares-spare-O4b6ww/090ac4d5-19db-415d-86b0-c35247d07503/scratchpad/build/SigesTI.Web.dll",
+        "--urls", "http://localhost:5240",
+        "--environment", "Development",
+        "--contentRoot", "C:/Users/Soporte2/source/repos/JustinSaan/SigesTI.Web/SigesTI.Web"
+      ],
+      "port": 5240,
+      "autoPort": false
     }
   ]
 }

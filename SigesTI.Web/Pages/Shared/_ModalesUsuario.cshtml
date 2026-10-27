@@ -1,0 +1,38 @@
+<!-- Modal: Cambiar contraseña (miCuenta.js) -->
+<div class="modal fade modal-notificacion" id="modalCambiarPassword" tabindex="-1" aria-labelledby="tituloCambiarPassword" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="notif-modal-icono"><i class="bi bi-key"></i></div>
+                    <h5 class="modal-title mb-0" id="tituloCambiarPassword">Cambiar contraseña</h5>
+                </div>
+                <button type="button" class="notif-btn-cerrar ms-auto" data-bs-dismiss="modal" aria-label="Cerrar" title="Cerrar"><i class="bi bi-x-lg"></i></button>
+            </div>
+
+            <form method="post" asp-page="/MiCuenta" asp-page-handler="CambiarPassword" id="formCambiarPassword">
+                <div class="modal-body mi-cuenta-form">
+                    <label for="passwordActual">Contraseña actual</label>
+                    <input type="password" id="passwordActual" name="passwordActual" autocomplete="current-password" required />
+
+                    <label for="passwordNueva">Contraseña nueva</label>
+                    <input type="password" id="passwordNueva" name="passwordNueva" autocomplete="new-password" minlength="6" required />
+
+                    <label for="confirmarPassword">Confirmar contraseña nueva</label>
+                    <input type="password" id="confirmarPassword" name="confirmarPassword" autocomplete="new-password" minlength="6" required />
+
+                    <small>Mínimo 6 caracteres.</small>
+                </div>
+
+                <div class="modal-footer mi-cuenta-pie">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-4 rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info btn-sm px-4 rounded-pill" id="btnGuardarPassword">
+                        <i class="bi bi-check-lg me-1"></i>Guardar
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

@@ -2,7 +2,13 @@
 
 @{
     string nombreUsuario = Context.Session.GetString("Usuario") ?? "Usuario";
+    string nombreCompleto = Context.Session.GetString("NombreCompleto") ?? nombreUsuario;
     string rolUsuario = Context.Session.GetString("Rol") ?? "Sin rol";
+
+    // Página abierta, para resaltar su opción y su grupo en el menú
+    string paginaActual = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+    string Activo(string pagina) => paginaActual == pagina ? "active" : "";
+    string GrupoActivo(params string[] carpetas) => carpetas.Any(c => paginaActual.StartsWith(c + "/")) ? "activo" : "";
 
     // Solo se muestran las opciones del menú que el rol puede ver
     bool verGenerar = await Permisos.PuedeAsync(Modulos.GenerarSolicitud, Accion.Ver);
@@ -18,7 +24,10 @@
     bool verMenuRequerimientos = verGenerar || verConsultar;
     bool verMenuActividades = verTickets || verRespaldos || verTareas || verCampana || verIndicadores;
     bool verMenuCuenta = verCuenta || verPersonal;
-}<!DOCTYPE html><html lang="es"><head>
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
@@ -27,10 +36,13 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/notificaciones.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SigesTI.Web.styles.css" asp-append-version="true" />
 
-    @await RenderSectionAsync("Styles", required: false)</head><body class="layout-body">
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="layout-body">
 
     <header class="layout-header">
         <nav class="layout-navbar">
@@ -48,9 +60,9 @@
                     @if (verMenuRequerimientos)
                     {
                         <div class="dropdown d-inline-block">
-                            <a class="layout-link dropdown-toggle"
+                            <a class="layout-link dropdown-toggle @GrupoActivo("/Solicitudes")"
                                href="#"
-                               id="navbarUserDropdown"
+                               id="navbarDropdownRequerimientos"
                                role="button"
                                data-bs-toggle="dropdown"
                                aria-expanded="false">
@@ -58,11 +70,11 @@
                                 <span>Requerimientos</span>
                             </a>
 
-                            <ul class="dropdown-menu custom-dropdown-menu shadow-lg border-0" aria-labelledby="navbarUserDropdown">
+                            <ul class="dropdown-menu custom-dropdown-menu shadow-lg border-0" aria-labelledby="navbarDropdownRequerimientos">
                                 @if (verGenerar)
                                 {
                                     <li>
-                                        <a class="dropdown-item item-emerald py-2" asp-page="/Solicitudes/Generar">
+                                        <a class="dropdown-item item-emerald py-2 @Activo("/Solicitudes/Generar")" asp-page="/Solicitudes/Generar">
                                             <i class="bi bi-plus-square me-2"></i>Generar Solicitud
                                         </a>
                                     </li>
@@ -70,7 +82,7 @@
                                 @if (verConsultar)
                                 {
                                     <li>
-                                        <a class="dropdown-item item-cyan py-2" asp-page="/Solicitudes/Consultar">
+                                        <a class="dropdown-item item-cyan py-2 @Activo("/Solicitudes/Consultar")" asp-page="/Solicitudes/Consultar">
                                             <i class="bi bi-search me-2"></i>Consultar Solicitudes
                                         </a>
                                     </li>
@@ -83,7 +95,7 @@
                     @if (verMenuActividades)
                     {
                         <div class="dropdown d-inline-block">
-                            <a class="layout-link dropdown-toggle"
+                            <a class="layout-link dropdown-toggle @GrupoActivo("/Actividades")"
                                href="#"
                                id="navbarDropdownActividades"
                                role="button"
@@ -97,7 +109,7 @@
                                 @if (verTickets)
                                 {
                                     <li>
-                                        <a class="dropdown-item item-cyan py-2" asp-page="/Actividades/ReporteTickets">
+                                        <a class="dropdown-item item-cyan py-2 @Activo("/Actividades/ReporteTickets")" asp-page="/Actividades/ReporteTickets">
                                             <i class="bi bi-journal-check me-2"></i>Reporte de Tickets
                                         </a>
                                     </li>
@@ -105,7 +117,7 @@
                                 @if (verRespaldos)
                                 {
                                     <li>
-                                        <a class="dropdown-item item-purple py-2" asp-page="/Actividades/PlanRespaldos">
+                                        <a class="dropdown-item item-purple py-2 @Activo("/Actividades/PlanRespaldos")" asp-page="/Actividades/PlanRespaldos">
                                             <i class="bi bi-hdd-network me-2"></i>Plan de Respaldos
                                         </a>
                                     </li>
@@ -113,7 +125,7 @@
                                 @if (verTareas)
                                 {
                                     <li>
-                                        <a class="dropdown-item item-amber py-2" asp-page="/Actividades/TareasProgramadas">
+                                        <a class="dropdown-item item-amber py-2 @Activo("/Actividades/TareasProgramadas")" asp-page="/Actividades/TareasProgramadas">
                                             <i class="bi bi-list-task me-2"></i>Tareas Generales
                                         </a>
                                     </li>
@@ -121,7 +133,7 @@
                                 @if (verCampana)
                                 {
                                     <li>
-                                        <a class="dropdown-item item-rose py-2" asp-page="/Actividades/CampañaR">
+                                        <a class="dropdown-item item-rose py-2 @Activo("/Actividades/CampañaR")" asp-page="/Actividades/CampañaR">
                                             <i class="bi bi-arrow-repeat me-2"></i>Campaña de Renovación
                                         </a>
                                     </li>
@@ -130,7 +142,7 @@
                                 {
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <a class="dropdown-item item-emerald py-2" asp-page="/Actividades/Indicadores">
+                                        <a class="dropdown-item item-emerald py-2 @Activo("/Actividades/Indicadores")" asp-page="/Actividades/Indicadores">
                                             <i class="bi bi-bar-chart-line me-2"></i>Indicadores y Métricas
                                         </a>
                                     </li>
@@ -143,7 +155,7 @@
                     @if (verMenuCuenta)
                     {
                         <div class="dropdown d-inline-block">
-                            <a class="layout-link dropdown-toggle"
+                            <a class="layout-link dropdown-toggle @GrupoActivo("/Cuenta", "/Personal")"
                                href="#"
                                id="navbarDropdownCuenta"
                                role="button"
@@ -157,7 +169,7 @@
                                 @if (verCuenta)
                                 {
                                     <li>
-                                        <a class="dropdown-item item-cyan py-2" asp-page="/Cuenta/ControlAcceso">
+                                        <a class="dropdown-item item-cyan py-2 @Activo("/Cuenta/ControlAcceso")" asp-page="/Cuenta/ControlAcceso">
                                             <i class="bi bi-person-lock me-2"></i>Control de acceso
                                         </a>
                                     </li>
@@ -165,7 +177,7 @@
                                 @if (verPersonal)
                                 {
                                     <li>
-                                        <a class="dropdown-item item-purple py-2" asp-page="/Personal/AdministracionPersonal">
+                                        <a class="dropdown-item item-purple py-2 @Activo("/Personal/AdministracionPersonal")" asp-page="/Personal/AdministracionPersonal">
                                             <i class="bi bi-people-fill me-2"></i>Administrar Personal
                                         </a>
                                     </li>
@@ -179,89 +191,89 @@
                 <!-- Notificaciones y usuario (Derecha) -->
                 <div class="layout-derecha">
 
-                <!-- Notificaciones (notificaciones.js) -->
-                <div class="dropdown notif-dropdown">
-                    <button type="button"
-                            class="notif-boton"
-                            id="btnNotificaciones"
-                            data-bs-toggle="dropdown"
-                            data-bs-auto-close="outside"
-                            aria-expanded="false"
-                            aria-label="Notificaciones"
-                            title="Notificaciones">
-                        <i class="bi bi-bell-fill"></i>
-                        <span class="notif-contador d-none" id="contadorNotificaciones">0</span>
-                    </button>
+                    <!-- Notificaciones (notificaciones.js) -->
+                    <div class="dropdown notif-dropdown">
+                        <button type="button"
+                                class="notif-boton"
+                                id="btnNotificaciones"
+                                data-bs-toggle="dropdown"
+                                data-bs-auto-close="outside"
+                                aria-expanded="false"
+                                aria-label="Notificaciones"
+                                title="Notificaciones">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="notif-contador d-none" id="contadorNotificaciones">0</span>
+                        </button>
 
-                    <div class="dropdown-menu dropdown-menu-end notif-menu" aria-labelledby="btnNotificaciones">
-                        <div class="notif-menu-encabezado">
-                            <span><i class="bi bi-bell me-2"></i>Notificaciones</span>
-                            <button type="button" class="notif-leer-todas" id="btnLeerTodas">Marcar todas como leídas</button>
-                        </div>
-                        <div class="notif-lista" id="listaNotificaciones">
-                            <div class="notif-vacio"><i class="bi bi-bell-slash"></i>No tienes notificaciones.</div>
+                        <div class="dropdown-menu dropdown-menu-end notif-menu" aria-labelledby="btnNotificaciones">
+                            <div class="notif-menu-encabezado">
+                                <span><i class="bi bi-bell me-2"></i>Notificaciones</span>
+                                <button type="button" class="notif-leer-todas" id="btnLeerTodas">Marcar todas como leídas</button>
+                            </div>
+                            <div class="notif-lista" id="listaNotificaciones">
+                                <div class="notif-vacio"><i class="bi bi-bell-slash"></i>No tienes notificaciones.</div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Usuario y menú desplegable -->
-                <div class="dropdown layout-user-dropdown">
+                    <!-- Usuario y menú desplegable -->
+                    <div class="dropdown layout-user-dropdown">
 
-                    <button type="button"
-                            class="layout-user"
-                            id="menuUsuario"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false">
+                        <button type="button"
+                                class="layout-user"
+                                id="menuUsuario"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
 
-                        <i class="bi bi-person-circle"></i>
+                            <i class="bi bi-person-circle"></i>
 
-                        <span class="layout-user-text">
-                            <span class="layout-user-welcome">
-                                Bienvenido(a):
+                            <span class="layout-user-text">
+                                <span class="layout-user-welcome">Bienvenido(a):</span>
+                                <strong>@nombreCompleto</strong>
+                                <small>@rolUsuario</small>
                             </span>
-                            <strong>
-                                @nombreUsuario
-                            </strong>
-                            <small>
-                                @rolUsuario
-                            </small>
-                        </span>
 
-                        <i class="bi bi-chevron-down layout-user-arrow"></i>
+                            <i class="bi bi-chevron-down layout-user-arrow"></i>
 
-                    </button>
+                        </button>
 
-                    <ul class="dropdown-menu dropdown-menu-end layout-user-menu custom-dropdown-menu shadow-lg border-0"
-                        aria-labelledby="menuUsuario">
+                        <ul class="dropdown-menu dropdown-menu-end layout-user-menu custom-dropdown-menu shadow-lg border-0"
+                            aria-labelledby="menuUsuario">
 
-                        <li class="layout-user-menu-header">
-                            <span>
-                                Sesión iniciada como
-                            </span>
-                            <strong>
-                                @nombreUsuario
-                            </strong>
-                        </li>
+                            <li class="layout-user-menu-header">
+                                <span>Sesión iniciada como</span>
+                                <strong>@nombreUsuario</strong>
+                            </li>
 
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
 
-                        <li>
-                            <form method="post"
-                                  asp-page="/InicioSesion/CerrarSesion"
-                                  id="formCerrarSesion">
-                                <button type="submit"
-                                        class="dropdown-item layout-logout">
-                                    <i class="bi bi-box-arrow-right me-2"></i>
-                                    Cerrar sesión
+                            <li>
+                                <button type="button" class="dropdown-item item-cyan" data-bs-toggle="modal" data-bs-target="#modalCambiarPassword">
+                                    <i class="bi bi-key me-2"></i>Cambiar contraseña
                                 </button>
-                            </form>
-                        </li>
+                            </li>
 
-                    </ul>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
 
-                </div>
+                            <li>
+                                <form method="post"
+                                      asp-page="/InicioSesion/CerrarSesion"
+                                      id="formCerrarSesion">
+                                    <button type="submit"
+                                            class="dropdown-item layout-logout">
+                                        <i class="bi bi-box-arrow-right me-2"></i>
+                                        Cerrar sesión
+                                    </button>
+                                </form>
+                            </li>
+
+                        </ul>
+
+                    </div>
 
                 </div>
 
@@ -310,10 +322,12 @@
         </div>
     </div>
 
+    <partial name="_ModalesUsuario" />
+
     <footer class="layout-footer">
         <div class="container-fluid px-4">
             <span>
-                &copy; 2026 - SigesST
+                &copy; @DateTime.Now.Year - SigesST
             </span>
 
             <span>
@@ -330,5 +344,8 @@
     <script src="~/js/modales.js" asp-append-version="true"></script>
     <script src="~/js/logout.js" asp-append-version="true"></script>
     <script src="~/js/notificaciones.js" asp-append-version="true"></script>
+    <script src="~/js/miCuenta.js" asp-append-version="true"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)</body></html>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

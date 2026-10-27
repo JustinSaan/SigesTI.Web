@@ -7,6 +7,11 @@
     bool puedeCrear = await Permisos.PuedeAsync(Modulos.PlanRespaldos, Accion.Crear);
     bool puedeEditar = await Permisos.PuedeAsync(Modulos.PlanRespaldos, Accion.Editar);
     bool puedeEliminar = await Permisos.PuedeAsync(Modulos.PlanRespaldos, Accion.Eliminar);
+
+    // Solo quien puede editar o eliminar abre el modal del equipo al dar clic en la fila
+    bool puedeAbrirEquipo = puedeEditar || puedeEliminar;
+    string claseClic = puedeAbrirEquipo ? "cursor-pointer" : "";
+    string? clicEquipo = puedeAbrirEquipo ? "abrirModalEditarDesdeFila(this)" : null;
 }
 @Html.AntiForgeryToken()
 
@@ -38,7 +43,13 @@
     <!-- Tabla Matriz Plan de Respaldos -->
     <div class="glass-panel mb-4 overflow-hidden">
         <div class="glass-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-calendar3 me-2"></i>Cronograma de Respaldos (Arrastra <i class="bi bi-grip-vertical"></i> para reordenar)</span>
+            <span>
+                <i class="bi bi-calendar3 me-2"></i>Cronograma de Respaldos
+                @if (puedeEditar)
+                {
+                    <text>(Arrastra <i class="bi bi-grip-vertical"></i> para reordenar)</text>
+                }
+            </span>
             <span class="badge bg-primary px-3 py-2 rounded-pill">Equipos Registrados: @Model.EquiposMatriz.Count</span>
         </div>
         <div class="table-responsive tabla-contenedor-respaldos">
@@ -81,15 +92,22 @@
                                 data-activo="@equipo.Activo.ToString().ToLower()"
                                 data-programaciones='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(equipo.Programaciones))'>
 
-                                <td class="drag-handle" title="Arrastra para reordenar"><i class="bi bi-grip-vertical fs-5"></i></td>
+                                @if (puedeEditar)
+                                {
+                                    <td class="drag-handle" title="Arrastra para reordenar"><i class="bi bi-grip-vertical fs-5"></i></td>
+                                }
+                                else
+                                {
+                                    <td></td>
+                                }
 
-                                <td class="text-start ps-3 cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">
+                                <td class="text-start ps-3 @claseClic" onclick="@clicEquipo">
                                     <span class="badge-area-sigest" data-area="@equipo.Area">
                                         @equipo.Area
                                     </span>
                                 </td>
 
-                                <td class="cursor-pointer celda-ejecutivo" onclick="abrirModalEditarDesdeFila(this)">
+                                <td class="@claseClic celda-ejecutivo" onclick="@clicEquipo">
                                     @if (equipo.Ejecutivo == "Sin Ejecutivo Asignado")
                                     {
                                         <span class="texto-tenue">@equipo.Ejecutivo</span>
@@ -99,13 +117,13 @@
                                         @equipo.Ejecutivo
                                     }
                                 </td>
-                                <td class="cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">
+                                <td class="@claseClic" onclick="@clicEquipo">
                                     <span class="equipo-folio">@equipo.Hostname</span>
                                     <span class="equipo-ip">@equipo.DireccionIP</span>
                                 </td>
 
                                 <!-- Columna de Fechas Vigentes -->
-                                <td class="cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">
+                                <td class="@claseClic" onclick="@clicEquipo">
                                     <div class="d-flex justify-content-center gap-2 flex-wrap align-items-center">
                                         @if (!equipo.Activo)
                                         {
@@ -177,7 +195,7 @@
                                     </div>
                                 </td>
 
-                                <td class="cursor-pointer" onclick="abrirModalEditarDesdeFila(this)">
+                                <td class="@claseClic" onclick="@clicEquipo">
                                     @if (equipo.Activo)
                                     {
                                         <span class="badge bg-success"><i class="bi bi-circle-fill me-1 small"></i>Activo</span>

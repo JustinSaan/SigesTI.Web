@@ -1044,48 +1044,66 @@
         text-shadow: none !important;
     }
 
-    /* Encabezado: franja azul marino con título y fecha */
+    /* Encabezado: fondo blanco, título a la izquierda y fecha en recuadro,
+       con una raya azul oscuro y otra azul claro debajo (igual que el reporte de solicitudes) */
     #seccionImpresion .rep-encabezado {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        background: #0f172a !important;
-        border-left: 6px solid #0284c7;
-        border-radius: 6px;
-        padding: 12px 18px;
-        margin-bottom: 12px;
+        align-items: flex-end;
+        background: #ffffff !important;
+        padding: 0 0 10px 0;
+        border-bottom: 3px solid #0f2a52;
+        margin-bottom: 18px;
+        position: relative;
     }
 
+        #seccionImpresion .rep-encabezado::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            bottom: -6px;
+            left: 0;
+            height: 2px;
+            background: #2563eb !important;
+        }
+
     #seccionImpresion .rep-area {
-        color: #7dd3fc !important;
+        color: #0284c7 !important;
         font-size: 7pt;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 1.2px;
+        margin-bottom: 2px;
     }
 
     #seccionImpresion .rep-titulo {
-        color: #ffffff !important;
-        font-size: 13pt;
+        color: #0f172a !important;
+        font-size: 15pt;
         font-weight: 800;
-        letter-spacing: 0.3px;
+        letter-spacing: 0.2px;
+        line-height: 1.1;
     }
 
     #seccionImpresion .rep-fecha {
-        text-align: right;
+        text-align: center;
+        background: #f0f9ff !important;
+        border: 1px solid #bae6fd;
+        border-radius: 6px;
+        padding: 4px 12px;
     }
 
         #seccionImpresion .rep-fecha span {
             display: block;
-            color: #94a3b8 !important;
-            font-size: 6.5pt;
+            color: #64748b !important;
+            font-size: 6pt;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         #seccionImpresion .rep-fecha strong {
-            color: #ffffff !important;
-            font-size: 11pt;
+            color: #0c4a6e !important;
+            font-size: 10.5pt;
         }
 
     /* Resumen: cuatro recuadros con el conteo por estatus */

@@ -240,7 +240,9 @@
                         int index = 1;
                         foreach (var item in Model.ListaTareas)
                         {
-                            bool soloBusqueda = !Model.FiltroFechaInicio.HasValue && !Model.FiltroFechaFin.HasValue && item.Estatus == "Resuelta";
+                            // Las resueltas solo se ocultan si se resolvieron antes de hoy; las de hoy siguen visibles hasta que cambie el día
+                            bool resueltaHoy = item.FechaRealizacion.HasValue && item.FechaRealizacion.Value.Date == DateTime.Today;
+                            bool soloBusqueda = !Model.FiltroFechaInicio.HasValue && !Model.FiltroFechaFin.HasValue && item.Estatus == "Resuelta" && !resueltaHoy;
                             <tr class="fila-tarea" data-id="@item.Id" data-solo-busqueda="@(soloBusqueda ? "true" : "false")" data-objetivo="@(string.IsNullOrWhiteSpace(item.Objetivo) ? "-" : item.Objetivo)" style="cursor: pointer;">
                                 <td class="text-center fw-bold text-index celda-sin-recorte">@(soloBusqueda ? "-" : (index++).ToString())</td>
                                 
@@ -526,8 +528,8 @@
                     </table>
 
                     <div class="rep-pie">
-                        <span>SigesTI · Área de Soporte Técnico</span>
-                        <span>Generado el @DateTime.Now.ToString("dd/MM/yyyy hh:mm tt")</span>
+                        <span>Área de Soporte Técnico</span>
+                      
                     </div>
                 </div>
             </div>

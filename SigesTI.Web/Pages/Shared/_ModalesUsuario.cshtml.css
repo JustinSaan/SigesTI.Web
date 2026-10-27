@@ -1,0 +1,44 @@
+/* ==========================================================================
+   MODAL CAMBIAR CONTRASEÑA
+   El diseño del modal viene de .modal-notificacion (notificaciones.css)
+   ========================================================================== */
+.mi-cuenta-form {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 22px;
+}
+
+    .mi-cuenta-form label {
+        margin: 10px 0 6px;
+        color: #cbd5e1;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+        .mi-cuenta-form label:first-child {
+            margin-top: 0;
+        }
+
+    .mi-cuenta-form input {
+        height: 40px;
+        padding: 9px 11px;
+        color: #f8fafc;
+        background: rgba(15, 23, 42, 0.84);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 8px;
+        outline: none;
+    }
+
+        .mi-cuenta-form input:focus {
+            border-color: rgba(56, 189, 248, 0.6);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+        }
+
+    .mi-cuenta-form small {
+        margin-top: 10px;
+        color: #64748b;
+    }
+
+.mi-cuenta-pie {
+    border-top: 1px solid rgba(56, 189, 248, 0.2);
+}
