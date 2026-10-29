@@ -21,13 +21,6 @@ function abrirVistaPreviaImpresion() {
         printInd.innerHTML = clonTabla.outerHTML;
     }
 
-    // Gráficas en tema claro para que se lean sobre la hoja blanca
-    const imagenes = imagenesGraficasParaImpresion();
-    const imgSistemas = document.getElementById("imgChartSistemasPrint");
-    const imgEstatus = document.getElementById("imgChartEstatusPrint");
-    if (imgSistemas) imgSistemas.src = imagenes.sistemas;
-    if (imgEstatus) imgEstatus.src = imagenes.estatus;
-
     const printAct = document.getElementById("contenedorActividadesPrint");
     const printSoportes = document.getElementById("printSoportesInternos");
 
@@ -756,8 +749,13 @@ document.addEventListener('DOMContentLoaded', function () {
    MÓDULO REPORTE DE TICKETS - GRÁFICAS DEL CONCENTRADO
    ========================================================================== */
 
-const temaGraficaOscuro = { texto: '#e2e8f0', rejilla: 'rgba(255, 255, 255, 0.1)', borde: '#111c33' };
-const temaGraficaClaro = { texto: '#0f172a', rejilla: 'rgba(15, 23, 42, 0.12)', borde: '#ffffff' };
+// Las gráficas del reporte impreso se dibujan en SVG desde el servidor (GraficasSvg.cs)
+// Colores de textos y líneas de las gráficas en pantalla, según el aspecto (oscuro o claro)
+function temaGrafica() {
+    return document.documentElement.getAttribute('data-tema') === 'claro'
+        ? { texto: '#0f172a', rejilla: 'rgba(15, 23, 42, 0.1)', borde: '#ffffff' }
+        : { texto: '#e2e8f0', rejilla: 'rgba(255, 255, 255, 0.1)', borde: '#111c33' };
+}
 
 function porcentajeDe(valor, datos) {
     const total = datos.reduce((suma, n) => suma + n, 0);
@@ -809,6 +807,8 @@ function posicionLeyendaDona(ancho) {
 }
 
 function crearGraficaSistemas(canvas) {
+    const tema = temaGrafica();
+
     return new Chart(canvas, {
         type: 'doughnut',
         data: {
@@ -816,7 +816,7 @@ function crearGraficaSistemas(canvas) {
             datasets: [{
                 data: dataTotales,
                 backgroundColor: labelsSistemas.map(colorSistema),
-                borderColor: temaGraficaOscuro.borde,
+                borderColor: tema.borde,
                 borderWidth: 2
             }]
         },
@@ -838,7 +838,7 @@ function crearGraficaSistemas(canvas) {
                 legend: {
                     position: posicionLeyendaDona(canvas.parentElement.clientWidth),
                     labels: {
-                        color: temaGraficaOscuro.texto,
+                        color: tema.texto,
                         usePointStyle: true,
                         pointStyle: 'circle',
                         boxWidth: 10,
@@ -846,7 +846,7 @@ function crearGraficaSistemas(canvas) {
                         font: { size: 11, weight: 'bold' }
                     }
                 },
-                totalCentro: { color: temaGraficaOscuro.texto },
+                totalCentro: { color: tema.texto },
                 tooltip: {
                     callbacks: {
                         label: (ctx) => ` ${ctx.label}: ${ctx.parsed} tickets · ${porcentajeDe(ctx.parsed, ctx.dataset.data)}%`
@@ -867,6 +867,7 @@ function crearGraficaSistemas(canvas) {
 }
 
 function crearGraficaEstatus(canvas) {
+    const tema = temaGrafica();
     const estatus = [
         { nombre: 'Tiempo y forma', datos: dataTiempoForma, variable: '--estatus-tiempo' },
         { nombre: 'Atrasados', datos: dataCerradosAtrasados, variable: '--estatus-atrasado' },
@@ -899,20 +900,20 @@ function crearGraficaEstatus(canvas) {
                 x: {
                     stacked: true,
                     beginAtZero: true,
-                    ticks: { color: temaGraficaOscuro.texto, precision: 0 },
-                    grid: { color: temaGraficaOscuro.rejilla },
-                    title: { display: true, text: 'Tickets', color: temaGraficaOscuro.texto }
+                    ticks: { color: tema.texto, precision: 0 },
+                    grid: { color: tema.rejilla },
+                    title: { display: true, text: 'Tickets', color: tema.texto }
                 },
                 y: {
                     stacked: true,
-                    ticks: { color: temaGraficaOscuro.texto, font: { size: 11, weight: 'bold' } },
+                    ticks: { color: tema.texto, font: { size: 11, weight: 'bold' } },
                     grid: { display: false }
                 }
             },
             plugins: {
                 legend: {
                     position: 'top',
-                    labels: { color: temaGraficaOscuro.texto, boxWidth: 12, font: { size: 11, weight: 'bold' } }
+                    labels: { color: tema.texto, boxWidth: 12, font: { size: 11, weight: 'bold' } }
                 },
                 datalabels: {
                     font: { weight: 'bold', size: 10 },
@@ -933,38 +934,13 @@ function inicializarGraficasConcentrado() {
     if (canvasEstatus) window.chartEstatusInstance = crearGraficaEstatus(canvasEstatus);
 }
 
-function aplicarTemaGraficas(tema) {
-    const dona = window.chartSistemasInstance;
-    if (dona) {
-        dona.data.datasets[0].borderColor = tema.borde;
-        dona.options.plugins.totalCentro.color = tema.texto;
-        dona.options.plugins.legend.labels.color = tema.texto;
-        dona.update('none');
-    }
+// Al cambiar el aspecto se vuelven a dibujar con los nuevos colores
+document.addEventListener('temaCambiado', () => {
+    window.chartSistemasInstance?.destroy();
+    window.chartEstatusInstance?.destroy();
+    inicializarGraficasConcentrado();
+});
 
-    const barras = window.chartEstatusInstance;
-    if (barras) {
-        barras.options.scales.x.ticks.color = tema.texto;
-        barras.options.scales.y.ticks.color = tema.texto;
-        barras.options.scales.x.grid.color = tema.rejilla;
-        barras.options.scales.x.title.color = tema.texto;
-        barras.options.plugins.legend.labels.color = tema.texto;
-        barras.update('none');
-    }
-}
-
-// Genera las imágenes de las gráficas en tema claro (texto oscuro) para el PDF
-function imagenesGraficasParaImpresion() {
-    aplicarTemaGraficas(temaGraficaClaro);
-
-    const imagenes = {
-        sistemas: window.chartSistemasInstance ? window.chartSistemasInstance.toBase64Image('image/png', 1) : '',
-        estatus: window.chartEstatusInstance ? window.chartEstatusInstance.toBase64Image('image/png', 1) : ''
-    };
-
-    aplicarTemaGraficas(temaGraficaOscuro);
-    return imagenes;
-}
 
 /* ==========================================================================
    MÓDULO REPORTE DE TICKETS - FILTRO DEL DETALLE POR SISTEMA

@@ -1,0 +1,207 @@
+﻿/* ==========================================================================
+   INDICADORES Y MÉTRICAS - TEMA CLARO
+   Mismas reglas que indicadores.css, con los colores en su versión clara.
+   Solo aplica con <html data-tema="claro"> y en pantalla (las impresiones no cambian).
+   Archivo generado con Scripts/GenerarTemaClaro.js: no se edita a mano.
+   ========================================================================== */
+
+@media screen {
+
+    html[data-tema="claro"] .indicadores {
+        --ind-fondo: #fdfefe;
+        --ind-panel: #f9fafd;
+        --ind-panel-borde: rgba(148, 163, 184, 0.28);
+        --ind-panel-header: rgba(255, 255, 255, 0.93);
+        --ind-texto: #3f5879;
+        --ind-texto-suave: #475569;
+        --ind-azul: #0369a1;
+        --ind-verde: #047857;
+        --ind-violeta: #6d28d9;
+        --ind-ambar: #b45309;
+        --graf-texto: #3f5879;
+        --graf-texto-suave: #475569;
+        --graf-linea: rgba(148, 163, 184, 0.32);
+        --graf-fondo: #f9fafd;
+        color: var(--ind-texto);
+        background: radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.18), transparent 38%), var(--ind-fondo);
+    }
+    html[data-tema="claro"] .indicadores ::selection {
+        color: #0f172a;
+        background: rgba(56, 189, 248, 0.35);
+    }
+    html[data-tema="claro"] .ind-icono-titulo {
+        color: var(--ind-azul);
+        background: rgba(56, 189, 248, 0.12);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    html[data-tema="claro"] .ind-titulo {
+        color: #0f172a;
+    }
+    html[data-tema="claro"] .ind-subtitulo {
+        color: var(--ind-texto-suave);
+    }
+    html[data-tema="claro"] .ind-subtitulo i {
+        color: var(--ind-azul);
+    }
+    html[data-tema="claro"] .ind-filtros {
+        background: var(--ind-panel);
+        border: 1px solid var(--ind-panel-borde);
+    }
+    html[data-tema="claro"] .ind-campo label {
+        color: var(--ind-texto-suave);
+    }
+    html[data-tema="claro"] .ind-campo input,
+    html[data-tema="claro"] .ind-campo select {
+        color: #0f172a;
+        background: #fdfefe;
+        border: 1px solid #ced7e8;
+        outline: none;
+    }
+    html[data-tema="claro"] .ind-campo input:focus,
+    html[data-tema="claro"] .ind-campo select:focus {
+        border-color: var(--ind-azul);
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+    }
+    html[data-tema="claro"] .ind-azul {
+        --ind-color-fondo: rgba(56, 189, 248, 0.14);
+    }
+    html[data-tema="claro"] .ind-verde {
+        --ind-color-fondo: rgba(52, 211, 153, 0.14);
+    }
+    html[data-tema="claro"] .ind-violeta {
+        --ind-color-fondo: rgba(167, 139, 250, 0.14);
+    }
+    html[data-tema="claro"] .ind-ambar {
+        --ind-color-fondo: rgba(251, 191, 36, 0.14);
+    }
+    html[data-tema="claro"] .ind-kpi {
+        background: var(--ind-panel);
+        border: 1px solid var(--ind-panel-borde);
+    }
+    html[data-tema="claro"] .ind-kpi::before {
+        background: var(--ind-color);
+    }
+    html[data-tema="claro"] .ind-kpi-label {
+        color: var(--ind-texto-suave);
+    }
+    html[data-tema="claro"] .ind-kpi-icono {
+        color: var(--ind-color);
+        background: var(--ind-color-fondo);
+    }
+    html[data-tema="claro"] .ind-kpi-valor {
+        color: #0f172a;
+    }
+    html[data-tema="claro"] .ind-kpi-valor small {
+        color: var(--ind-color);
+    }
+    html[data-tema="claro"] .ind-kpi-detalle {
+        color: var(--ind-texto-suave);
+    }
+    html[data-tema="claro"] .ind-kpi-detalle i {
+        color: var(--ind-color);
+    }
+    html[data-tema="claro"] .ind-kpi-desglose strong {
+        color: var(--ind-texto);
+    }
+    html[data-tema="claro"] .ind-barra {
+        background: rgba(148, 163, 184, 0.15);
+    }
+    html[data-tema="claro"] .ind-barra span {
+        background: var(--ind-color);
+    }
+    html[data-tema="claro"] .ind-parte-tiempo {
+        background: #34d399 !important;
+        color: #ffffff !important;
+    }
+    html[data-tema="claro"] .ind-parte-retraso {
+        background: #818cf8 !important;
+    }
+    html[data-tema="claro"] .ind-parte-curso {
+        background: #f59e0b !important;
+        color: #ffffff !important;
+    }
+    html[data-tema="claro"] .ind-kpi-partes {
+        color: var(--ind-texto-suave);
+    }
+    html[data-tema="claro"] .ind-chip {
+        color: var(--ind-texto);
+        background: var(--ind-color-fondo);
+    }
+    html[data-tema="claro"] .ind-chip b {
+        color: var(--ind-color);
+    }
+    html[data-tema="claro"] .ind-panel {
+        background: var(--ind-panel);
+        border: 1px solid var(--ind-panel-borde);
+    }
+    html[data-tema="claro"] .ind-panel-header {
+        color: #0f172a;
+        background: var(--ind-panel-header);
+        border-bottom: 1px solid var(--ind-panel-borde);
+    }
+    html[data-tema="claro"] .ind-panel-header i {
+        color: var(--ind-azul);
+    }
+    html[data-tema="claro"] .ind-contador {
+        color: var(--ind-azul);
+        background: rgba(56, 189, 248, 0.12);
+    }
+    html[data-tema="claro"] .indicadores .g-texto {
+        fill: var(--graf-texto);
+    }
+    html[data-tema="claro"] .indicadores .g-suave {
+        fill: var(--graf-texto-suave);
+    }
+    html[data-tema="claro"] .indicadores .g-linea {
+        stroke: var(--graf-linea);
+    }
+    html[data-tema="claro"] .indicadores .g-separador {
+        stroke: var(--graf-fondo);
+    }
+    html[data-tema="claro"] .ind-vacio {
+        color: var(--ind-texto-suave);
+    }
+    html[data-tema="claro"] .ind-vacio i {
+        color: #475569;
+    }
+    html[data-tema="claro"] .ind-textarea {
+        color: #0f172a;
+        background: #fdfefe;
+        border: 1px solid #ced7e8;
+        outline: none;
+    }
+    html[data-tema="claro"] .ind-textarea::placeholder {
+        color: #64748b;
+    }
+    html[data-tema="claro"] .ind-textarea:focus {
+        border-color: var(--ind-azul);
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+    }
+    html[data-tema="claro"] .indicadores.modo-impresion {
+        --ind-panel: #ffffff;
+        --ind-panel-borde: #dbe3ee;
+        --ind-panel-header: #f1f5f9;
+        --ind-texto: #0f172a;
+        --ind-texto-suave: #475569;
+        --ind-azul: #0284c7;
+        --ind-verde: #15803d;
+        --ind-violeta: #4e1c9c;
+        --ind-ambar: #b45309;
+        --graf-texto: #0f172a;
+        --graf-texto-suave: #475569;
+        --graf-linea: #e2e8f0;
+        --graf-fondo: #ffffff;
+        background: #ffffff;
+    }
+    html[data-tema="claro"] .modo-impresion .ind-kpi-valor,
+    html[data-tema="claro"] .modo-impresion .ind-panel-header {
+        color: #0f172a !important;
+    }
+    html[data-tema="claro"] .modo-impresion .ind-periodo-reporte {
+        color: #334155;
+    }
+    html[data-tema="claro"] .modo-impresion .ind-observaciones-reporte {
+        color: #0f172a;
+    }
+
+}

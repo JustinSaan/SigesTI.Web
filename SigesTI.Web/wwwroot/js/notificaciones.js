@@ -36,8 +36,13 @@ function tiempoTranscurrido(fechaTexto) {
     return new Date(fechaTexto).toLocaleDateString("es-MX");
 }
 
-function cargarNotificaciones() {
-    $.getJSON("/Notificaciones?handler=Listar", function (data) {
+/* segundoPlano: la consulta automática no cuenta como actividad (así la sesión puede caducar) */
+function cargarNotificaciones(segundoPlano) {
+    $.ajax({
+        url: "/Notificaciones?handler=Listar",
+        dataType: "json",
+        headers: segundoPlano === true ? { "X-Segundo-Plano": "1" } : {}
+    }).done(function (data) {
         var $contador = $("#contadorNotificaciones");
         var $lista = $("#listaNotificaciones").empty();
 
@@ -137,7 +142,9 @@ $(document).ready(function () {
     if (!$("#btnNotificaciones").length) return;
 
     cargarNotificaciones();
-    setInterval(cargarNotificaciones, 60000);
+    setInterval(function () {
+        cargarNotificaciones(true);
+    }, 60000);
 
     document.getElementById("btnNotificaciones").addEventListener("show.bs.dropdown", cargarNotificaciones);
 

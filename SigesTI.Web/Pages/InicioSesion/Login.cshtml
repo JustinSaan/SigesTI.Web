@@ -17,6 +17,13 @@
 
     <title>@ViewData["Title"] - SigesTI</title>
 
+    <!-- Aplica el aspecto guardado antes de pintar la página, para que no parpadee -->
+    <script>
+        try {
+            if (localStorage.getItem("tema") === "claro") document.documentElement.setAttribute("data-tema", "claro");
+        } catch (e) { }
+    </script>
+
     <link rel="icon"
           type="image/x-icon"
           href="~/icono.png" />
@@ -38,6 +45,18 @@
         <!-- Figuras decorativas -->
         <div class="figura figura-izquierda"></div>
         <div class="figura figura-derecha"></div>
+
+        <!-- Cambiar aspecto (oscuro / claro) -->
+        <button type="button"
+                id="btnCambiarTema"
+                class="btn-tema-login"
+                title="Cambiar aspecto"
+                aria-label="Cambiar aspecto">
+
+            <i class="bi bi-sun-fill icono-oscuro"></i>
+            <i class="bi bi-moon-stars-fill icono-claro"></i>
+
+        </button>
 
         <!-- Tarjeta del Login -->
         <section class="login-card">
@@ -128,15 +147,19 @@
 
                 </div>
 
-                <!-- Recuérdame -->
-                <div class="recordarme">
+                <!-- Recordar mi usuario: se guarda solo el usuario, en este navegador (login.js) -->
+                <label class="recordar-usuario"
+                       for="recordarUsuario">
 
-                    <input asp-for="Login.Recordarme" />
+                    <input type="checkbox"
+                           id="recordarUsuario"
+                           role="switch" />
 
-                    <label asp-for="Login.Recordarme">
-                    </label>
+                    <span class="recordar-interruptor"></span>
 
-                </div>
+                    <span>Recordar mi usuario</span>
+
+                </label>
 
                 <!-- Botón iniciar sesión -->
                 <button type="submit"
@@ -152,6 +175,67 @@
             </form>
 
         </section>
+
+        <!-- Acerca del sistema (igual que en la pantalla principal) -->
+        <button type="button"
+                id="btnAcercaDe"
+                class="btn-info-system"
+                title="Información del Sistema"
+                aria-label="Información del Sistema">
+
+            <i class="bi bi-info-circle-fill"></i>
+
+        </button>
+
+        <!-- Modal: Información del Sistema -->
+        <div id="modalAcercaDe"
+             class="modal-password"
+             aria-hidden="true">
+
+            <div class="info-modal-content"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-labelledby="tituloAcercaDe">
+
+                <div class="info-modal-encabezado">
+
+                    <h6 id="tituloAcercaDe"
+                        class="info-modal-etiqueta">
+
+                        <i class="bi bi-info-circle-fill"></i>ACERCA DEL SISTEMA
+
+                    </h6>
+
+                    <button type="button"
+                            id="btnCerrarAcercaDe"
+                            class="btn-cerrar-acerca"
+                            aria-label="Cerrar"
+                            title="Cerrar">
+
+                        <i class="bi bi-x-lg"></i>
+
+                    </button>
+
+                </div>
+
+                <div class="info-modal-cuerpo">
+
+                    <h2 class="info-modal-titulo">SigesST</h2>
+                    <p class="info-modal-subtitulo">Sistema de Gestión de Soporte Técnico</p>
+
+                    <hr />
+
+                    <div class="info-modal-datos">
+                        <div><span>Versión actual:</span><span class="info-version">v1.0.0</span></div>
+                        <div><span>Desarrollado por:</span><strong>Ing. Justin Sánchez</strong></div>
+                        <div><span>Fecha de versión:</span><strong>Junio 2026</strong></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
 
         <!-- Modal obligatorio para cambiar contraseña -->
         <div id="modalCambiarPassword"
@@ -286,6 +370,14 @@
     </main>
 
     <input type="hidden"
+           id="sesionEnOtroEquipo"
+           value="@Model.SesionEnOtroEquipo.ToString().ToLower()" />
+
+    <input type="hidden"
+           id="sesionCaducada"
+           value="@Model.SesionCaducada.ToString().ToLower()" />
+
+    <input type="hidden"
            id="passwordCambiada"
            value="@((TempData["PasswordCambiada"] != null).ToString().ToLower())" />
 
@@ -298,6 +390,11 @@
 
     <!-- Comportamiento del Login -->
     <script src="~/js/login.js"
+            asp-append-version="true">
+    </script>
+
+    <!-- Cambiar aspecto -->
+    <script src="~/js/tema.js"
             asp-append-version="true">
     </script>
 

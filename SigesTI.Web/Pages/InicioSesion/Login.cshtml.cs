@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using SigesTI.Web.Data;
 using SigesTI.Web.Models;
+using SigesTI.Web.Seguridad;
 using System.ComponentModel.DataAnnotations;
 
 namespace SigesTI.Web.Pages.InicioSesion
@@ -12,11 +13,13 @@ namespace SigesTI.Web.Pages.InicioSesion
     {
         private readonly ApplicationDbContext _context;
         private readonly PasswordHasher<UsuarioSistema> _passwordHasher;
+        private readonly SesionesActivas _sesionesActivas;
 
-        public LoginModel(ApplicationDbContext context)
+        public LoginModel(ApplicationDbContext context, SesionesActivas sesionesActivas)
         {
             _context = context;
             _passwordHasher = new PasswordHasher<UsuarioSistema>();
+            _sesionesActivas = sesionesActivas;
         }
 
         [BindProperty]
@@ -26,12 +29,20 @@ namespace SigesTI.Web.Pages.InicioSesion
 
         public string MensajeCambio { get; set; } = string.Empty;
 
-        public IActionResult OnGet()
+        // La cuenta ya tiene una sesión abierta en otro equipo (login.js muestra la alerta)
+        public bool SesionEnOtroEquipo { get; set; }
+
+        // La sesión se cerró por inactividad (login.js muestra la alerta)
+        public bool SesionCaducada { get; set; }
+
+        public IActionResult OnGet(bool caducada = false)
         {
             if (HttpContext.Session.GetInt32("IdUsuario") != null)
             {
                 return RedirectToPage("/Index");
             }
+
+            SesionCaducada = caducada;
 
             return Page();
         }
@@ -90,7 +101,19 @@ namespace SigesTI.Web.Pages.InicioSesion
                 return Page();
             }
 
+            /*
+             * Solo se permite una sesión por usuario. Si ya está abierta en
+             * otro equipo, primero debe cerrarse ahí (o esperar a que expire).
+             */
+            if (_sesionesActivas.TieneOtraSesion(usuario.IdUsuario, HttpContext.Session.Id))
+            {
+                SesionEnOtroEquipo = true;
+                return Page();
+            }
+
             CrearSesion(usuario);
+
+            _sesionesActivas.Registrar(usuario.IdUsuario, HttpContext.Session.Id);
 
             usuario.UltimoAcceso = DateTime.Now;
 
@@ -259,9 +282,6 @@ namespace SigesTI.Web.Pages.InicioSesion
             [DataType(DataType.Password)]
             [Display(Name = "Contraseña")]
             public string Password { get; set; } = string.Empty;
-
-            [Display(Name = "Recuérdame")]
-            public bool Recordarme { get; set; }
         }
     }
 }

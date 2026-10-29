@@ -1,5 +1,7 @@
 @page
 @model SigesTI.Web.Pages.Actividades.ReporteTicketsModel
+@using SigesTI.Web.Models
+@using SigesTI.Web.Pages.Shared
 @{
     ViewData["Title"] = "Reporte Diario de Tickets";
     var concentradoSistemas = Model.ConcentradoSistemas;
@@ -90,6 +92,7 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" />
 <link rel="stylesheet" href="~/css/Actividades/reporte-tickets.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Claro/reporte-tickets.claro.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Reportes/reporte-encabezado.css" asp-append-version="true" />
 <partial name="_ColoresSistemas" model="Model.Sistemas" />
 
@@ -363,7 +366,7 @@
             </span>
             <span class="d-flex align-items-center gap-2">
                 <span id="chipFiltroSistema" class="badge bg-secondary chip-filtro-sistema d-none" title="Quitar filtro"></span>
-                <span id="lblRegistrosDetalle" class="badge bg-primary px-3 py-2 rounded-pill">Registros: @Model.ListaTickets.Count</span>
+                <span id="lblRegistrosDetalle" class="badge-registros">Registros: @Model.ListaTickets.Count</span>
             </span>
         </div>
         <div class="p-0 table-responsive tabla-detalle-scroll">
@@ -870,15 +873,53 @@
                     <i class="bi bi-pie-chart-fill me-1 text-primary"></i> Concentrado del Día por Sistema
                 </h6>
 
-                <!-- Contenedor dinámico de gráficas -->
-                <div class="row g-2 mb-3" id="contenedorGraficasPrint">
-                    <div class="col-6 text-center">
-                        <div class="fw-bold text-dark small mb-1" style="font-size: 8.5pt;">Distribución por sistema</div>
-                        <img id="imgChartSistemasPrint" style="max-width: 100%; height: auto; max-height: 190px;" />
+                <!-- Gráficas dibujadas en SVG (GraficasSvg.cs): al imprimir o guardar en PDF quedan como vectores, no como imagen -->
+                @{
+                    var partesSistemas = concentradoSistemas
+                        .Select(s =>
+                        {
+                            var catalogo = SistemaTicket.Buscar(Model.Sistemas, s.Sistema);
+                            return new ParteGrafica(s.Sistema, s.Total, catalogo?.ColorFondo ?? "#64748B", catalogo?.ColorTexto ?? "#FFFFFF");
+                        })
+                        .ToList();
+
+                    var seriesEstatus = new List<SerieGrafica>
+                    {
+                        new("Tiempo y forma", "#34D399", "#0F172A", concentradoSistemas.Select(s => s.TiempoForma).ToList()),
+                        new("Atrasados", "#818CF8", "#0F172A", concentradoSistemas.Select(s => s.CerradosAtrasados).ToList()),
+                        new("En curso", "#C8956B", "#0F172A", concentradoSistemas.Select(s => s.EnCurso).ToList())
+                    };
+                }
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="grafica-print-recuadro">
+                            <div class="grafica-print-titulo">Distribución por sistema</div>
+                            <div class="grafica-svg-print">
+                                @if (concentradoSistemas.Any())
+                                {
+                                    @Html.Raw(GraficasSvg.Dona(600, 190, partesSistemas, totalAlCentro: true, conCantidad: true, donaAlCentro: true))
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Sin tickets para la fecha seleccionada</span>
+                                }
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-6 text-center">
-                        <div class="fw-bold text-dark small mb-1" style="font-size: 8.5pt;">Estatus de atención por sistema</div>
-                        <img id="imgChartEstatusPrint" style="max-width: 100%; height: auto; max-height: 190px;" />
+                    <div class="col-6">
+                        <div class="grafica-print-recuadro">
+                            <div class="grafica-print-titulo">Estatus de atención por sistema</div>
+                            <div class="grafica-svg-print">
+                                @if (concentradoSistemas.Any())
+                                {
+                                    @Html.Raw(GraficasSvg.BarrasApiladas(600, 190, concentradoSistemas.Select(s => s.Sistema).ToList(), seriesEstatus, "Tickets"))
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Sin tickets para la fecha seleccionada</span>
+                                }
+                            </div>
+                        </div>
                     </div>
                 </div>
 

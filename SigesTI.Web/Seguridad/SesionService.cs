@@ -13,11 +13,13 @@ namespace SigesTI.Web.Seguridad
     {
         private readonly ApplicationDbContext _context;
         private readonly IMemoryCache _cache;
+        private readonly SesionesActivas _sesionesActivas;
 
-        public SesionService(ApplicationDbContext context, IMemoryCache cache)
+        public SesionService(ApplicationDbContext context, IMemoryCache cache, SesionesActivas sesionesActivas)
         {
             _context = context;
             _cache = cache;
+            _sesionesActivas = sesionesActivas;
         }
 
         private record EstadoUsuario(
@@ -29,8 +31,38 @@ namespace SigesTI.Web.Seguridad
 
         private static string ClaveCache(int idUsuario) => $"SesionUsuario_{idUsuario}";
 
+        /*
+         * true si el usuario pasó más del tiempo permitido sin usar el sistema; en ese caso se cierra su sesión.
+         * Las peticiones automáticas (la campana de notificaciones) no cuentan como actividad.
+         */
+        public bool CaducoPorInactividad(HttpContext httpContext, bool esSegundoPlano)
+        {
+            int? idUsuario = httpContext.Session.GetInt32("IdUsuario");
+            string? ultimaActividad = httpContext.Session.GetString("UltimaActividad");
+
+            if (idUsuario == null)
+            {
+                return false;
+            }
+
+            if (ultimaActividad != null
+                && DateTime.Now - new DateTime(long.Parse(ultimaActividad)) > _sesionesActivas.TiempoInactividad)
+            {
+                httpContext.Session.Clear();
+                _sesionesActivas.Quitar(idUsuario.Value);
+                return true;
+            }
+
+            if (!esSegundoPlano || ultimaActividad == null)
+            {
+                httpContext.Session.SetString("UltimaActividad", DateTime.Now.Ticks.ToString());
+            }
+
+            return false;
+        }
+
         // Devuelve false si la sesión ya no es válida y hay que mandar al usuario al Login
-        public async Task<bool> ValidarSesionAsync(HttpContext httpContext)
+        public async Task<bool> ValidarSesionAsync(HttpContext httpContext, bool esSegundoPlano)
         {
             int? idUsuario = httpContext.Session.GetInt32("IdUsuario");
 
@@ -60,7 +92,14 @@ namespace SigesTI.Web.Seguridad
             if (estado == null || !estado.Activo || estado.RequiereCambioPassword)
             {
                 httpContext.Session.Clear();
+                _sesionesActivas.Quitar(idUsuario.Value);
                 return false;
+            }
+
+            // Marca que la sesión sigue en uso (así no se puede abrir otra en otro equipo)
+            if (!esSegundoPlano)
+            {
+                _sesionesActivas.Registrar(idUsuario.Value, httpContext.Session.Id);
             }
 
             // Si un Admin le cambió el rol o el nombre, la sesión toma los datos nuevos

@@ -1,269 +1,479 @@
 ﻿/* ==========================================================================
-   TABLERO DE INDICADORES Y MÉTRICAS - SIGESTI (CSS AISLADO)
+   TABLERO DE INDICADORES Y MÉTRICAS - SIGESTI
+   Todo va dentro de .indicadores para no afectar otras páginas.
    ========================================================================== */
 
-/* --------------------------------------------------------------------------
-   1. CONTENEDOR PRINCIPAL Y SCOPE EXCLUSIVO DE INDICADORES
-   -------------------------------------------------------------------------- */
-.actividades-container {
-    padding: 24px;
-    background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.25), transparent 40%), radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.15), transparent 35%), #0b132b !important;
+.indicadores {
+    --ind-fondo: #0b1426;
+    --ind-panel: #111c33;
+    --ind-panel-borde: rgba(148, 163, 184, 0.14);
+    --ind-panel-header: rgba(15, 23, 42, 0.55);
+    --ind-texto: #e2e8f0;
+    --ind-texto-suave: #94a3b8;
+    --ind-azul: #38bdf8;
+    --ind-verde: #34d399;
+    --ind-violeta: #a78bfa;
+    --ind-ambar: #fbbf24;
+    /* Colores de textos y líneas de las gráficas SVG (el tema claro y la impresión los cambian) */
+    --graf-texto: #e2e8f0;
+    --graf-texto-suave: #94a3b8;
+    --graf-linea: rgba(148, 163, 184, 0.16);
+    --graf-fondo: #111c33;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     min-height: calc(100vh - 120px);
-    color: #e2e8f0;
+    padding: 24px 28px 32px;
+    color: var(--ind-texto);
+    background: radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.18), transparent 38%), var(--ind-fondo);
 }
 
-    /* Anular sombras globales de texto desajustadas */
-    .actividades-container * {
-        text-shadow: none !important;
+    .indicadores ::selection {
+        color: #ffffff;
+        background: rgba(56, 189, 248, 0.35);
     }
-
-    /* Selección de texto adaptada al tema oscuro */
-    .actividades-container ::selection {
-        background-color: rgba(56, 189, 248, 0.35) !important;
-        color: #ffffff !important;
-    }
-
-    /* Tarjetas y Paneles Glassmorphism */
-    .actividades-container .glass-panel {
-        background: linear-gradient(145deg, #172a45, #0f172a) !important;
-        border: 1px solid rgba(56, 189, 248, 0.28) !important;
-        border-radius: 16px !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-    }
-
-        .actividades-container .glass-panel h1,
-        .actividades-container .glass-panel h2,
-        .actividades-container .glass-panel h3,
-        .actividades-container .glass-panel h4,
-        .actividades-container .glass-panel p,
-        .actividades-container .glass-panel label {
-            background-color: transparent !important;
-        }
-
-    /* Encabezados de Paneles / Tarjetas */
-    .actividades-container .glass-header {
-        background: rgba(15, 23, 42, 0.85) !important;
-        border-bottom: 1px solid rgba(56, 189, 248, 0.3) !important;
-        padding: 14px 20px !important;
-        color: #38bdf8 !important;
-        font-weight: 700;
-        font-size: 0.95rem;
-        letter-spacing: 0.3px;
-        border-top-left-radius: 15px;
-        border-top-right-radius: 15px;
-    }
-
-    .actividades-container .text-muted,
-    .actividades-container .text-secondary {
-        color: #94a3b8 !important;
-    }
-
-    /* --------------------------------------------------------------------------
-   2. CONTENEDORES DE GRÁFICAS (CHART.JS)
-   -------------------------------------------------------------------------- */
-    .actividades-container .chart-container-box {
-        position: relative;
-        height: 280px;
-        width: 100%;
-    }
-
-    .actividades-container canvas {
-        max-width: 100% !important;
-        max-height: 100% !important;
-        filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.35));
-    }
-
-    /* --------------------------------------------------------------------------
-   3. TABLA DEL PROGRAMA DE ACTIVIDADES Y MANTENIMIENTOS
-   -------------------------------------------------------------------------- */
-    .actividades-container .tabla-sigest {
-        width: 100%;
-        border-collapse: separate !important;
-        border-spacing: 0 !important;
-    }
-
-        .actividades-container .tabla-sigest th {
-            padding: 12px 10px !important;
-            color: #38bdf8 !important;
-            font-size: 0.75rem !important;
-            font-weight: 700 !important;
-            text-align: center !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
-            background: #0f172a !important;
-            border: 1px solid rgba(148, 163, 184, 0.2) !important;
-            border-bottom: 2px solid rgba(56, 189, 248, 0.3) !important;
-        }
-
-        .actividades-container .tabla-sigest td {
-            padding: 10px 12px !important;
-            color: #f1f5f9 !important;
-            font-size: 0.85rem !important;
-            vertical-align: middle !important;
-            border: 1px solid rgba(148, 163, 184, 0.15) !important;
-            background: rgba(15, 23, 42, 0.6) !important;
-        }
-
-        .actividades-container .tabla-sigest tbody tr {
-            transition: background-color 0.15s ease, transform 0.15s ease;
-        }
-
-            .actividades-container .tabla-sigest tbody tr:hover {
-                cursor: pointer !important;
-                background: rgba(56, 189, 248, 0.15) !important;
-            }
-
-                .actividades-container .tabla-sigest tbody tr:hover td {
-                    color: #ffffff !important;
-                }
-
-        /* Insignias de Estatus en Tablas */
-        .actividades-container .badge,
-        .actividades-container .tabla-sigest .badge {
-            font-size: 0.75rem !important;
-            font-weight: 700 !important;
-            letter-spacing: 0.4px !important;
-            border-radius: 6px !important;
-            padding: 6px 12px !important;
-            display: inline-block !important;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
-        }
-
-            .actividades-container .badge.bg-primary,
-            .actividades-container .tabla-sigest .badge.bg-primary {
-                background-color: #0284c7 !important;
-                color: #ffffff !important;
-                border: 1px solid #38bdf8 !important;
-            }
-
-            .actividades-container .badge.bg-success,
-            .actividades-container .tabla-sigest .badge.bg-success {
-                background-color: #15803d !important;
-                color: #ffffff !important;
-                border: 1px solid #4ade80 !important;
-            }
-
-            .actividades-container .badge.bg-warning,
-            .actividades-container .tabla-sigest .badge.bg-warning {
-                background-color: #d97706 !important;
-                color: #ffffff !important;
-                border: 1px solid #fbbf24 !important;
-            }
-
-            .actividades-container .badge.bg-danger,
-            .actividades-container .tabla-sigest .badge.bg-danger {
-                background-color: #b91c1c !important;
-                color: #ffffff !important;
-                border: 1px solid #f87171 !important;
-            }
-
-            .actividades-container .badge.bg-info,
-            .actividades-container .tabla-sigest .badge.bg-info {
-                background-color: #0369a1 !important;
-                color: #ffffff !important;
-                border: 1px solid #38bdf8 !important;
-            }
-
-            .actividades-container .badge.bg-secondary,
-            .actividades-container .tabla-sigest .badge.bg-secondary {
-                background-color: #475569 !important;
-                color: #f8fafc !important;
-                border: 1px solid #94a3b8 !important;
-            }
-
-    /* --------------------------------------------------------------------------
-   4. FORMULARIO DE FILTROS Y CONTROLES INTERACTIVOS
-   -------------------------------------------------------------------------- */
-    .actividades-container label {
-        color: #cbd5e1 !important;
-        font-size: 0.82rem !important;
-        font-weight: 600 !important;
-        margin-bottom: 6px !important;
-        display: inline-block !important;
-    }
-
-    .actividades-container input[type="text"],
-    .actividades-container input[type="date"],
-    .actividades-container select,
-    .actividades-container textarea {
-        color: #ffffff !important;
-        background-color: #0f172a !important;
-        border: 1px solid #334155 !important;
-        border-radius: 8px !important;
-        outline: none !important;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
-        color-scheme: dark !important;
-    }
-
-        .actividades-container select option {
-            background-color: #0f172a !important;
-            color: #ffffff !important;
-        }
-
-        .actividades-container input::placeholder,
-        .actividades-container textarea::placeholder {
-            color: #94a3b8 !important;
-            opacity: 1 !important;
-        }
-
-        .actividades-container input:focus,
-        .actividades-container select:focus,
-        .actividades-container textarea:focus {
-            border-color: #38bdf8 !important;
-            background-color: #1e293b !important;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
-        }
-
-    /* Switch / Interruptor de Observaciones */
-    .actividades-container .form-switch .form-check-input {
-        background-color: #334155 !important;
-        border-color: #475569 !important;
-        width: 2.5em !important;
-        height: 1.25em !important;
-        cursor: pointer !important;
-    }
-
-        .actividades-container .form-switch .form-check-input:checked {
-            background-color: #38bdf8 !important;
-            border-color: #38bdf8 !important;
-        }
-
-    /* --------------------------------------------------------------------------
-   5. BOTONES DE ACCIÓN
-   -------------------------------------------------------------------------- */
-    .actividades-container .btn-primary-sigest {
-        color: #ffffff !important;
-        font-weight: 700 !important;
-        background: linear-gradient(135deg, #1d4ed8, #0284c7) !important;
-        border: 1px solid rgba(56, 189, 248, 0.4) !important;
-        border-radius: 8px !important;
-        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3) !important;
-        transition: all 0.18s ease !important;
-    }
-
-        .actividades-container .btn-primary-sigest:hover {
-            background: linear-gradient(135deg, #2563eb, #0369a1) !important;
-            box-shadow: 0 6px 16px rgba(56, 189, 248, 0.45) !important;
-            transform: translateY(-1px) !important;
-        }
-
-    .actividades-container .btn-secondary-sigest {
-        color: #f1f5f9 !important;
-        font-weight: 700 !important;
-        background: #334155 !important;
-        border: 1px solid #475569 !important;
-        border-radius: 8px !important;
-        transition: all 0.18s ease !important;
-    }
-
-        .actividades-container .btn-secondary-sigest:hover {
-            color: #ffffff !important;
-            background: #475569 !important;
-            transform: translateY(-1px) !important;
-        }
 
 /* --------------------------------------------------------------------------
-   6. ESTILOS DE IMPRESIÓN Y GUARDADO EN PDF (FONDO BLANCO DE ALTO CONTRASTE)
+   1. ENCABEZADO
+   -------------------------------------------------------------------------- */
+.ind-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.ind-header-texto {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.ind-icono-titulo {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    color: var(--ind-azul);
+    font-size: 1.4rem;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 14px;
+}
+
+.ind-titulo {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -0.2px;
+}
+
+.ind-subtitulo {
+    margin: 2px 0 0;
+    color: var(--ind-texto-suave);
+    font-size: 0.88rem;
+}
+
+    .ind-subtitulo i {
+        margin-left: 4px;
+        color: var(--ind-azul);
+    }
+
+/* --------------------------------------------------------------------------
+   2. FILTROS
+   -------------------------------------------------------------------------- */
+.ind-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--ind-panel);
+    border: 1px solid var(--ind-panel-borde);
+    border-radius: 16px;
+}
+
+.ind-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 170px;
+}
+
+    .ind-campo label {
+        margin: 0;
+        color: var(--ind-texto-suave);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+
+    .ind-campo input,
+    .ind-campo select {
+        height: 38px;
+        padding: 0 12px;
+        color: #ffffff;
+        font-size: 0.88rem;
+        background: #0b1426;
+        border: 1px solid #263552;
+        border-radius: 10px;
+        outline: none;
+        color-scheme: dark;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+        .ind-campo input:focus,
+        .ind-campo select:focus {
+            border-color: var(--ind-azul);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+/* Mes actual, Imprimir y Descargar PDF a la derecha de los filtros (estilos globales de layout.css) */
+.ind-filtros-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-left: auto;
+}
+
+/* --------------------------------------------------------------------------
+   3. TARJETAS DE INDICADORES
+   Cada tarjeta toma su color de --ind-color (ind-azul, ind-verde, ...).
+   Sin color-mix() porque html2canvas (PDF) no lo soporta.
+   -------------------------------------------------------------------------- */
+.ind-azul { --ind-color: var(--ind-azul); --ind-color-fondo: rgba(56, 189, 248, 0.14); }
+.ind-verde { --ind-color: var(--ind-verde); --ind-color-fondo: rgba(52, 211, 153, 0.14); }
+.ind-violeta { --ind-color: var(--ind-violeta); --ind-color-fondo: rgba(167, 139, 250, 0.14); }
+.ind-ambar { --ind-color: var(--ind-ambar); --ind-color-fondo: rgba(251, 191, 36, 0.14); }
+
+.ind-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.ind-kpi {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px 20px;
+    overflow: hidden;
+    background: var(--ind-panel);
+    border: 1px solid var(--ind-panel-borde);
+    border-radius: 16px;
+    break-inside: avoid;
+}
+
+    /* Raya de color arriba */
+    .ind-kpi::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 3px;
+        background: var(--ind-color);
+    }
+
+.ind-kpi-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.ind-kpi-label {
+    color: var(--ind-texto-suave);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ind-kpi-icono {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    color: var(--ind-color);
+    font-size: 1.15rem;
+    background: var(--ind-color-fondo);
+    border-radius: 10px;
+}
+
+.ind-kpi-valor {
+    color: #ffffff;
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.5px;
+}
+
+    .ind-kpi-valor small {
+        margin-left: 2px;
+        color: var(--ind-color);
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+.ind-kpi-detalle {
+    margin-top: auto;
+    color: var(--ind-texto-suave);
+    font-size: 0.82rem;
+}
+
+    .ind-kpi-detalle i {
+        color: var(--ind-color);
+    }
+
+/* Llamadas, correos e internos con el mismo espacio entre ellos */
+.ind-kpi-desglose {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+}
+
+    .ind-kpi-desglose strong {
+        color: var(--ind-texto);
+    }
+
+.ind-barra {
+    height: 6px;
+    overflow: hidden;
+    background: rgba(148, 163, 184, 0.15);
+    border-radius: 99px;
+}
+
+    .ind-barra span {
+        display: block;
+        height: 100%;
+        background: var(--ind-color);
+        border-radius: 99px;
+    }
+
+/* Barra de eficiencia partida en tiempo / retrasados / en curso (mismos colores que Reporte de Tickets) */
+.ind-barra-partes {
+    display: flex;
+    gap: 2px;
+}
+
+    .ind-barra-partes span {
+        border-radius: 0;
+    }
+
+.ind-parte-tiempo { background: #34d399 !important; }
+.ind-parte-retraso { background: #818cf8 !important; }
+.ind-parte-curso { background: #f59e0b !important; }
+
+.ind-kpi-partes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    color: var(--ind-texto-suave);
+    font-size: 0.8rem;
+}
+
+.ind-punto {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 5px;
+    border-radius: 50%;
+}
+
+.ind-chip {
+    padding: 2px 9px;
+    color: var(--ind-texto);
+    background: var(--ind-color-fondo);
+    border-radius: 99px;
+}
+
+    .ind-chip b {
+        margin-left: 3px;
+        color: var(--ind-color);
+    }
+
+/* --------------------------------------------------------------------------
+   4. PANELES Y GRÁFICAS
+   -------------------------------------------------------------------------- */
+.ind-graficas {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.ind-panel {
+    overflow: hidden;
+    background: var(--ind-panel);
+    border: 1px solid var(--ind-panel-borde);
+    border-radius: 16px;
+    break-inside: avoid;
+}
+
+.ind-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 13px 18px;
+    color: #ffffff;
+    font-size: 0.92rem;
+    font-weight: 700;
+    background: var(--ind-panel-header);
+    border-bottom: 1px solid var(--ind-panel-borde);
+}
+
+    .ind-panel-header i {
+        margin-right: 6px;
+        color: var(--ind-azul);
+    }
+
+.ind-contador {
+    min-width: 28px;
+    padding: 2px 10px;
+    color: var(--ind-azul);
+    font-size: 0.78rem;
+    text-align: center;
+    background: rgba(56, 189, 248, 0.12);
+    border-radius: 99px;
+}
+
+.ind-panel-cuerpo {
+    padding: 16px 18px;
+}
+
+.ind-grafica {
+    position: relative;
+    height: 320px;
+    padding: 14px 16px;
+}
+
+    /* La gráfica SVG llena el recuadro y conserva su forma */
+    .ind-grafica svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+/* Textos y líneas de las gráficas SVG (GraficasSvg.cs) según el aspecto de la página */
+.indicadores .g-texto {
+    fill: var(--graf-texto);
+}
+
+.indicadores .g-suave {
+    fill: var(--graf-texto-suave);
+}
+
+.indicadores .g-linea {
+    stroke: var(--graf-linea);
+}
+
+/* Separación entre las partes de la dona y del mapa de árbol: del color del recuadro */
+.indicadores .g-separador {
+    stroke: var(--graf-fondo);
+}
+
+/* Al pasar el mouse se resalta la parte (el detalle sale en el globo del navegador) */
+.indicadores .grafica-svg path,
+.indicadores .grafica-svg rect,
+.indicadores .grafica-svg g {
+    transition: opacity 0.15s ease;
+}
+
+    .indicadores .grafica-svg path:hover,
+    .indicadores .grafica-svg rect:hover,
+    .indicadores .grafica-svg g:hover {
+        opacity: 0.82;
+    }
+
+.ind-vacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 100%;
+    color: var(--ind-texto-suave);
+    font-size: 0.88rem;
+}
+
+    .ind-vacio i {
+        color: #475569;
+        font-size: 2rem;
+    }
+
+/* --------------------------------------------------------------------------
+   5. OBSERVACIONES
+   -------------------------------------------------------------------------- */
+.ind-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    color: #ffffff;
+    font-size: 0.88rem;
+    background: #0b1426;
+    border: 1px solid #263552;
+    border-radius: 10px;
+    outline: none;
+    resize: vertical;
+}
+
+    .ind-textarea::placeholder {
+        color: #64748b;
+    }
+
+    .ind-textarea:focus {
+        border-color: var(--ind-azul);
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+
+.ind-observaciones-reporte {
+    display: none;
+    white-space: pre-wrap;
+}
+
+/* --------------------------------------------------------------------------
+   6. PANTALLAS PEQUEÑAS
+   -------------------------------------------------------------------------- */
+@media (max-width: 1200px) {
+    .ind-kpis {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Las gráficas SVG se achican con su recuadro; en pantallas medianas van una por fila para que el texto se lea */
+@media (max-width: 1100px) {
+    .ind-graficas {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .indicadores {
+        padding: 16px;
+    }
+
+    .ind-kpis {
+        grid-template-columns: 1fr;
+    }
+
+    .ind-campo {
+        flex: 1 1 100%;
+    }
+
+    .ind-filtros-botones {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   7. IMPRESIÓN Y PDF (FONDO BLANCO)
    La clase modo-impresion se pone al imprimir y al descargar el PDF.
    -------------------------------------------------------------------------- */
 @media print {
@@ -283,22 +493,27 @@
 
     #seccionImpresion {
         position: absolute !important;
-        left: 0 !important;
         top: 0 !important;
+        left: 0 !important;
         width: 100% !important;
         margin: 0 !important;
-        padding: 0 !important;
     }
 
-    /* Salto de página forzado para colocar las Gráficas 3 y 4 en la Hoja 2 */
+    /* Las gráficas 3 y 4 van en la hoja 2 */
     .salto-pagina-print {
-        page-break-before: always !important;
-        break-before: page !important;
-        margin-top: 15px !important;
+        break-before: page;
     }
 }
 
-/* Encabezado, período y pie que solo salen en el reporte */
+/* El reporte siempre usa el acomodo de escritorio, aunque la ventana sea angosta */
+.modo-impresion .ind-kpis {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.modo-impresion .ind-graficas {
+    grid-template-columns: repeat(2, 1fr);
+}
+
 .solo-impresion {
     display: none !important;
 }
@@ -311,69 +526,44 @@
     display: flex !important;
 }
 
-.actividades-container.modo-impresion {
-    color: #0f172a !important;
-    background: #ffffff !important;
+.indicadores.modo-impresion {
+    --ind-panel: #ffffff;
+    --ind-panel-borde: #dbe3ee;
+    --ind-panel-header: #f1f5f9;
+    --ind-texto: #0f172a;
+    --ind-texto-suave: #475569;
+    --ind-azul: #0284c7;
+    --ind-verde: #15803d;
+    --ind-violeta: #6d28d9;
+    --ind-ambar: #b45309;
+    --graf-texto: #0f172a;
+    --graf-texto-suave: #475569;
+    --graf-linea: #e2e8f0;
+    --graf-fondo: #ffffff;
+    min-height: 0;
+    background: #ffffff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
 }
 
-    /* Tarjetas blancas con borde suave */
-    .modo-impresion .glass-panel {
-        background: #ffffff !important;
-        border: 1px solid #cbd5e1 !important;
-        box-shadow: none !important;
-        page-break-inside: avoid !important;
-    }
-
-    .modo-impresion .glass-header {
-        color: #0369a1 !important;
-        background: #f1f5f9 !important;
-        border-bottom: 1px solid #cbd5e1 !important;
-    }
-
-    /* Textos oscuros legibles */
-    .modo-impresion h1,
-    .modo-impresion h2,
-    .modo-impresion h3,
-    .modo-impresion h4,
-    .modo-impresion p,
-    .modo-impresion span,
-    .modo-impresion label,
-    .modo-impresion td,
-    .modo-impresion th {
+    .modo-impresion .ind-kpi-valor,
+    .modo-impresion .ind-panel-header {
         color: #0f172a !important;
-        text-shadow: none !important;
     }
 
-    .modo-impresion .text-muted,
-    .modo-impresion .text-secondary {
-        color: #475569 !important;
-    }
-
-    .modo-impresion .text-info {
-        color: #0284c7 !important;
-    }
-
-    .modo-impresion .text-success {
-        color: #15803d !important;
-    }
-
-    .modo-impresion .text-primary {
-        color: #1d4ed8 !important;
-    }
-
-    .modo-impresion .text-warning {
-        color: #d97706 !important;
+    .modo-impresion .ind-periodo-reporte {
+        margin: -6px 0 0;
+        color: #334155;
+        font-size: 0.8rem;
     }
 
     .modo-impresion .d-print-none,
-    .modo-impresion #txtObservaciones {
+    .modo-impresion .ind-textarea {
         display: none !important;
     }
 
-    .modo-impresion #printObservacionesText {
-        display: block !important;
-        color: #0f172a !important;
-        background-color: #f8fafc !important;
-        border: 1px dashed #0284c7;
-        border-radius: 6px;
+    .modo-impresion .ind-observaciones-reporte {
+        display: block;
+        color: #0f172a;
+        font-size: 0.85rem;
     }

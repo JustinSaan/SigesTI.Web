@@ -1,0 +1,284 @@
+﻿/* ==========================================================================
+   INICIO - TEMA CLARO
+   Mismas reglas que Index.cshtml.css, con los colores en su versión clara.
+   Solo aplica con <html data-tema="claro"> y en pantalla (las impresiones no cambian).
+   Archivo generado con Scripts/GenerarTemaClaro.js: no se edita a mano.
+   ========================================================================== */
+
+@media screen {
+
+    html[data-tema="claro"] .dashboard-header-card {
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid #d2dae4;
+        color: #0f172a;
+        box-shadow: 0 10px 30px rgba(15, 23, 41, 0.09);
+    }
+    html[data-tema="claro"] .system-clock-badge {
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    html[data-tema="claro"] .activity-card {
+        box-shadow: 0 8px 20px rgba(15, 23, 41, 0.11);
+    }
+    html[data-tema="claro"] .activity-card:hover {
+        box-shadow: 0 14px 28px rgba(15, 23, 41, 0.15);
+    }
+    html[data-tema="claro"] .card-ticket {
+        background: linear-gradient(135deg, #dde4f8, rgba(255, 255, 255, 0.98));
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        border-left: 5px solid #3b82f6;
+    }
+    html[data-tema="claro"] .card-ticket .activity-type-badge,
+    html[data-tema="claro"] .card-ticket .activity-header-icon {
+        color: #1d4ed8;
+    }
+    html[data-tema="claro"] .card-ticket .btn-activity-action {
+        background: rgba(59, 130, 246, 0.2);
+        color: #1d4ed8;
+        border: 1px solid rgba(59, 130, 246, 0.5);
+    }
+    html[data-tema="claro"] .card-ticket .btn-activity-action:hover {
+        background: #2563eb;
+        color: #ffffff;
+    }
+    html[data-tema="claro"] .card-pendiente {
+        background: linear-gradient(135deg, #fae6db, rgba(255, 255, 255, 0.98));
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        border-left: 5px solid #f59e0b;
+    }
+    html[data-tema="claro"] .card-pendiente .activity-type-badge,
+    html[data-tema="claro"] .card-pendiente .activity-header-icon {
+        color: #b45309;
+    }
+    html[data-tema="claro"] .card-pendiente .btn-activity-action {
+        background: rgba(245, 158, 11, 0.2);
+        color: #b45309;
+        border: 1px solid rgba(245, 158, 11, 0.5);
+    }
+    html[data-tema="claro"] .card-pendiente .btn-activity-action:hover {
+        background: #faecdb;
+        color: #8a510f;
+    }
+    html[data-tema="claro"] .card-resuelto {
+        background: linear-gradient(135deg, #dbfaf2, rgba(255, 255, 255, 0.98));
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        border-left: 5px solid #10b981;
+    }
+    html[data-tema="claro"] .card-resuelto .activity-type-badge,
+    html[data-tema="claro"] .card-resuelto .activity-header-icon {
+        color: #047857;
+    }
+    html[data-tema="claro"] .card-resuelto .btn-activity-action {
+        background: rgba(16, 185, 129, 0.2);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.5);
+    }
+    html[data-tema="claro"] .card-resuelto .btn-activity-action:hover {
+        background: #dbfaf0;
+        color: #0f8a64;
+    }
+    html[data-tema="claro"] .card-seguridad {
+        background: linear-gradient(135deg, #f7dede, rgba(255, 255, 255, 0.98));
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        border-left: 5px solid #ef4444;
+    }
+    html[data-tema="claro"] .card-seguridad .activity-type-badge,
+    html[data-tema="claro"] .card-seguridad .activity-header-icon {
+        color: #b91c1c;
+    }
+    html[data-tema="claro"] .card-seguridad .btn-activity-action {
+        background: rgba(239, 68, 68, 0.2);
+        color: #b91c1c;
+        border: 1px solid rgba(239, 68, 68, 0.5);
+    }
+    html[data-tema="claro"] .card-seguridad .btn-activity-action:hover {
+        background: #dc2626;
+        color: #ffffff;
+    }
+    html[data-tema="claro"] .card-respaldo {
+        background: linear-gradient(135deg, #ecddf8, rgba(255, 255, 255, 0.98));
+        border: 1px solid rgba(168, 85, 247, 0.4);
+        border-left: 5px solid #a855f7;
+    }
+    html[data-tema="claro"] .card-respaldo .activity-type-badge,
+    html[data-tema="claro"] .card-respaldo .activity-header-icon {
+        color: #7e22ce;
+    }
+    html[data-tema="claro"] .card-respaldo .btn-activity-action {
+        background: rgba(168, 85, 247, 0.2);
+        color: #7e22ce;
+        border: 1px solid rgba(168, 85, 247, 0.5);
+    }
+    html[data-tema="claro"] .card-respaldo .btn-activity-action:hover {
+        background: #9333ea;
+        color: #ffffff;
+    }
+    html[data-tema="claro"] .dashboard-vacio {
+        color: #475569;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px dashed #d2dae4;
+    }
+    html[data-tema="claro"] .dashboard-vacio i {
+        color: #0369a1;
+    }
+    html[data-tema="claro"] .panel-inicio {
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid #d2dae4;
+        box-shadow: 0 10px 30px rgba(15, 23, 41, 0.09);
+    }
+    html[data-tema="claro"] .panel-inicio-encabezado h6 {
+        color: #0f172a;
+    }
+    html[data-tema="claro"] .panel-inicio-encabezado h6 i {
+        color: #0369a1;
+    }
+    html[data-tema="claro"] .panel-inicio-vacio {
+        color: #475569;
+    }
+    html[data-tema="claro"] .aviso {
+        --color: #0369a1;
+        background: rgba(255, 255, 255, 0.93);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-left: 4px solid var(--color);
+    }
+    html[data-tema="claro"] .aviso strong {
+        color: #0f172a;
+    }
+    html[data-tema="claro"] .aviso p {
+        color: #435a74;
+    }
+    html[data-tema="claro"] .aviso-importante {
+        --color: #b91c1c;
+    }
+    html[data-tema="claro"] .aviso-mantenimiento {
+        --color: #b45309;
+    }
+    html[data-tema="claro"] .aviso-tipo {
+        color: var(--color);
+    }
+    html[data-tema="claro"] .aviso-pie {
+        color: #64748b;
+    }
+    html[data-tema="claro"] .mi-req {
+        color: #0f172a;
+        background: rgba(255, 255, 255, 0.93);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+    html[data-tema="claro"] .mi-req:hover {
+        border-color: rgba(56, 189, 248, 0.5);
+        background: rgba(56, 189, 248, 0.08);
+    }
+    html[data-tema="claro"] .mi-req strong {
+        color: #0369a1;
+    }
+    html[data-tema="claro"] .mi-req p {
+        color: #435a74;
+    }
+    html[data-tema="claro"] .mi-req small {
+        color: #475569;
+    }
+    html[data-tema="claro"] .mi-req-fecha {
+        color: #64748b;
+    }
+    html[data-tema="claro"] .mi-req-pasos span {
+        color: #64748b;
+        border-top: 4px solid #d2dae4;
+    }
+    html[data-tema="claro"] .mi-req-pasos span.hecho {
+        color: #047857;
+        border-top-color: #10b981;
+    }
+    html[data-tema="claro"] .mi-req-pasos span.actual {
+        color: #b45309;
+        border-top-color: #f59e0b;
+    }
+    html[data-tema="claro"] .btn-aviso-guardar {
+        color: #0f172a;
+    }
+    html[data-tema="claro"] .btn-aviso-guardar {
+        background: linear-gradient(135deg, #0284c7, #0369a1);
+        border: 1px solid #38bdf8;
+        box-shadow: 0 4px 14px rgba(2, 132, 199, 0.24);
+        color: #ffffff;
+    }
+    html[data-tema="claro"] .btn-aviso-guardar:hover {
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.33);
+        color: #ffffff;
+    }
+    html[data-tema="claro"] .btn-quitar-aviso {
+        color: #475569;
+        background: rgba(148, 163, 184, 0.08);
+        border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+    html[data-tema="claro"] .btn-quitar-aviso:hover {
+        color: #ffffff;
+        background: #dc2626;
+        border-color: #f87171;
+    }
+    html[data-tema="claro"] .modal-aviso .modal-content {
+        color: #3f5879;
+        background: linear-gradient(160deg, #f8f9fc, #fcfdfe);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+    html[data-tema="claro"] .modal-aviso .modal-header {
+        background: #fcfdfe;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    }
+    html[data-tema="claro"] .modal-aviso .modal-title {
+        color: #0f172a;
+    }
+    html[data-tema="claro"] .modal-aviso .modal-footer {
+        background: #fcfdfe;
+        border-top: 1px solid rgba(56, 189, 248, 0.15);
+    }
+    html[data-tema="claro"] .modal-aviso-icono {
+        color: #0369a1;
+        background: rgba(56, 189, 248, 0.12);
+        border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    html[data-tema="claro"] .modal-aviso-subtitulo {
+        color: #475569;
+    }
+    html[data-tema="claro"] .form-aviso label {
+        color: #475569;
+    }
+    html[data-tema="claro"] .form-aviso label span {
+        color: #64748b;
+    }
+    html[data-tema="claro"] .form-aviso input,
+    html[data-tema="claro"] .form-aviso textarea,
+    html[data-tema="claro"] .form-aviso select {
+        color: #0f172a;
+        background-color: #fcfdfe;
+        border: 1px solid #cdd9ea;
+        outline: none;
+    }
+    html[data-tema="claro"] .form-aviso input::placeholder,
+    html[data-tema="claro"] .form-aviso textarea::placeholder {
+        color: #475569;
+    }
+    html[data-tema="claro"] .form-aviso input:focus,
+    html[data-tema="claro"] .form-aviso textarea:focus,
+    html[data-tema="claro"] .form-aviso select:focus {
+        border-color: #38bdf8;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.09);
+    }
+    html[data-tema="claro"] .btn-info-system {
+        color: #475569;
+        border: 1px solid #d2dae4;
+        background: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 4px 12px rgba(15, 23, 41, 0.09);
+    }
+    html[data-tema="claro"] .btn-info-system:hover {
+        color: #0369a1;
+        border-color: #38bdf8;
+        background: rgba(56, 189, 248, 0.15);
+    }
+    html[data-tema="claro"] .info-modal-content {
+        background: rgba(255, 255, 255, 0.99);
+        border: 1px solid #d2dae4;
+        box-shadow: 0 25px 50px rgba(15, 23, 41, 0.18);
+    }
+
+}

@@ -616,6 +616,33 @@ select.form-select[class*="badge-sistema-"] {
         display: none !important;
     }
 
+/* Contador de registros del detalle: mismo estilo que el de Tareas Generales, en celeste */
+.badge-registros {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    color: #bae6fd;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border-radius: 999px;
+}
+
+/* ".glass-panel" se agrega para ganarle a ".glass-panel span { background-color: transparent }" */
+.glass-panel .badge-registros {
+    background: rgba(14, 165, 233, 0.16) !important;
+    border: 1px solid rgba(56, 189, 248, 0.45);
+}
+
+    .badge-registros::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #38bdf8;
+        box-shadow: 0 0 8px #38bdf8;
+    }
+
 select.form-select option {
     background-color: #0f172a !important;
     color: #ffffff !important;
@@ -994,6 +1021,41 @@ select.form-select option {
     background: #111c33;
     padding: 28px 24px !important;
     overflow-x: auto !important;
+}
+
+/* Recuadro de cada gráfica del reporte impreso: borde azul claro y título centrado en una franja */
+.grafica-print-recuadro {
+    height: 100%;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.grafica-print-titulo {
+    padding: 5px 10px;
+    color: #1e40af !important;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-align: center;
+    background: #eff6ff !important;
+    border-bottom: 1px solid #bfdbfe;
+}
+
+.grafica-svg-print {
+    padding: 8px 10px;
+    text-align: center;
+}
+
+/* Gráficas SVG de la vista previa: ocupan el ancho de su columna sin pasar de 200px de alto */
+.grafica-svg-print svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 200px;
 }
 
 /* La hoja siempre mide lo de una oficio horizontal (1300px útiles + su margen interno),

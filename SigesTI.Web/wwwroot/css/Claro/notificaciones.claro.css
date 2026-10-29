@@ -1,0 +1,162 @@
+﻿/* ==========================================================================
+   NOTIFICACIONES - TEMA CLARO
+   Mismas reglas que notificaciones.css, con los colores en su versión clara.
+   Solo aplica con <html data-tema="claro"> y en pantalla (las impresiones no cambian).
+   Archivo generado con Scripts/GenerarTemaClaro.js: no se edita a mano.
+   ========================================================================== */
+
+@media screen {
+
+    html[data-tema="claro"] .notif-boton {
+        color: #0369a1;
+        background: rgba(255, 255, 255, 0.93);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+    html[data-tema="claro"] .notif-boton:hover,
+    html[data-tema="claro"] .notif-boton[aria-expanded="true"] {
+        color: #0f172a;
+        background: rgba(255, 255, 255, 0.98);
+        border-color: rgba(56, 189, 248, 0.55);
+        box-shadow: 0 0 22px rgba(56, 189, 248, 0.11);
+    }
+    html[data-tema="claro"] .notif-contador {
+        color: #ffffff;
+        background: linear-gradient(135deg, #ef4444, #b91c1c);
+        border: 2px solid #cdd5ea;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.33);
+    }
+    html[data-tema="claro"] .notif-menu {
+        color: #3f5879;
+        background: #fbfcfe !important;
+        border: 1px solid rgba(56, 189, 248, 0.35) !important;
+        box-shadow: 0 16px 36px rgba(15, 23, 41, 0.2), 0 0 15px rgba(56, 189, 248, 0.09) !important;
+    }
+    html[data-tema="claro"] .notif-menu-encabezado {
+        color: #0369a1;
+        background: rgba(255, 255, 255, 0.99);
+        border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+    }
+    html[data-tema="claro"] .notif-leer-todas {
+        color: #475569;
+        background: none;
+        border: none;
+    }
+    html[data-tema="claro"] .notif-leer-todas:hover {
+        color: #0f172a;
+    }
+    html[data-tema="claro"] .notif-item {
+        color: #435a74;
+        background: transparent;
+        border: 1px solid transparent;
+    }
+    html[data-tema="claro"] .notif-item:hover {
+        background: rgba(56, 189, 248, 0.08);
+        border-color: rgba(56, 189, 248, 0.3);
+    }
+    html[data-tema="claro"] .notif-item.no-leida {
+        color: #0f172a;
+        background: rgba(56, 189, 248, 0.06);
+    }
+    html[data-tema="claro"] .notif-item.no-leida::after {
+        background: #38bdf8;
+        box-shadow: 0 0 8px rgba(56, 189, 248, 0.48);
+        color: #ffffff;
+    }
+    html[data-tema="claro"] .notif-item-icono {
+        --color: #0369a1;
+        color: var(--color);
+        background: color-mix(in srgb, var(--color) 15%, transparent);
+        border: 1px solid color-mix(in srgb, var(--color) 45%, transparent);
+    }
+    html[data-tema="claro"] .notif-item-icono.autorizacion {
+        --color: #7e22ce;
+    }
+    html[data-tema="claro"] .notif-item-icono.atendida {
+        --color: #15803d;
+    }
+    html[data-tema="claro"] .notif-item-icono.pendientes {
+        --color: #b45309;
+    }
+    html[data-tema="claro"] .notif-item-icono.autorizado {
+        --color: #0f766e;
+    }
+    html[data-tema="claro"] .notif-item-icono.recordatorio {
+        --color: #b91c1c;
+    }
+    html[data-tema="claro"] .notif-item-fecha {
+        color: #64748b;
+    }
+    html[data-tema="claro"] .notif-vacio {
+        color: #64748b;
+    }
+    html[data-tema="claro"] .notif-vacio i {
+        color: #334155;
+    }
+    html[data-tema="claro"] .modal-notificacion .modal-content {
+        color: #3f5879;
+        background: linear-gradient(160deg, #f8f9fc, #fcfdfe) !important;
+        border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    }
+    html[data-tema="claro"] .modal-notificacion .modal-header {
+        background: #fcfdfe;
+        border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    }
+    html[data-tema="claro"] .modal-notificacion .modal-title {
+        color: #0f172a;
+    }
+    html[data-tema="claro"] .notif-modal-icono {
+        color: #0369a1;
+        background: rgba(56, 189, 248, 0.12);
+        border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    html[data-tema="claro"] .notif-modal-subtitulo {
+        color: #475569;
+    }
+    html[data-tema="claro"] .notif-btn-imprimir,
+    html[data-tema="claro"] .notif-btn-autorizar {
+        color: #0f172a;
+    }
+    html[data-tema="claro"] .notif-btn-imprimir {
+        background: linear-gradient(135deg, rgba(20, 184, 166, 0.16), rgba(255, 255, 255, 0.97));
+        border: 1px solid rgba(45, 212, 191, 0.55);
+        box-shadow: 0 4px 14px rgba(13, 148, 136, 0.18);
+    }
+    html[data-tema="claro"] .notif-btn-imprimir i {
+        color: #0f766e;
+    }
+    html[data-tema="claro"] .notif-btn-imprimir:hover {
+        background: linear-gradient(135deg, #dbfaf8, #dcf9f7);
+        border-color: #5eead4;
+        box-shadow: 0 6px 18px rgba(45, 212, 191, 0.27);
+    }
+    html[data-tema="claro"] .notif-btn-imprimir:hover i {
+        color: #0f172a;
+    }
+    html[data-tema="claro"] .notif-btn-autorizar {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        border: 1px solid #4ade80;
+        box-shadow: 0 4px 14px rgba(34, 197, 94, 0.24);
+        color: #ffffff;
+    }
+    html[data-tema="claro"] .notif-btn-autorizar:hover {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        box-shadow: 0 6px 20px rgba(74, 222, 128, 0.33);
+        color: #ffffff;
+    }
+    html[data-tema="claro"] .notif-vista-previa {
+        background: #f5f7fa;
+    }
+    html[data-tema="claro"] .notif-vista-previa iframe {
+        background: #ffffff;
+        border: none;
+        box-shadow: 0 12px 35px rgba(15, 23, 41, 0.14);
+    }
+    html[data-tema="claro"] .notif-lista::-webkit-scrollbar-track {
+        background: #fbfcfe;
+    }
+    html[data-tema="claro"] .notif-lista::-webkit-scrollbar-thumb {
+        background: #f5f7fa;
+        border: 1px solid #38bdf8;
+    }
+
+}

@@ -253,6 +253,117 @@ document.addEventListener("DOMContentLoaded", function () {
         mostrarAlertaPasswordCambiada();
     }
 
+
+    /* ======================================================================
+       RECORDAR MI USUARIO
+       Solo se guarda el nombre de usuario en este navegador, nunca la contraseña.
+       ====================================================================== */
+
+    const usuario =
+        document.getElementById("Login_Usuario");
+
+    const recordarUsuario =
+        document.getElementById("recordarUsuario");
+
+    const usuarioGuardado =
+        leerUsuarioRecordado();
+
+    if (usuarioGuardado) {
+
+        recordarUsuario.checked = true;
+
+        // Si el servidor regresó la página con un usuario escrito, se respeta
+        if (!usuario.value) {
+            usuario.value = usuarioGuardado;
+        }
+
+        password.focus();
+    }
+
+    formLogin.addEventListener(
+        "submit",
+        function () {
+
+            guardarUsuarioRecordado(
+                recordarUsuario.checked ? usuario.value.trim() : ""
+            );
+        }
+    );
+
+
+    /* ======================================================================
+       SESIÓN ABIERTA EN OTRO EQUIPO
+       ====================================================================== */
+
+    if (document.getElementById("sesionEnOtroEquipo").value === "true") {
+
+        mostrarAlerta(
+            "warning",
+            "Sesión activa en otro equipo",
+            "Tu cuenta ya tiene una sesión abierta en otro equipo o navegador.<br>" +
+            "Ciérrala ahí para poder entrar aquí. Si no puedes cerrarla, " +
+            "se cerrará sola después de un tiempo sin actividad."
+        );
+    }
+
+
+    /* ======================================================================
+       SESIÓN CADUCADA POR INACTIVIDAD
+       ====================================================================== */
+
+    if (document.getElementById("sesionCaducada").value === "true") {
+
+        mostrarAlerta(
+            "warning",
+            "Sesión caducada",
+            "Tu sesión ha caducado por inactividad.<br>Vuelve a iniciar sesión."
+        ).then(function () {
+            // Se quita ?caducada de la dirección para que no se repita al recargar
+            history.replaceState(null, "", "/InicioSesion/Login");
+        });
+    }
+
+
+    /* ======================================================================
+       ACERCA DEL SISTEMA
+       Se cierra con la X, con Esc o dando clic fuera de la ventana.
+       ====================================================================== */
+
+    const modalAcercaDe =
+        document.getElementById("modalAcercaDe");
+
+    function mostrarAcercaDe(mostrar) {
+
+        modalAcercaDe.classList.toggle("mostrar", mostrar);
+        modalAcercaDe.setAttribute("aria-hidden", mostrar ? "false" : "true");
+    }
+
+    document.getElementById("btnAcercaDe")
+        .addEventListener("click", () => mostrarAcercaDe(true));
+
+    document.getElementById("btnCerrarAcercaDe")
+        .addEventListener("click", () => mostrarAcercaDe(false));
+
+    modalAcercaDe.addEventListener(
+        "click",
+        function (evento) {
+
+            if (evento.target === modalAcercaDe) {
+                mostrarAcercaDe(false);
+            }
+        }
+    );
+
+    document.addEventListener(
+        "keydown",
+        function (evento) {
+
+            if (evento.key === "Escape") {
+                mostrarAcercaDe(false);
+            }
+        }
+    );
+
 });
 
 
@@ -371,4 +482,25 @@ function mostrarAlertaPasswordCambiada() {
             );
         });
     }
+}
+
+/* ==========================================================================
+   USUARIO RECORDADO (en el navegador)
+   ========================================================================== */
+
+function leerUsuarioRecordado() {
+
+    try {
+        return localStorage.getItem("usuarioRecordado") || "";
+    } catch (e) {
+        return "";
+    }
+}
+
+function guardarUsuarioRecordado(nombre) {
+
+    try {
+        if (nombre) localStorage.setItem("usuarioRecordado", nombre);
+        else localStorage.removeItem("usuarioRecordado");
+    } catch (e) { }
 }

@@ -1,14 +1,40 @@
 @page
 @model SigesTI.Web.Pages.Actividades.IndicadoresModel
+@using SigesTI.Web.Pages.Shared
 @{
-    ViewData["Title"] = "Indicadores y Métricas del Área de Soporte Técnico";
+    ViewData["Title"] = "Indicadores y Métricas";
+
+    var ind = Model.Indicadores;
+    var periodo = Model.Periodo;
+    bool puedeExportar = await Permisos.PuedeAsync(Modulos.Indicadores, Accion.Exportar);
+
+    // Recuadro con título, contador y la gráfica en SVG (GraficasSvg.cs); si no hay datos, un aviso
+    void Panel(string icono, string titulo, int contador, bool hayDatos, Func<string> grafica, string avisoVacio, string iconoVacio = "bi-inbox")
+    {
+        <div class="ind-panel">
+            <div class="ind-panel-header">
+                <span><i class="bi @icono"></i> @titulo</span>
+                <span class="ind-contador">@contador</span>
+            </div>
+            <div class="ind-grafica">
+                @if (hayDatos)
+                {
+                    @Html.Raw(grafica())
+                }
+                else
+                {
+                    <div class="ind-vacio"><i class="bi @iconoVacio"></i>@avisoVacio</div>
+                }
+            </div>
+        </div>
+    }
 }
 
 <link rel="stylesheet" href="~/css/Actividades/indicadores.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Claro/indicadores.claro.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/Reportes/reporte-encabezado.css" asp-append-version="true" />
-<partial name="_ColoresSistemas" model="Model.Sistemas" />
 
-<div class="actividades-container px-4 py-3" id="seccionImpresion">
+<div class="indicadores" id="seccionImpresion">
     <!-- Encabezado del reporte impreso -->
     <div class="rep-encabezado solo-impresion">
         <div>
@@ -20,235 +46,172 @@
             <strong>@DateTime.Now.ToString("dd/MM/yyyy")</strong>
         </div>
     </div>
-    <p class="solo-impresion small mb-3">
-        <strong>Período de Evaluación:</strong> @Model.FechaInicio?.ToString("dd/MM/yyyy") - @Model.FechaFin?.ToString("dd/MM/yyyy")
+    <p class="solo-impresion ind-periodo-reporte">
+        <strong>Período de evaluación:</strong> @periodo
+        @if (!string.IsNullOrWhiteSpace(Model.FiltroOrigen))
+        {
+            <span> · <strong>Origen:</strong> @Model.FiltroOrigen</span>
+        }
     </p>
 
-    <!-- Encabezado -->
-    <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
-        <div>
-            <h3 class="fw-bold text-white mb-1">
-                <i class="bi bi-bar-chart-line-fill me-2 text-info d-print-none"></i>Indicadores y Métricas del Área de Soporte Técnico
-            </h3>
-            <p class="text-muted small mb-0 fs-6">
-                <strong class="text-info">Período de Evaluación:</strong> @Model.FechaInicio?.ToString("dd/MM/yyyy") - @Model.FechaFin?.ToString("dd/MM/yyyy")
-            </p>
+    <!-- Encabezado de la pantalla -->
+    <header class="ind-header d-print-none">
+        <div class="ind-header-texto">
+            <span class="ind-icono-titulo"><i class="bi bi-bar-chart-line-fill"></i></span>
+            <div>
+                <h1 class="ind-titulo">Indicadores y Métricas</h1>
+                <p class="ind-subtitulo">Área de Soporte Técnico · <i class="bi bi-calendar3"></i> @periodo</p>
+            </div>
         </div>
-        @if (await Permisos.PuedeAsync(Modulos.Indicadores, Accion.Exportar))
+        @if (puedeExportar)
         {
-            <div class="reporte-acciones d-print-none">
+            <!-- Manda los filtros y las observaciones para armar el PDF -->
+            <form method="post" asp-page-handler="Pdf" id="formPdf" class="d-none">
+                <input type="hidden" name="FechaInicio" value="@Model.FechaInicio?.ToString("yyyy-MM-dd")" />
+                <input type="hidden" name="FechaFin" value="@Model.FechaFin?.ToString("yyyy-MM-dd")" />
+                <input type="hidden" name="FiltroOrigen" value="@Model.FiltroOrigen" />
+            </form>
+        }
+    </header>
+
+    <!-- Filtros: se aplican solos al cambiar una fecha o el origen -->
+    <form method="get" id="formFiltros" class="ind-filtros d-print-none">
+        <div class="ind-campo">
+            <label for="FechaInicio">Fecha inicio</label>
+            <input type="date" id="FechaInicio" name="FechaInicio" value="@Model.FechaInicio?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="ind-campo">
+            <label for="FechaFin">Fecha fin</label>
+            <input type="date" id="FechaFin" name="FechaFin" value="@Model.FechaFin?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="ind-campo">
+            <label for="FiltroOrigen">Origen</label>
+            <select asp-for="FiltroOrigen">
+                <option value="">Todos</option>
+                <option value="Llamada">Llamada</option>
+                <option value="Correo">Correo</option>
+                <option value="Interno">Interno</option>
+            </select>
+        </div>
+        <div class="ind-filtros-botones">
+            <a href="?" class="btn btn-filtros-sigest" title="Volver al mes actual">
+                <i class="bi bi-calendar-event me-1"></i> Mes actual
+            </a>
+            @if (puedeExportar)
+            {
                 <button type="button" class="btn btn-imprimir-sigest" onclick="imprimirReporte()">
                     <i class="bi bi-printer me-1"></i> Imprimir
                 </button>
-                <button type="button" class="btn btn-pdf-sigest" onclick="descargarPdfIndicadores(this)">
+                <button type="submit" form="formPdf" class="btn btn-pdf-sigest">
                     <i class="bi bi-file-earmark-pdf-fill me-1"></i> Descargar PDF
                 </button>
+            }
+        </div>
+    </form>
+
+    <!-- Tarjetas de indicadores -->
+    <section class="ind-kpis">
+        <article class="ind-kpi ind-azul">
+            <div class="ind-kpi-top">
+                <span class="ind-kpi-label">Tickets atendidos</span>
+                <i class="bi bi-headset ind-kpi-icono"></i>
             </div>
+            <div class="ind-kpi-valor">@ind.TotalTickets</div>
+            <div class="ind-kpi-detalle ind-kpi-desglose">
+                <span><i class="bi bi-telephone"></i> Llamadas: <strong>@ind.TotalLlamadas</strong></span>
+                <span><i class="bi bi-envelope"></i> Correos: <strong>@ind.TotalCorreos</strong></span>
+                <span><i class="bi bi-building"></i> Internos: <strong>@ind.TotalInternos</strong></span>
+            </div>
+        </article>
+
+        <article class="ind-kpi ind-verde">
+            <div class="ind-kpi-top">
+                <span class="ind-kpi-label">Eficiencia de resolución</span>
+                <i class="bi bi-check2-circle ind-kpi-icono"></i>
+            </div>
+            <div class="ind-kpi-valor">@ind.PorcentajeEficiencia<small>%</small></div>
+            <!-- Barra partida: en tiempo, retrasados y en curso -->
+            <div class="ind-barra ind-barra-partes">
+                <span class="ind-parte-tiempo" style="width: @ind.ParteDe(ind.CerradosEnTiempo).ToString(System.Globalization.CultureInfo.InvariantCulture)%"></span>
+                <span class="ind-parte-retraso" style="width: @ind.ParteDe(ind.CerradosRetrasados).ToString(System.Globalization.CultureInfo.InvariantCulture)%"></span>
+                <span class="ind-parte-curso" style="width: @ind.ParteDe(ind.TotalEnCurso).ToString(System.Globalization.CultureInfo.InvariantCulture)%"></span>
+            </div>
+            <div class="ind-kpi-partes">
+                <span><i class="ind-punto ind-parte-tiempo"></i>@ind.CerradosEnTiempo en tiempo</span>
+                <span><i class="ind-punto ind-parte-retraso"></i>@ind.CerradosRetrasados retrasados</span>
+                <span><i class="ind-punto ind-parte-curso"></i>@ind.TotalEnCurso en curso</span>
+            </div>
+        </article>
+
+        <article class="ind-kpi ind-violeta">
+            <div class="ind-kpi-top">
+                <span class="ind-kpi-label">Tickets escalados</span>
+                <i class="bi bi-diagram-3 ind-kpi-icono"></i>
+            </div>
+            <div class="ind-kpi-valor">@ind.TotalEscalados</div>
+            <div class="ind-kpi-detalle">@ind.PorcentajeEscalados% del total de tickets</div>
+            <div class="ind-kpi-partes">
+                @foreach (var area in ind.EscaladosPorArea)
+                {
+                    <span class="ind-chip">@area.Key <b>@area.Value</b></span>
+                }
+                @if (!ind.EscaladosPorArea.Any())
+                {
+                    <span>Ningún ticket escalado</span>
+                }
+            </div>
+        </article>
+
+        <article class="ind-kpi ind-ambar">
+            <div class="ind-kpi-top">
+                <span class="ind-kpi-label">Avance de tareas programadas</span>
+                <i class="bi bi-calendar2-check ind-kpi-icono"></i>
+            </div>
+            <div class="ind-kpi-valor">@ind.PorcentajeAvancePrograma<small>%</small></div>
+            <div class="ind-barra"><span style="width: @ind.PorcentajeAvancePrograma.ToString(System.Globalization.CultureInfo.InvariantCulture)%"></span></div>
+            <div class="ind-kpi-detalle">@ind.TareasResueltas de @ind.TotalTareas resueltas</div>
+        </article>
+    </section>
+
+    <!-- Gráficas en SVG: nítidas en pantalla, al imprimir y en el PDF (mismo dibujo en los tres) -->
+    <section class="ind-graficas">
+        @{
+            Panel("bi-pie-chart-fill", "Tickets por sistema", ind.TotalTickets, ind.TicketsPorSistema.Any(),
+                () => GraficasSvg.Dona(AnchoGrafica, AltoGrafica, Model.PartesSistemas), "Sin tickets en el período");
+            Panel("bi-bar-chart-steps", "Tipo de requerimiento", ind.TicketsPorTipo.Count, ind.TicketsPorTipo.Any(),
+                () => GraficasSvg.Barras(AnchoGrafica, AltoGrafica, Model.PartesTipos), "Sin tickets en el período");
         }
-    </div>
+    </section>
 
-    <!-- Barra de Filtros -->
-    <div class="glass-panel mb-4 p-3 d-print-none">
-        <form method="get" class="row g-2 align-items-center">
-            <div class="col-md-3">
-                <label class="form-label small text-muted mb-1">Fecha Inicio</label>
-                <input type="date" class="form-control form-control-sm" name="FechaInicio" value="@Model.FechaInicio?.ToString("yyyy-MM-dd")" />
-            </div>
-            <div class="col-md-3">
-                <label class="form-label small text-muted mb-1">Fecha Fin</label>
-                <input type="date" class="form-control form-control-sm" name="FechaFin" value="@Model.FechaFin?.ToString("yyyy-MM-dd")" />
-            </div>
-            <div class="col-md-3">
-                <label class="form-label small text-muted mb-1">Origen Servicio</label>
-                <select class="form-select form-select-sm" name="FiltroOrigen" asp-for="FiltroOrigen">
-                    <option value="">-- Todos --</option>
-                    <option value="Llamada">Llamada Telefónica</option>
-                    <option value="Correo">Correo Electrónico</option>
-                </select>
-            </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-sm btn-primary-sigest w-100">
-                    <i class="bi bi-funnel me-1"></i> Actualizar Métricas
-                </button>
-            </div>
-        </form>
-    </div>
+    <section class="ind-graficas salto-pagina-print">
+        @{
+            Panel("bi-bar-chart-fill", "Medio de entrada", ind.TotalLlamadas + ind.TotalCorreos, ind.TotalLlamadas + ind.TotalCorreos > 0,
+                () => GraficasSvg.Columnas(AnchoGrafica, AltoGrafica, ind.FechasEntrada, Model.SeriesOrigen, ind.AgrupacionEntrada), "Sin llamadas ni correos en el período");
+            Panel("bi-diagram-3-fill", "Escalados por área destino", ind.TotalEscalados, ind.EscaladosPorArea.Any(),
+                () => GraficasSvg.Radar(AnchoGrafica, AltoGrafica, Model.PartesEscalados, IndicadoresModel.ColorEscalados), "No hubo tickets escalados", "bi-check2-all");
+        }
+    </section>
 
-    <!-- Tarjetas de KPIs (Hoja 1) -->
-    <div class="row g-3 mb-4">
-        <div class="col-3">
-            <div class="glass-panel p-3 h-100">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted small d-block mb-1">Total Atendidos</span>
-                        <h2 class="fw-bold mb-0 text-info">@Model.Indicadores.TotalAtendidos</h2>
-                        <span class="text-success small"><i class="bi bi-arrow-up-right me-1"></i>En el período</span>
-                    </div>
-                    <div class="fs-1 text-info bg-info bg-opacity-10 p-3 rounded-3 d-print-none">
-                        <i class="bi bi-headset"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <section class="ind-graficas">
+        @{
+            Panel("bi-building", "Clientes más frecuentes", ind.ClientesFrecuentes.Count, ind.ClientesFrecuentes.Any(),
+                () => GraficasSvg.Paletas(AnchoGrafica, AltoGrafica, Model.PartesClientes, ind.TotalTickets), "Sin tickets en el período");
+            Panel("bi-arrow-left-right", "Servicios internos y externos", ind.ServiciosInternos + ind.TotalTickets, ind.ServiciosInternos + ind.TotalTickets > 0,
+                () => GraficasSvg.Comparativo(AnchoGrafica, AltoGrafica, Model.ParteInternos, Model.DetalleInternos, Model.ParteExternos, Model.DetalleExternos),
+                "Sin servicios en el período");
+        }
+    </section>
 
-        <div class="col-3">
-            <div class="glass-panel p-3 h-100">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted small d-block mb-1">% Eficiencia Resolución</span>
-                        <h2 class="fw-bold mb-0 text-success">@Model.Indicadores.PorcentajeEficiencia%</h2>
-                        <span class="text-muted small">@Model.Indicadores.TotalCerrados Cerrados / @Model.Indicadores.TotalEnCurso En curso</span>
-                    </div>
-                    <div class="fs-1 text-success bg-success bg-opacity-10 p-3 rounded-3 d-print-none">
-                        <i class="bi bi-check-circle-fill"></i>
-                    </div>
-                </div>
-            </div>
+    <!-- Observaciones: solo salen en el reporte si se escribió algo -->
+    <section class="ind-panel" id="panelObservaciones">
+        <div class="ind-panel-header">
+            <span><i class="bi bi-chat-left-text-fill"></i> Observaciones</span>
         </div>
-
-        <div class="col-3">
-            <div class="glass-panel p-3 h-100">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted small d-block mb-1">Llamada / Correo</span>
-                        <h2 class="fw-bold mb-0 text-primary">@Model.Indicadores.PorcentajeLlamadas% / @Model.Indicadores.PorcentajeCorreos%</h2>
-                        <span class="text-muted small">@Model.Indicadores.TotalLlamadas Llamadas / @Model.Indicadores.TotalCorreos Correos</span>
-                    </div>
-                    <div class="fs-1 text-primary bg-primary bg-opacity-10 p-3 rounded-3 d-print-none">
-                        <i class="bi bi-telephone-inbound-fill"></i>
-                    </div>
-                </div>
-            </div>
+        <div class="ind-panel-cuerpo">
+            <textarea id="txtObservaciones" name="Observaciones" form="formPdf" class="ind-textarea" rows="3" placeholder="Escriba aquí las observaciones que deben aparecer en el reporte (opcional)..."></textarea>
+            <div id="printObservacionesText" class="ind-observaciones-reporte"></div>
         </div>
-
-        <div class="col-3">
-            <div class="glass-panel p-3 h-100">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted small d-block mb-1">Tareas Programadas</span>
-                        <h2 class="fw-bold mb-0 text-warning">@Model.Indicadores.PorcentajeAvancePrograma%</h2>
-                        <span class="text-muted small">Avance del programa</span>
-                    </div>
-                    <div class="fs-1 text-warning bg-warning bg-opacity-10 p-3 rounded-3 d-print-none">
-                        <i class="bi bi-calendar-check-fill"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bloque 1 de Gráficos (Hoja 1) -->
-    <div class="row g-3 mb-4">
-        <div class="col-6">
-            <div class="glass-panel h-100 overflow-hidden">
-                <div class="glass-header">
-                    <i class="bi bi-pie-chart-fill me-2 text-info d-print-none"></i>Tickets por Sistema (Porcentajes)
-                </div>
-                <div class="p-3 d-flex justify-content-center align-items-center chart-container-box">
-                    <canvas id="chartSistemas"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-6">
-            <div class="glass-panel h-100 overflow-hidden">
-                <div class="glass-header">
-                    <i class="bi bi-bar-chart-steps me-2 text-warning d-print-none"></i>Distribución por Tipo de Requerimiento
-                </div>
-                <div class="p-3 d-flex justify-content-center align-items-center chart-container-box">
-                    <canvas id="chartRequerimientos"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bloque 2 de Gráficos (Hoja 2) -->
-    <div class="row g-3 mb-4 salto-pagina-print">
-        <div class="col-6">
-            <div class="glass-panel h-100 overflow-hidden">
-                <div class="glass-header">
-                    <i class="bi bi-diagram-3-fill me-2 text-primary d-print-none"></i>Tickets Escalados y Área Destino
-                </div>
-                <div class="p-3 d-flex justify-content-center align-items-center chart-container-box">
-                    <canvas id="chartEscalaciones"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-6">
-            <div class="glass-panel h-100 overflow-hidden">
-                <div class="glass-header">
-                    <i class="bi bi-envelope-at-fill me-2 text-success d-print-none"></i>Medio de Entrada (Llamada vs Correo)
-                </div>
-                <div class="p-3 d-flex justify-content-center align-items-center chart-container-box">
-                    <canvas id="chartCanalEntrada"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tabla (Hoja 2) -->
-    <div class="glass-panel mb-4 overflow-hidden">
-        <div class="glass-header">
-            <i class="bi bi-shield-check me-2 text-success d-print-none"></i>Estado del Programa de Actividades y Mantenimientos
-        </div>
-        <div class="p-0 table-responsive">
-            <table class="tabla-sigest align-middle text-nowrap mb-0 small">
-                <thead>
-                    <tr>
-                        <th>Programa / Actividad</th>
-                        <th>Tipo</th>
-                        <th>Fecha Programada</th>
-                        <th>Estatus</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.TablaProgramas != null && Model.TablaProgramas.Any())
-                    {
-                        @foreach (var item in Model.TablaProgramas)
-                        {
-                            var badgeClass = item.Estatus switch
-                            {
-                                "Realizado" or "Completado" => "bg-success",
-                                "En Proceso" => "bg-warning text-dark",
-                                "Pendiente" => "bg-secondary",
-                                "Cancelado" => "bg-danger",
-                                _ => "bg-info"
-                            };
-
-                            <tr>
-                                <td class="fw-bold text-white">@item.Nombre</td>
-                                <td>@item.Tipo</td>
-                                <td class="text-center">@item.FechaProgramada</td>
-                                <td class="text-center"><span class="badge @badgeClass px-2 py-1">@item.Estatus</span></td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="4" class="text-center text-muted py-3">No hay actividades ni mantenimientos registrados en este período.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Observaciones (Hoja 2) -->
-    <div class="glass-panel mb-4 overflow-hidden">
-        <div class="glass-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-chat-left-text-fill me-2 text-info d-print-none"></i>Observaciones y Notas Ejecutivas</span>
-            <div class="form-check form-switch mb-0 d-print-none">
-                <input class="form-check-input" type="checkbox" id="chkHabilitarObservaciones" onchange="toggleObservaciones()" />
-                <label class="form-check-input-label text-muted small ms-1" for="chkHabilitarObservaciones">Habilitar Observaciones</label>
-            </div>
-        </div>
-        <div class="p-3" id="panelObservaciones" style="display: none;">
-            <textarea id="txtObservaciones" class="form-control" rows="3" placeholder="Escriba aquí las observaciones o consideraciones del reporte..."></textarea>
-            <div id="printObservacionesText" class="d-none text-white small p-2"></div>
-        </div>
-    </div>
+    </section>
 
     <div class="rep-pie solo-impresion">
         <span>SigesST - Sistema de Gestión de Soporte Técnico</span>
@@ -256,18 +219,11 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <script>
-        // Puente de datos entre C# y Javascript
-        window.dataSistemasServer = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Indicadores.TicketsPorSistema));
-        window.dataRequerimientosServer = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Indicadores.TicketsPorTipoRequerimiento));
-        window.dataEscalacionesServer = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Indicadores.TicketsEscaladosPorArea));
-        window.totalLlamadasServer = @Model.Indicadores.TotalLlamadas;
-        window.totalCorreosServer = @Model.Indicadores.TotalCorreos;
-    </script>
-
     <script src="~/js/Actividades/actividades-indicadores.js" asp-append-version="true"></script>
+}
+
+@functions {
+    // Tamaño de dibujo de las gráficas en pantalla; el SVG se estira al recuadro y conserva su forma
+    private const float AnchoGrafica = 420;
+    private const float AltoGrafica = 230;
 }

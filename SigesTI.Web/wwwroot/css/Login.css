@@ -263,31 +263,63 @@ body {
     }
 
 /* ==========================================================================
-   RECUÉRDAME
+   RECORDAR MI USUARIO (INTERRUPTOR)
    ========================================================================== */
 
-.recordarme {
-    display: flex;
+.recordar-usuario {
+    display: inline-flex;
     align-items: center;
-    gap: 9px;
+    gap: 10px;
     margin: 4px 0 28px;
+    color: #cbd5e1;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
 }
 
-    .recordarme input {
-        width: 18px;
-        height: 18px;
-        margin: 0;
-        accent-color: var(--login-azul);
-        cursor: pointer;
+    .recordar-usuario input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
     }
 
-    .recordarme label {
-        margin: 0;
-        color: #cbd5e1;
-        font-size: 14px;
-        cursor: pointer;
-        user-select: none;
+.recordar-interruptor {
+    position: relative;
+    flex-shrink: 0;
+    width: 38px;
+    height: 21px;
+    background: rgba(100, 116, 139, 0.45);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 999px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+    .recordar-interruptor::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 15px;
+        height: 15px;
+        background: #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s ease;
     }
+
+.recordar-usuario input:checked + .recordar-interruptor {
+    background: var(--login-azul);
+    border-color: var(--login-celeste);
+}
+
+    .recordar-usuario input:checked + .recordar-interruptor::after {
+        transform: translateX(17px);
+    }
+
+.recordar-usuario input:focus-visible + .recordar-interruptor {
+    outline: 2px solid rgba(56, 189, 248, 0.65);
+    outline-offset: 2px;
+}
 
 /* ==========================================================================
    BOTONES
@@ -483,6 +515,376 @@ body {
     border-radius: 10px;
     cursor: pointer;
 }
+
+/* ==========================================================================
+   CAMBIAR ASPECTO (ESQUINA SUPERIOR DERECHA)
+   En oscuro muestra el sol (pasar a claro) y en claro la luna.
+   ========================================================================== */
+
+.btn-tema-login {
+    position: absolute;
+    z-index: 5;
+    top: 22px;
+    right: 22px;
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #fbbf24;
+    font-size: 19px;
+    background: rgba(8, 24, 44, 0.75);
+    border: 1px solid var(--login-borde);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .btn-tema-login:hover {
+        transform: translateY(-2px);
+        border-color: var(--login-celeste);
+        box-shadow: 0 0 18px rgba(56, 189, 248, 0.25);
+    }
+
+    .btn-tema-login .icono-claro {
+        display: none;
+    }
+
+/* ==========================================================================
+   ACERCA DEL SISTEMA (mismo diseño que en la pantalla principal)
+   ========================================================================== */
+
+/* Botón redondo (i) en la esquina inferior derecha */
+.btn-info-system {
+    position: absolute;
+    z-index: 5;
+    right: 22px;
+    bottom: 22px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #94a3b8;
+    font-size: 20px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid #334155;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+    .btn-info-system:hover {
+        color: #38bdf8;
+        background: rgba(56, 189, 248, 0.15);
+        border-color: #38bdf8;
+        transform: scale(1.08);
+    }
+
+.info-modal-content {
+    width: 100%;
+    max-width: 500px;
+    background: rgba(15, 23, 42, 0.96);
+    border: 1px solid #334155;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    animation: mostrarModalPassword 0.22s ease;
+}
+
+.info-modal-encabezado {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 24px 24px 0;
+}
+
+.info-modal-etiqueta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: #0dcaf0;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.btn-cerrar-acerca {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .btn-cerrar-acerca:hover {
+        color: #ffffff;
+        background: #dc2626;
+        border-color: #f87171;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+
+.info-modal-cuerpo {
+    padding: 16px 24px 24px;
+    text-align: center;
+}
+
+.info-modal-titulo {
+    margin: 0 0 4px;
+    color: #ffffff;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.info-modal-subtitulo {
+    margin: 0;
+    color: #0dcaf0;
+    font-size: 13px;
+    opacity: 0.75;
+}
+
+.info-modal-cuerpo hr {
+    margin: 16px 0;
+    border: 0;
+    border-top: 1px solid rgba(108, 117, 125, 0.25);
+}
+
+.info-modal-datos {
+    padding: 0 8px;
+    text-align: left;
+}
+
+    .info-modal-datos div {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 16px;
+        border-bottom: 1px solid rgba(108, 117, 125, 0.25);
+    }
+
+        .info-modal-datos div:last-child {
+            border-bottom: none;
+        }
+
+        .info-modal-datos div > span:first-child {
+            color: #f8f9fa;
+            opacity: 0.75;
+        }
+
+    .info-modal-datos strong {
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+.info-version {
+    padding: 4px 8px;
+    color: #0dcaf0;
+    font-size: 13px;
+    font-weight: 700;
+    background: rgba(13, 202, 240, 0.25);
+    border: 1px solid rgba(13, 202, 240, 0.25);
+    border-radius: 6px;
+}
+
+/* ==========================================================================
+   TEMA CLARO (con <html data-tema="claro">)
+   ========================================================================== */
+
+html[data-tema="claro"] {
+    --login-fondo: #eef3f9;
+    --login-texto: #0f172a;
+    --login-texto-suave: #64748b;
+    --login-celeste: #0284c7;
+    --login-error: #dc2626;
+    --login-borde: #bfd3ee;
+}
+
+    html[data-tema="claro"] .login-page {
+        background: radial-gradient( circle at 15% 25%, rgba(37, 99, 235, 0.12), transparent 35% ), radial-gradient( circle at 85% 80%, rgba(14, 165, 233, 0.1), transparent 35% ), linear-gradient( 135deg, #ffffff 0%, #eef3f9 55%, #dbe7f6 100% );
+    }
+
+    html[data-tema="claro"] .figura {
+        border-color: rgba(37, 99, 235, 0.18);
+    }
+
+    html[data-tema="claro"] .login-card {
+        background: linear-gradient( 145deg, rgba(255, 255, 255, 0.96), rgba(241, 246, 252, 0.92) );
+        box-shadow: 0 25px 60px rgba(30, 64, 175, 0.14), inset 0 1px 0 #ffffff;
+    }
+
+        html[data-tema="claro"] .login-card::before {
+            background: linear-gradient( 90deg, transparent, rgba(2, 132, 199, 0.6), transparent );
+        }
+
+    /* El logo tiene letras blancas: se invierte para que lo blanco quede oscuro y el azul siga azul */
+    html[data-tema="claro"] .login-logo img {
+        filter: invert(1) hue-rotate(180deg) saturate(1.4);
+    }
+
+    html[data-tema="claro"] .login-label {
+        color: #1e3a8a;
+    }
+
+    html[data-tema="claro"] .input-login > i,
+    html[data-tema="claro"] .btn-password {
+        color: #64748b;
+    }
+
+    html[data-tema="claro"] .login-input {
+        background: #f8fafc;
+        border-color: #cbd9ec;
+    }
+
+        html[data-tema="claro"] .login-input::placeholder {
+            color: #94a3b8;
+        }
+
+        html[data-tema="claro"] .login-input:hover {
+            border-color: #93c5fd;
+        }
+
+        html[data-tema="claro"] .login-input:focus {
+            color: #0f172a;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+        }
+
+        html[data-tema="claro"] .login-input:-webkit-autofill,
+        html[data-tema="claro"] .login-input:-webkit-autofill:hover,
+        html[data-tema="claro"] .login-input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px #eef5ff inset;
+        }
+
+    html[data-tema="claro"] .aviso-mayusculas {
+        color: #0369a1;
+    }
+
+    html[data-tema="claro"] .recordar-usuario {
+        color: #334155;
+    }
+
+    html[data-tema="claro"] .recordar-interruptor {
+        background: #cbd5e1;
+        border-color: #b6c3d4;
+    }
+
+    html[data-tema="claro"] .recordar-usuario input:checked + .recordar-interruptor {
+        background: #2563eb;
+        border-color: #2563eb;
+    }
+
+    html[data-tema="claro"] .btn-info-system {
+        color: #64748b;
+        background: #ffffff;
+        border-color: #cbd9ec;
+        box-shadow: 0 4px 12px rgba(30, 64, 175, 0.1);
+    }
+
+        html[data-tema="claro"] .btn-info-system:hover {
+            color: #0284c7;
+            background: #e0efff;
+            border-color: #0284c7;
+        }
+
+    html[data-tema="claro"] .info-modal-content {
+        background: #ffffff;
+        border-color: #bfd3ee;
+        box-shadow: 0 25px 50px rgba(15, 23, 42, 0.18);
+    }
+
+    html[data-tema="claro"] .info-modal-etiqueta,
+    html[data-tema="claro"] .info-modal-subtitulo,
+    html[data-tema="claro"] .info-version {
+        color: #0284c7;
+    }
+
+    html[data-tema="claro"] .info-version {
+        background: #e0f2fe;
+        border-color: #bae6fd;
+    }
+
+    html[data-tema="claro"] .info-modal-titulo,
+    html[data-tema="claro"] .info-modal-datos strong {
+        color: #0f172a;
+    }
+
+    html[data-tema="claro"] .info-modal-datos div > span:first-child {
+        color: #475569;
+        opacity: 1;
+    }
+
+    html[data-tema="claro"] .btn-cerrar-acerca {
+        color: #0284c7;
+        background: #e0f2fe;
+        border-color: #bae6fd;
+    }
+
+    html[data-tema="claro"] .mensaje-error ul {
+        background: #fef2f2;
+        border-color: #fecaca;
+    }
+
+    html[data-tema="claro"] .modal-password {
+        background: rgba(15, 23, 42, 0.3);
+    }
+
+    html[data-tema="claro"] .modal-password-contenido {
+        background: #ffffff;
+        border-color: #bfd3ee;
+        box-shadow: 0 30px 70px rgba(15, 23, 42, 0.2);
+    }
+
+    html[data-tema="claro"] .modal-password-titulo {
+        color: #1e3a8a;
+    }
+
+    html[data-tema="claro"] .modal-password-texto {
+        color: #64748b;
+    }
+
+    html[data-tema="claro"] .btn-tema-login {
+        color: #1e3a8a;
+        background: #ffffff;
+        box-shadow: 0 6px 18px rgba(30, 64, 175, 0.12);
+    }
+
+        html[data-tema="claro"] .btn-tema-login .icono-oscuro {
+            display: none;
+        }
+
+        html[data-tema="claro"] .btn-tema-login .icono-claro {
+            display: inline;
+        }
+
+    /* Alertas (alertas.js manda el fondo oscuro directo) */
+    html[data-tema="claro"] .swal2-popup {
+        color: #1e293b !important;
+        background: #ffffff !important;
+        border-color: #bfd3ee;
+    }
+
+    html[data-tema="claro"] .swal2-title {
+        color: #1e3a8a !important;
+    }
+
+    html[data-tema="claro"] .swal2-html-container {
+        color: #334155 !important;
+    }
 
 /* ==========================================================================
    RESPONSIVO

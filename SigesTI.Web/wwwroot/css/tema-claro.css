@@ -1,0 +1,215 @@
+/* ==========================================================================
+   TEMA CLARO - AJUSTES GENERALES
+   Las hojas de css/Claro repiten cada módulo con sus colores en versión clara.
+   Aquí van los detalles que no salen de esa conversión: fondo, barra superior,
+   alertas y clases de Bootstrap escritas en las páginas.
+   Solo aplica con <html data-tema="claro"> y en pantalla.
+   ========================================================================== */
+
+@media screen {
+
+    html[data-tema="claro"] {
+        color-scheme: light;
+    }
+
+    /* Fondo de la página */
+    html[data-tema="claro"] .layout-body,
+    html[data-tema="claro"] .layout-header {
+        background: #eef3f9;
+    }
+
+    /* Barra superior: cristal azul claro */
+    html[data-tema="claro"] .layout-navbar {
+        background: linear-gradient(135deg, #ffffff, #dbeafe);
+        border-color: #bfd3ee;
+        box-shadow: 0 10px 30px rgba(30, 64, 175, 0.12), inset 0 1px 0 #ffffff;
+    }
+
+    /* El logo tiene letras blancas: se invierte para que lo blanco quede oscuro y el azul siga azul */
+    html[data-tema="claro"] .layout-brand img {
+        filter: invert(1) hue-rotate(180deg) saturate(1.4);
+    }
+
+    html[data-tema="claro"] .layout-link {
+        color: #1e3a8a !important;
+        background: rgba(255, 255, 255, 0.7);
+        border-color: #d5e1f0;
+    }
+
+        html[data-tema="claro"] .layout-link i {
+            color: #0284c7;
+        }
+
+        html[data-tema="claro"] .layout-link:hover,
+        html[data-tema="claro"] .layout-link[aria-expanded="true"],
+        html[data-tema="claro"] .layout-link.activo {
+            color: #1e3a8a !important;
+            background: #e0efff;
+            border-color: #93c5fd;
+            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.15);
+        }
+
+        html[data-tema="claro"] .layout-link.activo {
+            box-shadow: inset 0 -3px 0 #0284c7;
+        }
+
+    html[data-tema="claro"] .custom-dropdown-menu {
+        background: #ffffff !important;
+        border-color: #bfd3ee !important;
+        box-shadow: 0 16px 36px rgba(30, 64, 175, 0.14) !important;
+    }
+
+    html[data-tema="claro"] .layout-user {
+        background: #ffffff;
+        border-color: #bfd3ee;
+    }
+
+        html[data-tema="claro"] .layout-user strong,
+        html[data-tema="claro"] .layout-user-menu-header strong {
+            color: #0f172a;
+        }
+
+        html[data-tema="claro"] .layout-user small {
+            color: #0284c7;
+        }
+
+    html[data-tema="claro"] .layout-footer {
+        color: #64748b;
+        background: #ffffff;
+        border-top-color: #d5e1f0;
+    }
+
+    /* Fondo del modal abierto */
+    html[data-tema="claro"] .modal-backdrop {
+        background-color: rgba(15, 23, 42, 0.35);
+    }
+
+    /* Alertas: algunas páginas mandan el fondo oscuro directo en el Swal.fire */
+    html[data-tema="claro"] .swal2-popup {
+        color: #1e293b !important;
+        background: #ffffff !important;
+        border: 1px solid #bfd3ee !important;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18) !important;
+    }
+
+    html[data-tema="claro"] .swal2-title {
+        color: #1e3a8a !important;
+    }
+
+    html[data-tema="claro"] .swal2-html-container {
+        color: #334155 !important;
+    }
+
+    html[data-tema="claro"] .swal2-container {
+        background: rgba(15, 23, 42, 0.3) !important;
+    }
+
+    /* Clases de Bootstrap puestas en las páginas para el fondo oscuro */
+    html[data-tema="claro"] .text-white,
+    html[data-tema="claro"] .text-light {
+        color: #0f172a !important;
+    }
+
+    html[data-tema="claro"] .text-info {
+        color: #0284c7 !important;
+    }
+
+    html[data-tema="claro"] .text-warning {
+        color: #b45309 !important;
+    }
+
+    html[data-tema="claro"] .text-success {
+        color: #15803d !important;
+    }
+
+    html[data-tema="claro"] .text-danger {
+        color: #b91c1c !important;
+    }
+
+    html[data-tema="claro"] .text-muted,
+    html[data-tema="claro"] .text-secondary {
+        color: #64748b !important;
+    }
+
+    html[data-tema="claro"] .bg-dark {
+        background-color: #ffffff !important;
+    }
+
+    html[data-tema="claro"] .btn-close-white {
+        filter: none;
+    }
+
+    /* Los íconos de los botones toman el color del texto del botón */
+    html[data-tema="claro"] .btn .text-white {
+        color: inherit !important;
+    }
+
+    /* En los badges de color el texto sí se queda blanco */
+    html[data-tema="claro"] .badge.text-white,
+    html[data-tema="claro"] .badge .text-white {
+        color: #ffffff !important;
+    }
+
+    /* Tipo de tarea (Tareas Generales): el color oscuro viene escrito en la página.
+       Una capa blanca encima lo deja en pastel del mismo tono, con el borde de color. */
+    html[data-tema="claro"] .tabla-sigest .badge-tipo-tabla {
+        color: #1e293b !important;
+        background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)) !important;
+        box-shadow: none !important;
+    }
+
+    /* Tareas Generales: la flecha del estatus es blanca; sobre el fondo pastel va oscura */
+    html[data-tema="claro"] .form-select.ddl-estatus-tabla {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23334155' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    }
+
+    /* Control de acceso, modal Sistemas: Externo / Interno elegido */
+    html[data-tema="claro"] .modal-cuenta .sis-tipo button.activo {
+        color: #ffffff;
+        background: #0284c7;
+    }
+
+    html[data-tema="claro"] .modal-cuenta .sis-tipo button[data-tipo="interno"].activo {
+        color: #78350f;
+        background: #fcd34d;
+    }
+
+    /* Campaña de Renovación: botones de Excel en verde */
+    html[data-tema="claro"] .btn.btn-cargar-excel,
+    html[data-tema="claro"] .btn.btn-exportar-excel {
+        color: #15803d !important;
+    }
+
+    /* Botón Limpiar filtros (Solicitudes y Tareas) */
+    html[data-tema="claro"] .btn-limpiar-filtros {
+        color: #1e3a8a !important;
+        background: #ffffff !important;
+        border: 1px solid #93c5fd !important;
+        box-shadow: 0 2px 8px rgba(30, 64, 175, 0.08);
+    }
+
+        html[data-tema="claro"] .btn-limpiar-filtros i {
+            color: #0284c7 !important;
+        }
+
+        html[data-tema="claro"] .btn-limpiar-filtros:hover {
+            color: #1e3a8a !important;
+            background: #e0efff !important;
+            border-color: #0284c7 !important;
+        }
+
+    /* Solicitudes: número de cada sección sobre el acento (que en claro es azul fuerte) */
+    html[data-tema="claro"] .sol-tarjeta-titulo .sol-paso {
+        color: #ffffff;
+    }
+
+    /* Ícono del calendario y del reloj en los campos de fecha y hora (en oscuro va invertido) */
+    html[data-tema="claro"] ::-webkit-calendar-picker-indicator {
+        filter: none !important;
+        opacity: 0.6;
+    }
+
+    html[data-tema="claro"] ::placeholder {
+        color: #94a3b8 !important;
+    }
+}

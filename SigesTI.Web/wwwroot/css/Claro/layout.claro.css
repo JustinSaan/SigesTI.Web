@@ -1,0 +1,262 @@
+﻿/* ==========================================================================
+   LAYOUT - TEMA CLARO
+   Mismas reglas que layout.css, con los colores en su versión clara.
+   Solo aplica con <html data-tema="claro"> y en pantalla (las impresiones no cambian).
+   Archivo generado con Scripts/GenerarTemaClaro.js: no se edita a mano.
+   ========================================================================== */
+
+@media screen {
+
+    html[data-tema="claro"] .layout-body {
+        background: #fbfcfe;
+        color: #0f172a;
+    }
+    html[data-tema="claro"] .layout-header {
+        background: #fbfcfe;
+    }
+    html[data-tema="claro"] .layout-navbar {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.99), rgba(37, 80, 218, 0.16));
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        box-shadow: 0 14px 40px rgba(15, 23, 41, 0.11), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    html[data-tema="claro"] .layout-brand {
+        color: #0f172a !important;
+    }
+    html[data-tema="claro"] .layout-link {
+        color: #1e3a8a !important;
+        background: rgba(255, 255, 255, 0.91);
+        border: 1px solid rgba(148, 163, 184, 0.36);
+    }
+    html[data-tema="claro"] .layout-link i {
+        color: #0369a1;
+    }
+    html[data-tema="claro"] .layout-link:hover,
+    html[data-tema="claro"] .layout-link[aria-expanded="true"] {
+        color: #0f172a !important;
+        background: rgba(56, 189, 248, 0.18);
+        border-color: rgba(56, 189, 248, 0.55);
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.13);
+    }
+    html[data-tema="claro"] .layout-link.activo {
+        color: #0f172a !important;
+        background: rgba(56, 189, 248, 0.14);
+        border-color: rgba(56, 189, 248, 0.45);
+        box-shadow: inset 0 -3px 0 rgba(56, 189, 248, 0.6);
+    }
+    html[data-tema="claro"] .custom-dropdown-menu {
+        background: #fbfcfe !important;
+        border: 1px solid rgba(56, 189, 248, 0.35) !important;
+        box-shadow: 0 16px 36px rgba(15, 23, 41, 0.2), 0 0 15px rgba(56, 189, 248, 0.09) !important;
+    }
+    html[data-tema="claro"] .custom-dropdown-menu .dropdown-item {
+        color: #0f172a !important;
+        border: 1px solid transparent !important;
+        background-color: transparent !important;
+    }
+    html[data-tema="claro"] .custom-dropdown-menu .dropdown-item i {
+        color: #0369a1 !important;
+    }
+    html[data-tema="claro"] .custom-dropdown-menu .dropdown-item.active {
+        background-color: rgba(56, 189, 248, 0.12) !important;
+        border-color: rgba(56, 189, 248, 0.35) !important;
+    }
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-cyan:hover,
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-cyan:focus {
+        color: #0f172a !important;
+        background-color: rgba(56, 189, 248, 0.22) !important;
+        border-color: rgba(56, 189, 248, 0.5) !important;
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.15) !important;
+    }
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-cyan:hover i,
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-cyan:focus i {
+        color: #0369a1 !important;
+        text-shadow: 0 0 8px rgba(56, 189, 248, 0.2) !important;
+    }
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-emerald:hover,
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-emerald:focus {
+        color: #0f172a !important;
+        background-color: rgba(16, 185, 129, 0.22) !important;
+        border-color: rgba(16, 185, 129, 0.5) !important;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.15) !important;
+    }
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-emerald:hover i,
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-emerald:focus i {
+        color: #047857 !important;
+        text-shadow: 0 0 8px rgba(52, 211, 153, 0.2) !important;
+    }
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-purple:hover,
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-purple:focus {
+        color: #0f172a !important;
+        background-color: rgba(168, 85, 247, 0.22) !important;
+        border-color: rgba(168, 85, 247, 0.5) !important;
+        box-shadow: 0 0 12px rgba(168, 85, 247, 0.15) !important;
+    }
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-purple:hover i,
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-purple:focus i {
+        color: #7e22ce !important;
+        text-shadow: 0 0 8px rgba(192, 132, 252, 0.2) !important;
+    }
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-amber:hover,
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-amber:focus {
+        color: #0f172a !important;
+        background-color: rgba(245, 158, 11, 0.22) !important;
+        border-color: rgba(245, 158, 11, 0.5) !important;
+        box-shadow: 0 0 12px rgba(245, 158, 11, 0.15) !important;
+    }
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-amber:hover i,
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-amber:focus i {
+        color: #b45309 !important;
+        text-shadow: 0 0 8px rgba(251, 191, 36, 0.2) !important;
+    }
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-rose:hover,
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-rose:focus,
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-rose:active {
+        color: #0f172a !important;
+        background-color: rgba(244, 63, 94, 0.25) !important;
+        border-color: rgba(244, 63, 94, 0.6) !important;
+        box-shadow: 0 0 16px rgba(244, 63, 94, 0.21) !important;
+    }
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-rose:hover i,
+    html[data-tema="claro"] .layout-header .layout-navbar .custom-dropdown-menu .dropdown-item.item-rose:focus i {
+        color: #be123c !important;
+        text-shadow: 0 0 10px rgba(251, 113, 133, 0.23) !important;
+    }
+    html[data-tema="claro"] .custom-dropdown-menu .dropdown-divider {
+        border-color: rgba(148, 163, 184, 0.36) !important;
+    }
+    html[data-tema="claro"] .layout-user {
+        color: #435a74;
+        outline: none;
+        background: rgba(255, 255, 255, 0.93);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+    html[data-tema="claro"] .layout-user:hover,
+    html[data-tema="claro"] .layout-user:focus,
+    html[data-tema="claro"] .layout-user[aria-expanded="true"] {
+        color: #0f172a;
+        background: rgba(255, 255, 255, 0.98);
+        border-color: rgba(56, 189, 248, 0.55);
+        box-shadow: 0 0 22px rgba(56, 189, 248, 0.11);
+    }
+    html[data-tema="claro"] .layout-user > i:first-child {
+        color: #0369a1;
+    }
+    html[data-tema="claro"] .layout-user-welcome {
+        color: #475569;
+    }
+    html[data-tema="claro"] .layout-user strong {
+        color: #0f172a;
+    }
+    html[data-tema="claro"] .layout-user small {
+        color: #0369a1;
+    }
+    html[data-tema="claro"] .layout-user-arrow {
+        color: #64748b;
+    }
+    html[data-tema="claro"] .layout-user-menu-header span {
+        color: #64748b;
+    }
+    html[data-tema="claro"] .layout-user-menu-header strong {
+        color: #0f172a;
+    }
+    html[data-tema="claro"] .layout-tema-switch {
+        background: #edf0f4;
+    }
+    html[data-tema="claro"] .layout-tema-switch::after {
+        background: #ffffff;
+    }
+    html[data-tema="claro"][data-tema="claro"] .layout-tema-switch {
+        background: #dbeffa;
+        color: #0f608a;
+    }
+    html[data-tema="claro"] .custom-dropdown-menu .dropdown-item.layout-logout {
+        color: #b91c1c !important;
+        background: rgba(225, 29, 72, 0.08) !important;
+        border: 1px solid rgba(225, 29, 72, 0.25) !important;
+    }
+    html[data-tema="claro"] .custom-dropdown-menu .dropdown-item.layout-logout i {
+        color: #be123c !important;
+    }
+    html[data-tema="claro"] .custom-dropdown-menu .dropdown-item.layout-logout:hover,
+    html[data-tema="claro"] .custom-dropdown-menu .dropdown-item.layout-logout:focus,
+    html[data-tema="claro"] .custom-dropdown-menu .dropdown-item.layout-logout:active {
+        color: #0f172a !important;
+        background: rgba(225, 29, 72, 0.28) !important;
+        border-color: rgba(244, 63, 94, 0.6) !important;
+        box-shadow: 0 0 16px rgba(225, 29, 72, 0.21) !important;
+    }
+    html[data-tema="claro"] .custom-dropdown-menu .dropdown-item.layout-logout:hover i,
+    html[data-tema="claro"] .custom-dropdown-menu .dropdown-item.layout-logout:focus i {
+        color: #0f172a !important;
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+    }
+    html[data-tema="claro"] .layout-footer {
+        border-top: 1px solid rgba(56, 189, 248, 0.22);
+        background: rgba(255, 255, 255, 0.97);
+        color: #475569;
+    }
+    html[data-tema="claro"] .modal-backdrop {
+        background-color: rgba(255, 255, 255, 0.93);
+    }
+    html[data-tema="claro"] .mer-btn-cerrar {
+        color: #0369a1;
+        background: rgba(56, 189, 248, 0.1);
+        border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    html[data-tema="claro"] .mer-btn-cerrar:hover {
+        color: #ffffff;
+        background: #dc2626;
+        border-color: #f87171;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.24);
+    }
+    html[data-tema="claro"] .btn-imprimir-sigest,
+    html[data-tema="claro"] .btn-pdf-sigest,
+    html[data-tema="claro"] .btn-filtros-sigest {
+        color: #0f172a !important;
+    }
+    html[data-tema="claro"] .btn-imprimir-sigest {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(255, 255, 255, 0.97)) !important;
+        border: 1px solid rgba(96, 165, 250, 0.55) !important;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.18);
+    }
+    html[data-tema="claro"] .btn-imprimir-sigest i {
+        color: #1d4ed8;
+    }
+    html[data-tema="claro"] .btn-imprimir-sigest:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+        border-color: #93c5fd !important;
+        box-shadow: 0 6px 18px rgba(96, 165, 250, 0.27);
+        color: #ffffff !important;
+    }
+    html[data-tema="claro"] .btn-imprimir-sigest:hover i {
+        color: #ffffff;
+    }
+    html[data-tema="claro"] .btn-pdf-sigest {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(255, 255, 255, 0.97)) !important;
+        border: 1px solid rgba(248, 113, 113, 0.5) !important;
+        box-shadow: 0 4px 18px rgba(220, 38, 38, 0.21);
+    }
+    html[data-tema="claro"] .btn-pdf-sigest:hover:not(:disabled) {
+        background: linear-gradient(135deg, #f9dcdc, #f7dede) !important;
+        border-color: #f87171 !important;
+        box-shadow: 0 0 22px rgba(248, 113, 113, 0.3);
+    }
+    html[data-tema="claro"] .btn-filtros-sigest {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.16), rgba(255, 255, 255, 0.97)) !important;
+        border: 1px solid rgba(167, 139, 250, 0.5) !important;
+        box-shadow: 0 4px 18px rgba(124, 58, 237, 0.18);
+    }
+    html[data-tema="claro"] .btn-filtros-sigest i {
+        color: #6d28d9;
+    }
+    html[data-tema="claro"] .btn-filtros-sigest:hover {
+        background: linear-gradient(135deg, #6d28d9, #5b21b6) !important;
+        border-color: #c4b5fd !important;
+        box-shadow: 0 0 22px rgba(167, 139, 250, 0.27);
+        color: #ffffff !important;
+    }
+    html[data-tema="claro"] .btn-filtros-sigest:hover i {
+        color: #ffffff;
+    }
+
+}

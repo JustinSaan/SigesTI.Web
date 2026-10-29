@@ -10,6 +10,7 @@
     bool puedeExportar = await Permisos.PuedeAsync(Modulos.TareasGenerales, Accion.Exportar);
 }
 <link rel="stylesheet" href="~/css/Actividades/tareasg.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Claro/tareasg.claro.css" asp-append-version="true" />
 
 <div class="actividades-container px-4 py-3" data-rol-usuario="@Model.RolUsuario" data-puede-editar="@puedeEditar.ToString().ToLower()">
     <!-- Encabezado y Acciones Principal -->

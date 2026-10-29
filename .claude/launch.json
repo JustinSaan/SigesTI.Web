@@ -6,9 +6,12 @@
       "runtimeExecutable": "dotnet",
       "runtimeArgs": [
         "C:/Users/Soporte2/AppData/Local/Temp/claude/C--Users-Soporte2-source-repos-JustinSaan-SigesTI-Web/0c374fb4-f84f-4dc3-8198-68c341073ef6/scratchpad/build9/SigesTI.Web.dll",
-        "--urls", "http://localhost:5238",
-        "--environment", "Development",
-        "--contentRoot", "C:/Users/Soporte2/source/repos/JustinSaan/SigesTI.Web/SigesTI.Web"
+        "--urls",
+        "http://localhost:5238",
+        "--environment",
+        "Development",
+        "--contentRoot",
+        "C:/Users/Soporte2/source/repos/JustinSaan/SigesTI.Web/SigesTI.Web"
       ],
       "port": 5238,
       "autoPort": false
@@ -18,9 +21,12 @@
       "runtimeExecutable": "dotnet",
       "runtimeArgs": [
         "C:/Users/Soporte2/AppData/Local/Temp/claude/C--Users-Soporte2--claude-spares-spare-OGa3cJ/c1214319-3f03-497b-a020-703bbd20842b/scratchpad/build/SigesTI.Web.dll",
-        "--urls", "http://localhost:5239",
-        "--environment", "Development",
-        "--contentRoot", "C:/Users/Soporte2/source/repos/JustinSaan/SigesTI.Web/SigesTI.Web"
+        "--urls",
+        "http://localhost:5239",
+        "--environment",
+        "Development",
+        "--contentRoot",
+        "C:/Users/Soporte2/source/repos/JustinSaan/SigesTI.Web/SigesTI.Web"
       ],
       "port": 5239,
       "autoPort": false
@@ -30,11 +36,59 @@
       "runtimeExecutable": "dotnet",
       "runtimeArgs": [
         "C:/Users/Soporte2/AppData/Local/Temp/claude/C--Users-Soporte2--claude-spares-spare-O4b6ww/090ac4d5-19db-415d-86b0-c35247d07503/scratchpad/build/SigesTI.Web.dll",
-        "--urls", "http://localhost:5240",
-        "--environment", "Development",
-        "--contentRoot", "C:/Users/Soporte2/source/repos/JustinSaan/SigesTI.Web/SigesTI.Web"
+        "--urls",
+        "http://localhost:5240",
+        "--environment",
+        "Development",
+        "--contentRoot",
+        "C:/Users/Soporte2/source/repos/JustinSaan/SigesTI.Web/SigesTI.Web"
       ],
       "port": 5240,
+      "autoPort": false
+    },
+    {
+      "name": "SigesTI.Web Indicadores",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": [
+        "C:/Users/Soporte2/AppData/Local/Temp/claude/C--Users-Soporte2-source-repos-JustinSaan-SigesTI-Web/7b43f2aa-7a01-42eb-9aed-e850b4a1b2c0/scratchpad/build/SigesTI.Web.dll",
+        "--urls",
+        "http://localhost:5241",
+        "--environment",
+        "Development",
+        "--contentRoot",
+        "C:/Users/Soporte2/source/repos/JustinSaan/SigesTI.Web/SigesTI.Web"
+      ],
+      "port": 5241,
+      "autoPort": false
+    },
+    {
+      "name": "SigesTI.Web Tema",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": [
+        "C:/Users/Soporte2/AppData/Local/Temp/claude/C--Users-Soporte2--claude-spares-spare-NY7o7a/e9181bf5-ceaa-41e9-901f-476b46f10e94/scratchpad/build/SigesTI.Web.dll",
+        "--urls",
+        "http://localhost:5242",
+        "--environment",
+        "Development",
+        "--contentRoot",
+        "C:/Users/Soporte2/source/repos/JustinSaan/SigesTI.Web/SigesTI.Web"
+      ],
+      "port": 5242,
+      "autoPort": false
+    },
+    {
+      "name": "SigesTI.Web Sesion",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": [
+        "C:/Users/Soporte2/AppData/Local/Temp/claude/C--Users-Soporte2--claude-spares-spare-mSNFWn/b0e14d3e-0c3c-4e43-929c-24aa3c2a7459/scratchpad/build/SigesTI.Web.dll",
+        "--urls",
+        "http://localhost:5243",
+        "--environment",
+        "Development",
+        "--contentRoot",
+        "C:/Users/Soporte2/source/repos/JustinSaan/SigesTI.Web/SigesTI.Web"
+      ],
+      "port": 5243,
       "autoPort": false
     }
   ]
